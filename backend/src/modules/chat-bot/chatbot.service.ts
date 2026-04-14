@@ -6,7 +6,6 @@ import { CustomError } from '../../common/errors/index.js';
 import type { ChatbotRequestDto, ChatbotResponseDto } from './chatbot.dto.js';
 import type { ListInventoriesQueryDto } from '../inventories/dto/inventory.dto.js';
 import type { InventoryService } from '../inventories/index.js';
-import type { ListTransactionsQueryDto } from '../transactions/transaction.dto.js';
 import type { TransactionService } from '../transactions/transaction.service.js';
 
 import 'dotenv/config';
@@ -53,7 +52,7 @@ export class ChatbotService {
               {
                 "intent": "tên_intent",
                 "parameters": {
-                "product_name": "tên sản phẩm (nếu có, không có thì để null)",
+                "product_name": "tên sản phẩm (Trích xuất CHÍNH XÁC từ khóa người dùng nhập. KHÔNG TỰ Ý THÊM BỚT TỪ. VD: 'Sữa tươi', 'Bia Tiger lon').",
                 "quantity": số lượng (kiểu số nguyên, nếu không có để null)
               }
             }`,
@@ -117,8 +116,30 @@ export class ChatbotService {
             sortOrder: 'desc',
           } as unknown as ListInventoriesQueryDto;
 
-          const searchResult =
+          let searchResult =
             await this.inventoryService.getInventoriesByStoreId(storeId, query);
+
+          // 1. Nếu không tìm thấy, thử Fallback Search (Cắt đơn vị lon/thùng)
+          if (searchResult.items.length === 0) {
+            let fallbackName = params.product_name;
+
+            if (fallbackName.includes('(')) {
+              fallbackName = fallbackName.split('(')[0].trim();
+            } else {
+              fallbackName = fallbackName
+                .replace(/^(lon|thùng|chai|hộp|gói|bao|lốc|két)\s+/i, '')
+                .trim();
+            }
+
+            if (fallbackName && fallbackName !== params.product_name) {
+              query.keyword = fallbackName;
+              searchResult =
+                await this.inventoryService.getInventoriesByStoreId(
+                  storeId,
+                  query,
+                );
+            }
+          }
 
           if (searchResult.items.length === 0) {
             return {
@@ -127,21 +148,43 @@ export class ChatbotService {
             };
           }
 
-          const item = searchResult.items[0];
+          // 2. PHẢI CÓ BƯỚC NÀY: So khớp chính xác từ danh sách tìm được
+          let targetItem;
+          const normalizeName = (str?: string | null) =>
+            (str || '').toLowerCase().replace(/[\s()-]/g, '');
 
-          if (!item) {
+          const exactMatch = searchResult.items.find(
+            (i) =>
+              normalizeName(i.productPackage.displayName) ===
+              normalizeName(params.product_name),
+          );
+
+          if (exactMatch) {
+            targetItem = exactMatch;
+          } else if (searchResult.items.length === 1) {
+            targetItem = searchResult.items[0];
+          } else {
+            return {
+              aiIntent: 'choose_product',
+              botReply: `Hệ thống tìm thấy nhiều sản phẩm liên quan đến "${params.product_name}". Vui lòng chọn sản phẩm bạn muốn xem thông tin:`,
+              data: {
+                originalIntent: intent,
+                items: searchResult.items,
+              },
+            };
+          }
+
+          if (!targetItem) {
             return {
               aiIntent: intent,
-              botReply:
-                'Không thể lấy thông tin chi tiết của sản phẩm lúc này.',
+              botReply: 'Không tìm thấy sản phẩm phù hợp trong kho.',
             };
           }
 
           return {
             aiIntent: intent,
-
-            botReply: `Sản phẩm ${item.productPackage.displayName} đang có giá bán ${item.productPackage.sellingPrice} VNĐ. Tồn kho hiện tại: ${item.quantity} ${item.productPackage.unit.name}.`,
-            data: item,
+            botReply: `Sản phẩm ${targetItem.productPackage.displayName} đang có giá bán ${targetItem.productPackage.sellingPrice} VNĐ. Tồn kho hiện tại: ${targetItem.quantity} ${targetItem.productPackage.unit.name}.`,
+            data: targetItem,
           };
         }
 
@@ -150,45 +193,69 @@ export class ChatbotService {
             return {
               aiIntent: intent,
               botReply:
-                'Please provide the product name and the quantity you want to export.',
+                'Vui lòng cung cấp tên sản phẩm và số lượng bạn muốn xuất.',
             };
           }
 
           const query = {
             keyword: params.product_name,
-            limit: 5, // 🌟 Lấy tối đa 5 kết quả
+            limit: 5,
             page: 1,
           } as unknown as ListInventoriesQueryDto;
-          const searchResult =
+
+          let searchResult =
             await this.inventoryService.getInventoriesByStoreId(storeId, query);
+
+          if (searchResult.items.length === 0) {
+            let fallbackName = params.product_name;
+
+            if (fallbackName.includes('(')) {
+              fallbackName = fallbackName.split('(')[0].trim();
+            } else {
+              fallbackName = fallbackName
+                .replace(/^(lon|thùng|chai|hộp|gói|bao|lốc|két)\s+/i, '')
+                .trim();
+            }
+
+            if (fallbackName && fallbackName !== params.product_name) {
+              query.keyword = fallbackName;
+              searchResult =
+                await this.inventoryService.getInventoriesByStoreId(
+                  storeId,
+                  query,
+                );
+            }
+          }
 
           if (searchResult.items.length === 0) {
             return {
               aiIntent: intent,
-              botReply: `I couldn't find the product "${params.product_name}" to export.`,
+              botReply: `Dạ em tìm trong kho không thấy sản phẩm nào tên là "${params.product_name}" để xuất.`,
             };
           }
 
           let targetItem;
 
-          // 🌟 FIX RỦI RO 2: XỬ LÝ TRÙNG LẶP (MULTIPLE MATCHES)
           if (searchResult.items.length > 1) {
+            const normalizeName = (str?: string | null) =>
+              (str || '').toLowerCase().replace(/[\s()-]/g, '');
             const exactMatch = searchResult.items.find(
               (i) =>
-                i.productPackage.displayName?.toLowerCase() ===
-                params.product_name.toLowerCase(),
+                normalizeName(i.productPackage.displayName) ===
+                normalizeName(params.product_name),
             );
 
             if (exactMatch) {
               targetItem = exactMatch;
             } else {
-              const options = searchResult.items
-                .map((i) => i.productPackage.displayName)
-                .join(', ');
-
               return {
-                aiIntent: intent,
-                botReply: `I found multiple items matching "${params.product_name}": ${options}. Which specific one do you mean?`,
+                aiIntent: 'choose_product',
+                botReply: `Hệ thống tìm thấy nhiều sản phẩm liên quan đến "${params.product_name}". Vui lòng chọn sản phẩm chính xác bên dưới:`,
+                data: {
+                  originalIntent: intent,
+                  quantity: params.quantity,
+                  items: searchResult.items,
+                },
               };
             }
           } else {
@@ -207,24 +274,26 @@ export class ChatbotService {
           if (sellingPrice <= 0) {
             return {
               aiIntent: intent,
-              botReply: `⚠️ The product "${pkg.displayName}" does not have a Selling Price configured. Please update it first!`,
+              botReply: `⚠️ Sản phẩm "${pkg.displayName}" chưa được cài đặt Giá bán. Vui lòng cập nhật giá trước!`,
             };
           }
 
+          // Kiểm tra tồn kho trước khi xuất
           if (targetItem.quantity < params.quantity) {
             return {
               aiIntent: intent,
-              botReply: `⚠️ Unfortunately, there are only ${targetItem.quantity} ${pkg.unit.name} of ${pkg.displayName} left in stock. Not enough to export!`,
+              botReply: `⚠️ Rất tiếc, trong kho chỉ còn ${targetItem.quantity} ${pkg.unit.name} của ${pkg.displayName}. Không đủ số lượng để xuất!`,
             };
           }
 
-          // 🌟 FIX RỦI RO 3: TRẢ VỀ BẢN NHÁP (DRAFT)
+          const quantityNum = Number(params.quantity);
+
           const draftPayload = {
-            note: 'Automatic export via AI Assistant',
+            note: 'Xuất kho tự động qua AI Assistant',
             items: [
               {
-                productPackageId: pkg.productPackageId,
-                quantity: params.quantity,
+                productPackageId: targetItem.productPackage.productPackageId,
+                quantity: quantityNum, // ÉP KIỂU SỐ TẠI ĐÂY
                 unitPrice: sellingPrice,
               },
             ],
@@ -232,12 +301,12 @@ export class ChatbotService {
 
           const estimatedTotal = (
             params.quantity * sellingPrice
-          ).toLocaleString('en-US');
+          ).toLocaleString('vi-VN');
 
           return {
-            aiIntent: 'confirm_export', // Đổi Intent thành "Chờ xác nhận"
-            botReply: `Do you want to create an export transaction for **${params.quantity} ${pkg.displayName}** (Total value: ${estimatedTotal} VND)?\n\nPlease confirm below.`,
-            data: draftPayload, // Trả nguyên cục payload này cho Flutter
+            aiIntent: 'confirm_export',
+            botReply: `Bạn có muốn tạo phiếu **XUẤT KHO** cho **${params.quantity} ${pkg.displayName}** (Tổng giá trị: ${estimatedTotal} VNĐ) không?\n\nVui lòng xác nhận bên dưới.`,
+            data: draftPayload,
           };
         }
 
@@ -246,48 +315,69 @@ export class ChatbotService {
             return {
               aiIntent: intent,
               botReply:
-                'Please provide the product name and the quantity you want to import.',
+                'Vui lòng cung cấp tên sản phẩm và số lượng bạn muốn nhập.',
             };
           }
 
           const query = {
             keyword: params.product_name,
-            limit: 5, // 🌟 Lấy tối đa 5 kết quả để check trùng lặp
+            limit: 5,
             page: 1,
           } as unknown as ListInventoriesQueryDto;
 
-          const searchResult =
+          let searchResult =
             await this.inventoryService.getInventoriesByStoreId(storeId, query);
+
+          if (searchResult.items.length === 0) {
+            let fallbackName = params.product_name;
+
+            if (fallbackName.includes('(')) {
+              fallbackName = fallbackName.split('(')[0].trim();
+            } else {
+              fallbackName = fallbackName
+                .replace(/^(lon|thùng|chai|hộp|gói|bao|lốc|két)\s+/i, '')
+                .trim();
+            }
+
+            if (fallbackName && fallbackName !== params.product_name) {
+              query.keyword = fallbackName;
+              searchResult =
+                await this.inventoryService.getInventoriesByStoreId(
+                  storeId,
+                  query,
+                );
+            }
+          }
 
           if (searchResult.items.length === 0) {
             return {
               aiIntent: intent,
-              botReply: `I couldn't find the product "${params.product_name}" in the system to create an import transaction.`,
+              botReply: `Dạ em tìm trong hệ thống không thấy sản phẩm nào tên là "${params.product_name}" để nhập.`,
             };
           }
 
           let targetItem;
 
-          // 🌟 FIX RỦI RO 2: XỬ LÝ TRÙNG LẶP (MULTIPLE MATCHES)
           if (searchResult.items.length > 1) {
-            // Thử tìm xem có tên nào khớp chính xác 100% không
+            const normalizeName = (str?: string | null) =>
+              (str || '').toLowerCase().replace(/[\s()-]/g, '');
             const exactMatch = searchResult.items.find(
               (i) =>
-                i.productPackage.displayName?.toLowerCase() ===
-                params.product_name.toLowerCase(),
+                normalizeName(i.productPackage.displayName) ===
+                normalizeName(params.product_name),
             );
 
             if (exactMatch) {
               targetItem = exactMatch;
             } else {
-              // Nếu không khớp chính xác, liệt kê danh sách cho user chọn
-              const options = searchResult.items
-                .map((i) => i.productPackage.displayName)
-                .join(', ');
-
               return {
-                aiIntent: intent, // Giữ nguyên intent để user gõ lại
-                botReply: `I found multiple items matching "${params.product_name}": ${options}. Which specific one do you mean?`,
+                aiIntent: 'choose_product',
+                botReply: `Hệ thống tìm thấy nhiều sản phẩm liên quan đến "${params.product_name}". Vui lòng chọn sản phẩm chính xác bên dưới:`,
+                data: {
+                  originalIntent: intent,
+                  quantity: params.quantity,
+                  items: searchResult.items,
+                },
               };
             }
           } else {
@@ -306,87 +396,31 @@ export class ChatbotService {
           if (importPrice <= 0) {
             return {
               aiIntent: intent,
-              botReply: `⚠️ The product "${pkg.displayName}" does not have an Import Price configured. Please update it first!`,
+              botReply: `⚠️ Sản phẩm "${pkg.displayName}" chưa được cài đặt Giá nhập. Vui lòng cập nhật giá trước!`,
             };
           }
 
-          // 🌟 FIX RỦI RO 3: TRẢ VỀ BẢN NHÁP (DRAFT) THAY VÌ LƯU DATABASE
+          const quantityNum = Number(params.quantity);
+
           const draftPayload = {
-            note: 'Automatic import via AI Assistant',
+            note: 'Nhập kho tự động qua AI Assistant',
             items: [
               {
-                productPackageId: pkg.productPackageId,
-                quantity: params.quantity,
+                productPackageId: targetItem.productPackage.productPackageId,
+                quantity: quantityNum, // ÉP KIỂU SỐ TẠI ĐÂY
                 unitPrice: importPrice,
               },
             ],
           };
 
           const estimatedTotal = (params.quantity * importPrice).toLocaleString(
-            'en-US',
+            'vi-VN',
           );
 
           return {
-            aiIntent: 'confirm_import', // Đổi Intent thành "Chờ xác nhận"
-            botReply: `Do you want to create an import transaction for **${params.quantity} ${pkg.displayName}** (Estimated total: ${estimatedTotal} VND)?\n\nPlease confirm below.`,
-            data: draftPayload, // Trả nguyên cục payload này cho Flutter
-          };
-        }
-
-        case 'get_report': {
-          // 1. Lấy thông tin hàng sắp hết
-          const lowStockQuery = {
-            inventoryStatus: 'lowStock',
-            limit: 50,
-            page: 1,
-          } as unknown as ListInventoriesQueryDto;
-          const lowStockResult =
-            await this.inventoryService.getInventoriesByStoreId(
-              storeId,
-              lowStockQuery,
-            );
-
-          // 2. Lấy 5 giao dịch xuất/nhập gần nhất
-          const recentTxQuery = {
-            limit: 5,
-            page: 1,
-            sortBy: 'createdAt',
-            sortOrder: 'desc',
-          } as unknown as ListTransactionsQueryDto;
-          const recentTxResult =
-            await this.transactionService.getTransactionsByStoreId(
-              storeId,
-              recentTxQuery,
-            );
-
-          // 3. AI "hót" ra câu trả lời tổng hợp
-          let replyMessage = '**Báo cáo nhanh tình hình cửa hàng:**\n\n';
-
-          if (lowStockResult.items.length > 0) {
-            replyMessage += `Cảnh báo: Đang có **${lowStockResult.items.length}** mặt hàng chạm mốc sắp hết (cần nhập thêm).\n\n`;
-          } else {
-            replyMessage +=
-              'Tồn kho ổn định, không có mặt hàng nào bị thiếu hụt.\n\n';
-          }
-
-          replyMessage += '**Giao dịch gần đây nhất:**\n';
-          if (recentTxResult.items.length === 0) {
-            replyMessage += '- Chưa có giao dịch nào.\n';
-          } else {
-            recentTxResult.items.forEach((tx) => {
-              const txType = tx.type === 'import' ? 'Nhập kho' : 'Xuất kho';
-
-              replyMessage += `- ${txType}: ${tx.itemCount} sản phẩm (Tổng tiền: ${tx.totalPrice.toLocaleString('vi-VN')}đ)\n`;
-            });
-          }
-
-          return {
-            aiIntent: intent,
-            botReply: replyMessage,
-            data: {
-              lowStockCount: lowStockResult.items.length,
-              recentTransactions: recentTxResult.items,
-            },
+            aiIntent: 'confirm_import',
+            botReply: `Bạn có muốn tạo phiếu **NHẬP KHO** cho **${params.quantity} ${pkg.displayName}** (Ước tính: ${estimatedTotal} VNĐ) không?\n\nVui lòng xác nhận bên dưới.`,
+            data: draftPayload,
           };
         }
 

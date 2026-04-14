@@ -6,6 +6,7 @@ import 'package:frontend/features/navigation/controllers/chatbot_ui_controller.d
 import 'package:frontend/features/navigation/models/chat_message_model.dart';
 import 'package:frontend/features/navigation/wigdets/chatbot_bubble_standard.dart';
 import 'package:frontend/features/navigation/wigdets/chatbot_card_action_confirm.dart';
+import 'package:frontend/features/navigation/wigdets/chatbot_card_choose_product.dart';
 import 'package:frontend/features/navigation/wigdets/chatbot_card_low_stock.dart';
 import 'package:frontend/features/navigation/wigdets/chatbot_card_product_info.dart';
 import 'package:frontend/features/navigation/wigdets/chatbot_typing_indicator.dart';
@@ -209,12 +210,15 @@ class ChatbotWindowLayout extends StatelessWidget {
 
     switch (msg.intent) {
       case 'get_product_info':
+      if (msg.data == null) return ChatBubbleStandard(message: msg);
         return ChatCardProductInfo(message: msg);
       case 'confirm_import':
       case 'confirm_export':
         return ChatCardActionConfirm(message: msg);
       case 'get_low_stock':
         return ChatCardLowStock(message: msg);
+      case 'choose_product':
+        return ChatCardChooseProduct(message: msg);
       default:
         return ChatBubbleStandard(message: msg);
     }

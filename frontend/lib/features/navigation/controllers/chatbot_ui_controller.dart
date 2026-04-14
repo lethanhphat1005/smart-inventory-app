@@ -86,8 +86,8 @@ class ChatbotUiController extends GetxController with TErrorHandler {
 
     try {
       final endpoint = message.intent == 'confirm_import'
-          ? '/transactions/import'
-          : '/transactions/export';
+          ? '/api/transactions/import'
+          : '/api/transactions/export';
 
       // Hiển thị trạng thái đang xử lý (tùy chọn)
       isTyping.value = true;
@@ -107,7 +107,7 @@ class ChatbotUiController extends GetxController with TErrorHandler {
     } catch (e) {
       handleError(e);
       messages.add(ChatMessage(
-          text: "❌ Giao dịch thất bại. Vui lòng thử lại sau.", isUser: false));
+          text: "Giao dịch thất bại. Vui lòng thử lại sau.", isUser: false));
     } finally {
       isTyping.value = false;
       _scrollToBottom();
