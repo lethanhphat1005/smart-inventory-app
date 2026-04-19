@@ -76,9 +76,11 @@ class TSnackbarsWidget {
                 const SizedBox(height: 4),
                 Text(
                   message,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontFamily: 'Poppins',
-                    fontSize: 12, // CHUẨN YÊU CẦU: Tiêu đề phụ 12
+                    fontSize: 12,
                     fontWeight: FontWeight.w400,
                     color: AppColors.subText,
                     height: 1.4,

@@ -174,6 +174,18 @@ class ProductFormController extends GetxController with TErrorHandler {
       final args = Get.arguments as Map<String, dynamic>;
       formMode.value = args['mode'] ?? 'create';
 
+      if (formMode.value == 'create') {
+        if (args['barcode'] != null) {
+          barcodeController.text = args['barcode'];
+        }
+        if (args['freshName'] != null) {
+          nameController.text = args['freshName'];
+        }
+        if (args['freshBrand'] != null) {
+          brandController.text = args['freshBrand'];
+        }
+      }
+
       if (args['product'] != null) {
         isEditMode = true;
         isCategoryLocked = true;
@@ -326,13 +338,17 @@ class ProductFormController extends GetxController with TErrorHandler {
   }
 
   // 2. CREATE FULL PRODUCT (Có cả Package)
-  void saveProduct() {
+  void saveProduct() async {
     if (packageFormKey.currentState?.validate() != true ||
         selectedUnitId.value.isEmpty) {
       TSnackbarsWidget.warning(
           title: TTexts.errorTitle.tr, message: TTexts.fillRequiredFields.tr);
       return;
     }
+
+    final isBarcodeValid = await _checkBarcodeAvailability();
+    if (!isBarcodeValid) return;
+
     Get.dialog(TCustomDialogWidget(
       title: TTexts.confirmCreateTitle.tr,
       description: TTexts.confirmCreateMessage.tr,
@@ -391,13 +407,17 @@ class ProductFormController extends GetxController with TErrorHandler {
   }
 
   // 5. SAVE PACKAGE DATA (Dùng khi Add/Edit Package lẻ tẻ)
-  void savePackageData() {
+  void savePackageData() async {
     if (packageFormKey.currentState?.validate() != true ||
         selectedUnitId.value.isEmpty) {
       TSnackbarsWidget.warning(
           title: TTexts.errorTitle.tr, message: TTexts.fillRequiredFields.tr);
       return;
     }
+
+    final isBarcodeValid = await _checkBarcodeAvailability();
+    if (!isBarcodeValid) return;
+
     bool isUpdate = formMode.value == 'edit_package';
     Get.dialog(TCustomDialogWidget(
       title: isUpdate
@@ -502,7 +522,6 @@ class ProductFormController extends GetxController with TErrorHandler {
       };
       final newProduct = await _provider.createProduct(productPayload);
 
-      // Định dạng Package Payload theo API mới
       final packagePayload = {
         'displayNameSuffix': packageVariantNameController.text.trim().isNotEmpty
             ? packageVariantNameController.text.trim()
@@ -510,25 +529,44 @@ class ProductFormController extends GetxController with TErrorHandler {
         'unitId': selectedUnitId.value,
         'importPrice': double.tryParse(importPriceController.text),
         'sellingPrice': double.tryParse(salePriceController.text),
-        'barcodeValue': barcodeController.text.trim().isNotEmpty
-            ? barcodeController.text.trim()
-            : null,
-        'barcodeType': barcodeController.text.trim().isNotEmpty ? 'ean' : null,
+        // Chú ý: Backend của bạn không lưu barcode trực tiếp qua payload này
       };
 
-      // Payload cho Inventory đi kèm lúc tạo mới
       final inventoryPayload = {
         'quantity': 0,
         'reorderThreshold': _getParsedThreshold(),
       };
 
-      await _provider.createProductPackage(
+      // 1. GỌI API TẠO PACKAGE
+      final newPackageData = await _provider.createProductPackage(
           newProduct.productId, packagePayload, inventoryPayload);
+
+      // Lấy ID của package vừa tạo
+      final createdPkgId =
+          newPackageData['productPackageId'] ?? newPackageData['id'];
+
+      // 2. GỌI API ĐỂ MAP BARCODE (NẾU CÓ NHẬP BARCODE)
+      final barcodeValue = barcodeController.text.trim();
+      if (barcodeValue.isNotEmpty && createdPkgId != null) {
+        try {
+          // Bắn API Confirm Mapping
+          await _provider.confirmBarcodeMapping(
+            barcode: barcodeValue,
+            productPackageId: createdPkgId,
+          );
+        } catch (e) {
+          TSnackbarsWidget.error(
+              title: 'Lỗi gán mã vạch',
+              message:
+                  'Đã tạo sản phẩm nhưng mã vạch $barcodeValue đang bị kẹt ở một sản phẩm đã xóa hoặc cửa hàng khác!');
+        }
+      }
 
       FullScreenLoaderUtils.stopLoading();
       _triggerRefreshAndClose(TTexts.productCreatedSuccess.tr);
     } catch (e) {
       FullScreenLoaderUtils.stopLoading();
+
       handleError(e);
     } finally {
       isSaving.value = false;
@@ -593,9 +631,9 @@ class ProductFormController extends GetxController with TErrorHandler {
       final isUpdate =
           (formMode.value == 'edit_package' && packageToEdit != null);
       final thresholdVal = _getParsedThreshold();
+      final barcodeValue = barcodeController.text.trim();
 
       if (isUpdate) {
-        // UPDATE MODE: Chỉ gửi các trường cho phép đổi (Không có unitId)
         final packagePayload = {
           'displayNameSuffix':
               packageVariantNameController.text.trim().isNotEmpty
@@ -603,17 +641,28 @@ class ProductFormController extends GetxController with TErrorHandler {
                   : null,
           'importPrice': double.tryParse(importPriceController.text),
           'sellingPrice': double.tryParse(salePriceController.text),
-          'barcodeValue': barcodeController.text.trim().isNotEmpty
-              ? barcodeController.text.trim()
-              : null,
-          'barcodeType':
-              barcodeController.text.trim().isNotEmpty ? 'ean' : null,
         };
 
         await _provider.updateProductPackage(
             packageToEdit!.productPackageId, packagePayload);
         await _provider.updateInventorySettings(packageToEdit!.productPackageId,
             reorderThreshold: thresholdVal);
+
+        // MAP LẠI BARCODE NẾU USER SỬA/THÊM BARCODE KHI EDIT PACKAGE
+        if (barcodeValue.isNotEmpty &&
+            barcodeValue != packageToEdit!.barcodeValue) {
+          try {
+            await _provider.confirmBarcodeMapping(
+              barcode: barcodeValue,
+              productPackageId: packageToEdit!.productPackageId,
+            );
+          } catch (e) {
+            TSnackbarsWidget.error(
+                title: 'Lỗi gán mã vạch',
+                message:
+                    'Đã tạo sản phẩm nhưng mã vạch $barcodeValue đang bị kẹt ở một sản phẩm đã xóa hoặc cửa hàng khác!');
+          }
+        }
 
         FullScreenLoaderUtils.stopLoading();
         _triggerRefreshAndClose(TTexts.packageUpdatedSuccess.tr);
@@ -627,11 +676,6 @@ class ProductFormController extends GetxController with TErrorHandler {
           'unitId': selectedUnitId.value,
           'importPrice': double.tryParse(importPriceController.text),
           'sellingPrice': double.tryParse(salePriceController.text),
-          'barcodeValue': barcodeController.text.trim().isNotEmpty
-              ? barcodeController.text.trim()
-              : null,
-          'barcodeType':
-              barcodeController.text.trim().isNotEmpty ? 'ean' : null,
         };
         final inventoryPayload = {
           'quantity': 0,
@@ -640,7 +684,20 @@ class ProductFormController extends GetxController with TErrorHandler {
 
         final newPackageData = await _provider.createProductPackage(
             productToEdit!.productId, packagePayload, inventoryPayload);
+
         final createdPkg = ProductPackageModel.fromJson(newPackageData);
+
+        // MAP BARCODE KHI TẠO PACKAGE LẺ
+        if (barcodeValue.isNotEmpty) {
+          try {
+            await _provider.confirmBarcodeMapping(
+              barcode: barcodeValue,
+              productPackageId: createdPkg.productPackageId,
+            );
+          } catch (e) {
+            debugPrint('Lỗi map barcode: $e');
+          }
+        }
 
         FullScreenLoaderUtils.stopLoading();
         _triggerRefreshAndClose(TTexts.packageCreatedSuccess.tr,
@@ -653,7 +710,6 @@ class ProductFormController extends GetxController with TErrorHandler {
       isSaving.value = false;
     }
   }
-
   // ==========================================
   // IMAGE PICKER & UI HELPERS
   // ==========================================
@@ -801,6 +857,40 @@ class ProductFormController extends GetxController with TErrorHandler {
               ),
       ),
     );
+  }
+
+  Future<bool> _checkBarcodeAvailability() async {
+    final barcode = barcodeController.text.trim();
+    if (barcode.isEmpty) return true; // Không nhập barcode thì cho qua
+
+    try {
+      FullScreenLoaderUtils.openLoadingDialog('Đang kiểm tra mã vạch...');
+      final result = await _provider.scanBarcode(barcode);
+      FullScreenLoaderUtils.stopLoading();
+
+      if (result['resolutionType'] == 'exact_match') {
+        final pkg = result['productPackage'];
+
+        // Ngoại lệ: Nếu đang edit chính cái package này thì không sao
+        if (formMode.value == 'edit_package' &&
+            packageToEdit?.productPackageId == pkg['productPackageId']) {
+          return true;
+        }
+
+        // Nếu trùng với sản phẩm khác -> Chặn ngay lập tức!
+        TSnackbarsWidget.error(
+            title: 'Mã vạch bị trùng',
+            message:
+                'Mã vạch $barcode đã được sử dụng cho sản phẩm: ${pkg['displayName']}');
+        return false;
+      }
+      return true;
+    } catch (e) {
+      FullScreenLoaderUtils.stopLoading();
+      TSnackbarsWidget.error(
+          title: 'Lỗi', message: 'Không thể kiểm tra mã vạch lúc này.');
+      return false; // Lỗi mạng cũng không cho tạo để đảm bảo an toàn
+    }
   }
 
   void confirmExit() {

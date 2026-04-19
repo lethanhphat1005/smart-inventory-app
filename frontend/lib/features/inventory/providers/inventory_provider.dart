@@ -211,4 +211,32 @@ Future<Map<String, dynamic>> createProductPackage(
         queryParameters: queryParams ?? {'limit': 100});
     return listData;
   }
+
+  // ==========================================
+  // BARCODES
+  // ==========================================
+  
+  /// Quét mã vạch (Bước 1)
+  Future<Map<String, dynamic>> scanBarcode(String barcode) async {
+    final response = await _apiClient.post(
+      '/api/barcodes/scan',
+      data: {'barcode': barcode},
+    );
+    return response.data['data'] ?? response.data;
+  }
+
+  /// Xác nhận gán mã vạch vào package có sẵn (Bước 2 - Nếu cần)
+  Future<Map<String, dynamic>> confirmBarcodeMapping({
+    required String barcode,
+    required String productPackageId,
+  }) async {
+    final response = await _apiClient.post(
+      '/api/barcodes/confirm',
+      data: {
+        'barcode': barcode,
+        'productPackageId': productPackageId,
+      },
+    );
+    return response.data['data'] ?? response.data;
+  }
 }

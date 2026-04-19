@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/state/controllers/barcode_action_controller.dart';
 import 'package:frontend/core/ui/layouts/t_barcode_scanner_layout.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
@@ -47,8 +48,11 @@ class SearchInputFieldWidget extends GetView<TSearchController> {
                           // Nếu là Inventory Search -> Hiện Nút Quét Barcode
                           icon: const Icon(Iconsax.scan_barcode_copy,
                               color: AppColors.primary, size: 20),
-                          onPressed: () =>
-                              Get.off(() => const TBarcodeScannerLayout()),
+                          onPressed: () => Get.off(() => TBarcodeScannerLayout(
+                                onScanned: (code) => BarcodeActionController
+                                    .instance
+                                    .handleScannedBarcode(code),
+                              )),
                         )),
             ),
           )),

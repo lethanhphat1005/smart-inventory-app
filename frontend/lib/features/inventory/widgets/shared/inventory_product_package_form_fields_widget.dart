@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/state/controllers/barcode_action_controller.dart';
 import 'package:frontend/features/inventory/widgets/shared/inventory_product_package_unit_dropdown_widget.dart';
 import 'package:get/get.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
@@ -182,8 +183,8 @@ class InventoryProductPackageFormFieldsWidget
                 Get.to(() => TBarcodeScannerLayout(
                       title: TTexts.homeScanBarcode.tr,
                       onScanned: (code) {
-                        controller.barcodeController.text = code;
-                        Get.back();
+                        BarcodeActionController.instance
+                            .handleScannedBarcode(code, isFromForm: true);
                       },
                     ));
               },

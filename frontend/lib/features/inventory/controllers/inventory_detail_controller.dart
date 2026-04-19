@@ -81,14 +81,19 @@ class InventoryDetailController extends GetxController with TErrorHandler {
     final arg = Get.arguments;
     String? productId;
 
+    // Mặc định lấy từ URL Parameters trước (nếu có)
+    String? packageId = Get.parameters['packageId'];
+    String? barcode = Get.parameters['barcode'];
+
+    // Nếu có Arguments truyền sang (như từ Bottom Sheet Barcode)
     if (arg is String) {
       productId = arg;
     } else if (arg is Map) {
       productId = arg['productId'];
+      // Lấy packageId và barcode từ arguments nếu có
+      packageId ??= arg['packageId'];
+      barcode ??= arg['barcode'];
     }
-
-    final packageId = Get.parameters['packageId'];
-    final barcode = Get.parameters['barcode'];
 
     _fetchDetailData(
         productId: productId, packageId: packageId, barcode: barcode);
