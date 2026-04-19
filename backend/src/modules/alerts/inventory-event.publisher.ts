@@ -25,7 +25,7 @@ export class InventoryEventPublisher {
 
   public emitInventoryDiscrepancy(payload: DiscrepancyPayload): void {
     console.info(
-      `[Event Publisher] Bắn sự kiện Lệch kho cho ${payload.productName}. Hệ thống: ${payload.systemQuantity}, Thực tế: ${payload.actualQuantity}`,
+      `[Event Publisher] Bắn sự kiện Lệch kho cho ${payload.items.length} sản phẩm (Phiếu: ${payload.adjustmentId}).`,
     );
     eventBus.emit(appEvents.INVENTORY_DISCREPANCY, payload);
   }

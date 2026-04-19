@@ -20,7 +20,6 @@ const inventorySelect = {
   inventoryId: true,
   quantity: true,
   reorderThreshold: true,
-  lastCount: true,
   updatedAt: true,
   productPackage: {
     select: {
@@ -28,8 +27,6 @@ const inventorySelect = {
       displayName: true,
       importPrice: true,
       sellingPrice: true,
-      barcodeValue: true,
-      barcodeType: true,
       unit: {
         select: {
           unitId: true,
@@ -81,7 +78,6 @@ export class InventoryRepository {
       inventoryId: item.inventoryId,
       quantity: item.quantity,
       reorderThreshold: item.reorderThreshold,
-      lastCount: item.lastCount,
       updatedAt: item.updatedAt,
       inventoryStatus: this.mapInventoryStatus(
         item.quantity,
@@ -96,8 +92,6 @@ export class InventoryRepository {
         sellingPrice: item.productPackage.sellingPrice
           ? Number(item.productPackage.sellingPrice)
           : null,
-        barcodeValue: item.productPackage.barcodeValue,
-        barcodeType: item.productPackage.barcodeType,
         unit: item.productPackage.unit,
         product: item.productPackage.product,
       },
@@ -132,12 +126,6 @@ export class InventoryRepository {
                     OR: [
                       {
                         displayName: { contains: keyword, mode: 'insensitive' },
-                      },
-                      {
-                        barcodeValue: {
-                          contains: keyword,
-                          mode: 'insensitive',
-                        },
                       },
                     ],
                   },
@@ -195,7 +183,7 @@ export class InventoryRepository {
     if (keyword) {
       const search = `%${keyword}%`;
 
-      keywordCondition = Prisma.sql`AND (p.name ILIKE ${search} OR pp.display_name ILIKE ${search} OR pp.barcode_value ILIKE ${search})`;
+      keywordCondition = Prisma.sql`AND (p.name ILIKE ${search} OR pp.display_name ILIKE ${search})`;
     }
 
     let categoryCondition = Prisma.empty;
@@ -385,7 +373,6 @@ export class InventoryRepository {
       data: {
         quantity: data.quantity,
         reorderThreshold: data.reorderThreshold ?? null,
-        lastCount: data.lastCount ?? null,
         activeStatus: 'active',
       },
       select: inventorySelect,
@@ -394,13 +381,14 @@ export class InventoryRepository {
     return this.toInventoryListItem(inventory);
   }
 
-  async create(data: CreateInventoryDto): Promise<InventoryDetailResponseDto> {
+  async createOne(
+    data: CreateInventoryDto,
+  ): Promise<InventoryDetailResponseDto> {
     const inventory = await this.prisma.inventory.create({
       data: {
         productPackageId: data.productPackageId,
         quantity: data.quantity,
         reorderThreshold: data.reorderThreshold ?? null,
-        lastCount: data.lastCount ?? null,
       },
       select: inventorySelect,
     });

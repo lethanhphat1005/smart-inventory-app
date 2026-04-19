@@ -26,8 +26,7 @@ export type InventoryDetailResponseDto = InventoryListItemDto;
 export type InventorySortBy =
   | 'updatedAt'
   | 'quantity'
-  | 'reorderThreshold'
-  | 'lastCount';
+  | 'reorderThreshold';
 
 export type ListInventoriesQueryDto =
   ListPaginationQueryDto<InventorySortBy> & {
@@ -71,7 +70,6 @@ export type CreateInventoryDto = {
   productPackageId: string;
   quantity: number;
   reorderThreshold?: number | null;
-  lastCount?: number | null;
 };
 
 export type AdjustInventoryForTransactionDto = Pick<

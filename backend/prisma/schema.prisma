@@ -54,6 +54,14 @@ enum AuditActionType {
   delete
 }
 
+enum PackageBarcodeSource {
+  user_confirmed
+  barcode_flow_create
+  admin
+  seed
+  api_import
+}
+
 model UserProfile {
   userId       String       @id @default(uuid()) @map("user_id")
   authUserId   String?      @unique @map("auth_user_id")
@@ -156,27 +164,40 @@ model Unit {
 model ProductPackage {
   productPackageId String       @id @default(uuid()) @map("product_package_id")
   displayName      String?      @map("display_name")
+  variant          String?
   importPrice      Decimal?     @map("import_price") @db.Decimal(18, 2)
   sellingPrice     Decimal?     @map("selling_price") @db.Decimal(18, 2)
   activeStatus     ActiveStatus @default(active) @map("active_status")
-  barcodeValue     String?      @map("barcode_value")
-  barcodeType      BarcodeType? @map("barcode_type")
   createdAt        DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt        DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
   unitId           String       @map("unit_id")
   productId        String       @map("product_id")
 
-  unit               Unit                @relation(fields: [unitId], references: [unitId])
-  product            Product             @relation(fields: [productId], references: [productId])
-  inventory          Inventory?
-  transactionDetails TransactionDetail[]
+  unit                   Unit                    @relation(fields: [unitId], references: [unitId])
+  product                Product                 @relation(fields: [productId], references: [productId])
+  inventory              Inventory?
+  transactionDetails     TransactionDetail[]
+  productPackageBarcodes ProductPackageBarcode[]
+}
+
+model ProductPackageBarcode {
+  productPackageBarcodeId String               @id @default(uuid()) @map("product_package_barcode_id")
+  barcode                 String               @unique
+  type                    BarcodeType?         @map("barcode_type")
+  isVerified              Boolean              @default(true) @map("is_verified")
+  source                  PackageBarcodeSource
+  confidence              Decimal?             @db.Decimal(5, 2)
+  createdAt               DateTime             @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt               DateTime             @updatedAt @map("updated_at") @db.Timestamptz(3)
+  productPackageId        String               @map("product_package_id")
+
+  productPackage ProductPackage @relation(fields: [productPackageId], references: [productPackageId])
 }
 
 model Inventory {
   inventoryId      String       @id @default(uuid()) @map("inventory_id")
   quantity         Int
   reorderThreshold Int?         @map("reorder_threshold")
-  lastCount        Int?         @map("last_count")
   updatedAt        DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
   activeStatus     ActiveStatus @default(active) @map("active_status")
   productPackageId String       @unique @map("product_package_id")
@@ -228,12 +249,18 @@ model AuditLog {
 }
 
 model BarcodeApiCache {
-  barcode   String        @id @unique
-  payload   Json
-  provider  String?
-  type      BarcodeType?
-  status    BarcodeStatus
-  fetchedAt DateTime      @default(now()) @map("fetched_at") @db.Timestamptz(3)
+  barcodeCacheId        String        @id @default(uuid()) @map("barcode_cache_id")
+  barcode               String
+  payload               Json
+  provider              String?
+  type                  BarcodeType?
+  status                BarcodeStatus
+  normalizedName        String?       @map("normalized_name")
+  normalizedBrand       String?       @map("normalized_brand")
+  normalizedPackageText String?       @map("normalized_package_text")
+  fetchedAt             DateTime      @default(now()) @map("fetched_at") @db.Timestamptz(3)
+  lastUsedAt            DateTime?     @map("last_used_at") @db.Timestamptz(3)
+  hitCount              Int           @default(0) @map("hit_count")
 }
 
 model FcmToken {

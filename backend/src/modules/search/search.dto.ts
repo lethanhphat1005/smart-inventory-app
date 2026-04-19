@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 import type { searchByKeywordQuerySchema } from './search.validator.js';
 import type { PaginationResponseDto } from '../../common/types/index.js';
-import type { BarcodeType, Prisma } from '../../generated/prisma/client.js';
+import type { Prisma } from '../../generated/prisma/client.js';
 import type { Product } from '../products/index.js';
 
 export type SearchByKeywordQueryDto = z.infer<
@@ -29,8 +29,6 @@ export type SearchProductPackageItemDto = {
 
   productPackageId: string;
   displayName: string | null;
-  barcodeValue: string | null;
-  barcodeType: BarcodeType | null;
   importPrice: number | null;
   sellingPrice: number | null;
 

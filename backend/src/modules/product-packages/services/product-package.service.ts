@@ -19,14 +19,14 @@ import type { DbClient } from '../../../common/types/db.type.js';
 import type { Prisma } from '../../../generated/prisma/client.js';
 import type { ProductSimpleResponseDto } from '../../products/index.js';
 import type {
-  CreateProductPackageData,
+  CreateProductPackageInput,
   CreateProductPackageAndInventoryDto,
   ListProductPackagesResponseDto,
   PackageQueryDto,
   ProductPackageDetailResponseDto,
   ProductPackageResponseDto,
   UpdateProductPackageDto,
-  UpdateProductPackageData,
+  UpdateProductPackageInput,
   ProductPackageResponseForTransaction,
   CreatePackageAndInventoryResponseDto,
 } from '../product-package.dto.js';
@@ -202,35 +202,16 @@ export class ProductPackageService {
     productId: string,
     data: CreateProductPackageAndInventoryDto,
   ): Promise<CreatePackageAndInventoryResponseDto> {
-    if (data.package.barcodeValue) {
-      const existingPackageSameBarcode =
-        await this.productPackageRepository.findActiveByBarcodeValueInStore(
-          storeId,
-          data.package.barcodeValue,
-        );
+    // NOTE: Ở đây từng có check barcode đã tồn tại
 
-      if (existingPackageSameBarcode) {
-        throw new CustomError({
-          message: 'Barcode already exists',
-          status: StatusCodes.CONFLICT,
-        });
-      }
-    }
-
-    const { displayNameSuffix, ...packageBaseData } = data.package;
-
-    const defaultDisplayName = await this.getDefaultDisplayName(
+    const displayName = await this.getDefaultDisplayName(
       storeId,
       productId,
       data.package.unitId,
     );
 
-    const displayName = [defaultDisplayName, displayNameSuffix?.trim()]
-      .filter(Boolean)
-      .join(' ');
-
-    const createPackageData: CreateProductPackageData = {
-      ...packageBaseData,
+    const createPackageData: CreateProductPackageInput = {
+      ...data.package,
       productId,
       displayName,
     };
@@ -255,11 +236,10 @@ export class ProductPackageService {
         newValue: {
           productId: createdPackageInventory.productId,
           displayName: createdPackageInventory.displayName,
+          variant: createdPackageInventory.variant,
           unitId: createdPackageInventory.unitId,
           importPrice: createdPackageInventory.importPrice,
           sellingPrice: createdPackageInventory.sellingPrice,
-          barcodeValue: createdPackageInventory.barcodeValue,
-          barcodeType: createdPackageInventory.barcodeType,
         } as Prisma.InputJsonObject,
       });
 
@@ -292,36 +272,23 @@ export class ProductPackageService {
       productPackageId,
     );
 
-    if (data.barcodeValue) {
-      const existingPackageSameBarcode =
-        await this.productPackageRepository.findActiveByBarcodeValueInStore(
-          storeId,
-          data.barcodeValue,
-        );
+    const updateData: UpdateProductPackageInput = {};
 
-      if (
-        existingPackageSameBarcode &&
-        existingPackageSameBarcode.productPackageId !== productPackageId
-      ) {
-        throw new CustomError({
-          message: 'Barcode already exists',
-          status: StatusCodes.CONFLICT,
-        });
-      }
+    if (data.unitId !== undefined) {
+      updateData.unitId = data.unitId;
+
+      const newDisplayName = await this.getDefaultDisplayName(
+        storeId,
+        existingProductPackage.productId,
+        data.unitId,
+      );
+
+      updateData.displayName = newDisplayName;
     }
 
-    if (
-      data.barcodeType !== undefined &&
-      data.barcodeType !== null &&
-      !((data.barcodeValue ?? existingProductPackage.barcodeValue) !== null)
-    ) {
-      throw new CustomError({
-        message: 'barcodeType requires barcodeValue',
-        status: StatusCodes.BAD_REQUEST,
-      });
+    if (data.variant !== undefined) {
+      updateData.variant = data.variant;
     }
-
-    const updateData: UpdateProductPackageData = {};
 
     if (data.importPrice !== undefined) {
       updateData.importPrice = data.importPrice;
@@ -331,45 +298,15 @@ export class ProductPackageService {
       updateData.sellingPrice = data.sellingPrice;
     }
 
-    if (data.barcodeValue !== undefined) {
-      updateData.barcodeValue = data.barcodeValue;
-    }
-
-    if (data.barcodeType !== undefined) {
-      updateData.barcodeType = data.barcodeType;
-    }
-
-    if (
-      data.barcodeValue !== undefined &&
-      data.barcodeValue === null &&
-      data.barcodeType === undefined
-    ) {
-      updateData.barcodeType = null;
-    }
-
-    if (data.displayNameSuffix !== undefined) {
-      const defaultDisplayName = await this.getDefaultDisplayName(
-        storeId,
-        existingProductPackage.productId,
-        existingProductPackage.unitId,
-      );
-
-      const suffix = data.displayNameSuffix?.trim();
-
-      updateData.displayName = [defaultDisplayName, suffix]
-        .filter(Boolean)
-        .join(' ');
-    }
-
     // detect các trường được update trước khi ghi vào log
     // tránh ghi log data không cần thiết
     const { oldValue, newValue } = buildAuditDiff(
       {
         displayName: existingProductPackage.displayName,
+        variant: existingProductPackage.variant,
         importPrice: existingProductPackage.importPrice,
         sellingPrice: existingProductPackage.sellingPrice,
-        barcodeValue: existingProductPackage.barcodeValue,
-        barcodeType: existingProductPackage.barcodeType,
+        unitId: existingProductPackage.unitId,
       },
       updateData,
     );

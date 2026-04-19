@@ -66,7 +66,7 @@ export type ListTransactionsResponseDto =
   PaginationResponseDto<TransactionListItemDto>;
 
 type DetailTransactionItem = Pick<TransactionDetail, 'quantity' | 'unitPrice'> &
-  Pick<ProductPackage, 'productPackageId' | 'displayName' | 'barcodeValue'> & {
+  Pick<ProductPackage, 'productPackageId' | 'displayName'> & {
     imageUrl: string | null;
   };
 

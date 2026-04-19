@@ -48,14 +48,14 @@ export class NotificationRepository {
   ) {
     const skip = (page - 1) * size;
 
+    const typeArray = type && type !== 'ALL' ? type.split(',') : undefined;
+
     return await prisma.notification.findMany({
-      // Đưa trực tiếp object vào bên trong where
       where: {
         userId,
         storeId,
         activeStatus: 'active',
-        // Dùng đúng 1 dòng này để nội suy biến type
-        ...(type && type !== 'ALL' ? { type } : {}),
+        ...(typeArray ? { type: { in: typeArray } } : {}),
       },
       orderBy: { createdAt: 'desc' },
       skip: skip,

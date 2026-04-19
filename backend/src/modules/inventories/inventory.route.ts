@@ -99,7 +99,6 @@ inventoryRouter.get(
  *
  * Body:
  *  - reorderThreshold?: number | null - ngưỡng cảnh báo sắp hết hàng
- *  - lastCount?: number | null - số lượng kiểm kê gần nhất
  *
  * API endpoint: DELETE /api/inventories/product-packages/:productPackageId
  * Xóa mềm bản ghi tồn kho theo product package id

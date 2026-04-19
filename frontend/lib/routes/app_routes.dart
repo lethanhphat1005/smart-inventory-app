@@ -49,4 +49,6 @@ class AppRoutes {
   static const changePassword = '/change_password';
   static const editStore = '/edit_store';
   static const assignsRole = '/assign_role';
+
+  static const reorderSuggestion = '/reorder-suggestion';
 }

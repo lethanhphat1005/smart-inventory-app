@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/infrastructure/constants/text_strings.dart';
+import 'package:frontend/features/notification/utils/notification_constants.dart';
 import 'package:get/get.dart';
 import 'package:frontend/routes/app_routes.dart';
 import 'package:frontend/core/state/services/store_service.dart';
@@ -25,7 +27,7 @@ class NotificationRouter {
     }
     final supabase = Supabase.instance.client;
     final storeService = Get.find<StoreService>();
-    
+
     bool isFromSplash =
         Get.currentRoute == AppRoutes.splash || Get.currentRoute.isEmpty;
     bool needsSwitchStore = notificationStoreId != null &&
@@ -64,7 +66,7 @@ class NotificationRouter {
       } catch (e) {
         debugPrint("⚠️ [Router] Lỗi Switch Store: $e");
         TSnackbarsWidget.error(
-            title: 'Lỗi', message: 'Không thể truy cập cửa hàng.');
+            title: TTexts.errorTitle.tr, message: TTexts.cannotAccessStore.tr);
         if (isFromSplash) Get.offAllNamed(AppRoutes.main);
         return;
       }
@@ -83,12 +85,10 @@ class NotificationRouter {
 
   static Future<void> _performFinalNavigation(
       String type, String? referenceId, SupabaseClient? supabase) async {
-    debugPrint("🎯 [Router] Đang nhảy vào màn chi tiết: $type");
-
     switch (type) {
-      // 1. Nhóm cảnh báo sắp hết hàng (UC-NA-01)
-      case 'LOW_STOCK':
-      case 'INVENTORY_CHANGED':
+      // 1. Nhóm Cảnh báo Tồn kho
+      case NotificationTypes.lowStock:
+      case NotificationTypes.batchLowStock:
         if (referenceId != null && referenceId.isNotEmpty) {
           Get.toNamed(AppRoutes.inventoryDetail, arguments: referenceId);
         } else {
@@ -96,26 +96,14 @@ class NotificationRouter {
         }
         break;
 
-      case 'BATCH_LOW_STOCK':
-        Get.toNamed(AppRoutes.lowStock);
+      // 2. Nhóm Đề xuất nhập hàng
+      case NotificationTypes.reorderSuggestion:
+        Get.toNamed(AppRoutes.reorderSuggestion);
         break;
 
-      // 2. Nhóm gợi ý nhập hàng (UC-NA-02 & UC-SDS-01) - MỚI THÊM
-      case 'REORDER_SUGGESTION':
-      case 'REORDER_REQUIRED':
-        if (referenceId != null && referenceId.isNotEmpty) {
-          // Có thể truyền thêm tham số báo cho màn hình Detail biết cần bật Popup gợi ý nhập hàng
-          Get.toNamed(AppRoutes.inventoryDetail,
-              arguments: referenceId, parameters: {'action': 'reorder'});
-        } else {
-          Get.toNamed(AppRoutes.lowStock);
-        }
-        break;
-
-      // 3. Nhóm Giao dịch (UC-ST-01 -> UC-ST-04)
-      case 'ORDER_CREATED':
-      case 'IMPORT':
-      case 'EXPORT':
+      // 3. Nhóm Giao dịch (Sử dụng chung logic cho Import/Export)
+      case NotificationTypes.import:
+      case NotificationTypes.export:
         if (referenceId != null && referenceId.isNotEmpty) {
           Get.toNamed(AppRoutes.transactionDetail,
               arguments: {'id': referenceId});
@@ -124,40 +112,37 @@ class NotificationRouter {
         }
         break;
 
-      // 4. Nhóm Cảnh báo lệch kho (UC-NA-03 & UC-ST-05) - MỚI THÊM
-      case 'DISCREPANCY_ALERT':
-      case 'ADJUSTMENT':
+      // 4. Nhóm Lệch kho
+      case NotificationTypes.inventoryDiscrepancy:
         if (referenceId != null && referenceId.isNotEmpty) {
-          // referenceId lúc này nên là ID của phiếu kiểm kho (Adjustment Transaction)
-          Get.toNamed(AppRoutes.transactionDetail,
-              arguments: {'id': referenceId});
-        } else {
-          Get.toNamed(AppRoutes.transactionSummary);
+          Get.toNamed(AppRoutes.adjustmentHistory,
+              arguments: {'batchId': '[Lô-$referenceId]'});
         }
         break;
 
-      case 'ROLE_UPDATED':
-        TSnackbarsWidget.warning(
-            title: 'Phiên đăng nhập hết hạn',
-            message:
-                'Quyền hạn của bạn đã bị thay đổi, vui lòng đăng nhập lại.');
-
-        await supabase!.auth.signOut();
-        // Đăng xuất Google để lần sau hiện lại popup chọn tài khoản
-        await GoogleSignIn.instance.signOut();
-
-        // 2. Xoá StoreID hoặc data local
-        GetStorage().remove('STORE_ID');
-
-        // 3. Điều hướng về màn Login
-        Get.offAllNamed(AppRoutes.login);
+      case NotificationTypes.roleUpdated:
+        // Giữ nguyên logic logout như bạn đã làm rất tốt
+        _handleLogout(supabase);
         break;
 
       default:
         if (Get.currentRoute != AppRoutes.notification) {
           Get.toNamed(AppRoutes.notification);
         }
-        break;
     }
+  }
+
+  static Future<void> _handleLogout(SupabaseClient? supabase) async {
+    TSnackbarsWidget.warning(
+        title: TTexts.sessionExpiredTitle.tr,
+        message: TTexts.sessionExpiredMessage.tr);
+
+    await supabase!.auth.signOut();
+
+    await GoogleSignIn.instance.signOut();
+
+    GetStorage().remove('STORE_ID');
+
+    Get.offAllNamed(AppRoutes.login);
   }
 }

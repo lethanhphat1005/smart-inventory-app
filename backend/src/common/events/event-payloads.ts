@@ -16,7 +16,11 @@ export interface SingleInventoryPayload {
 
 export interface DiscrepancyPayload {
   storeId: string;
-  adjustmentId: string;
+  adjustmentId: string; // Đây chính là transactionId của phiếu kiểm kê
+  items: DiscrepancyItem[];
+}
+
+export interface DiscrepancyItem {
   productName: string;
   systemQuantity: number;
   actualQuantity: number;

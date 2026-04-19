@@ -119,7 +119,7 @@ class NotificationCardWidget extends StatelessWidget {
                     width: 8,
                     height: 8,
                     decoration: BoxDecoration(
-                      color: AppColors.primary, // Chấm cam chủ đạo
+                      color: AppColors.primary,
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(

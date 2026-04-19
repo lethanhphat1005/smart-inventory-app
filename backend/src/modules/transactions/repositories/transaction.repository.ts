@@ -105,7 +105,6 @@ export class TransactionRepository {
               select: {
                 productPackageId: true,
                 displayName: true,
-                barcodeValue: true,
                 product: {
                   select: {
                     imageUrl: true,
@@ -131,7 +130,6 @@ export class TransactionRepository {
       totalPrice: transaction.totalPrice.toNumber(),
       items: transaction.transactionDetails.map((item) => ({
         productPackageId: item.productPackage.productPackageId,
-        barcodeValue: item.productPackage.barcodeValue,
         displayName: item.productPackage.displayName,
         imageUrl: item.productPackage.product.imageUrl,
         quantity: item.quantity,

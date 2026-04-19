@@ -66,6 +66,9 @@ class NotificationService {
               () async {
                 try {
                   await _apiClient.patch('/api/notification/$notiId/read');
+                  if (Get.isRegistered<NotificationController>()) {
+                    Get.find<NotificationController>().markAsRead(notiId);
+                  }
                 } catch (e) {
                   debugPrint("Lỗi xử lý đã đọc thông báo: $e");
                 }

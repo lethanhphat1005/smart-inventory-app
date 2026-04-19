@@ -20,7 +20,7 @@ const listInventoriesQuerySchema = z.object({
   page: z.coerce.number().int().min(1).optional().default(1),
   limit: z.coerce.number().int().min(1).max(100).optional().default(10),
   sortBy: z
-    .enum(['updatedAt', 'quantity', 'reorderThreshold', 'lastCount'])
+    .enum(['updatedAt', 'quantity', 'reorderThreshold'])
     .optional()
     .default('updatedAt'),
   sortOrder: z.enum(['asc', 'desc']).optional().default('desc'),
@@ -44,7 +44,6 @@ const createInventoryBodySchema = z.object({
   productPackageId: z.string(),
   quantity: z.number().int().min(0).default(0),
   reorderThreshold: z.number().int().min(0).nullable().optional(),
-  lastCount: z.number().int().min(0).nullable().optional(),
 });
 
 // Middleware lưu trữ kết quả query đã validate

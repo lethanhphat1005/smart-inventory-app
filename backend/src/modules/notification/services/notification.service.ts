@@ -49,7 +49,14 @@ export class NotificationService {
     let fcmPriority: 'high' | 'normal' = 'normal';
     const sound: string = 'default';
 
-    if (['DISCREPANCY_ALERT', 'LOW_STOCK', 'CRITICAL_STOCK'].includes(type)) {
+    if (
+      [
+        'DISCREPANCY_ALERT',
+        'LOW_STOCK',
+        'BATCH_LOW_STOCK',
+        'REORDER_SUGGESTION',
+      ].includes(type)
+    ) {
       fcmPriority = 'high';
     }
 

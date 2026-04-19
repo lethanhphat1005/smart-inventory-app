@@ -6,7 +6,6 @@ export type Inventory = {
   inventoryId: string;
   quantity: number;
   reorderThreshold: number | null;
-  lastCount: number | null;
   updatedAt: Date;
   productPackageId: string;
 };
@@ -24,8 +23,6 @@ export type ProductPackageSnapshot = {
   displayName: string | null;
   importPrice: number | null;
   sellingPrice: number | null;
-  barcodeValue: string | null;
-  barcodeType: 'upc' | 'ean' | 'code128' | 'qr' | null;
 };
 
 export type ProductSnapshot = {

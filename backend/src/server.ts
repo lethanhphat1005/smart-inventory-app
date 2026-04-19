@@ -4,7 +4,9 @@ import { errorHandler, pinoLogger } from './common/middlewares/index.js';
 import { sendResponse } from './common/utils/index.js';
 import { initFirebaseAdmin } from './config/firebase.config.js';
 import { initCronJobs } from './cron/index.js';
+import { smartDecisionRouter } from './modules/alerts/index.js';
 import { auditLogRouter } from './modules/audit-log/audit-log.route.js';
+import { barcodeRouter } from './modules/barcode/index.js';
 import { categoryRouter } from './modules/categories/index.js';
 import { inventoryRouter } from './modules/inventories/inventory.route.js';
 import notificationRouter from './modules/notification/notification.route.js';
@@ -41,6 +43,7 @@ app.get('/api/health', (_req: Request, res: Response<ApiResponse<null>>) => {
 });
 
 app.use('/api/stores', storeRouter);
+app.use('/api/barcodes', barcodeRouter);
 app.use('/api/products', [productRouter, productPackageProductRouter]);
 app.use('/api/categories', categoryRouter);
 app.use('/api/auth', userProfileRouter);
@@ -52,6 +55,7 @@ app.use('/api/notification', notificationRouter);
 app.use('/api/search', searchRouter);
 app.use('/api/units', unitRouter);
 app.use('/api/store-members', storeMemberRouter);
+app.use('/api/smart-decisions', smartDecisionRouter);
 
 app.use(errorHandler);
 

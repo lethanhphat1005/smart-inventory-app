@@ -1,3 +1,5 @@
+import crypto from 'crypto';
+
 import { StatusCodes } from 'http-status-codes';
 
 import { CustomError } from '../../../common/errors/index.js';
@@ -175,6 +177,11 @@ export class InventoryService {
   ): Promise<InventoryAdjustmentResponseDto[]> {
     const { items } = data;
 
+    // 1. TẠO MÃ LÔ ĐỂ GOM NHÓM VÀ TÌM KIẾM
+    // Đảm bảo bạn đã import crypto ở đầu file: import crypto from 'crypto';
+    const batchId = crypto.randomBytes(3).toString('hex').toUpperCase();
+    const searchPrefix = `[Lô-${batchId}]`;
+
     const productPackageIds = items.map((item) => item.productPackageId);
     const existingInventories =
       await this.inventoryRepository.findManyActiveByProductPackageIds(
@@ -207,6 +214,13 @@ export class InventoryService {
       }
     }
 
+    // MẢNG HỨNG CÁC SẢN PHẨM BỊ LỆCH KHO NHIỀU
+    const discrepancies: Array<{
+      productName: string;
+      systemQuantity: number;
+      actualQuantity: number;
+    }> = [];
+
     // 3. Mở Transaction
     const results = await prisma.$transaction(async (tx) => {
       const { inventoryRepositoryTx, auditLogRepositoryTx } =
@@ -229,16 +243,20 @@ export class InventoryService {
 
         const changedQty = updated.quantity - existingInventory.quantity;
 
+        // KIỂM TRA ĐỘ LỆCH VÀ PUSH VÀO MẢNG (KHÔNG BẮN EVENT Ở ĐÂY NỮA)
         if (Math.abs(changedQty) >= 5) {
-          this.inventoryEventPublisher.emitInventoryDiscrepancy({
-            storeId,
-            adjustmentId: updated.inventoryId,
+          discrepancies.push({
             productName:
               existingInventory.productPackage.displayName ?? 'Sản phẩm',
             systemQuantity: existingInventory.quantity,
             actualQuantity: updated.quantity,
           });
         }
+
+        // TẠO GHI CHÚ CHỨA MÃ LÔ
+        const finalNote = item.note
+          ? `${searchPrefix} ${item.note}`
+          : searchPrefix;
 
         // Ghi AuditLog độc lập cho từng productPackageId
         await auditLogRepositoryTx.createLog({
@@ -247,7 +265,7 @@ export class InventoryService {
           entityId: existingInventory.inventoryId,
           userId,
           storeId,
-          note: item.note ?? null,
+          note: finalNote,
           oldValue: {
             quantity: existingInventory.quantity,
           } as Prisma.InputJsonObject,
@@ -276,7 +294,16 @@ export class InventoryService {
       return adjustments;
     });
 
-    // 4. Phát tín hiệu hàng loạt thay vì lặp qua emitInventoryChanged
+    // 4. PHÁT TÍN HIỆU LỆCH KHO GỘP (Chỉ bắn 1 lần duy nhất ngoài Transaction)
+    if (discrepancies.length > 0) {
+      this.inventoryEventPublisher.emitInventoryDiscrepancy({
+        storeId,
+        adjustmentId: batchId, // Mã Lô sẽ làm referenceId gửi qua FE
+        items: discrepancies,
+      });
+    }
+
+    // 5. Phát tín hiệu hàng loạt thay vì lặp qua emitInventoryChanged
     const changedEventItems = results.map((r) => ({
       inventoryId: r.inventoryId,
       oldQuantity: r.previousQuantity,
@@ -348,7 +375,6 @@ export class InventoryService {
               activeStatus: 'active',
               quantity: restored.quantity,
               reorderThreshold: restored.reorderThreshold,
-              lastCount: restored.lastCount,
               productPackageId: restored.productPackage.productPackageId,
             } as Prisma.InputJsonObject,
           });
@@ -357,7 +383,7 @@ export class InventoryService {
         }
       }
 
-      const created = await inventoryRepository.create(data);
+      const created = await inventoryRepository.createOne(data);
 
       await auditLogRepositoryTx.createLog({
         actionType: 'create',
@@ -369,7 +395,6 @@ export class InventoryService {
         newValue: {
           quantity: created.quantity,
           reorderThreshold: created.reorderThreshold,
-          lastCount: created.lastCount,
           productPackageId: created.productPackage.productPackageId,
         } as Prisma.InputJsonObject,
       });

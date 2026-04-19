@@ -17,6 +17,7 @@ const listAuditLogsQuerySchema = z.object({
   // nghiêm ngặt chuẩn ISO 8601 để parse đúng múi giờ
   startDate: z.string().optional(),
   endDate: z.string().optional(),
+  search: z.string().optional(),
 });
 
 // Middleware lưu trữ kết quả query đã validate an toàn

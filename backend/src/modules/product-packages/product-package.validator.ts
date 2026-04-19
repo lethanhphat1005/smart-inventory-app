@@ -12,8 +12,6 @@ const productPackageParamsSchema = z.object({
   productPackageId: z.uuid('Invalid productPackageId'),
 });
 
-const barcodeTypeSchema = z.enum(['upc', 'ean', 'code128', 'qr']);
-
 const createProductPackageBodySchema = z
   .object({
     package: z.object({
@@ -28,19 +26,11 @@ const createProductPackageBodySchema = z
         .min(0, 'Selling price must be greater than or equal to 0')
         .nullable()
         .optional(),
-      barcodeValue: z
+      variant: z
         .string()
         .trim()
-        .min(1, 'Barcode value cannot be empty')
-        .max(255, 'Barcode value cannot exceed 255 characters')
-        .nullable()
-        .optional(),
-      barcodeType: barcodeTypeSchema.nullable().optional(),
-      displayNameSuffix: z
-        .string()
-        .trim()
-        .min(1, 'Display name suffix cannot be empty')
-        .max(255, 'Display name suffix cannot exceed 255 characters')
+        .min(1, 'Variant cannot be empty')
+        .max(255, 'Variant cannot exceed 255 characters')
         .optional()
         .default(''),
     }),
@@ -59,23 +49,19 @@ const createProductPackageBodySchema = z
       lastCount: z.number().int().min(0).nullable().optional(),
     }),
   })
-  .superRefine((data, ctx) => {
-    if (data.package.barcodeType && !data.package.barcodeValue) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'barcodeType requires barcodeValue',
-        path: ['barcodeType'],
-      });
-    }
-  });
+  .refine(
+    (data) => Object.keys(data).length > 0,
+    'Request body cannot be empty',
+  );
 
 const updateProductPackageBodySchema = z
   .object({
-    displayNameSuffix: z
+    unitId: z.uuid('Invalid unitId'),
+    variant: z
       .string()
       .trim()
-      .min(1, 'Display name suffix cannot be empty')
-      .max(255, 'Display name suffix cannot exceed 255 characters')
+      .min(1, 'Variant cannot be empty')
+      .max(255, 'Variant cannot exceed 255 characters')
       .nullable()
       .optional(),
     importPrice: z.coerce
@@ -88,28 +74,11 @@ const updateProductPackageBodySchema = z
       .min(0, 'Selling price must be greater than or equal to 0')
       .nullable()
       .optional(),
-    barcodeValue: z
-      .string()
-      .trim()
-      .min(1, 'Barcode value cannot be empty')
-      .max(255, 'Barcode value cannot exceed 255 characters')
-      .nullable()
-      .optional(),
-    barcodeType: barcodeTypeSchema.nullable().optional(),
   })
   .refine(
     (data) => Object.keys(data).length > 0,
     'Request body cannot be empty',
-  )
-  .superRefine((data, ctx) => {
-    if (data.barcodeType && !('barcodeValue' in data)) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'barcodeType requires barcodeValue',
-        path: ['barcodeType'],
-      });
-    }
-  });
+  );
 
 export const listPackageQuerySchema = z.object({
   page: z.coerce.number().int().min(1).optional().default(1),

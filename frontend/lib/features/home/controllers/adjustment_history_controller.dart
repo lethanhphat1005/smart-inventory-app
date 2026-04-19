@@ -27,11 +27,18 @@ class AdjustmentHistoryController extends GetxController with TErrorHandler {
 
   final Map<String, String> _nameDictionary = {};
 
+  String _hiddenBatchId = ''; // Thêm biến này để lưu mã Lô ngầm
+
   @override
   void onInit() {
     super.onInit();
 
     if (Get.arguments != null && Get.arguments is Map) {
+      // Hứng mã Lô ẩn
+      if (Get.arguments['batchId'] != null) {
+        _hiddenBatchId = Get.arguments['batchId'];
+      }
+      // Vẫn giữ logic cũ nếu màn hình khác truyền search bình thường
       if (Get.arguments['search'] != null) {
         searchController.text = Get.arguments['search'];
       }
@@ -100,10 +107,15 @@ class AdjustmentHistoryController extends GetxController with TErrorHandler {
             .toIso8601String();
       }
 
+      String apiSearchQuery = searchController.text.trim();
+      if (apiSearchQuery.isEmpty && _hiddenBatchId.isNotEmpty) {
+        apiSearchQuery = _hiddenBatchId;
+      }
+
       final rawLogs = await _provider.getAuditLogs(
         page: _currentPage,
         limit: _limit, // CHỈ REQUEST 15 DÒNG
-        search: searchController.text.trim(),
+        search: apiSearchQuery,
         startDate: start,
         endDate: end,
       );
@@ -113,6 +125,7 @@ class AdjustmentHistoryController extends GetxController with TErrorHandler {
       for (var log in rawLogs) {
         dynamic oldRaw = log['oldValue'] ?? log['old_value'];
         dynamic newRaw = log['newValue'] ?? log['new_value'];
+        String rawNote = log['note']?.toString() ?? '';
 
         Map<String, dynamic> oldVal = {};
         Map<String, dynamic> newVal = {};
@@ -159,6 +172,8 @@ class AdjustmentHistoryController extends GetxController with TErrorHandler {
         final id = log['id']?.toString() ??
             log['event_id']?.toString() ??
             DateTime.now().millisecondsSinceEpoch.toString();
+        String cleanNote =
+            rawNote.replaceAll(RegExp(r'\[Lô-[A-Z0-9]+\]\s*'), '').trim();
 
         newLogs.add(AdjustmentHistoryModel(
           id: id,
@@ -167,7 +182,7 @@ class AdjustmentHistoryController extends GetxController with TErrorHandler {
           newQuantity: newQty,
           difference: newQty - oldQty,
           performedAt: DateTime.parse(dateStr).toLocal(),
-          note: log['note']?.toString() ?? '',
+          note: cleanNote,
         ));
       }
 
