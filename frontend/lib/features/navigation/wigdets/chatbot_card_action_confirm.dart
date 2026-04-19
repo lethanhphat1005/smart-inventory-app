@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/features/navigation/controllers/chatbot_ui_controller.dart';
 import 'package:frontend/features/navigation/models/chat_message_model.dart';
@@ -21,6 +22,41 @@ class ChatCardActionConfirm extends StatelessWidget {
     final actionIcon = isImport ? Iconsax.import_1 : Iconsax.export_1;
     final title = isImport ? "Xác nhận Nhập kho" : "Xác nhận Xuất kho";
 
+    // =================================================================
+    // TRẠNG THÁI 1: ĐÃ XỬ LÝ (RESOLVED) -> Hiển thị dạng Chip thu gọn
+    // =================================================================
+    if (message.isResolved) {
+      return Center(
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade100,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.grey.shade300),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Iconsax.tick_circle, color: Colors.grey.shade600, size: 16),
+              const SizedBox(width: 8),
+              Text(
+                "$title (Đã xử lý)",
+                style: TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // =================================================================
+    // TRẠNG THÁI 2: CHƯA XỬ LÝ -> Hiển thị Card chi tiết đầy đủ
+    // =================================================================
     return Align(
       alignment: Alignment.centerLeft,
       child: Container(
@@ -46,7 +82,7 @@ class ChatCardActionConfirm extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ================== HEADER (Giống mẫu Low Stock) ==================
+            // --- HEADER ---
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
@@ -73,100 +109,72 @@ class ChatCardActionConfirm extends StatelessWidget {
             ),
             const Divider(height: 1, color: AppColors.divider),
 
-            // ================== BODY: NỘI DUNG CHI TIẾT ==================
+            // --- BODY SỬ DỤNG MARKDOWN ---
             Padding(
               padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    message.text,
-                    style: const TextStyle(
+              child: MarkdownBody(
+                data: message.text,
+                styleSheet: MarkdownStyleSheet(
+                  p: const TextStyle(
                       fontSize: 14.5,
                       color: AppColors.primaryText,
                       height: 1.5,
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.w500),
+                  strong: TextStyle(
+                      fontSize: 14.5,
+                      color: actionColor.shade800,
+                      height: 1.5,
+                      fontWeight: FontWeight.w800), // In đậm kết hợp màu sắc
+                  listBullet: const TextStyle(color: AppColors.primaryText),
+                ),
+              ),
+            ),
+
+            // --- FOOTER: ACTION BUTTONS ---
+            const Divider(height: 1, color: AppColors.divider),
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                children: [
+                  // Nút Hủy
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () {
+                        message.isResolved = true;
+                        controller.messages.refresh();
+                        controller.messages.add(ChatMessage(
+                            text: "Đã hủy thao tác.", isUser: false));
+                      },
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        foregroundColor: Colors.grey.shade600,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                      ),
+                      child: const Text("Hủy bỏ",
+                          style: TextStyle(fontWeight: FontWeight.w600)),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  // Nút Xác nhận
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () => controller.confirmTransaction(message),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                      ),
+                      child: const Text("Xác nhận",
+                          style: TextStyle(fontWeight: FontWeight.w700)),
                     ),
                   ),
                 ],
               ),
-            ),
-
-            // ================== FOOTER: ACTIONS HOẶC STATUS ==================
-            if (!message.isResolved) ...[
-              const Divider(height: 1, color: AppColors.divider),
-              Padding(
-                padding: const EdgeInsets.all(12),
-                child: Row(
-                  children: [
-                    // Nút Hủy - Style nhẹ nhàng
-                    Expanded(
-                      child: TextButton(
-                        onPressed: () {
-                          message.isResolved = true;
-                          controller.messages.refresh();
-                          controller.messages.add(ChatMessage(
-                              text: "Đã hủy thao tác.", isUser: false));
-                        },
-                        style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          foregroundColor: Colors.grey.shade600,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
-                        ),
-                        child: const Text("Hủy bỏ",
-                            style: TextStyle(fontWeight: FontWeight.w600)),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    // Nút Xác nhận - Style nổi bật giống Product Info footer
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () => controller.confirmTransaction(message),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
-                        ),
-                        child: const Text("Xác nhận",
-                            style: TextStyle(fontWeight: FontWeight.w700)),
-                      ),
-                    ),
-                  ],
-                ),
-              )
-            ] else ...[
-              // Trạng thái đã xử lý - Giống mẫu ảnh bạn gửi nhưng trau chuốt hơn
-              const Divider(height: 1, color: AppColors.divider),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade50,
-                  borderRadius:
-                      const BorderRadius.vertical(bottom: Radius.circular(20)),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Iconsax.tick_circle,
-                        color: Color(0xFF00C853), size: 18),
-                    const SizedBox(width: 8),
-                    Text(
-                      "Giao dịch đã được ghi nhận",
-                      style: TextStyle(
-                        color: Colors.grey.shade600,
-                        fontSize: 13.5,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+            )
           ],
         ),
       ),

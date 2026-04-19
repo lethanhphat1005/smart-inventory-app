@@ -9,6 +9,7 @@ import 'package:frontend/features/navigation/wigdets/chatbot_card_action_confirm
 import 'package:frontend/features/navigation/wigdets/chatbot_card_choose_product.dart';
 import 'package:frontend/features/navigation/wigdets/chatbot_card_low_stock.dart';
 import 'package:frontend/features/navigation/wigdets/chatbot_card_product_info.dart';
+import 'package:frontend/features/navigation/wigdets/chatbot_suggested_prompts.dart';
 import 'package:frontend/features/navigation/wigdets/chatbot_typing_indicator.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:get/get.dart';
@@ -40,11 +41,42 @@ class ChatbotWindowLayout extends StatelessWidget {
             children: [
               _buildHeader(context, controller),
               Container(height: 1, color: AppColors.divider.withOpacity(0.5)),
+              // Flexible(
+              //   child: Container(
+              //     color: AppColors.surface,
+              //     child: Obx(
+              //       () => ListView.builder(
+              //         controller: controller.scrollController,
+              //         padding: const EdgeInsets.symmetric(
+              //             horizontal: 20, vertical: 24),
+              //         itemCount: controller.messages.length +
+              //             (controller.isTyping.value ? 1 : 0),
+              //         itemBuilder: (context, index) {
+              //           if (index == controller.messages.length) {
+              //             return const ChatTypingIndicator();
+              //           }
+              //           return _buildMessageRouter(controller.messages[index]);
+              //         },
+              //       ),
+              //     ),
+              //   ),
+              // ),
               Flexible(
                 child: Container(
                   color: AppColors.surface,
-                  child: Obx(
-                    () => ListView.builder(
+                  child: Obx(() {
+                    // Nếu chưa có tin nhắn nào, hiện màn hình gợi ý
+                    if (controller.messages.isEmpty &&
+                        !controller.isTyping.value) {
+                      return ChatbotSuggestedPrompts(
+                        onAction: (text, autoSend) {
+                          _handlePromptAction(controller, text, autoSend);
+                        },
+                      );
+                    }
+
+                    // Nếu có tin nhắn, hiện danh sách chat
+                    return ListView.builder(
                       controller: controller.scrollController,
                       padding: const EdgeInsets.symmetric(
                           horizontal: 20, vertical: 24),
@@ -56,16 +88,89 @@ class ChatbotWindowLayout extends StatelessWidget {
                         }
                         return _buildMessageRouter(controller.messages[index]);
                       },
-                    ),
-                  ),
+                    );
+                  }),
                 ),
               ),
+
+              // KHU VỰC QUICK ACTIONS (Thêm mới)
+              _buildQuickActionsBar(controller),
               _buildInputArea(controller),
             ],
           ),
         ),
       ),
     );
+  }
+
+  Widget _buildQuickActionsBar(ChatbotUiController controller) {
+    // Tổ chức lại dữ liệu Action
+    final actions = [
+      {
+        "label": "Hàng sắp hết",
+        "template": "Sản phẩm nào sắp hết hàng?",
+        "autoSend": true
+      },
+      {"label": "Tạo đơn nhập", "template": "Nhập: ", "autoSend": false},
+      {"label": "Tạo đơn xuất", "template": "Xuất: ", "autoSend": false},
+    ];
+
+    return Container(
+      height: 48,
+      width: double.infinity,
+      color: Colors.white,
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: ListView.separated(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        scrollDirection: Axis.horizontal,
+        itemCount: actions.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        itemBuilder: (context, index) {
+          final action = actions[index];
+          return InkWell(
+            onTap: () => _handlePromptAction(controller,
+                action["template"] as String, action["autoSend"] as bool),
+            borderRadius: BorderRadius.circular(16),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: AppColors.divider),
+              ),
+              child: Text(
+                action["label"] as String,
+                style: const TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.subText,
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  void _handlePromptAction(
+      ChatbotUiController controller, String text, bool autoSend) {
+    if (autoSend) {
+      // Gửi luôn lập tức
+      controller.textController.text = text;
+      controller.sendMessage();
+    } else {
+      // Gắn text vào ô input
+      controller.textController.text = text;
+
+      // Di chuyển con trỏ chuột (cursor) xuống cuối cùng để user gõ tiếp
+      controller.textController.selection = TextSelection.fromPosition(
+          TextPosition(offset: controller.textController.text.length));
+
+      // Focus vào TextField để bàn phím điện thoại tự động bật lên
+      controller.focusNode.requestFocus();
+    }
   }
 
   Widget _buildHeader(BuildContext context, ChatbotUiController controller) {
@@ -161,6 +266,7 @@ class ChatbotWindowLayout extends StatelessWidget {
                   ),
                   child: TextField(
                     controller: controller.textController,
+                    focusNode: controller.focusNode,
                     maxLines: 4,
                     minLines: 1,
                     cursorColor: AppColors.primary,
@@ -210,7 +316,7 @@ class ChatbotWindowLayout extends StatelessWidget {
 
     switch (msg.intent) {
       case 'get_product_info':
-      if (msg.data == null) return ChatBubbleStandard(message: msg);
+        if (msg.data == null) return ChatBubbleStandard(message: msg);
         return ChatCardProductInfo(message: msg);
       case 'confirm_import':
       case 'confirm_export':

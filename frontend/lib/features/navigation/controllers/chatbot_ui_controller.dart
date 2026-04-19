@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/utils/error_handler_utils.dart';
 import 'package:frontend/features/navigation/providers/chatbot_provider.dart';
 import 'package:get/get.dart';
-import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/features/navigation/models/chat_message_model.dart';
 import 'package:frontend/core/infrastructure/network/app_client.dart'; // Import AppClient
 
@@ -19,11 +18,7 @@ class ChatbotUiController extends GetxController with TErrorHandler {
   final TextEditingController textController = TextEditingController();
   final ScrollController scrollController = ScrollController();
 
-  @override
-  void onInit() {
-    super.onInit();
-    messages.add(ChatMessage(text: TTexts.chatbotWelcomeMsg.tr, isUser: false));
-  }
+  final FocusNode focusNode = FocusNode();
 
   void toggleChat() {
     isChatOpen.value = !isChatOpen.value;
@@ -72,7 +67,7 @@ class ChatbotUiController extends GetxController with TErrorHandler {
   void resetChat() {
     messages.clear();
     // Thêm lại câu chào mừng mặc định
-    messages.add(ChatMessage(text: TTexts.chatbotWelcomeMsg.tr, isUser: false));
+    //  messages.add(ChatMessage(text: TTexts.chatbotWelcomeMsg.tr, isUser: false));
 
     // (Tuỳ chọn) Nếu muốn đổi store thì tự động đóng cửa sổ chat lại
     if (isChatOpen.value) {
@@ -133,6 +128,7 @@ class ChatbotUiController extends GetxController with TErrorHandler {
   void onClose() {
     textController.dispose();
     scrollController.dispose();
+    focusNode.dispose();
     super.onClose();
   }
 }
