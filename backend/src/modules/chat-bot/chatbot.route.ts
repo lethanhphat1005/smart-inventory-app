@@ -10,5 +10,6 @@ const chatbotRouter = Router();
 chatbotRouter.use(authenticate, requireStoreContext);
 
 chatbotRouter.post('/', asyncWrapper(chatbotController.processChat));
+chatbotRouter.post('/confirm', asyncWrapper(chatbotController.confirmAction));
 
 export { chatbotRouter };

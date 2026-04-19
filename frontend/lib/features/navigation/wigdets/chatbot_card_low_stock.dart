@@ -12,18 +12,20 @@ class ChatCardLowStock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     List<dynamic> items = [];
+    int totalCount = 0;
 
+    // Phân tách dữ liệu lấy từ data mới trả về của Backend
     if (message.data is List) {
-      // Trường hợp backend trả thẳng mảng (data: inventories.items)
       items = message.data as List<dynamic>;
+      totalCount = items.length;
     } else if (message.data is Map) {
-      // Trường hợp backend bọc trong object (data: { items: [...] } hoặc data: { data: [...] })
-      items = (message.data['data'] ?? message.data['items'] ?? [])
-          as List<dynamic>;
+      final rawData = message.data as Map<String, dynamic>;
+      items = (rawData['items'] ?? rawData['data'] ?? []) as List<dynamic>;
+      totalCount = rawData['totalCount'] ?? items.length;
     }
 
-    // Nếu không có dữ liệu mảng thì trả về dạng bong bóng text thường
-    if (items.isEmpty) {
+    // Nếu không có dữ liệu thì trả về bong bóng text mặc định
+    if (items.isEmpty && totalCount == 0) {
       return _buildFallbackBubble(message.text);
     }
 
@@ -52,7 +54,7 @@ class ChatCardLowStock extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header cảnh báo (Thu gọn padding và thay text ngắn gọn)
+            // ================= HEADER =================
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
@@ -66,12 +68,11 @@ class ChatCardLowStock extends StatelessWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      // Tự động generate text ngắn gọn dựa trên số lượng item
-                      "Chú ý: Có ${items.length} mặt hàng sắp hết",
+                      "Chú ý: Có $totalCount mặt hàng sắp hết", // Cập nhật số lượng
                       style: const TextStyle(
                         fontSize: 14.5,
                         color: AppColors.primaryText,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ),
@@ -80,13 +81,11 @@ class ChatCardLowStock extends StatelessWidget {
             ),
             const Divider(height: 1, color: AppColors.divider),
 
-            // Danh sách sản phẩm
+            // ================= BODY: DANH SÁCH RÚT GỌN =================
             Padding(
-              padding:
-                  const EdgeInsets.only(top: 4, bottom: 4), // Ép margin nhỏ lại
+              padding: const EdgeInsets.only(top: 4, bottom: 4),
               child: ListView.separated(
-                padding: EdgeInsets
-                    .zero, // QUAN TRỌNG: Xoá padding mặc định của ListView
+                padding: EdgeInsets.zero,
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: items.length,
@@ -98,14 +97,12 @@ class ChatCardLowStock extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final item = items[index];
                   final pkg = item['productPackage'];
-
                   final displayName =
                       pkg?['displayName'] ?? 'Sản phẩm không xác định';
                   final quantity = item['quantity'] ?? 0;
                   final unitName = pkg?['unit']?['name'] ?? '';
 
                   return Padding(
-                    // Giảm vertical padding của từng dòng xuống còn 10
                     padding: const EdgeInsets.symmetric(
                         horizontal: 16, vertical: 10),
                     child: Row(
@@ -127,13 +124,14 @@ class ChatCardLowStock extends StatelessWidget {
                               color: AppColors.primaryText,
                               fontWeight: FontWeight.w500,
                             ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         const SizedBox(width: 8),
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 4), // Làm nhỏ badge tồn kho lại
+                              horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
                             color: Colors.red.withOpacity(0.08),
                             borderRadius: BorderRadius.circular(10),
@@ -153,6 +151,40 @@ class ChatCardLowStock extends StatelessWidget {
                     ),
                   );
                 },
+              ),
+            ),
+
+            // ================= FOOTER: NÚT XEM CHI TIẾT =================
+            const Divider(height: 1, color: AppColors.divider),
+            InkWell(
+              onTap: () {
+                // TODO: Open comment
+                // Get.toNamed(AppRoutes.lowStock);
+              },
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.05),
+                  borderRadius:
+                      const BorderRadius.vertical(bottom: Radius.circular(20)),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Xem chi tiết toàn bộ $totalCount mặt hàng", // Cập nhật số lượng
+                      style: const TextStyle(
+                        color: AppColors.primary,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Icon(Iconsax.arrow_right_3,
+                        size: 16, color: AppColors.primary.withOpacity(0.8)),
+                  ],
+                ),
               ),
             ),
           ],

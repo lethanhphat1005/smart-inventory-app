@@ -30,4 +30,27 @@ export class ChatbotController {
 
     sendResponse.success(res, result, { status: StatusCodes.OK });
   };
+
+  confirmAction = async (
+    req: Request,
+    // Thay thế any bằng { message: string }
+    res: Response<ApiResponse<{ message: string }>>,
+  ): Promise<void> => {
+    // Ép kiểu cho req.body để an toàn hơn
+    const { draftActionId, isConfirmed } = req.body as {
+      draftActionId: string;
+      isConfirmed: boolean;
+    };
+
+    const resultMessage = await this.chatbotService.confirmDraftAction(
+      draftActionId,
+      isConfirmed,
+    );
+
+    sendResponse.success(
+      res,
+      { message: resultMessage },
+      { status: StatusCodes.OK },
+    );
+  };
 }

@@ -80,34 +80,37 @@ class ChatbotUiController extends GetxController with TErrorHandler {
     }
   }
 
-  // Hàm được gọi khi user bấm nút "Xác nhận" trên UI Card
+  // Mới (Khớp với Backend 2 pha):
   Future<void> confirmTransaction(ChatMessage message) async {
-    if (message.isResolved) return; // Nếu đã xác nhận rồi thì bỏ qua
+    if (message.isResolved) return;
 
     try {
-      final endpoint = message.intent == 'confirm_import'
-          ? '/api/transactions/import'
-          : '/api/transactions/export';
-
-      // Hiển thị trạng thái đang xử lý (tùy chọn)
       isTyping.value = true;
       _scrollToBottom();
 
-      // Gọi API tạo transaction
-      await _apiClient.post(endpoint, data: message.data);
+      // Lấy draftActionId do Backend trả về ở Pha 1
+      final draftActionId = message.data['draftActionId'];
 
-      // Đánh dấu thẻ này đã xử lý xong
+      // Bắn lên endpoint confirm mới
+      await _apiClient.post(
+        '/api/chat-bot/confirm', // Khớp với router: chatbotRouter.post('/confirm', ...)
+        data: {
+          'draftActionId': draftActionId,
+          'isConfirmed': true // Khớp với biến req.body trong Controller
+        },
+      );
+
       message.isResolved = true;
-      messages.refresh(); // Ép GetX vẽ lại danh sách
+      messages.refresh();
 
-      // Trả lời thành công
       messages.add(ChatMessage(
           text: "✅ Giao dịch thành công! Dữ liệu kho đã được cập nhật.",
           isUser: false));
     } catch (e) {
       handleError(e);
       messages.add(ChatMessage(
-          text: "Giao dịch thất bại. Vui lòng thử lại sau.", isUser: false));
+          text: "Giao dịch thất bại. Yêu cầu có thể đã hết hạn.",
+          isUser: false));
     } finally {
       isTyping.value = false;
       _scrollToBottom();
