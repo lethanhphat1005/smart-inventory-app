@@ -17,11 +17,17 @@ import 'dotenv/config';
 
 export type DraftActionType = 'create_import' | 'create_export';
 
-export interface LLMProductParams {
-  product_name?: string;
-  quantity?: number;
+export interface LLMProductItem {
+  product_name: string;
+  quantity: number;
 }
 
+// Interface dùng chung cho mọi tool của chatbot
+export interface LLMToolParams {
+  product_name?: string;
+  quantity?: number;
+  products?: LLMProductItem[];
+}
 export interface TransactionItemPayload {
   productPackageId: string;
   quantity: number;
@@ -111,17 +117,28 @@ export class ChatbotService {
         type: 'function',
         function: {
           name: 'create_export',
-          description: 'Yêu cầu tạo phiếu xuất kho hoặc bán hàng.',
+          description:
+            'Tạo phiếu xuất kho hoặc bán hàng. Luôn sử dụng mảng products ngay cả khi chỉ có 1 sản phẩm.',
           parameters: {
             type: 'object',
             properties: {
-              product_name: {
-                type: 'string',
-                description: 'Tên sản phẩm cần xuất',
+              products: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    product_name: {
+                      type: 'string',
+                      description: 'Tên sản phẩm',
+                    },
+                    quantity: { type: 'number', description: 'Số lượng' },
+                  },
+                  required: ['product_name', 'quantity'],
+                },
+                description: 'Danh sách sản phẩm cần xuất',
               },
-              quantity: { type: 'number', description: 'Số lượng cần xuất' },
             },
-            required: ['product_name', 'quantity'],
+            required: ['products'], // Chỉ bắt buộc mảng products
           },
         },
       },
@@ -129,17 +146,24 @@ export class ChatbotService {
         type: 'function',
         function: {
           name: 'create_import',
-          description: 'Yêu cầu tạo phiếu nhập hàng vào kho.',
+          description:
+            'Tạo phiếu nhập hàng vào kho. Luôn sử dụng mảng products ngay cả khi chỉ có 1 sản phẩm.',
           parameters: {
             type: 'object',
             properties: {
-              product_name: {
-                type: 'string',
-                description: 'Tên sản phẩm cần nhập',
+              products: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    product_name: { type: 'string' },
+                    quantity: { type: 'number' },
+                  },
+                  required: ['product_name', 'quantity'],
+                },
               },
-              quantity: { type: 'number', description: 'Số lượng cần nhập' },
             },
-            required: ['product_name', 'quantity'],
+            required: ['products'],
           },
         },
       },
@@ -165,7 +189,13 @@ User ID: ${userId}
 
 QUY TẮC TUYỆT ĐỐI:
 1. Backend đã tự động xử lý Store ID và User ID. Bạn TUYỆT ĐỐI KHÔNG ĐƯỢC truyền 'store_id' hay 'user_id' vào bất kỳ tham số (parameters) nào của Tools.
-2. Không bao giờ tự bịa ra dữ liệu tồn kho.`,
+2. Không bao giờ tự bịa ra dữ liệu tồn kho.
+
+QUY TẮC GỌI TOOL:
+1. Khi người dùng muốn nhập hoặc xuất kho, bạn PHẢI gọi tool 'create_import' hoặc 'create_export'.
+2. Bạn PHẢI cung cấp dữ liệu qua tham số 'products' dưới dạng một mảng (array) các object, ngay cả khi chỉ có một sản phẩm.
+3. KHÔNG ĐƯỢC tự ý thêm các ký tự lạ hoặc dấu ngoặc kép thừa vào chuỗi JSON.
+`,
           },
           { role: 'user', content: payload.message },
         ],
@@ -197,10 +227,10 @@ QUY TẮC TUYỆT ĐỐI:
 
         const intent = toolCall.function.name;
 
-        let params: LLMProductParams = {};
+        let params: LLMToolParams = {};
 
         if (toolCall.function.arguments) {
-          params = JSON.parse(toolCall.function.arguments) as LLMProductParams;
+          params = JSON.parse(toolCall.function.arguments) as LLMToolParams;
         }
 
         switch (intent) {
@@ -375,73 +405,106 @@ QUY TẮC TUYỆT ĐỐI:
     storeId: string,
     userId: string,
     intent: DraftActionType,
-    params: LLMProductParams,
+    params: LLMToolParams,
   ): Promise<ChatbotResponseDto> {
-    if (!params.product_name || !params.quantity) {
+    let itemsToProcess = params.products || [];
+
+    if (itemsToProcess.length === 0 && params.product_name && params.quantity) {
+      itemsToProcess = [
+        { product_name: params.product_name, quantity: params.quantity },
+      ];
+    }
+
+    if (itemsToProcess.length === 0) {
       return {
         aiIntent: intent,
-        botReply: 'Vui lòng cung cấp đủ tên sản phẩm và số lượng.',
+        botReply:
+          'Dạ, bạn muốn thao tác với sản phẩm nào và số lượng bao nhiêu ạ?',
       };
     }
 
-    const searchResult = await this.searchInventory(
-      storeId,
-      params.product_name,
-    );
-
-    if (searchResult.length === 0) {
-      return {
-        aiIntent: intent,
-        botReply: `Dạ em không tìm thấy "${params.product_name}".`,
-      };
-    }
-
-    let targetItem: InventoryItemData;
-    const exactMatch = this.findExactMatch(searchResult, params.product_name);
-    const firstResult = searchResult[0]; // Fix TS Strict
-
-    if (exactMatch) {
-      targetItem = exactMatch;
-    } else if (searchResult.length === 1 && firstResult) {
-      targetItem = firstResult;
-    } else {
-      return {
-        aiIntent: 'choose_product',
-        botReply: `Vui lòng chọn chính xác sản phẩm để ${intent === 'create_export' ? 'xuất' : 'nhập'}:`,
-        data: {
-          originalIntent: intent,
-          quantity: params.quantity,
-          items: searchResult,
-        },
-      };
-    }
-
-    const pkg = targetItem.productPackage;
     const isExport = intent === 'create_export';
-    const price = isExport ? Number(pkg.sellingPrice) : Number(pkg.importPrice);
+    const actionText = isExport ? 'XUẤT KHO' : 'NHẬP KHO';
 
-    if (price <= 0) {
-      return {
-        aiIntent: intent,
-        botReply: `⚠️ Sản phẩm "${pkg.displayName}" chưa được cài đặt Giá ${isExport ? 'bán' : 'nhập'}!`,
-      };
-    }
-    if (isExport && targetItem.quantity < params.quantity) {
-      return {
-        aiIntent: intent,
-        botReply: `⚠️ Trong kho chỉ còn ${targetItem.quantity} ${pkg.unit.name}. Không đủ để xuất!`,
-      };
+    const transactionItems: TransactionItemPayload[] = [];
+    let grandTotal = 0;
+    const successMessages: string[] = [];
+
+    for (const item of itemsToProcess) {
+      if (!item.product_name || !item.quantity) {
+        continue;
+      }
+      const searchResult = await this.searchInventory(
+        storeId,
+        item.product_name,
+      );
+
+      if (searchResult.length === 0) {
+        return {
+          aiIntent: intent,
+          botReply: `❌ Dạ em không tìm thấy "${item.product_name}" trong kho. Vui lòng kiểm tra lại tên, thao tác đã bị hủy.`,
+        };
+      }
+
+      let targetItem: InventoryItemData;
+      const exactMatch = this.findExactMatch(searchResult, item.product_name);
+      const firstResult = searchResult[0];
+
+      if (exactMatch) {
+        targetItem = exactMatch;
+      } else if (searchResult.length === 1 && firstResult) {
+        targetItem = firstResult;
+      } else {
+        // Tái chế UI chọn sản phẩm nếu có 1 món bị trùng tên
+        return {
+          aiIntent: 'choose_product',
+          botReply: `⚠️ Hệ thống tìm thấy nhiều mặt hàng giống "${item.product_name}". Vui lòng chọn chính xác để tiếp tục:`,
+          data: {
+            originalIntent: intent,
+            quantity: item.quantity,
+            items: searchResult,
+          },
+        };
+      }
+
+      const pkg = targetItem.productPackage;
+      const price = isExport
+        ? Number(pkg.sellingPrice)
+        : Number(pkg.importPrice);
+
+      if (price <= 0) {
+        return {
+          aiIntent: intent,
+          botReply: `⚠️ Sản phẩm "${pkg.displayName}" chưa được cài đặt Giá ${isExport ? 'bán' : 'nhập'}! Thao tác đã bị hủy.`,
+        };
+      }
+
+      if (isExport && targetItem.quantity < item.quantity) {
+        return {
+          aiIntent: intent,
+          botReply: `⚠️ "${pkg.displayName}" chỉ còn ${targetItem.quantity} ${pkg.unit.name}. Không đủ xuất ${item.quantity}! Thao tác đã bị hủy.`,
+        };
+      }
+
+      // Nếu pass hết các validate -> Đưa vào mảng
+      transactionItems.push({
+        productPackageId: pkg.productPackageId,
+        quantity: Number(item.quantity),
+        unitPrice: price,
+      });
+
+      const itemTotal = item.quantity * price;
+
+      grandTotal += itemTotal;
+      successMessages.push(
+        `- **${item.quantity}** ${pkg.displayName} (${itemTotal.toLocaleString('vi-VN')}đ)`,
+      );
     }
 
+    // Nếu qua được vòng lặp an toàn -> Tạo Draft Payload
     const payload: TransactionPayload = {
-      note: `${isExport ? 'Xuất' : 'Nhập'} kho tự động qua AI Assistant`,
-      items: [
-        {
-          productPackageId: pkg.productPackageId,
-          quantity: Number(params.quantity),
-          unitPrice: price,
-        },
-      ],
+      note: `${isExport ? 'Xuất' : 'Nhập'} kho nhiều sản phẩm qua AI Assistant`,
+      items: transactionItems,
     };
 
     const draftId = `draft_${uuidv4()}`;
@@ -454,15 +517,17 @@ QUY TẮC TUYỆT ĐỐI:
       payload,
       createdAt: Date.now(),
     });
-
     setTimeout(() => this.drafts.delete(draftId), 5 * 60 * 1000);
 
-    const estimatedTotal = (params.quantity * price).toLocaleString('vi-VN');
-    const actionText = isExport ? '**XUẤT KHO**' : '**NHẬP KHO**';
+    // Build câu trả lời hiện lên thẻ Confirm bên Frontend
+    const replyMessage =
+      `Bạn có muốn tạo phiếu **${actionText}** cho các sản phẩm sau không?\n\n` +
+      `${successMessages.join('\n')}\n\n` +
+      `**Tổng cộng: ${grandTotal.toLocaleString('vi-VN')} VNĐ**`;
 
     return {
       aiIntent: isExport ? 'confirm_export' : 'confirm_import',
-      botReply: `Bạn có muốn tạo phiếu ${actionText} cho **${params.quantity} ${pkg.displayName}** (Tổng: ${estimatedTotal} VNĐ) không?\n\nVui lòng xác nhận.`,
+      botReply: replyMessage,
       data: { draftActionId: draftId },
     };
   }

@@ -13,13 +13,18 @@ class ChatCardActionConfirm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<ChatbotUiController>();
-    final isImport = message.intent == 'confirm_import';
-    final actionColor = isImport ? Colors.blueAccent : Colors.orangeAccent;
+    final isImport =
+        message.intent == 'confirm_import' || message.intent == 'create_import';
+
+    // Màu sắc và Icon chủ đạo theo logic của các card mẫu
+    final actionColor = isImport ? Colors.blue : Colors.orange;
+    final actionIcon = isImport ? Iconsax.import_1 : Iconsax.export_1;
+    final title = isImport ? "Xác nhận Nhập kho" : "Xác nhận Xuất kho";
 
     return Align(
       alignment: Alignment.centerLeft,
       child: Container(
-        constraints: BoxConstraints(maxWidth: Get.width * 0.85),
+        constraints: BoxConstraints(maxWidth: Get.width * 0.88),
         margin: const EdgeInsets.only(bottom: 20),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -29,10 +34,10 @@ class ChatCardActionConfirm extends StatelessWidget {
             bottomRight: Radius.circular(20),
             bottomLeft: Radius.circular(6),
           ),
-          border: Border.all(color: AppColors.divider.withOpacity(0.4)),
+          border: Border.all(color: actionColor.withOpacity(0.3)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.06),
+              color: actionColor.withOpacity(0.06),
               blurRadius: 16,
               offset: const Offset(0, 6),
             )
@@ -41,92 +46,127 @@ class ChatCardActionConfirm extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            // ================== HEADER (Giống mẫu Low Stock) ==================
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: actionColor.withOpacity(0.08),
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(20)),
+              ),
               child: Row(
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: actionColor.withOpacity(0.1),
-                      shape: BoxShape.circle,
+                  Icon(actionIcon, color: actionColor, size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 14.5,
+                        color: actionColor.shade800,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
-                    child: Icon(isImport ? Iconsax.arrow_down_2 : Iconsax.arrow_up_2, color: actionColor, size: 18),
-                  ),
-                  const SizedBox(width: 10),
-                  Text(
-                    isImport ? "Xác nhận Nhập kho" : "Xác nhận Xuất kho",
-                    style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15, color: AppColors.primaryText),
                   ),
                 ],
               ),
             ),
             const Divider(height: 1, color: AppColors.divider),
+
+            // ================== BODY: NỘI DUNG CHI TIẾT ==================
             Padding(
               padding: const EdgeInsets.all(16),
-              child: Text(
-                message.text,
-                style: const TextStyle(fontSize: 14.5, color: AppColors.primaryText, height: 1.4),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    message.text,
+                    style: const TextStyle(
+                      fontSize: 14.5,
+                      color: AppColors.primaryText,
+                      height: 1.5,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
               ),
             ),
-            if (!message.isResolved)
+
+            // ================== FOOTER: ACTIONS HOẶC STATUS ==================
+            if (!message.isResolved) ...[
+              const Divider(height: 1, color: AppColors.divider),
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                padding: const EdgeInsets.all(12),
                 child: Row(
                   children: [
+                    // Nút Hủy - Style nhẹ nhàng
                     Expanded(
-                      child: OutlinedButton(
+                      child: TextButton(
                         onPressed: () {
                           message.isResolved = true;
                           controller.messages.refresh();
-                          controller.messages.add(ChatMessage(text: "Đã hủy thao tác.", isUser: false));
+                          controller.messages.add(ChatMessage(
+                              text: "Đã hủy thao tác.", isUser: false));
                         },
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          foregroundColor: AppColors.primaryText,
-                          side: BorderSide(color: AppColors.divider.withOpacity(0.8)),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          foregroundColor: Colors.grey.shade600,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
                         ),
-                        child: const Text("Hủy bỏ", style: TextStyle(fontWeight: FontWeight.w600)),
+                        child: const Text("Hủy bỏ",
+                            style: TextStyle(fontWeight: FontWeight.w600)),
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 8),
+                    // Nút Xác nhận - Style nổi bật giống Product Info footer
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () => controller.confirmTransaction(message),
                         style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
                           backgroundColor: AppColors.primary,
                           foregroundColor: Colors.white,
                           elevation: 0,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
                         ),
-                        child: const Text("Xác nhận", style: TextStyle(fontWeight: FontWeight.w600)),
+                        child: const Text("Xác nhận",
+                            style: TextStyle(fontWeight: FontWeight.w700)),
                       ),
                     ),
                   ],
                 ),
               )
-            else
+            ] else ...[
+              // Trạng thái đã xử lý - Giống mẫu ảnh bạn gửi nhưng trau chuốt hơn
+              const Divider(height: 1, color: AppColors.divider),
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 decoration: BoxDecoration(
-                  color: AppColors.surface.withOpacity(0.6),
-                  borderRadius: const BorderRadius.vertical(bottom: Radius.circular(20)),
+                  color: Colors.grey.shade50,
+                  borderRadius:
+                      const BorderRadius.vertical(bottom: Radius.circular(20)),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Iconsax.tick_circle, color: Colors.grey.shade400, size: 16),
-                    const SizedBox(width: 6),
+                    const Icon(Iconsax.tick_circle,
+                        color: Color(0xFF00C853), size: 18),
+                    const SizedBox(width: 8),
                     Text(
-                      "Giao dịch đã được xử lý",
-                      style: TextStyle(color: Colors.grey.shade600, fontSize: 13, fontWeight: FontWeight.w500),
+                      "Giao dịch đã được ghi nhận",
+                      style: TextStyle(
+                        color: Colors.grey.shade600,
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ],
                 ),
-              )
+              ),
+            ],
           ],
         ),
       ),
