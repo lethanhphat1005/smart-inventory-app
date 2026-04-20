@@ -23,7 +23,7 @@ class NavigationBinding extends Bindings {
     Get.lazyPut(() => ReportController(), fenix: true);
 
     // 3. Các Controller phụ của Tab.
-    Get.lazyPut(() => ChatbotUiController(), fenix: true);
+    Get.put(ChatbotUiController(), permanent: true);
     Get.lazyPut(() => ReportExportController(), fenix: true);
   }
 }

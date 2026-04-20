@@ -11,6 +11,7 @@ import {
   productPackageBarcodeRouter,
 } from './modules/barcode/index.js';
 import { categoryRouter } from './modules/categories/index.js';
+import { chatbotRouter } from './modules/chat-bot/chatbot.route.js';
 import { inventoryRouter } from './modules/inventories/inventory.route.js';
 import notificationRouter from './modules/notification/notification.route.js';
 import {
@@ -61,6 +62,7 @@ app.use('/api/notification', notificationRouter);
 app.use('/api/search', searchRouter);
 app.use('/api/units', unitRouter);
 app.use('/api/store-members', storeMemberRouter);
+app.use('/api/chat-bot', chatbotRouter);
 app.use('/api/smart-decisions', smartDecisionRouter);
 
 app.use(errorHandler);

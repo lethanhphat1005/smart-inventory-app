@@ -18,6 +18,8 @@ class _NavigationDraggableChatbotFabWidgetState
     with SingleTickerProviderStateMixin {
   final ChatbotUiController _uiController = Get.put(ChatbotUiController());
 
+  Worker? _chatOpenWorker;
+
   Offset _currentPosition = const Offset(20, 100);
   Offset _savedPosition = const Offset(20, 100);
   bool _isInitialized = false;
@@ -40,7 +42,8 @@ class _NavigationDraggableChatbotFabWidgetState
       CurvedAnimation(parent: _breathController, curve: Curves.easeInOut),
     );
 
-    ever(_uiController.isChatOpen, (bool isOpen) {
+    _chatOpenWorker = ever(_uiController.isChatOpen, (bool isOpen) {
+      if (!mounted) return;
       if (isOpen) {
         _savedPosition = _currentPosition;
         setState(() {
@@ -69,6 +72,7 @@ class _NavigationDraggableChatbotFabWidgetState
   @override
   void dispose() {
     _breathController.dispose();
+    _chatOpenWorker?.dispose();
     super.dispose();
   }
 
@@ -103,7 +107,7 @@ class _NavigationDraggableChatbotFabWidgetState
             bottom: isOpen ? 0 : -chatHeight,
             left: 0,
             right: 0,
-            child: const ChatbotWindowLayout(),
+            child: ChatbotWindowLayout(),
           ),
           AnimatedPositioned(
             duration:
