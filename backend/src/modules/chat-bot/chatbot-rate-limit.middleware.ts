@@ -1,9 +1,8 @@
-import rateLimit from 'express-rate-limit';
+import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 
 import { requireReqUser } from '../../common/utils/require-req.js';
 
-import type { Request } from 'express';
-
+import type { Request, Response } from 'express';
 /**
  * Middleware giới hạn số lượng tin nhắn từ người dùng
  * windowMs: 1 phút
@@ -16,16 +15,18 @@ export const chatbotRateLimit = rateLimit({
   legacyHeaders: false,
   message: {
     success: false,
-    message:
-      'Bạn đang nhắn tin quá nhanh. Vui lòng đợi một chút để em xử lý xong các yêu cầu trước nhé! 📦✨',
+    message: 'Bạn thao tác quá nhanh. Vui lòng đợi một chút nhé! 📦✨',
   },
-  keyGenerator: (req: Request) => {
+  keyGenerator: (req: Request, res: Response) => {
     try {
       const user = requireReqUser(req);
 
       return user.userId;
     } catch {
-      return req.ip || 'unknown-ip';
+      type ERLReq = Parameters<typeof ipKeyGenerator>[0];
+      type ERLRes = Parameters<typeof ipKeyGenerator>[1];
+
+      return ipKeyGenerator(req as unknown as ERLReq, res as unknown as ERLRes);
     }
   },
 });

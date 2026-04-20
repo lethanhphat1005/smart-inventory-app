@@ -111,15 +111,31 @@ export class ChatbotService {
     userId: string,
     payload: ChatbotRequestDto,
   ): Promise<ChatbotResponseDto> {
+    const lockKey = `chatbot:lock:${userId}`;
+
+    const acquired = await this.redisClient.set(
+      lockKey,
+      'locked',
+      'EX',
+      15,
+      'NX',
+    );
+
+    if (!acquired) {
+      throw new CustomError({
+        message:
+          'AI đang suy nghĩ câu hỏi trước của bạn, vui lòng đợi vài giây nhé! ⏳',
+        status: StatusCodes.TOO_MANY_REQUESTS,
+      });
+    }
+
     try {
-      // 1. Lấy lịch sử chat cũ của user này
       const previousHistory = await this.getChatHistory(userId);
 
-      // 2. Build mảng messages truyền cho AI
       const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
         { role: 'system', content: getCoordinatorPrompt(storeId, userId) },
-        ...previousHistory, // Nối lịch sử vào giữa
-        { role: 'user', content: payload.message }, // Tin nhắn hiện tại ở cuối cùng
+        ...previousHistory,
+        { role: 'user', content: payload.message },
       ];
 
       const response = await this.openai.chat.completions.create({
@@ -141,7 +157,7 @@ export class ChatbotService {
         if (!toolCall || toolCall.type !== 'function') {
           finalResponse = {
             aiIntent: 'unknown',
-            botReply: 'Lỗi truy xuất công cụ.',
+            botReply: 'Lỗi truy xuất công cụ hệ thống.',
           };
         } else {
           const intent = toolCall.function.name;
@@ -188,7 +204,7 @@ export class ChatbotService {
                 aiIntent: 'unknown',
                 botReply: await this.generateFriendlyReply(
                   payload.message,
-                  'Dạ, tính năng này hiện chưa khả dụng.',
+                  'Dạ, tính năng này hiện chưa khả dụng trên hệ thống.',
                 ),
               };
           }
@@ -212,9 +228,11 @@ export class ChatbotService {
     } catch (error) {
       console.error('[Chatbot Error]', error);
       throw new CustomError({
-        message: 'Lỗi kết nối với mô hình AI',
+        message: 'Lỗi kết nối với hệ thống mô hình AI',
         status: StatusCodes.INTERNAL_SERVER_ERROR,
       });
+    } finally {
+      await this.redisClient.del(lockKey);
     }
   }
 
