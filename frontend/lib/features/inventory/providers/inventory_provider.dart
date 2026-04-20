@@ -96,15 +96,15 @@ class InventoryProvider {
     return response.data['data'] ?? response.data;
   }
 
-Future<Map<String, dynamic>> createProductPackage(
-      String productId, Map<String, dynamic> packageData, Map<String, dynamic> inventoryData) async {
-    final response = await _apiClient.post(
-      '/api/products/$productId/packages', 
-      data: {
-        'package': packageData,
-        'inventory': inventoryData,
-      }
-    );
+  Future<Map<String, dynamic>> createProductPackage(
+      String productId,
+      Map<String, dynamic> packageData,
+      Map<String, dynamic> inventoryData) async {
+    final response =
+        await _apiClient.post('/api/products/$productId/packages', data: {
+      'package': packageData,
+      'inventory': inventoryData,
+    });
     return response.data['data'] ?? response.data;
   }
 
@@ -215,7 +215,7 @@ Future<Map<String, dynamic>> createProductPackage(
   // ==========================================
   // BARCODES
   // ==========================================
-  
+
   /// Quét mã vạch (Bước 1)
   Future<Map<String, dynamic>> scanBarcode(String barcode) async {
     final response = await _apiClient.post(
@@ -238,5 +238,13 @@ Future<Map<String, dynamic>> createProductPackage(
       },
     );
     return response.data['data'] ?? response.data;
+  }
+
+  /// Xóa (Gỡ) mã vạch khỏi Product Package
+  Future<void> deletePackageBarcode(
+      String productPackageId, String barcode) async {
+    await _apiClient.delete(
+      '/api/product-packages/$productPackageId/barcodes/$barcode',
+    );
   }
 }

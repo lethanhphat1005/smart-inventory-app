@@ -18,6 +18,7 @@ class TTextFormFieldWidget extends StatelessWidget {
     this.maxLines = 1,
     this.prefixIcon,
     this.keyboardType,
+    this.onFieldSubmitted,
   });
 
   final String label;
@@ -32,6 +33,7 @@ class TTextFormFieldWidget extends StatelessWidget {
   final int maxLines;
   final IconData? prefixIcon;
   final TextInputType? keyboardType;
+  final void Function(String)? onFieldSubmitted;
 
   @override
   Widget build(BuildContext context) {
@@ -80,6 +82,7 @@ class TTextFormFieldWidget extends StatelessWidget {
           maxLines: isObscure ? 1 : maxLines,
           readOnly: readOnly,
           cursorColor: AppColors.primary,
+          onFieldSubmitted: onFieldSubmitted,
           style: TextStyle(
             fontFamily: 'Poppins',
             fontSize: 14,

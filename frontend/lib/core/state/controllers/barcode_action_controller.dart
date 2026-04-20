@@ -3,7 +3,6 @@ import 'package:frontend/core/ui/widgets/t_barcode_candidate_bottom_sheet.dart';
 import 'package:frontend/core/ui/widgets/t_barcode_exact_match_bottom_sheet.dart';
 import 'package:frontend/core/ui/widgets/t_barcode_not_found_bottom_sheet.dart';
 import 'package:frontend/core/ui/widgets/t_barcode_prefill_bottom_sheet.dart';
-import 'package:frontend/core/ui/widgets/t_barcode_valid_for_form_bottom_sheet.dart';
 import 'package:get/get.dart';
 import 'package:frontend/core/infrastructure/utils/full_screen_loader_utils.dart';
 import 'package:frontend/core/ui/widgets/t_snackbars_widget.dart';
@@ -45,8 +44,6 @@ class BarcodeActionController extends GetxController {
         if (isFromForm) {
           // Nếu đang ở trong Form: Hiện Bottom Sheet báo "Mã hợp lệ",
           // User nhấn OK thì đóng camera và điền vào ô Text.
-          TBarcodeValidForFormBottomSheet.show(
-              barcode: barcode, prefill: prefill);
         } else {
           // Nếu ở ngoài (Search): Hiện Bottom Sheet hỏi có muốn tạo mới không.
           if (prefill.isNotEmpty) {

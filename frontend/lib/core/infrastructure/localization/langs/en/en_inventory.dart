@@ -139,6 +139,15 @@ final Map<String, String> enInventory = {
   TTexts.productDataRefreshing: 'Refreshing product data...',
   TTexts.packageUpdatedSuccess: 'Package updated successfully.',
   TTexts.packageCreatedSuccess: 'Package created successfully.',
+  TTexts.variantLabel: 'Variant Name',
+  TTexts.variantHint: 'e.g., 330ml, Red, Large...',
+  TTexts.enterBarcodeHint: 'Type barcode and press Enter or Scan',
+  TTexts.barcodeTooShort: 'Barcode must be at least 5 characters',
+  TTexts.barcodeDuplicate: 'This barcode is already in the list',
+  TTexts.barcodeAdded: 'Barcode added successfully',
+  TTexts.invalidPrice: 'Please enter a valid number',
+  TTexts.barcodeDeletedSuccess: 'Barcode deleted successfully',
+  TTexts.barcodeDeleted: 'Deleted barcode',
 
   // -- Category Detail
   TTexts.addNewProduct: 'Add New Product',

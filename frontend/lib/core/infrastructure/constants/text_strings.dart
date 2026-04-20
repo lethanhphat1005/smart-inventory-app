@@ -509,6 +509,15 @@ class TTexts {
   static const String categoryDescription = 'category_description';
   static const String noCategoryDescription = 'no_description';
   static const String emptyCategoryMessage = 'empty_category_message';
+  static const String variantLabel = 'variant_label';
+  static const String variantHint = 'variant_hint';
+  static const String enterBarcodeHint = 'enter_barcode_hint';
+  static const String barcodeTooShort = 'barcode_too_short';
+  static const String barcodeDuplicate = 'barcode_duplicate';
+  static const String barcodeAdded = 'barcode_added';
+  static const String invalidPrice = 'invalid_price';
+  static const String barcodeDeletedSuccess = 'barcode_deleted_success';
+  static const String barcodeDeleted = 'barcode_deleted';
 
   // --- View All Products
   static const String viewAllProducts = 'view_all_products';
