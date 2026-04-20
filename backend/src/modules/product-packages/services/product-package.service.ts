@@ -82,9 +82,9 @@ export class ProductPackageService {
     return existingProduct;
   }
 
-  private async getSignedUrlForItemImageUrl(
-    items: ProductPackageDetailResponseDto[],
-  ): Promise<ProductPackageDetailResponseDto[]> {
+  private async getSignedUrlForItemImageUrl<
+    T extends { product: { imageUrl: string | null } },
+  >(items: T[]): Promise<T[]> {
     return await Promise.all(
       items.map(async (item) => ({
         ...item,
@@ -151,7 +151,18 @@ export class ProductPackageService {
       });
     }
 
-    return productPackage;
+    const packageWithSignedUrl = {
+      ...productPackage,
+      product: {
+        ...productPackage.product,
+        imageUrl: await StorageService.getSignedUrl(
+          process.env.STORAGE_BUCKET ?? 'images',
+          productPackage.product.imageUrl,
+        ),
+      },
+    };
+
+    return packageWithSignedUrl;
   }
 
   // dùng cho transaction để tạo TransactionDetail, xử lý duplicate
