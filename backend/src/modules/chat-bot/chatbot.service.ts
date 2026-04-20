@@ -21,21 +21,63 @@ import type {
 import type { ListInventoriesQueryDto } from '../inventories/dto/inventory.dto.js';
 import type { InventoryService } from '../inventories/index.js';
 import type { TransactionService } from '../transactions/transaction.service.js';
+import type { Redis } from 'ioredis';
 
 import 'dotenv/config';
 
 export class ChatbotService {
   private openai: OpenAI;
   private drafts = new Map<string, DraftAction>();
+  // Giữ lại 6 tin nhắn gần nhất (3 lượt hỏi - đáp)
+  private readonly MAX_HISTORY_LENGTH = 6;
+  // 5 phút
+  private readonly DRAFT_TTL_SECONDS = 300;
+  // 1 tiếng (Reset bộ nhớ sau 1 tiếng không chat)
+  private readonly HISTORY_TTL_SECONDS = 3600;
 
   constructor(
     private readonly inventoryService: InventoryService,
     private readonly transactionService: TransactionService,
+    private readonly redisClient: Redis,
   ) {
     this.openai = new OpenAI({
       baseURL: 'https://api.groq.com/openai/v1',
       apiKey: process.env.GROQ_API_KEY,
     });
+  }
+
+  private async getChatHistory(
+    userId: string,
+  ): Promise<OpenAI.Chat.ChatCompletionMessageParam[]> {
+    const key = `chatbot:history:${userId}`;
+    const data = await this.redisClient.get(key);
+
+    return data ? JSON.parse(data) : [];
+  }
+
+  private async saveChatHistory(
+    userId: string,
+    userMsg: string,
+    assistantMsg: string,
+  ): Promise<void> {
+    const key = `chatbot:history:${userId}`;
+    let history = await this.getChatHistory(userId);
+
+    // Push tin nhắn mới vào mảng
+    history.push({ role: 'user', content: userMsg });
+    history.push({ role: 'assistant', content: assistantMsg });
+
+    // Cắt bớt nếu lịch sử quá dài (tránh tốn token)
+    if (history.length > this.MAX_HISTORY_LENGTH) {
+      history = history.slice(history.length - this.MAX_HISTORY_LENGTH);
+    }
+
+    await this.redisClient.set(
+      key,
+      JSON.stringify(history),
+      'EX',
+      this.HISTORY_TTL_SECONDS,
+    );
   }
 
   private async generateFriendlyReply(
@@ -47,9 +89,10 @@ export class ChatbotService {
         model: 'llama-3.1-8b-instant',
         messages: [
           { role: 'system', content: getFriendlyReplyPrompt() },
+
           {
             role: 'user',
-            content: `Câu nói của người dùng: "${userMessage}"\n\nDữ liệu hệ thống: ${systemContext}`,
+            content: `Câu nói: "${userMessage}"\nDữ liệu: ${systemContext}`,
           },
         ],
         temperature: 0.6,
@@ -69,12 +112,19 @@ export class ChatbotService {
     payload: ChatbotRequestDto,
   ): Promise<ChatbotResponseDto> {
     try {
+      // 1. Lấy lịch sử chat cũ của user này
+      const previousHistory = await this.getChatHistory(userId);
+
+      // 2. Build mảng messages truyền cho AI
+      const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
+        { role: 'system', content: getCoordinatorPrompt(storeId, userId) },
+        ...previousHistory, // Nối lịch sử vào giữa
+        { role: 'user', content: payload.message }, // Tin nhắn hiện tại ở cuối cùng
+      ];
+
       const response = await this.openai.chat.completions.create({
         model: 'llama-3.1-8b-instant',
-        messages: [
-          { role: 'system', content: getCoordinatorPrompt(storeId, userId) },
-          { role: 'user', content: payload.message },
-        ],
+        messages,
         tools: CHATBOT_TOOLS,
         tool_choice: 'auto',
         temperature: 0.1,
@@ -83,62 +133,82 @@ export class ChatbotService {
       const responseMessage = response.choices[0]?.message;
       const toolCalls = responseMessage?.tool_calls;
 
+      let finalResponse: ChatbotResponseDto;
+
       if (toolCalls && toolCalls.length > 0) {
         const toolCall = toolCalls[0];
 
         if (!toolCall || toolCall.type !== 'function') {
-          return { aiIntent: 'unknown', botReply: 'Lỗi truy xuất công cụ.' };
-        }
+          finalResponse = {
+            aiIntent: 'unknown',
+            botReply: 'Lỗi truy xuất công cụ.',
+          };
+        } else {
+          const intent = toolCall.function.name;
+          let params: LLMToolParams = {};
 
-        const intent = toolCall.function.name;
-        let params: LLMToolParams = {};
+          if (toolCall.function.arguments) {
+            params = JSON.parse(toolCall.function.arguments) as LLMToolParams;
+          }
 
-        if (toolCall.function.arguments) {
-          params = JSON.parse(toolCall.function.arguments) as LLMToolParams;
-        }
-
-        switch (intent) {
-          case 'get_low_stock':
-            return await this.handleGetLowStock(storeId, payload.message);
-          case 'get_product_info':
-            return await this.handleGetProductInfo(
-              storeId,
-              params.product_name,
-              payload.message,
-            );
-          case 'create_export':
-            return await this.handleTransactionDraft(
-              storeId,
-              userId,
-              'create_export',
-              params,
-              payload.message,
-            );
-          case 'create_import':
-            return await this.handleTransactionDraft(
-              storeId,
-              userId,
-              'create_import',
-              params,
-              payload.message,
-            );
-          default:
-            return {
-              aiIntent: 'unknown',
-              botReply: await this.generateFriendlyReply(
+          switch (intent) {
+            case 'get_low_stock':
+              finalResponse = await this.handleGetLowStock(
+                storeId,
                 payload.message,
-                'Dạ, tính năng này hiện chưa khả dụng.',
-              ),
-            };
+              );
+              break;
+            case 'get_product_info':
+              finalResponse = await this.handleGetProductInfo(
+                storeId,
+                params.product_name,
+                payload.message,
+              );
+              break;
+            case 'create_export':
+              finalResponse = await this.handleTransactionDraft(
+                storeId,
+                userId,
+                'create_export',
+                params,
+                payload.message,
+              );
+              break;
+            case 'create_import':
+              finalResponse = await this.handleTransactionDraft(
+                storeId,
+                userId,
+                'create_import',
+                params,
+                payload.message,
+              );
+              break;
+            default:
+              finalResponse = {
+                aiIntent: 'unknown',
+                botReply: await this.generateFriendlyReply(
+                  payload.message,
+                  'Dạ, tính năng này hiện chưa khả dụng.',
+                ),
+              };
+          }
         }
+      } else {
+        finalResponse = {
+          aiIntent: 'unknown',
+          botReply:
+            responseMessage?.content ||
+            'Em chưa hiểu ý anh/chị, mình có thể nói rõ hơn được không ạ?',
+        };
       }
 
-      return {
-        aiIntent: 'unknown',
-        botReply:
-          responseMessage?.content ||
-          'Em chưa hiểu ý anh/chị, mình có thể nói rõ hơn được không ạ?',
-      };
+      await this.saveChatHistory(
+        userId,
+        payload.message,
+        finalResponse.botReply,
+      );
+
+      return finalResponse;
     } catch (error) {
       console.error('[Chatbot Error]', error);
       throw new CustomError({
@@ -152,22 +222,25 @@ export class ChatbotService {
     draftActionId: string,
     isConfirmed: boolean,
   ): Promise<string> {
-    if (!isConfirmed) {
-      this.drafts.delete(draftActionId);
+    const draftKey = `chatbot:draft:${draftActionId}`;
+    const draftData = await this.redisClient.get(draftKey);
 
-      return await this.generateFriendlyReply(
-        'Hủy bỏ thao tác',
-        'Yêu cầu của bạn đã được hủy thành công.',
-      );
-    }
-
-    const draft = this.drafts.get(draftActionId);
-
-    if (!draft) {
+    if (!draftData) {
       throw new CustomError({
-        message: 'Phiên làm việc đã hết hạn.',
+        message: 'Yêu cầu đã hết hạn hoặc không tồn tại (quá 5 phút).',
         status: StatusCodes.GONE,
       });
+    }
+
+    const draft = JSON.parse(draftData) as DraftAction;
+
+    if (!isConfirmed) {
+      await this.redisClient.del(draftKey); // Xóa khỏi Redis
+
+      return await this.generateFriendlyReply(
+        'Tôi muốn hủy giao dịch',
+        'Đã hủy thao tác.',
+      );
     }
 
     if (draft.type === 'create_import') {
@@ -184,7 +257,7 @@ export class ChatbotService {
       );
     }
 
-    this.drafts.delete(draftActionId);
+    await this.redisClient.del(draftKey);
 
     return await this.generateFriendlyReply(
       'Xác nhận thành công',
@@ -406,19 +479,24 @@ export class ChatbotService {
       items: transactionItems,
     };
 
-    const draftId = `draft_${uuidv4()}`;
-
-    this.drafts.set(draftId, {
+    const draftId = uuidv4();
+    const draftAction: DraftAction = {
       id: draftId,
       type: intent,
       storeId,
       userId,
       payload,
       createdAt: Date.now(),
-    });
-    setTimeout(() => this.drafts.delete(draftId), 5 * 60 * 1000);
+    };
 
-    const systemContext = `Hệ thống chuẩn bị tạo phiếu ${actionText} cho các sản phẩm: ${successMessages.join('; ')}. Tổng tiền: ${grandTotal.toLocaleString('vi-VN')} VNĐ. Yêu cầu người dùng xác nhận trên giao diện.`;
+    await this.redisClient.set(
+      `chatbot:draft:${draftId}`,
+      JSON.stringify(draftAction),
+      'EX',
+      this.DRAFT_TTL_SECONDS,
+    );
+
+    const systemContext = `Hệ thống chuẩn bị tạo phiếu ${actionText} cho các sản phẩm: ${successMessages.join('; ')}. Tổng tiền: ${grandTotal.toLocaleString('vi-VN')} VNĐ. Yêu cầu người dùng xác nhận.`;
 
     return {
       aiIntent: isExport ? 'confirm_export' : 'confirm_import',
