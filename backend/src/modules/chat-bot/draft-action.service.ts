@@ -14,7 +14,6 @@ export type DraftAction = {
   type: 'create_import' | 'create_export';
   storeId: string;
   userId: string;
-  // Thay thế any bằng TransactionPayload
   payload: TransactionPayload;
   createdAt: number;
 };

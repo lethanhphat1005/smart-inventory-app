@@ -2,70 +2,27 @@ import { StatusCodes } from 'http-status-codes';
 import { OpenAI } from 'openai';
 import { v4 as uuidv4 } from 'uuid';
 
+import {
+  getCoordinatorPrompt,
+  getFriendlyReplyPrompt,
+} from './chatbot.prompt.js';
+import { CHATBOT_TOOLS } from './chatbot.tool.js';
 import { CustomError } from '../../common/errors/index.js';
 
 import type { ChatbotRequestDto, ChatbotResponseDto } from './chatbot.dto.js';
+import type {
+  DraftAction,
+  DraftActionType,
+  InventoryItemData,
+  LLMToolParams,
+  TransactionItemPayload,
+  TransactionPayload,
+} from './chatbot.type.js';
 import type { ListInventoriesQueryDto } from '../inventories/dto/inventory.dto.js';
 import type { InventoryService } from '../inventories/index.js';
 import type { TransactionService } from '../transactions/transaction.service.js';
 
 import 'dotenv/config';
-
-// ==========================================
-// INTERFACES
-// ==========================================
-
-export type DraftActionType = 'create_import' | 'create_export';
-
-export interface LLMProductItem {
-  product_name: string;
-  quantity: number;
-}
-
-// Interface dùng chung cho mọi tool của chatbot
-export interface LLMToolParams {
-  product_name?: string;
-  quantity?: number;
-  products?: LLMProductItem[];
-}
-export interface TransactionItemPayload {
-  productPackageId: string;
-  quantity: number;
-  unitPrice: number;
-}
-
-export interface TransactionPayload {
-  note: string;
-  items: TransactionItemPayload[];
-}
-
-export interface DraftAction {
-  id: string;
-  type: DraftActionType;
-  storeId: string;
-  userId: string;
-  payload: TransactionPayload;
-  createdAt: number;
-}
-
-export interface InventoryPackageData {
-  productPackageId: string;
-  displayName: string;
-  sellingPrice: number | string;
-  importPrice: number | string;
-  unit: { name: string };
-}
-
-export interface InventoryItemData {
-  quantity: number;
-  reorder_threshold?: number;
-  reorderThreshold?: number;
-  productPackage: InventoryPackageData;
-}
-
-// ==========================================
-// SERVICE LỚP CHÍNH
-// ==========================================
 
 export class ChatbotService {
   private openai: OpenAI;
@@ -81,93 +38,30 @@ export class ChatbotService {
     });
   }
 
-  private readonly chatbotTools: OpenAI.Chat.Completions.ChatCompletionTool[] =
-    [
-      {
-        type: 'function',
-        function: {
-          name: 'get_low_stock',
-          description:
-            'Xem danh sách các sản phẩm sắp hết hàng hoặc đã hết hàng trong kho cần nhập thêm.',
-          parameters: {
-            type: 'object',
-            properties: {},
+  private async generateFriendlyReply(
+    userMessage: string,
+    systemContext: string,
+  ): Promise<string> {
+    try {
+      const response = await this.openai.chat.completions.create({
+        model: 'llama-3.1-8b-instant',
+        messages: [
+          { role: 'system', content: getFriendlyReplyPrompt() },
+          {
+            role: 'user',
+            content: `Câu nói của người dùng: "${userMessage}"\n\nDữ liệu hệ thống: ${systemContext}`,
           },
-        },
-      },
-      {
-        type: 'function',
-        function: {
-          name: 'get_product_info',
-          description:
-            'Hỏi thông tin, giá bán, số lượng tồn kho của một sản phẩm cụ thể.',
-          parameters: {
-            type: 'object',
-            properties: {
-              product_name: {
-                type: 'string',
-                description: 'Tên sản phẩm cần tìm',
-              },
-            },
-            required: ['product_name'],
-          },
-        },
-      },
-      {
-        type: 'function',
-        function: {
-          name: 'create_export',
-          description:
-            'Tạo phiếu xuất kho hoặc bán hàng. Luôn sử dụng mảng products ngay cả khi chỉ có 1 sản phẩm.',
-          parameters: {
-            type: 'object',
-            properties: {
-              products: {
-                type: 'array',
-                items: {
-                  type: 'object',
-                  properties: {
-                    product_name: {
-                      type: 'string',
-                      description: 'Tên sản phẩm',
-                    },
-                    quantity: { type: 'number', description: 'Số lượng' },
-                  },
-                  required: ['product_name', 'quantity'],
-                },
-                description: 'Danh sách sản phẩm cần xuất',
-              },
-            },
-            required: ['products'], // Chỉ bắt buộc mảng products
-          },
-        },
-      },
-      {
-        type: 'function',
-        function: {
-          name: 'create_import',
-          description:
-            'Tạo phiếu nhập hàng vào kho. Luôn sử dụng mảng products ngay cả khi chỉ có 1 sản phẩm.',
-          parameters: {
-            type: 'object',
-            properties: {
-              products: {
-                type: 'array',
-                items: {
-                  type: 'object',
-                  properties: {
-                    product_name: { type: 'string' },
-                    quantity: { type: 'number' },
-                  },
-                  required: ['product_name', 'quantity'],
-                },
-              },
-            },
-            required: ['products'],
-          },
-        },
-      },
-    ];
+        ],
+        temperature: 0.6,
+      });
+
+      return response.choices[0]?.message?.content || systemContext;
+    } catch (error) {
+      console.error('[AI Responder Error]', error);
+
+      return systemContext;
+    }
+  }
 
   public async processMessage(
     storeId: string,
@@ -178,28 +72,10 @@ export class ChatbotService {
       const response = await this.openai.chat.completions.create({
         model: 'llama-3.1-8b-instant',
         messages: [
-          {
-            role: 'system',
-            content: `Bạn là trợ lý AI điều phối dữ liệu của hệ thống Smart Store Support System.
-Nhiệm vụ của bạn là phân tích câu nói của người dùng và gọi Tool phù hợp nhất.
-
-[THÔNG TIN HỆ THỐNG]
-Active store ID: ${storeId}
-User ID: ${userId}
-
-QUY TẮC TUYỆT ĐỐI:
-1. Backend đã tự động xử lý Store ID và User ID. Bạn TUYỆT ĐỐI KHÔNG ĐƯỢC truyền 'store_id' hay 'user_id' vào bất kỳ tham số (parameters) nào của Tools.
-2. Không bao giờ tự bịa ra dữ liệu tồn kho.
-
-QUY TẮC GỌI TOOL:
-1. Khi người dùng muốn nhập hoặc xuất kho, bạn PHẢI gọi tool 'create_import' hoặc 'create_export'.
-2. Bạn PHẢI cung cấp dữ liệu qua tham số 'products' dưới dạng một mảng (array) các object, ngay cả khi chỉ có một sản phẩm.
-3. KHÔNG ĐƯỢC tự ý thêm các ký tự lạ hoặc dấu ngoặc kép thừa vào chuỗi JSON.
-`,
-          },
+          { role: 'system', content: getCoordinatorPrompt(storeId, userId) },
           { role: 'user', content: payload.message },
         ],
-        tools: this.chatbotTools,
+        tools: CHATBOT_TOOLS,
         tool_choice: 'auto',
         temperature: 0.1,
       });
@@ -208,25 +84,13 @@ QUY TẮC GỌI TOOL:
       const toolCalls = responseMessage?.tool_calls;
 
       if (toolCalls && toolCalls.length > 0) {
-        // Fix TS Strict: Ép kiểu hoặc check null cho array index
         const toolCall = toolCalls[0];
 
-        if (!toolCall) {
-          return {
-            aiIntent: 'unknown',
-            botReply: 'Lỗi truy xuất công cụ từ AI.',
-          };
-        }
-
-        if (toolCall.type !== 'function') {
-          return {
-            aiIntent: 'unknown',
-            botReply: 'Loại công cụ không được hỗ trợ.',
-          };
+        if (!toolCall || toolCall.type !== 'function') {
+          return { aiIntent: 'unknown', botReply: 'Lỗi truy xuất công cụ.' };
         }
 
         const intent = toolCall.function.name;
-
         let params: LLMToolParams = {};
 
         if (toolCall.function.arguments) {
@@ -235,11 +99,12 @@ QUY TẮC GỌI TOOL:
 
         switch (intent) {
           case 'get_low_stock':
-            return await this.handleGetLowStock(storeId);
+            return await this.handleGetLowStock(storeId, payload.message);
           case 'get_product_info':
             return await this.handleGetProductInfo(
               storeId,
               params.product_name,
+              payload.message,
             );
           case 'create_export':
             return await this.handleTransactionDraft(
@@ -247,6 +112,7 @@ QUY TẮC GỌI TOOL:
               userId,
               'create_export',
               params,
+              payload.message,
             );
           case 'create_import':
             return await this.handleTransactionDraft(
@@ -254,11 +120,15 @@ QUY TẮC GỌI TOOL:
               userId,
               'create_import',
               params,
+              payload.message,
             );
           default:
             return {
               aiIntent: 'unknown',
-              botReply: 'Dạ, em chưa hỗ trợ tác vụ này.',
+              botReply: await this.generateFriendlyReply(
+                payload.message,
+                'Dạ, tính năng này hiện chưa khả dụng.',
+              ),
             };
         }
       }
@@ -267,7 +137,7 @@ QUY TẮC GỌI TOOL:
         aiIntent: 'unknown',
         botReply:
           responseMessage?.content ||
-          'Dạ, em chỉ là AI quản lý kho nên chưa hiểu ý này.',
+          'Em chưa hiểu ý anh/chị, mình có thể nói rõ hơn được không ạ?',
       };
     } catch (error) {
       console.error('[Chatbot Error]', error);
@@ -278,9 +148,6 @@ QUY TẮC GỌI TOOL:
     }
   }
 
-  // ==========================================
-  // PHA 2: XỬ LÝ XÁC NHẬN GIAO DỊCH
-  // ==========================================
   public async confirmDraftAction(
     draftActionId: string,
     isConfirmed: boolean,
@@ -288,14 +155,17 @@ QUY TẮC GỌI TOOL:
     if (!isConfirmed) {
       this.drafts.delete(draftActionId);
 
-      return 'Đã hủy thao tác.';
+      return await this.generateFriendlyReply(
+        'Hủy bỏ thao tác',
+        'Yêu cầu của bạn đã được hủy thành công.',
+      );
     }
 
     const draft = this.drafts.get(draftActionId);
 
     if (!draft) {
       throw new CustomError({
-        message: 'Yêu cầu đã hết hạn hoặc không tồn tại.',
+        message: 'Phiên làm việc đã hết hạn.',
         status: StatusCodes.GONE,
       });
     }
@@ -316,11 +186,15 @@ QUY TẮC GỌI TOOL:
 
     this.drafts.delete(draftActionId);
 
-    return 'Giao dịch thành công!';
+    return await this.generateFriendlyReply(
+      'Xác nhận thành công',
+      'Tuyệt vời! Giao dịch đã được ghi nhận vào hệ thống.',
+    );
   }
 
   private async handleGetLowStock(
     storeId: string,
+    userMessage: string,
   ): Promise<ChatbotResponseDto> {
     const query = {
       limit: 100,
@@ -328,7 +202,6 @@ QUY TẮC GỌI TOOL:
       sortBy: 'quantity',
       sortOrder: 'asc',
     } as unknown as ListInventoriesQueryDto;
-
     const res = await this.inventoryService.getInventoriesByStoreId(
       storeId,
       query,
@@ -340,30 +213,32 @@ QUY TẮC GỌI TOOL:
     );
 
     const totalCount = allLowStockItems.length;
-
     const displayItems = allLowStockItems.slice(0, 5);
+
+    const systemContext =
+      totalCount > 0
+        ? `Có tổng cộng ${totalCount} sản phẩm chạm mức cảnh báo. Danh sách 5 sản phẩm cạn kiệt nhất: ${displayItems.map((i) => i.productPackage.displayName).join(', ')}`
+        : 'Tuyệt vời, hiện tại không có sản phẩm nào chạm mức cảnh báo!';
 
     return {
       aiIntent: 'get_low_stock',
-      botReply:
-        totalCount > 0
-          ? `Hệ thống ghi nhận có tổng cộng ${totalCount} sản phẩm chạm mức cảnh báo.\n\nDưới đây là danh sách 5 sản phẩm cạn kiệt cần ưu tiên nhập sớm nhất:`
-          : 'Tuyệt vời, hiện tại không có sản phẩm nào chạm mức cảnh báo!',
-      data: {
-        totalCount: totalCount,
-        items: displayItems,
-      },
+      botReply: await this.generateFriendlyReply(userMessage, systemContext),
+      data: { totalCount, items: displayItems },
     };
   }
 
   private async handleGetProductInfo(
     storeId: string,
-    productName?: string,
+    productName: string | undefined,
+    userMessage: string,
   ): Promise<ChatbotResponseDto> {
     if (!productName) {
       return {
         aiIntent: 'get_product_info',
-        botReply: 'Vui lòng cho biết tên sản phẩm bạn muốn tìm.',
+        botReply: await this.generateFriendlyReply(
+          userMessage,
+          'Yêu cầu người dùng cung cấp tên sản phẩm cần tìm.',
+        ),
       };
     }
 
@@ -372,31 +247,42 @@ QUY TẮC GỌI TOOL:
     if (searchResult.length === 0) {
       return {
         aiIntent: 'get_product_info',
-        botReply: `Dạ em không tìm thấy "${productName}" trong kho.`,
+        botReply: await this.generateFriendlyReply(
+          userMessage,
+          `Không tìm thấy "${productName}" trong kho.`,
+        ),
       };
     }
 
     const exactMatch = this.findExactMatch(searchResult, productName);
-    const firstResult = searchResult[0]; // Fix TS Strict
+    const firstResult = searchResult[0];
 
     if (exactMatch) {
+      const context = `Sản phẩm ${exactMatch.productPackage.displayName} có giá bán ${exactMatch.productPackage.sellingPrice} VNĐ. Tồn kho: ${exactMatch.quantity} ${exactMatch.productPackage.unit.name}.`;
+
       return {
         aiIntent: 'get_product_info',
-        botReply: `Sản phẩm ${exactMatch.productPackage.displayName} đang có giá bán ${exactMatch.productPackage.sellingPrice} VNĐ. Tồn kho hiện tại: ${exactMatch.quantity} ${exactMatch.productPackage.unit.name}.`,
+        botReply: await this.generateFriendlyReply(userMessage, context),
         data: exactMatch,
       };
     }
+
     if (searchResult.length === 1 && firstResult) {
+      const context = `Sản phẩm ${firstResult.productPackage.displayName} có giá bán ${firstResult.productPackage.sellingPrice} VNĐ. Tồn kho: ${firstResult.quantity} ${firstResult.productPackage.unit.name}.`;
+
       return {
         aiIntent: 'get_product_info',
-        botReply: `Sản phẩm ${firstResult.productPackage.displayName} đang có giá bán ${firstResult.productPackage.sellingPrice} VNĐ. Tồn kho hiện tại: ${firstResult.quantity} ${firstResult.productPackage.unit.name}.`,
+        botReply: await this.generateFriendlyReply(userMessage, context),
         data: firstResult,
       };
     }
 
     return {
       aiIntent: 'choose_product',
-      botReply: `Hệ thống tìm thấy nhiều kết quả cho "${productName}". Vui lòng chọn sản phẩm:`,
+      botReply: await this.generateFriendlyReply(
+        userMessage,
+        `Hệ thống tìm thấy nhiều kết quả cho "${productName}". Yêu cầu người dùng chọn chính xác trong danh sách.`,
+      ),
       data: { originalIntent: 'get_product_info', items: searchResult },
     };
   }
@@ -406,6 +292,7 @@ QUY TẮC GỌI TOOL:
     userId: string,
     intent: DraftActionType,
     params: LLMToolParams,
+    userMessage: string,
   ): Promise<ChatbotResponseDto> {
     let itemsToProcess = params.products || [];
 
@@ -418,8 +305,10 @@ QUY TẮC GỌI TOOL:
     if (itemsToProcess.length === 0) {
       return {
         aiIntent: intent,
-        botReply:
-          'Dạ, bạn muốn thao tác với sản phẩm nào và số lượng bao nhiêu ạ?',
+        botReply: await this.generateFriendlyReply(
+          userMessage,
+          'Yêu cầu người dùng cho biết tên sản phẩm và số lượng muốn thao tác.',
+        ),
       };
     }
 
@@ -434,6 +323,7 @@ QUY TẮC GỌI TOOL:
       if (!item.product_name || !item.quantity) {
         continue;
       }
+
       const searchResult = await this.searchInventory(
         storeId,
         item.product_name,
@@ -442,7 +332,10 @@ QUY TẮC GỌI TOOL:
       if (searchResult.length === 0) {
         return {
           aiIntent: intent,
-          botReply: `❌ Dạ em không tìm thấy "${item.product_name}" trong kho. Vui lòng kiểm tra lại tên, thao tác đã bị hủy.`,
+          botReply: await this.generateFriendlyReply(
+            userMessage,
+            `Lỗi: Không tìm thấy "${item.product_name}" trong kho. Thao tác đã bị hủy.`,
+          ),
         };
       }
 
@@ -455,10 +348,12 @@ QUY TẮC GỌI TOOL:
       } else if (searchResult.length === 1 && firstResult) {
         targetItem = firstResult;
       } else {
-        // Tái chế UI chọn sản phẩm nếu có 1 món bị trùng tên
         return {
           aiIntent: 'choose_product',
-          botReply: `⚠️ Hệ thống tìm thấy nhiều mặt hàng giống "${item.product_name}". Vui lòng chọn chính xác để tiếp tục:`,
+          botReply: await this.generateFriendlyReply(
+            userMessage,
+            `Cảnh báo: Tìm thấy nhiều mặt hàng giống "${item.product_name}". Yêu cầu người dùng chọn chính xác để tiếp tục.`,
+          ),
           data: {
             originalIntent: intent,
             quantity: item.quantity,
@@ -475,18 +370,23 @@ QUY TẮC GỌI TOOL:
       if (price <= 0) {
         return {
           aiIntent: intent,
-          botReply: `⚠️ Sản phẩm "${pkg.displayName}" chưa được cài đặt Giá ${isExport ? 'bán' : 'nhập'}! Thao tác đã bị hủy.`,
+          botReply: await this.generateFriendlyReply(
+            userMessage,
+            `Lỗi: Sản phẩm "${pkg.displayName}" chưa được cài đặt giá ${isExport ? 'bán' : 'nhập'}. Thao tác bị hủy.`,
+          ),
         };
       }
 
       if (isExport && targetItem.quantity < item.quantity) {
         return {
           aiIntent: intent,
-          botReply: `⚠️ "${pkg.displayName}" chỉ còn ${targetItem.quantity} ${pkg.unit.name}. Không đủ xuất ${item.quantity}! Thao tác đã bị hủy.`,
+          botReply: await this.generateFriendlyReply(
+            userMessage,
+            `Lỗi: "${pkg.displayName}" chỉ còn ${targetItem.quantity} ${pkg.unit.name}, không đủ để xuất ${item.quantity}. Thao tác bị hủy.`,
+          ),
         };
       }
 
-      // Nếu pass hết các validate -> Đưa vào mảng
       transactionItems.push({
         productPackageId: pkg.productPackageId,
         quantity: Number(item.quantity),
@@ -497,11 +397,10 @@ QUY TẮC GỌI TOOL:
 
       grandTotal += itemTotal;
       successMessages.push(
-        `- **${item.quantity}** ${pkg.displayName} (${itemTotal.toLocaleString('vi-VN')}đ)`,
+        `${item.quantity} ${pkg.displayName} (${itemTotal.toLocaleString('vi-VN')}đ)`,
       );
     }
 
-    // Nếu qua được vòng lặp an toàn -> Tạo Draft Payload
     const payload: TransactionPayload = {
       note: `${isExport ? 'Xuất' : 'Nhập'} kho nhiều sản phẩm qua AI Assistant`,
       items: transactionItems,
@@ -519,21 +418,17 @@ QUY TẮC GỌI TOOL:
     });
     setTimeout(() => this.drafts.delete(draftId), 5 * 60 * 1000);
 
-    // Build câu trả lời hiện lên thẻ Confirm bên Frontend
-    const replyMessage =
-      `Bạn có muốn tạo phiếu **${actionText}** cho các sản phẩm sau không?\n\n` +
-      `${successMessages.join('\n')}\n\n` +
-      `**Tổng cộng: ${grandTotal.toLocaleString('vi-VN')} VNĐ**`;
+    const systemContext = `Hệ thống chuẩn bị tạo phiếu ${actionText} cho các sản phẩm: ${successMessages.join('; ')}. Tổng tiền: ${grandTotal.toLocaleString('vi-VN')} VNĐ. Yêu cầu người dùng xác nhận trên giao diện.`;
 
     return {
       aiIntent: isExport ? 'confirm_export' : 'confirm_import',
-      botReply: replyMessage,
+      botReply: await this.generateFriendlyReply(userMessage, systemContext),
       data: { draftActionId: draftId },
     };
   }
 
   // ==========================================
-  // UTILS
+  // UTILS (Giữ nguyên như cũ)
   // ==========================================
 
   private async searchInventory(
@@ -551,7 +446,6 @@ QUY TẮC GỌI TOOL:
     );
 
     if (res.items.length === 0) {
-      // Fix TS Strict: Check mảng sinh ra từ split
       const splitArr = keyword.split('(');
       const fallbackName = keyword.includes('(')
         ? (splitArr[0] ?? '').trim()
