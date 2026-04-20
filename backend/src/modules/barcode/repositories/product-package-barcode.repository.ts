@@ -5,23 +5,18 @@ import type {
   Prisma,
 } from '../../../generated/prisma/client.js';
 import type { ProductPackageResponseDto } from '../../product-packages/index.js';
+import type {
+  CreateBarcodeMappingInput,
+  ProductPackageInput,
+} from '../barcodes.type.js';
 
 type ProductPackageBarcodeMappingRecord = {
   barcode: string;
   type: BarcodeType | null;
   source: PackageBarcodeSource;
   isVerified: boolean;
+  confidence: number | null;
   productPackage: ProductPackageResponseDto;
-};
-
-type ProductPackageInput = {
-  productPackageId: string;
-  displayName: string | null;
-  variant: string | null;
-  importPrice: Prisma.Decimal | null;
-  sellingPrice: Prisma.Decimal | null;
-  unitId: string;
-  productId: string;
 };
 
 export class PackageBarcodeRepository {
@@ -46,6 +41,7 @@ export class PackageBarcodeRepository {
     type: BarcodeType | null;
     source: PackageBarcodeSource;
     isVerified: boolean;
+    confidence: Prisma.Decimal | null;
     productPackage: ProductPackageInput;
   }): ProductPackageBarcodeMappingRecord {
     return {
@@ -53,6 +49,7 @@ export class PackageBarcodeRepository {
       type: mapping.type,
       source: mapping.source,
       isVerified: mapping.isVerified,
+      confidence: mapping.confidence?.toNumber() ?? null,
       productPackage: this.mapProductPackage(mapping.productPackage),
     };
   }
@@ -77,6 +74,7 @@ export class PackageBarcodeRepository {
         type: true,
         source: true,
         isVerified: true,
+        confidence: true,
         productPackage: {
           select: {
             productPackageId: true,
@@ -106,6 +104,7 @@ export class PackageBarcodeRepository {
         type: true,
         source: true,
         isVerified: true,
+        confidence: true,
         productPackage: {
           select: {
             productPackageId: true,
@@ -123,20 +122,33 @@ export class PackageBarcodeRepository {
     return mapping ? this.mapMappingRecord(mapping) : null;
   }
 
-  // WARN: Không có logic tạo confidence
-  async createMapping(data: {
-    barcode: string;
-    productPackageId: string;
-    source: PackageBarcodeSource;
-    isVerified: boolean;
-    type?: BarcodeType;
-  }): Promise<ProductPackageBarcodeMappingRecord> {
+  async findByProductPackageId(
+    productPackageId: string,
+  ): Promise<{ barcode: string; type: string | null } | null> {
+    return await this.db.productPackageBarcode.findFirst({
+      where: {
+        productPackageId,
+        productPackage: { activeStatus: 'active' },
+      },
+      select: {
+        barcode: true,
+        type: true,
+      },
+    });
+  }
+
+  async createMapping(
+    data: CreateBarcodeMappingInput,
+  ): Promise<ProductPackageBarcodeMappingRecord> {
     const mapping = await this.db.productPackageBarcode.create({
       data: {
         barcode: data.barcode,
         productPackageId: data.productPackageId,
         source: data.source,
         isVerified: data.isVerified,
+        ...(data.confidence !== undefined && {
+          confidence: data.confidence,
+        }),
         ...(data.type !== undefined && {
           type: data.type,
         }),
@@ -146,6 +158,7 @@ export class PackageBarcodeRepository {
         type: true,
         source: true,
         isVerified: true,
+        confidence: true,
         productPackage: {
           select: {
             productPackageId: true,
@@ -171,5 +184,19 @@ export class PackageBarcodeRepository {
     });
 
     return total > 0;
+  }
+
+  async deleteByBarcodeAndProductPackageId(
+    barcode: string,
+    productPackageId: string,
+  ): Promise<number> {
+    const result = await this.db.productPackageBarcode.deleteMany({
+      where: {
+        barcode,
+        productPackageId,
+      },
+    });
+
+    return result.count;
   }
 }

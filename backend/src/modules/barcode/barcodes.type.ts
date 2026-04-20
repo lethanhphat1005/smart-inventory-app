@@ -2,8 +2,15 @@ import type {
   BarcodeType,
   BarcodeStatus,
   Prisma,
+  PackageBarcodeSource,
+  ProductPackage,
 } from '../../generated/prisma/client.js';
 import type { ProductPackageResponseDto } from '../product-packages/index.js';
+
+export type ProductPackageInput = Omit<
+  ProductPackage,
+  'activeStatus' | 'createdAt' | 'updatedAt'
+>;
 
 export type ScanBarcodeResolutionType =
   | 'exact_match'
@@ -92,11 +99,26 @@ export type ScanBarcodeInput = {
   type?: BarcodeType;
 };
 
+export type CreateBarcodeMappingInput = {
+  barcode: string;
+  productPackageId: string;
+  source: PackageBarcodeSource;
+  isVerified: boolean;
+  confidence?: Prisma.Decimal | number;
+  type?: BarcodeType;
+};
+
 export type ConfirmBarcodeMappingInput = ScanBarcodeInput & {
   productPackageId: string;
 };
 
 export type CreateBarcodeMappingForNewPackageInput = ConfirmBarcodeMappingInput;
+
+export type RemoveProductPackageBarcodeMappingInput = {
+  storeId: string;
+  productPackageId: string;
+  barcode: string;
+};
 
 export type TokenMatchResult = {
   matchedTokenCount: number;

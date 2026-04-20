@@ -1,95 +1,117 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/utils/error_handler_utils.dart';
+import 'package:frontend/features/navigation/providers/chatbot_provider.dart';
 import 'package:get/get.dart';
-import 'package:dio/dio.dart' as dio;
-import 'package:frontend/core/infrastructure/constants/text_strings.dart';
-import 'package:frontend/core/ui/widgets/t_snackbars_widget.dart';
 import 'package:frontend/features/navigation/models/chat_message_model.dart';
+import 'package:frontend/core/infrastructure/network/app_client.dart'; // Import AppClient
 
 class ChatbotUiController extends GetxController with TErrorHandler {
   static ChatbotUiController get instance => Get.find();
 
-  final RxBool isChatOpen = false.obs;
+  final ChatbotProvider _chatbotProvider = ChatbotProvider();
+  final ApiClient _apiClient = ApiClient(); // Thêm ApiClient để gọi transaction
 
-  // Trạng thái Chat
+  final RxBool isChatOpen = false.obs;
   final RxList<ChatMessage> messages = <ChatMessage>[].obs;
   final RxBool isTyping = false.obs;
 
   final TextEditingController textController = TextEditingController();
   final ScrollController scrollController = ScrollController();
 
-  @override
-  void onInit() {
-    super.onInit();
-    // Dùng TTexts cho tin nhắn mặc định
-    messages.add(ChatMessage(text: TTexts.chatbotWelcomeMsg.tr, isUser: false));
-  }
+  final FocusNode focusNode = FocusNode();
 
   void toggleChat() {
     isChatOpen.value = !isChatOpen.value;
   }
 
   void closeChat() {
-    if (isChatOpen.value) {
-      isChatOpen.value = false;
-    }
+    if (isChatOpen.value) isChatOpen.value = false;
   }
 
   Future<void> sendMessage() async {
     final text = textController.text.trim();
+    if (text.isEmpty) return;
 
-    // 🟢 Bẫy lỗi Validation (Rỗng) bằng TSnackbarsWidget thông thường
-    if (text.isEmpty) {
-      TSnackbarsWidget.warning(
-        title: TTexts.warningTitle.tr,
-        message: TTexts.chatbotEmptyInputWarning.tr,
-      );
-      return;
-    }
-
-    // 1. Thêm tin nhắn của User vào UI
     messages.add(ChatMessage(text: text, isUser: true));
     textController.clear();
     _scrollToBottom();
 
-    // 2. Hiển thị trạng thái AI đang gõ
     isTyping.value = true;
+    _scrollToBottom();
 
     try {
-      // TODO: GỌI API AI THẬT
-      await Future.delayed(const Duration(milliseconds: 1500));
+      final result = await _chatbotProvider.sendMessageToBot(text);
 
-      // GIẢ LẬP LỖI ĐỂ KIỂM TRA ERROR HANDLER MIXIN
-      if (text.toLowerCase() == "mạng") {
-        throw dio.DioException(
-          requestOptions: dio.RequestOptions(path: ''),
-          type: dio.DioExceptionType.connectionError,
-        );
-      }
+      final String botReply =
+          result['botReply'] ?? "Xin lỗi, tôi không hiểu yêu cầu này.";
+      final String aiIntent = result['aiIntent'] ?? "unknown";
+      final dynamic rawData = result['data'];
 
-      if (text.toLowerCase() == "server") {
-        throw dio.DioException(
-          requestOptions: dio.RequestOptions(path: ''),
-          type: dio.DioExceptionType.badResponse,
-          response: dio.Response(
-              statusCode: 500, requestOptions: dio.RequestOptions(path: '')),
-        );
-      }
-
-      // 3. Nhận kết quả và thêm tin nhắn của AI vào UI (Sử dụng TTexts hoàn toàn)
+      // Thêm tin nhắn AI kèm theo intent và data để UI tự quyết định cách vẽ
       messages.add(ChatMessage(
-          text: "${TTexts.chatbotMockResponse.tr} '$text'", isUser: false));
+        text: botReply,
+        isUser: false,
+        intent: aiIntent,
+        data: rawData,
+      ));
     } catch (e) {
-      // 🟢 CHUYỀN LỖI CHO MIXIN XỬ LÝ: Nó sẽ tự bóc tách mã lỗi và hiện Snackbar
       handleError(e);
+      messages
+          .add(ChatMessage(text: "Oops! Mất kết nối đến AI 😢", isUser: false));
     } finally {
-      // 5. Tắt trạng thái đang gõ
       isTyping.value = false;
       _scrollToBottom();
     }
   }
 
-  // Hàm tự động cuộn xuống cuối cùng khi có tin nhắn mới
+  void resetChat() {
+    messages.clear();
+    // Thêm lại câu chào mừng mặc định
+    //  messages.add(ChatMessage(text: TTexts.chatbotWelcomeMsg.tr, isUser: false));
+
+    // (Tuỳ chọn) Nếu muốn đổi store thì tự động đóng cửa sổ chat lại
+    if (isChatOpen.value) {
+      isChatOpen.value = false;
+    }
+  }
+
+  // Mới (Khớp với Backend 2 pha):
+  Future<void> confirmTransaction(ChatMessage message) async {
+    if (message.isResolved) return;
+
+    try {
+      isTyping.value = true;
+      _scrollToBottom();
+
+      // Lấy draftActionId do Backend trả về ở Pha 1
+      final draftActionId = message.data['draftActionId'];
+
+      // Bắn lên endpoint confirm mới
+      await _apiClient.post(
+        '/api/chat-bot/confirm', // Khớp với router: chatbotRouter.post('/confirm', ...)
+        data: {
+          'draftActionId': draftActionId,
+          'isConfirmed': true // Khớp với biến req.body trong Controller
+        },
+      );
+
+      message.isResolved = true;
+      messages.refresh();
+
+      messages.add(ChatMessage(
+          text: "✅ Giao dịch thành công! Dữ liệu kho đã được cập nhật.",
+          isUser: false));
+    } catch (e) {
+      handleError(e);
+      messages.add(ChatMessage(
+          text: "Giao dịch thất bại. Yêu cầu có thể đã hết hạn.",
+          isUser: false));
+    } finally {
+      isTyping.value = false;
+      _scrollToBottom();
+    }
+  }
+
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (scrollController.hasClients) {
@@ -106,6 +128,7 @@ class ChatbotUiController extends GetxController with TErrorHandler {
   void onClose() {
     textController.dispose();
     scrollController.dispose();
+    focusNode.dispose();
     super.onClose();
   }
 }

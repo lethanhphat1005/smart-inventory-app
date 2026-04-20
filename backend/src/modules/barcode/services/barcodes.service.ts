@@ -3,7 +3,11 @@ import { StatusCodes } from 'http-status-codes';
 import { CustomError } from '../../../common/errors/index.js';
 import { logger } from '../../../common/utils/index.js';
 import { ProductPackageRepository } from '../../product-packages/repositories/product-package.repository.js';
-import { BARCODE_CACHE_TTL, SCORE_WEIGHT } from '../barcode.constant.js';
+import {
+  BARCODE_CACHE_TTL,
+  SCORE_WEIGHT,
+  PACKAGE_BARCODE_CONFIDENCE,
+} from '../barcode.constant.js';
 import { BarcodeApiCacheRepository } from '../repositories/barcode-api-cache.repository.js';
 import { PackageBarcodeRepository } from '../repositories/product-package-barcode.repository.js';
 import {
@@ -22,7 +26,6 @@ import type { ConfirmBarcodeMappingResponseDto } from '../barcodes.dto.js';
 import type {
   BarcodeCandidatePackage,
   ConfirmBarcodeMappingInput,
-  CreateBarcodeMappingForNewPackageInput,
   NormalizedBarcodeData,
   ScanBarcodeInput,
   ScanBarcodeServiceResult,
@@ -639,9 +642,6 @@ export class BarcodesService {
     return productPackage;
   }
 
-  // Tạo verified mapping barcode - package cho 2 trường hợp:
-  // 1. User xác nhận barcode thuộc về một package đã có
-  // 2. User vừa tạo package mới từ barcode flow và gắn barcode vào package đó
   private async createVerifiedMapping(input: {
     storeId: string;
     barcode: string;
@@ -674,16 +674,25 @@ export class BarcodesService {
         barcode: existingMapping.barcode,
         type: existingMapping.type,
         source: existingMapping.source,
+        confidence: existingMapping.confidence,
         isVerified: existingMapping.isVerified,
         productPackage,
       };
     }
+
+    // độ uy tín của barcode được mapping
+    // user_confirmed và barcode_flow_create đều khá uy tín -> 100
+    const confidence =
+      input.source === 'user_confirmed'
+        ? PACKAGE_BARCODE_CONFIDENCE.USER_CONFIRMED
+        : PACKAGE_BARCODE_CONFIDENCE.BARCODE_FLOW_CREATE;
 
     // tạo mapping barcode - package mới
     const createdMapping = await this.packageBarcodeRepository.createMapping({
       barcode: input.barcode,
       productPackageId: input.productPackageId,
       source: input.source,
+      confidence,
       isVerified: true,
       ...(input.type !== undefined && {
         type: input.type,
@@ -694,6 +703,7 @@ export class BarcodesService {
       barcode: createdMapping.barcode,
       type: createdMapping.type,
       source: createdMapping.source,
+      confidence: createdMapping.confidence,
       isVerified: createdMapping.isVerified,
       productPackage,
     };
@@ -708,23 +718,6 @@ export class BarcodesService {
       barcode: input.barcode.trim(),
       productPackageId: input.productPackageId,
       source: 'user_confirmed',
-      ...(input.type !== undefined && {
-        type: input.type,
-      }),
-    });
-  }
-
-  // tạo barcode khi user tạo package mới bằng barcode
-  // và tiện thể gán luôn barcode vào
-  // NOTE: Dùng trong /product-packages cho hàm tạo package mới bằng barcode
-  async createBarcodeMappingForNewPackage(
-    input: CreateBarcodeMappingForNewPackageInput,
-  ): Promise<ConfirmBarcodeMappingResponseDto> {
-    return await this.createVerifiedMapping({
-      storeId: input.storeId,
-      barcode: input.barcode.trim(),
-      productPackageId: input.productPackageId,
-      source: 'barcode_flow_create',
       ...(input.type !== undefined && {
         type: input.type,
       }),

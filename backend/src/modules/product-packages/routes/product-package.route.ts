@@ -52,12 +52,19 @@ productPackageRouter.get(
  * Path params:
  *  - productId: string (UUID, required)
  *
+ * Frontend flow khi user nhập/scan barcode:
+ *  1. Gọi API này để tạo productPackage trước
+ *  2. Sau khi tạo thành công (có productPackageId),
+ *     gọi tiếp API:
+ *     POST /api/product-packages/:productPackageId/barcodes
+ *     (xem api comment tại product-package-barcode.route.ts)
+ *
  * Body:
  *  - package: object (required)
  *    - unitId: string (UUID, required) - đơn vị tính của package
  *    - importPrice?: number | null - giá nhập
  *    - sellingPrice?: number | null - giá bán
- *    - displayNameSuffix?: string | null - phần custom của displayName
+ *    - variant?: string | null - biến thể của package
  *  - inventory: object (required)
  *    - quantity: number (integer, default: 0) - số lượng tồn kho ban đầu
  *    - reorderThreshold?: number | null - ngưỡng cảnh báo
@@ -91,7 +98,8 @@ productPackageProductRouter
  * Body:
  *  - importPrice?: number | null - giá nhập
  *  - sellingPrice?: number | null - giá bán
- *  - displayNameSuffix?: string | null - phần custom của displayName
+ *  - variant?: string | null - biến thể của package
+ *  - unitId?: string - đơn vị tính của package
  *
  * API endpoint: DELETE /api/product-packages/:productPackageId
  * Xóa mềm package theo id

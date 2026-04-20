@@ -1,14 +1,14 @@
 import { Router } from 'express';
 
-import { barcodesController } from './barcodes.module.js';
+import { asyncWrapper } from '../../../common/middlewares/index.js';
+import { PERMISSION, requirePermission } from '../../access-control/index.js';
+import { authenticate } from '../../auth/index.js';
+import { requireStoreContext } from '../../stores/index.js';
+import { barcodesController } from '../barcodes.module.js';
 import {
   validateConfirmBarcodeMapping,
   validateScanBarcode,
-} from './barcodes.validator.js';
-import { asyncWrapper } from '../../common/middlewares/index.js';
-import { PERMISSION, requirePermission } from '../access-control/index.js';
-import { authenticate } from '../auth/index.js';
-import { requireStoreContext } from '../stores/index.js';
+} from '../barcodes.validator.js';
 
 const barcodeRouter = Router();
 

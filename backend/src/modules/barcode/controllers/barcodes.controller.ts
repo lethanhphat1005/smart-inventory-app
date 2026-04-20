@@ -1,19 +1,19 @@
 import { StatusCodes } from 'http-status-codes';
 
-import { BarcodesService } from './services/barcodes.service.js';
 import {
   requireReqStoreContext,
   sendResponse,
-} from '../../common/utils/index.js';
+} from '../../../common/utils/index.js';
+import { BarcodesService } from '../services/barcodes.service.js';
 
+import type { ApiResponse } from '../../../common/types/index.js';
 import type {
   ConfirmBarcodeMappingRequestDto,
   ConfirmBarcodeMappingResponseDto,
   ScanBarcodeRequestDto,
   ScanBarcodeResponseDto,
-} from './barcodes.dto.js';
-import type { ScanBarcodeServiceResult } from './barcodes.type.js';
-import type { ApiResponse } from '../../common/types/index.js';
+} from '../barcodes.dto.js';
+import type { ScanBarcodeServiceResult } from '../barcodes.type.js';
 import type { Request, Response } from 'express';
 
 export class BarcodesController {

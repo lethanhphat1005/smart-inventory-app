@@ -1,2 +1,2 @@
-export { barcodeRouter } from './barcodes.route.js';
-export { barcodesService } from './barcodes.module.js';
+export { barcodeRouter } from './routes/barcode.route.js';
+export {productPackageBarcodeRouter} from './routes/product-package-barcode.route.js';

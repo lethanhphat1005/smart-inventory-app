@@ -1,4 +1,3 @@
-// ignore_for_file: prefer_const_constructors
 import 'package:flutter/material.dart';
 import 'package:frontend/core/ui/layouts/t_data_error_layout.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
@@ -103,7 +102,7 @@ class _DetailContent extends StatelessWidget {
       physics: const AlwaysScrollableScrollPhysics(),
       slivers: [
         // 1. Header Slivers (Ảnh, Nút Back, Menu)
-        InventoryDetailHeaderWidget(),
+        const InventoryDetailHeaderWidget(),
 
         // 2. Nội dung Slivers
         // TỐI ƯU: Đập bỏ Column/SingleChildScrollView khổng lồ bằng SliverList
@@ -115,11 +114,11 @@ class _DetailContent extends StatelessWidget {
           ),
           sliver: SliverList.list(
             children: [
-              InventoryDetailProductInfoWidget(),
+              const InventoryDetailProductInfoWidget(),
               const SizedBox(height: AppSizes.p16),
-              InventoryDetailBarcodeWidget(),
+              const InventoryDetailBarcodeWidget(),
               const _Divider(),
-              InventoryDetailPricingWidget(),
+              const InventoryDetailPricingWidget(),
               const _Divider(),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: AppSizes.p20),
@@ -133,8 +132,8 @@ class _DetailContent extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: AppSizes.p12),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: AppSizes.p20),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: AppSizes.p20),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   // ignore: prefer_const_literals_to_create_immutables
@@ -146,16 +145,16 @@ class _DetailContent extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: AppSizes.p24),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: AppSizes.p20),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: AppSizes.p20),
                 child: InventoryDetailStockStatsWidget(),
               ),
               const _Divider(),
               _buildSectionTitle(TTexts.relatedPackages.tr),
-              InventoryDetailRelatedPackagesWidget(),
+              const InventoryDetailRelatedPackagesWidget(),
               const _Divider(),
               _buildSectionTitle(TTexts.inventoryHistory.tr),
-              InventoryDetailHistoryWidget(),
+              const InventoryDetailHistoryWidget(),
               const SizedBox(height: AppSizes.bottomNavSpacer),
             ],
           ),
