@@ -9,8 +9,8 @@ import { InventoryService } from '../service/inventory.service.js';
 
 import type { ApiResponse } from '../../../common/types/index.js';
 import type {
+  BatchInventoryAdjustmentDto,
   CreateInventoryDto,
-  InventoryAdjustmentDto,
   InventoryAdjustmentResponseDto,
   InventoryDetailResponseDto,
   ListInventoriesQueryDto,
@@ -92,25 +92,20 @@ export class InventoryController {
     sendResponse.success(res, inventory, { status: StatusCodes.OK });
   };
 
-  adjustInventory = async (
+  adjustInventories = async (
     req: Request,
-    res: Response<ApiResponse<InventoryAdjustmentResponseDto>>,
+    res: Response<ApiResponse<InventoryAdjustmentResponseDto[]>>, // Trả về mảng
   ): Promise<void> => {
     const storeId = requireReqStoreContext(req).storeId;
     const userId = requireReqUser(req).userId;
-    const { productPackageId } = req.params;
 
-    /* Xử lý điều chỉnh số lượng kho (nhập/xuất/cân bằng).
-    NOTE: Luồng này bắt buộc truyền userId để
-    lưu lịch sử vào AuditLog nhằm mục đích kiểm toán. */
-    const adjustedInventory = await this.inventoryService.adjustInventory(
+    const adjustedInventories = await this.inventoryService.adjustInventories(
       storeId,
-      productPackageId as string,
       userId,
-      req.body as InventoryAdjustmentDto,
+      req.body as BatchInventoryAdjustmentDto,
     );
 
-    sendResponse.success(res, adjustedInventory, {
+    sendResponse.success(res, adjustedInventories, {
       status: StatusCodes.OK,
     });
   };

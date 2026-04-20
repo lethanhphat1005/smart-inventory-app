@@ -4,12 +4,10 @@ import 'package:get/get.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:frontend/features/inventory/controllers/inventory_controller.dart';
-// THÊM IMPORT ĐA NGÔN NGỮ
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 
 class InventoryFlowChartWidget extends GetView<InventoryController> {
   InventoryFlowChartWidget({super.key}) {
-    // Kích hoạt hiệu ứng mọc lên sau 150ms
     Future.delayed(const Duration(milliseconds: 150), () {
       _isAnimated.value = true;
     });
@@ -37,20 +35,7 @@ class InventoryFlowChartWidget extends GetView<InventoryController> {
                       fontFamily: 'Poppins',
                       fontWeight: FontWeight.bold,
                       fontSize: 16)),
-              InkWell(
-                onTap: () {},
-                child: Row(
-                  children: [
-                    Text(TTexts.details.tr,
-                        style: const TextStyle(
-                            color: AppColors.primary,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600)),
-                    const Icon(Icons.chevron_right_rounded,
-                        color: AppColors.primary, size: 18),
-                  ],
-                ),
-              )
+              // Nút Detail được tạm ẩn theo yêu cầu
             ],
           ),
           const SizedBox(height: 4),
@@ -111,11 +96,40 @@ class InventoryFlowChartWidget extends GetView<InventoryController> {
       final currentOutbound =
           _isAnimated.value ? controller.outboundFlow : _zeros;
 
+      final maxIn = currentInbound.isEmpty
+          ? 0.0
+          : currentInbound.reduce((a, b) => a > b ? a : b);
+      final maxOut = currentOutbound.isEmpty
+          ? 0.0
+          : currentOutbound.reduce((a, b) => a > b ? a : b);
+      final chartMaxY = (maxIn > maxOut ? maxIn : maxOut) * 1.2;
+
       return BarChart(
         BarChartData(
           alignment: BarChartAlignment.spaceBetween,
-          maxY: 60,
-          barTouchData: const BarTouchData(enabled: false),
+          maxY: chartMaxY < 10 ? 10 : chartMaxY,
+          barTouchData: BarTouchData(
+            enabled: true,
+            touchTooltipData: BarTouchTooltipData(
+              tooltipPadding: const EdgeInsets.all(8),
+              getTooltipColor: (group) =>
+                  AppColors.primaryText.withOpacity(0.85),
+              getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                final inVal = currentInbound[groupIndex].toInt();
+                final outVal = currentOutbound[groupIndex].toInt();
+                
+                return BarTooltipItem(
+                  '${TTexts.chartTooltipIn.tr}: $inVal\n${TTexts.chartTooltipOut.tr}: $outVal',
+                  const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 12,
+                    fontFamily: 'Poppins',
+                  ),
+                );
+              },
+            ),
+          ),
           titlesData: FlTitlesData(
             show: true,
             bottomTitles: AxisTitles(
@@ -123,7 +137,8 @@ class InventoryFlowChartWidget extends GetView<InventoryController> {
                 showTitles: true,
                 reservedSize: 24,
                 getTitlesWidget: (value, meta) {
-                  const days = [
+                  final now = DateTime.now();
+                  final days = [
                     'Mon',
                     'Tue',
                     'Wed',
@@ -132,9 +147,18 @@ class InventoryFlowChartWidget extends GetView<InventoryController> {
                     'Sat',
                     'Sun'
                   ];
+                  final labels = <String>[];
+                  for (int i = 6; i >= 0; i--) {
+                    final date = now.subtract(Duration(days: i));
+                    labels.add(days[date.weekday - 1]);
+                  }
+
+                  int index = value.toInt();
+                  if (index < 0 || index > 6) return const SizedBox();
+
                   return Padding(
                     padding: const EdgeInsets.only(top: 8.0),
-                    child: Text(days[value.toInt()],
+                    child: Text(labels[index],
                         style: const TextStyle(
                             fontSize: 10,
                             color: AppColors.softGrey,
@@ -147,7 +171,7 @@ class InventoryFlowChartWidget extends GetView<InventoryController> {
               sideTitles: SideTitles(
                 showTitles: true,
                 reservedSize: 32,
-                interval: 20,
+                interval: chartMaxY > 50 ? (chartMaxY / 4).roundToDouble() : 10,
                 getTitlesWidget: (value, meta) {
                   if (value == 0) return const SizedBox.shrink();
                   return Text("${value.toInt()}",
@@ -164,7 +188,8 @@ class InventoryFlowChartWidget extends GetView<InventoryController> {
           gridData: FlGridData(
             show: true,
             drawVerticalLine: false,
-            horizontalInterval: 20,
+            horizontalInterval:
+                chartMaxY > 50 ? (chartMaxY / 4).roundToDouble() : 10,
             getDrawingHorizontalLine: (value) => FlLine(
                 color: AppColors.softGrey.withOpacity(0.1), strokeWidth: 1),
           ),

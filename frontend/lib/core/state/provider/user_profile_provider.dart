@@ -18,7 +18,7 @@ class UserProfileProvider {
 
       debugPrint("Tạo profile thành công");
     } catch (e) {
-      debugPrint("Lỗi tạo profile: $e");  
+      debugPrint("Lỗi tạo profile: $e");
     }
   }
 
@@ -29,6 +29,16 @@ class UserProfileProvider {
 
       return UserProfileModel.fromJson(data);
     } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> updateProfile(String userId, Map<String, dynamic> data) async {
+    try {
+      await _apiClient.patch('/api/auth/$userId', data: data);
+      debugPrint("Cập nhật profile thành công");
+    } catch (e) {
+      debugPrint("Lỗi cập nhật profile: $e");
       rethrow;
     }
   }

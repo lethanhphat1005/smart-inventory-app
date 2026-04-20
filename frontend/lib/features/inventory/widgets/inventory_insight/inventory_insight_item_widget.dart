@@ -39,14 +39,21 @@ class InventoryInsightItemWidget extends StatelessWidget {
     }
 
     return GestureDetector(
+      // 🔥 ĐÃ FIX: Truyền thêm PackageId
       onTap: () {
         final productId = displayItem.product?.productId;
+        final packageId = displayItem.inventory.productPackageId;
         final barcode = displayItem.inventory.productPackage?.barcodeValue;
 
-        if (productId != null) {
-          Get.toNamed(AppRoutes.inventoryDetail,
-              arguments: productId,
-              parameters: barcode != null ? {'barcode': barcode} : null);
+        if (productId != null || packageId.isNotEmpty) {
+          Get.toNamed(
+            AppRoutes.inventoryDetail,
+            arguments: productId,
+            parameters: {
+              if (packageId.isNotEmpty) 'packageId': packageId,
+              if (barcode != null && barcode.isNotEmpty) 'barcode': barcode,
+            },
+          );
         }
       },
       child: Container(

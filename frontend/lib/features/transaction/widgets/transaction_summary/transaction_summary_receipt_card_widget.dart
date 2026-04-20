@@ -27,12 +27,17 @@ class TransactionSummaryReceiptCardWidget
       ),
       child: Column(
         children: [
+          // 1. MÃ GIAO DỊCH
           _buildRow(
-            TTexts.transactionNumber.tr,
+            controller.isAdjustment
+                ? TTexts.adjustmentId.tr
+                : TTexts.transactionNumber.tr,
             controller.transaction.transactionId ?? TTexts.na.tr,
             rightWidget: _buildFakeBarcode(),
           ),
           const SizedBox(height: 20),
+
+          // 2. NGÀY GIỜ VÀ LOẠI GIAO DỊCH (GỘP CHUNG)
           _buildRow(
             TTexts.transactionDate.tr,
             controller.dateStr,
@@ -57,8 +62,13 @@ class TransactionSummaryReceiptCardWidget
             ),
           ),
           const SizedBox(height: 20),
+
+          // 3. THỐNG KÊ ITEM VÀ TỔNG TIỀN (GỘP CHUNG)
           _buildRow(
-            TTexts.totalItemsTransaction.tr,
+            // ĐÃ FIX: Hiển thị Modified Products thay cho thẻ chung
+            controller.isAdjustment
+                ? TTexts.modifiedProducts.tr
+                : TTexts.totalItemsTransaction.tr,
             '',
             customLeftWidget: Row(
               children: [
@@ -67,16 +77,20 @@ class TransactionSummaryReceiptCardWidget
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
                         color: controller.itemsColor)),
-                const Text(" / ",
-                    style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w400,
-                        color: AppColors.subText)),
-                Text(controller.moneyDisplay,
-                    style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: controller.moneyColor)),
+
+                // ĐÃ FIX: CHỈ HIỂN THỊ TIỀN NẾU KHÔNG PHẢI LÀ KIỂM KHO
+                if (!controller.isAdjustment) ...[
+                  const Text(" / ",
+                      style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
+                          color: AppColors.subText)),
+                  Text(controller.moneyDisplay,
+                      style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: controller.moneyColor)),
+                ],
               ],
             ),
             rightWidget: _buildCustomLayerIcon(),

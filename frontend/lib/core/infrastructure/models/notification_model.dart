@@ -4,7 +4,8 @@ class NotificationModel {
   final String body;
   final String type;
   final String? referenceId;
-  bool isRead; // Bỏ final vì biến này sẽ bị thay đổi khi user click
+  final String? storeId;
+  bool isRead;
   final DateTime createdAt;
 
   NotificationModel({
@@ -13,6 +14,7 @@ class NotificationModel {
     required this.body,
     required this.type,
     this.referenceId,
+    this.storeId,
     required this.isRead,
     required this.createdAt,
   });
@@ -24,6 +26,7 @@ class NotificationModel {
       body: json['body'] ?? '',
       type: json['type'] ?? 'UNKNOWN',
       referenceId: json['reference_id'] ?? json['referenceId'],
+      storeId: json['store_id'] ?? json['storeId'], // Lấy từ Backend trả về
       isRead: json['is_read'] ?? json['isRead'] ?? false,
       createdAt: json['created_at'] != null || json['createdAt'] != null
           ? DateTime.parse(json['created_at'] ?? json['createdAt']).toLocal()

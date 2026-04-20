@@ -10,6 +10,8 @@ final Map<String, String> enInventory = {
   TTexts.inventoryInsights: 'Inventory Insights',
   TTexts.manageData: 'Manage Data',
   TTexts.productCatalog: 'Product Catalog',
+  TTexts.chartTooltipIn: 'In',
+  TTexts.chartTooltipOut: 'Out',
 
   // -- Inventory Header & Health
   TTexts.stockValue: 'Stock Value',
@@ -99,6 +101,14 @@ final Map<String, String> enInventory = {
   TTexts.loadingProduct: 'Loading product details...',
   TTexts.viewProductInfo: 'View Product Info',
   TTexts.productDataMissing: 'Product data is missing',
+
+  TTexts.noHistoryAvailable: 'No history available for this item.',
+  TTexts.importGoods: 'Import Goods',
+  TTexts.exportGoods: 'Export Goods',
+  TTexts.stockTake: 'Stock Take',
+  TTexts.stockAdjustmentOrCheck: 'Stock Take / Adjustment',
+  TTexts.currentQty: 'Current Qty',
+  TTexts.errorProductOrPackageIdMissing: 'Product ID or Package ID is missing.',
 
   // --- Transaction Bottom Sheet ở trang Detail ---
   TTexts.addToTransaction: 'Add to Transaction',
@@ -279,7 +289,11 @@ final Map<String, String> enInventory = {
   TTexts.stockQuantityLabel: 'Stock',
   TTexts.inventoryThreshold: 'Threshold',
   TTexts.sellingPrice: 'Sale Price',
-  TTexts.zeroMeansNoLimit: '0 means No Limit / No Threshold',
+  TTexts.unitLockedMessage: 'Unit cannot be changed after creation.',
+  TTexts.thresholdMustBeGreaterThanZero: 'Must be > 0',
+  TTexts.leaveEmptyForNoLimit: 'Leave empty for no limit',
+  TTexts.displayNameSuffixLabel: 'Variant Suffix (Optional)',
+  TTexts.displayNameSuffixHint: 'e.g. Red, 500ml...',
   TTexts.displayNameLabel: 'Display Name',
   TTexts.displayNameHint: 'Product + Unit + Variant (optional)',
   TTexts.instructionTitle: 'How to fill data',

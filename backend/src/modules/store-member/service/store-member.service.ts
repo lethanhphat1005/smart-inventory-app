@@ -1,6 +1,7 @@
 import { StatusCodes } from 'http-status-codes';
 
 import { CustomError } from '../../../common/errors/custom-error.js';
+import { appEvents, eventBus } from '../../../common/events/event-bus.js';
 import { ROLE } from '../../access-control/role-permission.constant.js'; // IMPORT CONSTANT MỚI Ở ĐÂY
 
 import type { StoreRole } from '../../../generated/prisma/enums.js';
@@ -116,6 +117,13 @@ export class StoreMemberService {
         status: StatusCodes.BAD_REQUEST,
       });
     }
+
+    eventBus.emit(appEvents.ROLE_UPDATED, {
+      targetUserId,
+      storeId,
+      oldRole: targetMember.role,
+      newRole: newRole,
+    });
 
     // 5. Cập nhật role
     return await this.storeMemberRepository.updateRole(

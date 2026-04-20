@@ -32,12 +32,12 @@ class ProfileMenuWidget extends StatelessWidget {
 
         const SizedBox(height: AppSizes.p16),
 
-        // SECURITY
-        ProfileSectionTitleWidget(title: TTexts.profileSecurity.tr),
+        // MANAGEMENT
+        ProfileSectionTitleWidget(title: TTexts.profileManagement.tr),
 
         ProfileMenuItemWidget(
           icon: Iconsax.security_safe_copy,
-          title: TTexts.profileUserPermissions.tr,
+          title: TTexts.profileUserManagement.tr,
           onTap: () => Get.find<ProfileController>().goToAssignsRoleProfile(),
         ),
       ],

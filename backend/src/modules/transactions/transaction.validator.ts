@@ -15,7 +15,7 @@ export const listTransactionsQuerySchema = z
     sortBy: z.enum(['createdAt', 'totalPrice']).optional().default('createdAt'),
     sortOrder: z.enum(['asc', 'desc']).optional().default('desc'),
     type: z.enum(['import', 'export']).optional(),
-
+    userId: z.uuid().trim().optional(),
     startDate: z
       .string()
       .regex(/^\d{4}-\d{2}-\d{2}$/)

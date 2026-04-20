@@ -33,6 +33,7 @@ dependencies:
   lottie: ^3.3.0
   percent_indicator: ^4.2.5
   shimmer: ^3.0.0
+  intl_phone_field: ^3.2.0
   table_calendar: ^3.2.0
 
   # ----------------------------------------------------

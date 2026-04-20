@@ -1,12 +1,10 @@
+import 'package:frontend/core/infrastructure/models/product_model.dart';
 import 'package:frontend/core/infrastructure/models/product_package_model.dart';
 
-// 1. Model cho Item trong 1 Transaction
 class TransactionDetailModel {
   final String? productPackageId;
   final int quantity;
   final double unitPrice;
-
-  // Thông tin thêm để hiển thị UI (không gửi lên API tạo)
   final ProductPackageModel? packageInfo;
   final int currentStock;
   final int reorderThreshold;
@@ -20,21 +18,47 @@ class TransactionDetailModel {
     this.reorderThreshold = 0,
   });
 
-  // HÀM MỚI BỔ SUNG: Parse từ JSON thành Object
   factory TransactionDetailModel.fromJson(Map<String, dynamic> json) {
+    ProductPackageModel? parsedPackageInfo;
+
+    // Trường hợp 1: Có nested object productPackage (Từ API tạo giỏ hàng)
+    if (json['productPackage'] != null) {
+      parsedPackageInfo = ProductPackageModel.fromJson(json['productPackage']);
+    }
+    // Trường hợp 2: JSON bị làm phẳng (Từ API lấy Chi tiết Hóa đơn)
+    else if (json['displayName'] != null) {
+      parsedPackageInfo = ProductPackageModel(
+        productPackageId: json['productPackageId'] ?? '',
+        displayName: json['displayName'],
+        barcodeValue: json['barcodeValue'],
+        importPrice: 0.0,
+        sellingPrice: 0.0,
+        unitId: '',
+        productId: '',
+        activeStatus: 'active',
+        product: json['imageUrl'] != null
+            ? ProductModel(
+                productId: '',
+                name: json['displayName'] ?? '',
+                activeStatus: 'active',
+                imageUrl: json['imageUrl'],
+                createdAt: DateTime.now(),
+                updatedAt: DateTime.now(),
+                storeId: '',
+                categoryId: '',
+              )
+            : null,
+      );
+    }
+
     return TransactionDetailModel(
-      // Bắt cả 2 trường hợp camelCase và snake_case
       productPackageId: json['productPackageId'] ?? json['product_package_id'],
       quantity: int.tryParse(json['quantity']?.toString() ?? '0') ?? 0,
       unitPrice: double.tryParse(json['unitPrice']?.toString() ??
               json['unit_price']?.toString() ??
               '0') ??
           0.0,
-
-      // Parse object lồng nếu có trả về từ API (ví dụ tên package)
-      packageInfo: json['productPackage'] != null
-          ? ProductPackageModel.fromJson(json['productPackage'])
-          : null,
+      packageInfo: parsedPackageInfo,
     );
   }
 

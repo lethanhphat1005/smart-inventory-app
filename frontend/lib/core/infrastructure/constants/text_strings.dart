@@ -61,6 +61,7 @@ class TTexts {
   static const String activeFilters = "active_filters";
   static const String userLabel = "user_label";
   static const String me = "me";
+  static const String resultsFound = "results found";
 
   // -- Network Error Dialog
   static const String netErrorTitle = "net_error_title";
@@ -291,7 +292,8 @@ class TTexts {
   static const String confirmChangeRoleMessage = "confirm_change_role_message";
   static const String updatingRole = "updating_role";
   static const String roleUpdatedSuccess = "role_updated_success";
-  static const String inviteCodeGeneratedSuccess = "invite_code_generated_success";
+  static const String inviteCodeGeneratedSuccess =
+      "invite_code_generated_success";
   static const String plsGenerateNewCode = "pls_generate_new_code";
   static const String copyTooltip = "copy_tooltip";
   static const String shareTooltip = "share_tooltip";
@@ -328,6 +330,46 @@ class TTexts {
   static const String homeAddProductSub = "home_add_product_sub";
   static const String homeViewReports = "home_view_reports";
   static const String homeViewReportsSub = "home_view_reports_sub";
+  static const String surplus = 'surplus';
+  static const String shrinkage = 'shrinkage';
+  static const String dailyStockHealth = 'daily_stock_health';
+  static const String recentAdjustments = 'recent_adjustments';
+  static const String systemAdjustment = 'system_adjustment';
+  static const String itemsText = 'items_text';
+  static const String adjustmentHistoryTitle = 'adjustment_history_title';
+  static const String searchAdjustmentHint = 'search_adjustment_hint';
+  static const String selectDate = 'select_date';
+  static const String clearFilter = 'clear_filter';
+  static const String noAdjustmentsFound = 'no_adjustments_found';
+  static const String noAdjustmentsFoundDesc = 'no_adjustments_found_desc';
+  static const String filtered = 'filtered';
+  static const String today = 'today';
+  static const String yesterday = 'yesterday';
+  static const String note = 'note';
+  static const String productName = 'product_name';
+  static const String overviewInfoTitle = 'overview_info_title';
+  static const String inboundDesc = 'inbound_desc';
+  static const String outboundDesc = 'outbound_desc';
+  static const String adjustmentDesc = 'adjustment_desc';
+  static const String totalInDesc = 'total_in_desc';
+  static const String totalOutDesc = 'total_out_desc';
+  static const String adjust = 'adjust';
+  static const String totalIn = 'total_in';
+  static const String totalOut = 'total_out';
+  static const String noRecentAdjustments = 'no_recent_adjustments';
+  static const String homeViewAdjustments = 'home_view_adjustments';
+  static const String homeViewAdjustmentsSub = 'home_view_adjustments_sub';
+  static const String homeLowStock = 'home_low_stock';
+  static const String homeLowStockSub = 'home_low_stock_sub';
+  static const String lowStockTitle = 'low_stock_title';
+  static const String noLowStock = 'no_low_stock';
+  static const String noLowStockDesc = 'no_low_stock_desc';
+  static const String stockLeft = 'stock_left';
+  static const String qtyChange = "qty_change";
+
+  // -- Low Stock
+  static const String outOfStockSection = 'out_of_stock_section';
+  static const String lowStockSection = 'low_stock_section';
 
   // -- Inventory
   static const String inventoryHub = "inventory_hub";
@@ -338,7 +380,7 @@ class TTexts {
   static const String inventoryInsights = "inventory_insights";
   static const String manageData = "manage_data";
   static const String productCatalog = "product_catalog";
-  static const String totalItemsValue = "total_items_value"; // updated
+  static const String totalItemsValue = "total_items_value";
   static const String stockValue = "stock_value";
   static const String stockHealth = "stock_health";
   static const String statusHealthy = "status_healthy";
@@ -360,6 +402,16 @@ class TTexts {
   static const String inventoryHealth = 'inventory_health';
   static const String topCategories = 'top_categories';
   static const String inventoryFlow = 'inventory_flow';
+  static const String chartTooltipIn = 'chart_tooltip_in';
+  static const String chartTooltipOut = 'chart_tooltip_out';
+  static const String noHistoryAvailable = "no_history_available";
+  static const String stockTake = "stock_take";
+  static const String importGoods = "import_goods";
+  static const String exportGoods = "export_goods";
+  static const String stockAdjustmentOrCheck = "stock_adjustment_or_check";
+  static const String currentQty = "current_qty";
+  static const String errorProductOrPackageIdMissing =
+      "error_product_or_package_id_missing";
 
   // -- Chatbot AI
   static const String chatbotName = "chatbot_name";
@@ -564,7 +616,12 @@ class TTexts {
   static const String cropImage = 'crop_image';
   static const String reorderThresholdLabel = 'reorder_threshold_label';
   static const String reorderThresholdHint = 'reorder_threshold_hint';
-  static const String zeroMeansNoLimit = 'zero_means_no_limit';
+  static const String unitLockedMessage = "unit_locked_message";
+  static const String thresholdMustBeGreaterThanZero =
+      "threshold_must_be_greater_than_zero";
+  static const String leaveEmptyForNoLimit = "leave_empty_for_no_limit";
+  static const String displayNameSuffixLabel = "display_name_suffix_label";
+  static const String displayNameSuffixHint = "display_name_suffix_hint";
   static const String fieldRequired = 'field_required';
   static const String invalidNumber = 'invalid_number';
   static const String suggestedNames = 'suggested_names';
@@ -672,6 +729,11 @@ class TTexts {
   static const String actualStock = "actual_stock";
   static const String autoRemovedFromCart = "auto_removed_from_cart";
   static const String updatedListLabel = "updated_list_label";
+  static const String clearStock = 'clear_stock';
+  static const String clearAllStock = 'clear_all_stock';
+  static const String productHasRemainingStock = 'product_has_remaining_stock';
+  static const String autoGeneratedClearanceNote =
+      'auto_generated_clearance_note';
 
   // --- Inbound/Outbound Transaction Item Add ---
   static const String loadingAddingToCart = "loading_adding_to_cart";
@@ -736,6 +798,9 @@ class TTexts {
   static const String sellingPriceLot = "selling_price_lot";
   static const String importedOn = "imported_on";
   static const String outOfStockBatch = "out_of_stock_batch";
+  static const String outboundTransaction = 'outbound_transaction';
+  static const String loadingCreatingTransaction =
+      'loading_creating_transaction';
 
   // Export process
   static const String confirmExportTitle = "confirm_export_title";
@@ -800,10 +865,54 @@ class TTexts {
   static const String noItemsFoundDesc = "no_items_found_desc";
   static const String discardTransactionTitle = "discard_transaction_title";
   static const String discardTransactionDesc = "discard_transaction_desc";
+  static const String profileEmailUser = "profile_email_user";
+  static const String noDifferencesFound = 'no_differences_found';
+  static const String adjustmentCompletedTitle = 'adjustment_completed_title';
+  static const String adjustmentSuccessSub = 'adjustment_success_sub';
+  static const String adjustmentId = 'adjustment_id';
+  static const String checkItemsStats = 'check_items_stats';
+  static const String totalDifference = 'total_difference';
 
   // -- Transaction Summary
   static const String qty = "qty";
+  static const String modifiedProducts = 'modified_products';
   static const String adjustmentSummaryBrief = "adjustment_summary_brief";
+
+  // -- Report
+  static const String reportTabToday = 'report_tab_today';
+  static const String reportTabCalendar = 'report_tab_calendar';
+  static const String export = 'export';
+  static const String exportingProgress = 'exporting_progress';
+  static const String exportTransactionsTitle = 'export_transactions_title';
+  static const String exportTransactionsDesc = 'export_transactions_desc';
+  static const String reportEmptyTitle = 'report_empty_title';
+  static const String reportEmptySubtitle = 'report_empty_subtitle';
+  static const String reportHistory = 'report_history';
+  static const String reportTransactionsOverview =
+      'report_transactions_overview';
+  static const String exportFailedTitle = 'export_failed_title';
+  static const String exportFailedMessage = 'export_failed_message';
+  static const String amount = "amount";
+
+  // -- Report Transaction Detail
+  static const String totalItems = 'total_items';
+  static const String totalAmount = 'total_amount';
+  static const String transactionDetailsNotFound =
+      'transaction_details_not_found';
+  static const String unknownUser = 'unknown_user';
+  static const String staff = 'staff';
+  static const String mainHQStore = 'main_hq_store';
+  static const String transactionId = 'transaction_id';
+  static const String dateAndTime = 'date_and_time';
+  static const String cashier = 'cashier';
+  static const String role = 'role';
+  static const String store = 'store';
+  static const String itemDeletedOrUnavailable = 'item_deleted_or_unavailable';
+  static const String exportTransaction = 'export_transaction';
+  static const String exportDailyReport = 'export_daily_report';
+  static const String exportDailyReportDesc = 'export_daily_report_desc';
+  static const String exportSingleTransactionDesc =
+      'export_single_transaction_desc';
 
   // -- Notifications
   static const String notificationTitle = "notification_title";
@@ -830,18 +939,29 @@ class TTexts {
   static const String filterAlerts = "filter_alerts";
   static const String filterTransactions = "filter_transactions";
   static const String filterSystem = "filter_system";
+  static const String filterLowStock = "filter_low_stock";
+  static const String filterDiscrepancy = "filter_discrepancy";
+  static const String filterReorder = "filter_reorder";
+  static const String filterImport = "filter_import";
+  static const String filterExport = "filter_export";
+
+  // -- Notification Router & Errors
+  static const String storeNotFound = "store_not_found";
+  static const String cannotAccessStore = "cannot_access_store";
+  static const String sessionExpiredTitle = "session_expired_title";
+  static const String sessionExpiredMessage = "session_expired_message";
 
   //--Profile
   static const String profileTitle = 'profile_title';
   static const String profileNameUser = 'profile_name_user';
-  static const String profileEmaiUser = 'profile_mail_user';
+  static const String profilePhoneNumber = 'profile_phone_number';
   static const String profileNameStore = 'profile_name_store';
   static const String profileBtnSwitchStore = 'profile_btn_switch_store';
   static const String profileAccount = 'profile_account';
-  static const String profileSecurity = 'profile_security';
+  static const String profileManagement = 'profile_management';
   static const String profileMyAccount = 'profile_my_account';
   static const String profileChangePassword = 'profile_change_password';
-  static const String profileUserPermissions = 'proflie_user_permissions';
+  static const String profileUserManagement = 'profile_user_management';
   static const String profileBtnLogout = 'profile_btn_logout';
   static const String profileDialogTitleLogout = 'profile_dialog_title_logout';
   static const String profileDialogDescriptionLogout =
@@ -869,6 +989,16 @@ class TTexts {
   static const String editHintName = 'edit_hint_name';
   static const String editHintEmail = 'edit_hint_email';
   static const String editUpdate = 'edit_update';
+  static const String editPhoneNumberEmpty = 'edit_phone_number_empty';
+  static const String editPhoneNumberInvalid = 'edit_phone_number_invalid';
+  static const String editPhoneNumber = 'edit_phone_number';
+  static const String editPhoneNumberHint = 'edit_phone_number_hint';
+  static const String editErrorEmptyFieldsTitle =
+      'edit_error_empty_fields_title';
+  static const String editErrorEmptyFieldsMessage =
+      'edit_error_empty_fields_message';
+  static const String confirmUpdateDescription = 'confirm_update_description';
+  static const String confirmUpdate = 'confirm_update';
 
   //--Change password
   static const String changePasswordTitle = "change_password_title";
@@ -892,12 +1022,15 @@ class TTexts {
   static const String authSessionExpired = "auth_session_expired";
   static const String systemError = "system_error";
   static const String authError = "auth_error";
+  static const String changePasswordDialogDescription =
+      "change_password_dialog_description";
+  static const String fillAllFields = "fill_all_fields";
 
   //--Edit store
   static const String editStoreTitle = 'edit_store_title';
   static const String editStoreSubtitle = 'edit_store_subtitle';
   static const String editStoreNameLabel = 'edit_store_name_label';
-  static const String editStoreAddress = 'edit_store_address';
+  static const String editStoreNameHint = 'edit_store_name_hint';
   static const String editStoreAmountMember = 'edit_store_amount_member';
   static const String editStoreBtnEdit = 'edit_store_btn_edit';
   static const String profileUpdateSuccess = 'profile_update_success';
@@ -907,6 +1040,15 @@ class TTexts {
   static const String profileUpdateErrorTitle = 'profile_update_error_title';
   static const String loggingOut = 'logging_out';
   static const String logoutErrorTitle = 'logout_error_title';
+  static const String editStoreTitleDialog = 'edit_store_title_dialog';
+  static const String editStoreSubtitleDialog = 'edit_store_subtitle_dialog';
+  static const String editStoreAddressLabel = 'edit_store_address_label';
+  static const String editStoreAddressHint = 'edit_store_address_hint';
+  static const String profileUpdateError = 'profile_update_error';
+  static const String editStoreDialogDescription =
+      'edit_store_dialog_description';
+  static const String profileUpdateStoreSuccess =
+      'profile_update_store_success';
 
   // --Assigns role
   static const String assignsRoleTitle = 'assigns_role_title';
@@ -919,7 +1061,21 @@ class TTexts {
   static const String assignsRoleOwner = 'assigns_role_owner';
   static const String assignsRoleSearchHint = 'assigns_role_search_hint';
 
+  //Member
+  static const String profileNoMembers = 'profile_no_members';
+  static const String profileNoMembersSubtitle = 'profile_no_members_subtitle';
+
   //-- System
   static const String systemSnackbarTitle = "system_snackbar_title";
   static const String systemSnackbar403Error = "system_snackbar_403_error";
+
+  // -- Smart Decision (Reorder Suggestion)
+  static const String reorderReportTitle = "reorder_report_title";
+  static const String aiAnalyzingStock = "ai_analyzing_stock";
+  static const String optimalStockTitle = "optimal_stock_title";
+  static const String optimalStockDesc = "optimal_stock_desc";
+  static const String productLabel = "product_label";
+  static const String currentStockLabel = "current_stock_label";
+  static const String alertThresholdLabel = "alert_threshold_label";
+  static const String suggestedImportLabel = "suggested_import_label";
 }

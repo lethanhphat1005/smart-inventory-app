@@ -1,11 +1,14 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/models/transaction_detail_model.dart';
+import 'package:frontend/core/infrastructure/utils/url_helper_utils.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/widgets/t_no_image_widget.dart';
 import 'package:frontend/routes/app_routes.dart';
 import 'package:get/get.dart';
-import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:frontend/core/ui/widgets/t_snackbars_widget.dart';
+import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 
 class ReportTransactionDetailItemCardWidget extends StatelessWidget {
   final TransactionDetailModel item;
@@ -17,7 +20,8 @@ class ReportTransactionDetailItemCardWidget extends StatelessWidget {
     final priceStr = NumberFormat.currency(locale: 'en_US', symbol: '\$')
         .format(item.unitPrice);
 
-    final String? imageUrl = item.packageInfo?.product?.imageUrl;
+    final String? imageUrl =
+        UrlHelperUtils.normalizeImageUrl(item.packageInfo?.product?.imageUrl);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -36,19 +40,32 @@ class ReportTransactionDetailItemCardWidget extends StatelessWidget {
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
           onTap: () {
-            if (item.productPackageId != null &&
-                item.productPackageId!.isNotEmpty) {
-              Get.toNamed(
-                AppRoutes.inventoryDetail,
-                arguments: item.productPackageId,
-              );
+            final pkgId =
+                item.productPackageId ?? item.packageInfo?.productPackageId;
+            final String? productId = item.packageInfo?.productId ??
+                item.packageInfo?.product?.productId;
+            final barcode = item.packageInfo?.barcodeValue ?? '';
+
+            if (pkgId == null || pkgId.isEmpty) {
+              TSnackbarsWidget.error(
+                  title: TTexts.errorTitle.tr,
+                  message: TTexts.itemDeletedOrUnavailable.tr);
+              return;
             }
+
+            Get.toNamed(
+              AppRoutes.inventoryDetail,
+              arguments: productId,
+              parameters: {
+                'packageId': pkgId,
+                if (barcode.isNotEmpty) 'barcode': barcode,
+              },
+            );
           },
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                // --- PRODUCT IMAGE ---
                 Container(
                   width: 52,
                   height: 52,
@@ -69,23 +86,30 @@ class ReportTransactionDetailItemCardWidget extends StatelessWidget {
                               child: CircularProgressIndicator(
                                   strokeWidth: 2, color: AppColors.primary),
                             ),
-                            errorWidget: (context, url, error) => const Icon(
-                                Iconsax.box_1_copy,
-                                color: AppColors.softGrey,
-                                size: 24),
+                            errorWidget: (context, url, error) =>
+                                const TNoImageWidget(
+                              width: 52,
+                              height: 52,
+                              borderRadius: 11,
+                              iconSize: 24,
+                            ),
                           )
-                        : const Icon(Iconsax.box_1_copy,
-                            color: AppColors.softGrey, size: 24),
+                        : const TNoImageWidget(
+                            width: 52,
+                            height: 52,
+                            borderRadius: 11,
+                            iconSize: 24,
+                          ),
                   ),
                 ),
                 const SizedBox(width: 16),
-
-                // --- PRODUCT INFO ---
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(item.packageInfo?.displayName ?? 'Unknown Product',
+                      Text(
+                          item.packageInfo?.displayName ??
+                              TTexts.unknownProduct.tr,
                           style: const TextStyle(
                               fontFamily: 'Poppins',
                               fontSize: 14,
@@ -95,7 +119,7 @@ class ReportTransactionDetailItemCardWidget extends StatelessWidget {
                           overflow: TextOverflow.ellipsis),
                       const SizedBox(height: 4),
                       Text(
-                          'Barcode: ${item.packageInfo?.barcodeValue ?? "N/A"}',
+                          '${TTexts.barcodeLabel.tr}: ${item.packageInfo?.barcodeValue ?? TTexts.na.tr}',
                           style: const TextStyle(
                               fontSize: 11, color: AppColors.subText)),
                       const SizedBox(height: 8),

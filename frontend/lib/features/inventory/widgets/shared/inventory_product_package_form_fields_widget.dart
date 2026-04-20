@@ -14,33 +14,58 @@ class InventoryProductPackageFormFieldsWidget
 
   @override
   Widget build(BuildContext context) {
+    // KHAI BÁO BIẾN Ở ĐÂY, KHÔNG CẦN DÙNG OBX CHO BIẾN TĨNH
+    final isEditMode = controller.packageToEdit != null;
+
     return Form(
       key: controller.packageFormKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 1. CHỌN ĐƠN VỊ
-          const InventoryProductPackageUnitDropdownWidget(),
+          // 1. CHỌN ĐƠN VỊ (BỊ KHÓA NẾU LÀ EDIT MODE)
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              IgnorePointer(
+                ignoring: isEditMode,
+                child: Opacity(
+                  opacity: isEditMode ? 0.6 : 1.0,
+                  child: const InventoryProductPackageUnitDropdownWidget(),
+                ),
+              ),
+              if (isEditMode)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0, left: 4.0),
+                  child: Text(
+                    TTexts.unitLockedMessage.tr,
+                    style: const TextStyle(
+                        fontSize: 12,
+                        color: AppColors.alertText,
+                        fontStyle: FontStyle.italic),
+                  ),
+                ),
+            ],
+          ),
           const SizedBox(height: 24),
 
-          // 2. TÊN PHÂN LOẠI (DỌC ĐỂ KHÔNG BỊ HẸP CHỮ)
+          // 2. TÊN HIỂN THỊ PREVIEW
           TTextFormFieldWidget(
             label: TTexts.displayNameLabel.tr,
             hintText: TTexts.displayNameHint.tr,
             isRequired: true,
-            readOnly:
-                true, // Không cho gõ vào ô này vì nó tự nhảy theo Listener
+            readOnly: true,
             controller: controller.packageDisplayNameController,
           ),
           const SizedBox(height: 16),
 
+          // 3. SUFFIX NAME (Phần cho phép User sửa)
           TTextFormFieldWidget(
-            label: TTexts.variantNameLabel.tr,
-            hintText: TTexts.variantNameHint.tr,
+            label: TTexts.displayNameSuffixLabel.tr,
+            hintText: TTexts.displayNameSuffixHint.tr,
             controller: controller.packageVariantNameController,
           ),
 
-          // THANH GỢI Ý CHIPS
+          // THANH GỢI Ý CHIPS (Đoạn này giữ nguyên Obx vì selectedUnitId là Rx)
           Obx(() {
             final suggestions = controller.variantNameSuggestions;
             if (suggestions.isEmpty) return const SizedBox.shrink();
@@ -74,7 +99,7 @@ class InventoryProductPackageFormFieldsWidget
           }),
           const SizedBox(height: 24),
 
-          // 3. GIÁ NHẬP & GIÁ BÁN
+          // 4. GIÁ NHẬP & GIÁ BÁN
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -99,7 +124,7 @@ class InventoryProductPackageFormFieldsWidget
           ),
           const SizedBox(height: 24),
 
-          // 4. NGƯỠNG CẢNH BÁO TỒN KHO
+          // 5. NGƯỠNG CẢNH BÁO TỒN KHO (>0 hoặc Null)
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -111,8 +136,12 @@ class InventoryProductPackageFormFieldsWidget
                   keyboardType: TextInputType.number,
                   controller: controller.thresholdController,
                   validator: (v) {
-                    if (v != null && v.isNotEmpty && int.tryParse(v) == null) {
-                      return TTexts.invalidNumber.tr;
+                    if (v != null && v.trim().isNotEmpty) {
+                      final parsed = int.tryParse(v.trim());
+                      if (parsed == null) return TTexts.invalidNumber.tr;
+                      if (parsed <= 0) {
+                        return TTexts.thresholdMustBeGreaterThanZero.tr;
+                      }
                     }
                     return null;
                   },
@@ -122,7 +151,7 @@ class InventoryProductPackageFormFieldsWidget
               Padding(
                 padding: const EdgeInsets.only(top: 24),
                 child: Tooltip(
-                  message: TTexts.zeroMeansNoLimit.tr,
+                  message: TTexts.leaveEmptyForNoLimit.tr,
                   triggerMode: TooltipTriggerMode.tap,
                   preferBelow: false,
                   decoration: BoxDecoration(
@@ -140,7 +169,7 @@ class InventoryProductPackageFormFieldsWidget
           ),
           const SizedBox(height: 24),
 
-          // 5. BARCODE
+          // 6. BARCODE
           TTextFormFieldWidget(
             label: TTexts.barcodeLabel.tr,
             hintText: TTexts.scanOrTypeBarcode.tr,

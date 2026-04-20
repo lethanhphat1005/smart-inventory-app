@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:frontend/core/infrastructure/models/transaction_model.dart';
@@ -34,27 +35,23 @@ class ReportTransactionExportBottomSheetWidget
             ),
             const SizedBox(height: 24),
             Text(
-              'Exporting... $percent%',
+              TTexts.exportingProgress
+                  .trParams({'percent': percent.toString()}),
               style: const TextStyle(
                   fontFamily: 'Poppins',
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: AppColors.primaryText),
             ),
-            const SizedBox(height: 8),
-            Text(
-              controller.exportStatus.value,
-              style: const TextStyle(fontSize: 13, color: AppColors.subText),
-            ),
             const SizedBox(height: 32),
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
               child: LinearProgressIndicator(
                 value: controller.exportProgress.value,
-                minHeight: 8,
                 backgroundColor: AppColors.softGrey.withOpacity(0.2),
                 valueColor:
                     const AlwaysStoppedAnimation<Color>(AppColors.primary),
+                minHeight: 8,
               ),
             ),
             const SizedBox(height: 16),
@@ -77,23 +74,21 @@ class ReportTransactionExportBottomSheetWidget
             ),
           ),
           const SizedBox(height: 16),
-          const Text(
-            'Export Transaction?',
-            style: TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: AppColors.primaryText),
-            textAlign: TextAlign.center,
-          ),
+          Text(TTexts.exportTransaction.tr,
+              style: const TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primaryText),
+              textAlign: TextAlign.center),
           const SizedBox(height: 12),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.0),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Text(
-              'Do you want to generate and download an Excel receipt for this transaction?',
-              style: TextStyle(
-                  fontSize: 13, color: AppColors.subText, height: 1.5),
+              TTexts.exportSingleTransactionDesc.tr,
               textAlign: TextAlign.center,
+              style: const TextStyle(
+                  fontSize: 13, color: AppColors.subText, height: 1.5),
             ),
           ),
           const SizedBox(height: 32),
@@ -109,8 +104,8 @@ class ReportTransactionExportBottomSheetWidget
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12)),
                   ),
-                  child: const Text('Cancel',
-                      style: TextStyle(
+                  child: Text(TTexts.cancel.tr,
+                      style: const TextStyle(
                           color: AppColors.primaryText,
                           fontWeight: FontWeight.w600)),
                 ),
@@ -127,8 +122,8 @@ class ReportTransactionExportBottomSheetWidget
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12)),
                   ),
-                  child: const Text('Export',
-                      style: TextStyle(
+                  child: Text(TTexts.export.tr,
+                      style: const TextStyle(
                           color: Colors.white, fontWeight: FontWeight.w600)),
                 ),
               ),

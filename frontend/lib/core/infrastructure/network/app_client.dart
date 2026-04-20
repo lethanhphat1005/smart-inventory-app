@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/app_constants.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/ui/widgets/t_snackbars_widget.dart';
+import 'package:frontend/routes/app_routes.dart';
 import 'package:get/get.dart' hide Response;
 import 'package:get_storage/get_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -64,7 +65,7 @@ class ApiClient {
             GetStorage().remove('STORE_ID');
 
             // 3. Điều hướng về màn Login
-            // Get.offAllNamed(AppRoutes.login);
+            Get.offAllNamed(AppRoutes.login);
             TSnackbarsWidget.warning(
                 title: TTexts.systemSnackbarTitle.tr,
                 message: TTexts.systemSnackbarTitle.tr);

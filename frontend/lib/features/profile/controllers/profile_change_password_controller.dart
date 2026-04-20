@@ -10,66 +10,129 @@ class ProfileChangePasswordController extends GetxController {
   final newPasswordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
 
-  final isLoading = false.obs;
+  // Biến trạng thái (State)
+  final RxBool isOldPasswordHidden = true.obs;
+  final RxBool isNewPasswordHidden = true.obs;
+  final RxBool isConfirmPasswordHidden = true.obs;
+  final RxBool isLoading = false.obs;
+
+  // --- HÀM XỬ LÝ GIAO DIỆN ---
+  void toggleOldPasswordVisibility() =>
+      isOldPasswordHidden.value = !isOldPasswordHidden.value;
+  void toggleNewPasswordVisibility() =>
+      isNewPasswordHidden.value = !isNewPasswordHidden.value;
+  void toggleConfirmPasswordVisibility() =>
+      isConfirmPasswordHidden.value = !isConfirmPasswordHidden.value;
+
   final supabase = Supabase.instance.client;
 
-  Future<void> updatePassword() async {
-    // 1. Kiểm tra Validate từ Form UI
-    if (!formKey.currentState!.validate()) return;
+  Future<bool> validateBeforeSubmit() async {
+    // 1. Kiểm tra form có hợp lệ không
+    if (!formKey.currentState!.validate()) return false;
 
-    // 2. Kiểm tra khớp mật khẩu mới
+    // 2. Kiểm tra các trường có bị bỏ trống không
+    if (oldPasswordController.text.isEmpty ||
+        newPasswordController.text.isEmpty ||
+        confirmPasswordController.text.isEmpty) {
+      TSnackbarsWidget.warning(
+        title: TTexts.warningTitle.tr,
+        message: TTexts.fillAllFields.tr,
+      );
+      return false;
+    }
+
+    // 3. Kiểm tra mật khẩu mới có khớp với xác nhận mật khẩu không
     if (newPasswordController.text != confirmPasswordController.text) {
       TSnackbarsWidget.error(
         title: TTexts.errorTitle.tr,
         message: TTexts.passwordNotMatch.tr,
       );
-      return;
+      return false;
     }
 
-    // 3. Kiểm tra mật khẩu mới không được trùng mật khẩu cũ
+    // 4. Kiểm tra mật khẩu mới có khác mật khẩu cũ không
     if (newPasswordController.text == oldPasswordController.text) {
       TSnackbarsWidget.warning(
         title: TTexts.warningTitle.tr,
         message: TTexts.passwordSameAsOld.tr,
       );
-      return;
+      return false;
     }
+
+    // 5. Xác thực lại mật khẩu cũ
+    final user = supabase.auth.currentUser;
+    if (user == null || user.email == null) {
+      TSnackbarsWidget.error(
+        title: TTexts.errorTitle.tr,
+        message: TTexts.authSessionExpired.tr,
+      );
+      return false;
+    }
+
+    try {
+      await supabase.auth.signInWithPassword(
+        email: user.email!,
+        password: oldPasswordController.text,
+      );
+    } on AuthException {
+      TSnackbarsWidget.error(
+        title: TTexts.errorTitle.tr,
+        message: TTexts.oldPasswordIncorrect.tr,
+      );
+      return false;
+    }
+
+    // Nếu tất cả đều hợp lệ
+    return true;
+  }
+
+  Future<void> updatePassword() async {
+    if (!await validateBeforeSubmit()) return;
 
     isLoading.value = true;
 
     try {
+      // 1. Xác thực lại bằng mật khẩu cũ
       final user = supabase.auth.currentUser;
       if (user == null || user.email == null) {
         throw Exception(TTexts.authSessionExpired.tr);
       }
 
-      // 4. Xác thực mật khẩu hiện tại (Re-authentication)
-      // Việc sử dụng AuthResponse giúp đảm bảo lấy được Session mới nhất
+      try {
+        await supabase.auth.signInWithPassword(
+          email: user.email!,
+          password: oldPasswordController.text,
+        );
+      } on AuthException {
+        TSnackbarsWidget.error(
+          title: TTexts.errorTitle.tr,
+          message: TTexts.oldPasswordIncorrect.tr,
+        );
+        return;
+      }
+      // 2. Nếu xác thực thành công, tiến hành cập nhật mật khẩu mới
       final AuthResponse authResponse = await supabase.auth.signInWithPassword(
         email: user.email!,
         password: oldPasswordController.text,
       );
 
-      // Kiểm tra session mới từ phản hồi của server
+      // 3. Nếu xác thực thành công, cập nhật mật khẩu mới
       if (authResponse.session != null) {
-        // 5. Tiến hành cập nhật mật khẩu mới vào hệ thống
         await supabase.auth.updateUser(
           UserAttributes(password: newPasswordController.text),
         );
 
-        // 6. Thông báo thành công theo phong cách Modern Clean
+        // 4. Hiển thị thông báo thành công
         TSnackbarsWidget.success(
           title: TTexts.successTitle.tr,
           message: TTexts.passwordChangedSuccess.tr,
         );
 
-        // Xóa trắng các trường sau khi hoàn tất
         _clearForm();
       } else {
         throw Exception(TTexts.systemError.tr);
       }
     } on AuthException catch (e) {
-      // Xử lý các lỗi đặc thù từ Supabase
       String errorMsg = e.message;
       if (e.message.contains('Invalid login credentials')) {
         errorMsg = TTexts.oldPasswordIncorrect.tr;
@@ -80,7 +143,6 @@ class ProfileChangePasswordController extends GetxController {
         message: errorMsg,
       );
     } catch (e) {
-      // Xử lý các lỗi ngoại lệ khác (mất mạng, lỗi server...)
       TSnackbarsWidget.error(
         title: TTexts.errorTitle.tr,
         message: TTexts.systemError.tr,

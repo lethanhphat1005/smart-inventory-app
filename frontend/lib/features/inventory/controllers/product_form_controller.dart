@@ -476,6 +476,12 @@ class ProductFormController extends GetxController with TErrorHandler {
     }
   }
 
+  int? _getParsedThreshold() {
+    final val = int.tryParse(thresholdController.text.trim());
+    if (val != null && val > 0) return val;
+    return null; // Trả về null nếu trống hoặc <= 0
+  }
+
   Future<void> _executeSaveFullProduct() async {
     if (isSaving.value) return;
     try {
@@ -496,21 +502,28 @@ class ProductFormController extends GetxController with TErrorHandler {
       };
       final newProduct = await _provider.createProduct(productPayload);
 
-      final combinedDisplayName = packageDisplayNameController.text.trim();
+      // Định dạng Package Payload theo API mới
       final packagePayload = {
-        'displayName': combinedDisplayName,
+        'displayNameSuffix': packageVariantNameController.text.trim().isNotEmpty
+            ? packageVariantNameController.text.trim()
+            : null,
         'unitId': selectedUnitId.value,
-        'importPrice': double.tryParse(importPriceController.text) ?? 0,
-        'sellingPrice': double.tryParse(salePriceController.text) ?? 0,
-        'barcodeValue': barcodeController.text.trim(),
-        'barcodeType': 'ean',
+        'importPrice': double.tryParse(importPriceController.text),
+        'sellingPrice': double.tryParse(salePriceController.text),
+        'barcodeValue': barcodeController.text.trim().isNotEmpty
+            ? barcodeController.text.trim()
+            : null,
+        'barcodeType': barcodeController.text.trim().isNotEmpty ? 'ean' : null,
       };
-      final newPackage = await _provider.createProductPackage(
-          newProduct.productId, packagePayload);
-      final packageId = newPackage['productPackageId'] ?? newPackage['id'];
 
-      await _provider.createInventory(packageId,
-          reorderThreshold: int.tryParse(thresholdController.text) ?? 0);
+      // Payload cho Inventory đi kèm lúc tạo mới
+      final inventoryPayload = {
+        'quantity': 0,
+        'reorderThreshold': _getParsedThreshold(),
+      };
+
+      await _provider.createProductPackage(
+          newProduct.productId, packagePayload, inventoryPayload);
 
       FullScreenLoaderUtils.stopLoading();
       _triggerRefreshAndClose(TTexts.productCreatedSuccess.tr);
@@ -577,37 +590,58 @@ class ProductFormController extends GetxController with TErrorHandler {
       isSaving.value = true;
       FullScreenLoaderUtils.openLoadingDialog(TTexts.saving.tr);
 
-      final combinedDisplayName = packageDisplayNameController.text.trim();
-      final packagePayload = {
-        'displayName': combinedDisplayName,
-        'unitId': selectedUnitId.value,
-        'importPrice': double.tryParse(importPriceController.text) ?? 0,
-        'sellingPrice': double.tryParse(salePriceController.text) ?? 0,
-        'barcodeValue': barcodeController.text.trim(),
-        'barcodeType': 'ean',
-      };
-      final inventoryPayload = {
-        'reorderThreshold': int.tryParse(thresholdController.text) ?? 0,
-      };
+      final isUpdate =
+          (formMode.value == 'edit_package' && packageToEdit != null);
+      final thresholdVal = _getParsedThreshold();
 
-      if (formMode.value == 'edit_package' && packageToEdit != null) {
+      if (isUpdate) {
+        // UPDATE MODE: Chỉ gửi các trường cho phép đổi (Không có unitId)
+        final packagePayload = {
+          'displayNameSuffix':
+              packageVariantNameController.text.trim().isNotEmpty
+                  ? packageVariantNameController.text.trim()
+                  : null,
+          'importPrice': double.tryParse(importPriceController.text),
+          'sellingPrice': double.tryParse(salePriceController.text),
+          'barcodeValue': barcodeController.text.trim().isNotEmpty
+              ? barcodeController.text.trim()
+              : null,
+          'barcodeType':
+              barcodeController.text.trim().isNotEmpty ? 'ean' : null,
+        };
+
         await _provider.updateProductPackage(
             packageToEdit!.productPackageId, packagePayload);
         await _provider.updateInventorySettings(packageToEdit!.productPackageId,
-            reorderThreshold: inventoryPayload['reorderThreshold']);
+            reorderThreshold: thresholdVal);
 
         FullScreenLoaderUtils.stopLoading();
         _triggerRefreshAndClose(TTexts.packageUpdatedSuccess.tr);
       } else {
+        // CREATE PACKAGE LẺ MODE
+        final packagePayload = {
+          'displayNameSuffix':
+              packageVariantNameController.text.trim().isNotEmpty
+                  ? packageVariantNameController.text.trim()
+                  : null,
+          'unitId': selectedUnitId.value,
+          'importPrice': double.tryParse(importPriceController.text),
+          'sellingPrice': double.tryParse(salePriceController.text),
+          'barcodeValue': barcodeController.text.trim().isNotEmpty
+              ? barcodeController.text.trim()
+              : null,
+          'barcodeType':
+              barcodeController.text.trim().isNotEmpty ? 'ean' : null,
+        };
+        final inventoryPayload = {
+          'quantity': 0,
+          'reorderThreshold': thresholdVal,
+        };
+
         final newPackageData = await _provider.createProductPackage(
-            productToEdit!.productId, packagePayload);
-        final pkgId =
-            newPackageData['productPackageId'] ?? newPackageData['id'];
-
-        await _provider.createInventory(pkgId,
-            reorderThreshold: inventoryPayload['reorderThreshold']);
-
+            productToEdit!.productId, packagePayload, inventoryPayload);
         final createdPkg = ProductPackageModel.fromJson(newPackageData);
+
         FullScreenLoaderUtils.stopLoading();
         _triggerRefreshAndClose(TTexts.packageCreatedSuccess.tr,
             updatedPackage: createdPkg);

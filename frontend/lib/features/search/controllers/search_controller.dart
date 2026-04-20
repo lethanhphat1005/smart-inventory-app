@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:frontend/core/infrastructure/models/category_model.dart'; // 🟢 Import thêm CategoryModel
+import 'package:frontend/core/infrastructure/models/category_model.dart';
 import 'package:frontend/core/infrastructure/models/transaction_model.dart';
-import 'package:frontend/core/infrastructure/models/transaction_detail_model.dart';
 import 'package:frontend/core/infrastructure/models/unit_model.dart';
+import 'package:frontend/core/infrastructure/utils/day_formatter_utils.dart';
 import 'package:frontend/core/infrastructure/utils/error_handler_utils.dart';
-import 'package:frontend/core/infrastructure/utils/url_helper.dart';
+import 'package:frontend/core/infrastructure/utils/url_helper_utils.dart';
 import 'package:frontend/core/state/services/store_service.dart';
 import 'package:frontend/core/state/services/user_service.dart';
 import 'package:frontend/core/ui/widgets/t_bottom_sheet_widget.dart';
@@ -56,7 +56,7 @@ class TSearchController extends GetxController with TErrorHandler {
       Get.isRegistered<InboundTransactionController>();
 
   final RxString filterType = TTexts.filterAll.obs;
-  final RxString filterStatus = TTexts.filterAll.obs;
+
   final Rx<DateTimeRange?> filterDateRange = Rx<DateTimeRange?>(null);
 
   final RxString filterUserId = ''.obs;
@@ -105,37 +105,37 @@ class TSearchController extends GetxController with TErrorHandler {
         .addPostFrameCallback((_) => focusNode.requestFocus());
   }
 
-  void _loadFilterUsers() {
+  Future<void> _loadFilterUsers() async {
     try {
+      final storeId = Get.find<StoreService>().currentStoreId.value;
       final currentUser = Get.find<UserService>().currentUser.value;
-      final myId = currentUser?.userId ?? 'USER-Admin';
-      final myName = currentUser?.fullName ?? 'Admin';
+      final currentUserId = currentUser?.userId ?? '';
 
-      availableUsers.assignAll([
-        SearchFilterUserModel(
-            id: myId,
-            name: myName,
-            avatarUrl: 'https://i.pravatar.cc/150?u=$myId'),
-        SearchFilterUserModel(
-            id: 'USER-Sarah',
-            name: 'Sarah',
-            avatarUrl: 'https://i.pravatar.cc/150?u=USER-Sarah'),
-        SearchFilterUserModel(
-            id: 'USER-John',
-            name: 'John',
-            avatarUrl: 'https://i.pravatar.cc/150?u=USER-John'),
-      ]);
+      if (storeId.isEmpty) return;
+
+      // Gọi API thật, trả về List<StoreMemberModel>
+      final members = await _provider.getStoreMembers(storeId, currentUserId);
+
+      if (members.isNotEmpty) {
+        final mappedUsers = members.map((m) {
+          final id = m.userId;
+          final name = m.name;
+
+          const String avatar = '';
+
+          return SearchFilterUserModel(id: id, name: name, avatarUrl: avatar);
+        }).toList();
+
+        availableUsers.assignAll(mappedUsers);
+      } else {
+        // Fallback nếu cửa hàng chưa có ai, tự hiện chính mình
+        final myName = currentUser?.fullName ?? 'Admin';
+        availableUsers.assignAll([
+          SearchFilterUserModel(id: currentUserId, name: myName, avatarUrl: '')
+        ]);
+      }
     } catch (e) {
-      availableUsers.assignAll([
-        SearchFilterUserModel(
-            id: 'USER-Admin',
-            name: 'Admin',
-            avatarUrl: 'https://i.pravatar.cc/150?u=USER-Admin'),
-        SearchFilterUserModel(
-            id: 'USER-Sarah',
-            name: 'Sarah',
-            avatarUrl: 'https://i.pravatar.cc/150?u=USER-Sarah'),
-      ]);
+      debugPrint("Lỗi fetch users: $e");
     }
   }
 
@@ -147,10 +147,9 @@ class TSearchController extends GetxController with TErrorHandler {
     );
   }
 
-  void applyFilters(String type, String status, DateTimeRange? dateRange,
-      String userId, String userName) {
+  void applyFilters(
+      String type, DateTimeRange? dateRange, String userId, String userName) {
     filterType.value = type;
-    filterStatus.value = status;
     filterDateRange.value = dateRange;
     filterUserId.value = userId;
     filterUserName.value = userName;
@@ -160,7 +159,6 @@ class TSearchController extends GetxController with TErrorHandler {
 
   void removeFilter(String filterCategory) {
     if (filterCategory == 'type') filterType.value = TTexts.filterAll;
-    if (filterCategory == 'status') filterStatus.value = TTexts.filterAll;
     if (filterCategory == 'date') filterDateRange.value = null;
     if (filterCategory == 'user') {
       filterUserId.value = '';
@@ -192,122 +190,72 @@ class TSearchController extends GetxController with TErrorHandler {
   }
 
   Future<void> _executeTransactionSearch(String query) async {
+    final q = query.trim();
+
+    // ===============================================
+    // ĐÃ FIX: CHỐT CHẶN TRÁNH TRÀN DATA
+    // Kiểm tra xem có đang ở trạng thái "Trắng bóc" không
+    // ===============================================
+    final bool hasNoFilters = filterType.value == TTexts.filterAll &&
+        filterDateRange.value == null &&
+        filterUserId.value.isEmpty;
+
+    // Nếu không gõ gì và cũng không có bộ lọc nào -> Xóa list và thoát luôn
+    if (q.isEmpty && hasNoFilters) {
+      searchTransactionResults.clear();
+      return;
+    }
+
     isSearching.value = true;
     hasMore.value = false;
+
     try {
-      await Future.delayed(const Duration(milliseconds: 600));
-      final currentUser = Get.find<UserService>().currentUser.value;
-      final myId = currentUser?.userId ?? 'USER-Admin';
+      // 1. CHUẨN BỊ THAM SỐ LỌC CHO API BACKEND
+      Map<String, dynamic> queryParams = {
+        'limit': 100,
+        'sortBy': 'createdAt',
+        'sortOrder': 'desc',
+      };
 
-      List<TransactionModel> mockData = [
-        TransactionModel(
-            transactionId: 'TRX-101',
-            type: 'INBOUND',
-            status: 'COMPLETED',
-            totalPrice: 150000,
-            createdAt: DateTime.now(),
-            userId: 'USER-Sarah',
-            note: 'Restock from supplier',
-            items: [
-              TransactionDetailModel(
-                  quantity: 10,
-                  unitPrice: 15000,
-                  packageInfo: ProductPackageModel(
-                      productPackageId: 'p1',
-                      displayName: 'Cola',
-                      barcodeValue: '123456789',
-                      productId: 'p1',
-                      activeStatus: 'active',
-                      importPrice: 10,
-                      sellingPrice: 12,
-                      unitId: 'u1',
-                      unit: UnitModel(unitId: 'u1', code: 'BOX', name: 'Box')))
-            ]),
-        TransactionModel(
-            transactionId: 'TRX-102',
-            type: 'OUTBOUND',
-            status: 'PENDING',
-            totalPrice: 80000,
-            createdAt: DateTime.now().subtract(const Duration(days: 2)),
-            userId: 'USER-John',
-            items: [
-              TransactionDetailModel(
-                  quantity: 4,
-                  unitPrice: 20000,
-                  packageInfo: ProductPackageModel(
-                      productPackageId: 'p2',
-                      displayName: 'Chips',
-                      barcodeValue: '987654321',
-                      productId: 'p2',
-                      activeStatus: 'active',
-                      importPrice: 15,
-                      sellingPrice: 20,
-                      unitId: 'u2',
-                      unit: UnitModel(unitId: 'u2', code: 'PC', name: 'Piece')))
-            ]),
-        TransactionModel(
-            transactionId: 'TRX-103',
-            type: 'ADJUSTMENT',
-            status: 'COMPLETED',
-            totalPrice: 0,
-            createdAt: DateTime.now().subtract(const Duration(days: 5)),
-            userId: myId,
-            note: 'Monthly audit',
-            items: []),
-      ];
-
+      // Map Type Filter
       if (filterType.value != TTexts.filterAll) {
-        String targetType = '';
-        if (filterType.value == TTexts.filterInbound) targetType = 'INBOUND';
-        if (filterType.value == TTexts.filterOutbound) targetType = 'OUTBOUND';
-        if (filterType.value == TTexts.filterAdjustment) {
-          targetType = 'ADJUSTMENT';
+        if (filterType.value == TTexts.filterInbound) {
+          queryParams['type'] = 'import';
         }
-        mockData = mockData.where((tx) => tx.type == targetType).toList();
+        if (filterType.value == TTexts.filterOutbound) {
+          queryParams['type'] = 'export';
+        }
       }
 
-      if (filterStatus.value != TTexts.filterAll) {
-        String targetStatus = '';
-        if (filterStatus.value == TTexts.filterCompleted) {
-          targetStatus = 'COMPLETED';
-        }
-        if (filterStatus.value == TTexts.filterPending) {
-          targetStatus = 'PENDING';
-        }
-        if (filterStatus.value == TTexts.filterCancelled) {
-          targetStatus = 'CANCELLED';
-        }
-        mockData = mockData.where((tx) => tx.status == targetStatus).toList();
-      }
-
+      // Map Date Range Filter
       if (filterDateRange.value != null) {
-        final start = filterDateRange.value!.start;
-        final end = filterDateRange.value!.end.add(const Duration(days: 1));
-        mockData = mockData
-            .where((tx) =>
-                tx.createdAt != null &&
-                tx.createdAt!.isAfter(start) &&
-                tx.createdAt!.isBefore(end))
-            .toList();
+        queryParams['startDate'] =
+            DayFormatterUtils.formatApiDate(filterDateRange.value!.start);
+        queryParams['endDate'] =
+            DayFormatterUtils.formatApiDate(filterDateRange.value!.end);
       }
 
+      // 2. GỌI API TỪ SEARCH PROVIDER
+      List<TransactionModel> results =
+          await _provider.searchTransactions(queryParams: queryParams);
+
+      // 3. LỌC Ở LOCAL (User ID & Text)
       if (filterUserId.value.isNotEmpty) {
-        mockData =
-            mockData.where((tx) => tx.userId == filterUserId.value).toList();
+        results =
+            results.where((tx) => tx.userId == filterUserId.value).toList();
       }
 
-      if (query.isNotEmpty) {
-        final q = query.toLowerCase();
-        mockData = mockData.where((tx) {
-          final matchId = (tx.transactionId ?? '').toLowerCase().contains(q);
-          final matchNote = (tx.note ?? '').toLowerCase().contains(q);
-          final matchBarcode = tx.items.any((item) =>
-              (item.packageInfo?.barcodeValue ?? '').toLowerCase().contains(q));
-          return matchId || matchNote || matchBarcode;
+      if (q.isNotEmpty) {
+        results = results.where((tx) {
+          final matchId =
+              (tx.transactionId ?? '').toLowerCase().contains(q.toLowerCase());
+          final matchNote =
+              (tx.note ?? '').toLowerCase().contains(q.toLowerCase());
+          return matchId || matchNote;
         }).toList();
       }
 
-      searchTransactionResults.assignAll(mockData);
+      searchTransactionResults.assignAll(results);
     } catch (e) {
       handleError(e);
     } finally {
@@ -437,7 +385,8 @@ class TSearchController extends GetxController with TErrorHandler {
       if (pkg != null) {
         // Có Package -> Tới trang Inventory Detail
         Get.toNamed(AppRoutes.inventoryDetail,
-            arguments: prod?.productId ?? pkg.productId);
+            arguments: prod?.productId ?? pkg.productId,
+            parameters: {'packageId': pkg.productPackageId});
       } else if (prod != null && prod.productId.isNotEmpty) {
         // Có Product nhưng chưa có Package -> Tới Product Catalog
         Get.toNamed(AppRoutes.productCatalogDetail, arguments: prod);
@@ -486,7 +435,7 @@ class TSearchController extends GetxController with TErrorHandler {
       product: ProductModel(
           productId: s.productId,
           name: isCategoryOnly ? s.categoryName : s.productName,
-          imageUrl: UrlHelper.normalizeImageUrl(s.imageUrl),
+          imageUrl: UrlHelperUtils.normalizeImageUrl(s.imageUrl),
           brand: s.brand,
           categoryId: s.categoryId,
           storeId: '',

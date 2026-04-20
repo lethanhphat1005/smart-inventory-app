@@ -40,7 +40,7 @@ class InventoryInsightController extends GetxController with TErrorHandler {
     try {
       final storeService = Get.find<StoreService>();
       final role = storeService.currentRole.value.toLowerCase();
-      canManageProduct = (role == 'manager');
+      canManageProduct = (role == 'manager' || role == 'owner');
     } catch (e) {
       canManageProduct = false;
     }

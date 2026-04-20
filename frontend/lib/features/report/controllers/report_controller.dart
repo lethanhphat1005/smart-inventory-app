@@ -1,33 +1,37 @@
 import 'package:frontend/core/infrastructure/models/transaction_model.dart';
+import 'package:frontend/core/infrastructure/utils/day_formatter_utils.dart';
+import 'package:frontend/core/infrastructure/utils/error_handler_utils.dart';
+import 'package:frontend/features/report/providers/report_provider.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
-class ReportController extends GetxController {
+class ReportController extends GetxController with TErrorHandler {
   final _box = GetStorage();
+  late final ReportProvider _provider;
 
-  // Trạng thái chung
   final RxString activeTab = 'Today'.obs;
   final RxBool isLoading = true.obs;
-
-  // Dữ liệu
   final RxList<TransactionModel> allTransactions = <TransactionModel>[].obs;
-
-  // Trạng thái của Calendar
   final Rx<DateTime> focusedDay = DateTime.now().obs;
   final Rx<DateTime> selectedDay = DateTime.now().obs;
+
+  // Chỉ thêm 2 phần này để UI Filter hết báo lỗi
+  final RxString activeFilterType = 'All'.obs;
+  void changeFilterType(String type) => activeFilterType.value = type;
 
   @override
   void onInit() {
     super.onInit();
-    // Lấy trạng thái Tab đã lưu từ Local Storage (Mặc định là Today)
+    _provider = ReportProvider();
     activeTab.value = _box.read('report_active_tab') ?? 'Today';
-    fetchMockData();
+
+    // Giữ nguyên tên gốc của bạn
+    fetchTransactions();
   }
 
   void changeTab(String tab) {
     if (activeTab.value == tab) return;
     activeTab.value = tab;
-    // Lưu xuống Local Storage
     _box.write('report_active_tab', tab);
   }
 
@@ -36,86 +40,64 @@ class ReportController extends GetxController {
     focusedDay.value = focused;
   }
 
-  // Hàm lấy danh sách giao dịch cho 1 ngày cụ thể (Dùng để vẽ chấm trên lịch)
+  // Trả lại nguyên tên fetchTransactions và thêm param để không bị lỗi ở View
+  Future<void> fetchTransactions({bool isRefresh = false}) async {
+    if (isRefresh) {
+      isLoading.value = true;
+    }
+
+    try {
+      final now = DateTime.now();
+      final startDate = DateTime(now.year, now.month - 2, 1);
+      final endDate = DateTime(now.year, now.month + 2, 0);
+
+      final startDateStr =
+          "${startDate.year}-${startDate.month.toString().padLeft(2, '0')}-${startDate.day.toString().padLeft(2, '0')}";
+      final endDateStr =
+          "${endDate.year}-${endDate.month.toString().padLeft(2, '0')}-${endDate.day.toString().padLeft(2, '0')}";
+
+      final data = await _provider.getTransactions(queryParams: {
+        'limit': 100,
+        'sortBy': 'createdAt',
+        'sortOrder': 'desc',
+        'startDate': startDateStr,
+        'endDate': endDateStr,
+      });
+
+      allTransactions.assignAll(data);
+    } catch (e) {
+      handleError(e);
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   List<TransactionModel> getTransactionsForDay(DateTime day) {
     return allTransactions.where((tx) {
       if (tx.createdAt == null) return false;
-      return isSameDay(tx.createdAt!, day);
+      return isSameDay(tx.createdAt!.toLocal(), day);
     }).toList();
   }
 
-  // Hàm lọc dữ liệu để hiển thị bên dưới View
+  // Lọc thêm theo filter để View hiển thị đúng
   List<TransactionModel> get filteredTransactions {
     final targetDay =
         activeTab.value == 'Today' ? DateTime.now() : selectedDay.value;
-    return getTransactionsForDay(targetDay);
+
+    final dayTransactions = getTransactionsForDay(targetDay);
+
+    if (activeFilterType.value == 'All') {
+      return dayTransactions;
+    }
+
+    return dayTransactions
+        .where((tx) =>
+            tx.type.toLowerCase() == activeFilterType.value.toLowerCase())
+        .toList();
   }
 
-  // Tiện ích so sánh ngày (bỏ qua giờ phút giây)
   bool isSameDay(DateTime a, DateTime b) {
     return a.year == b.year && a.month == b.month && a.day == b.day;
-  }
-
-  Future<void> fetchMockData() async {
-    isLoading.value = true;
-    await Future.delayed(const Duration(milliseconds: 1000)); // Fake delay
-
-    final today = DateTime.now();
-    // Tạo Mock Data động dựa vào ngày hiện tại để bạn test Lịch dễ dàng
-    allTransactions.assignAll([
-      TransactionModel(
-          transactionId: 'TRX-001',
-          type: 'ADJUSTMENT',
-          status: 'COMPLETED',
-          totalPrice: 0,
-          createdAt: today,
-          items: []),
-      TransactionModel(
-          transactionId: 'TRX-002',
-          type: 'INBOUND',
-          status: 'COMPLETED',
-          totalPrice: 150000,
-          createdAt: today,
-          items: []),
-      TransactionModel(
-          transactionId: 'TRX-003',
-          type: 'OUTBOUND',
-          status: 'COMPLETED',
-          totalPrice: 50000,
-          createdAt: today,
-          items: []),
-      TransactionModel(
-          transactionId: 'TRX-004',
-          type: 'INBOUND',
-          status: 'COMPLETED',
-          totalPrice: 20000,
-          createdAt: today,
-          items: []), // Chấm thứ 4 sẽ bị ẩn theo yêu cầu max 3
-
-      TransactionModel(
-          transactionId: 'TRX-005',
-          type: 'OUTBOUND',
-          status: 'COMPLETED',
-          totalPrice: 120000,
-          createdAt: today.subtract(const Duration(days: 1)),
-          items: []),
-      TransactionModel(
-          transactionId: 'TRX-006',
-          type: 'ADJUSTMENT',
-          status: 'COMPLETED',
-          totalPrice: 0,
-          createdAt: today.subtract(const Duration(days: 2)),
-          items: []),
-      TransactionModel(
-          transactionId: 'TRX-007',
-          type: 'INBOUND',
-          status: 'COMPLETED',
-          totalPrice: 30000,
-          createdAt: today.subtract(const Duration(days: 2)),
-          items: []),
-    ]);
-
-    isLoading.value = false;
   }
 
   String get currentDateStr {
@@ -134,20 +116,19 @@ class ReportController extends GetxController {
       'November',
       'December'
     ];
-    return '${months[now.month - 1]} ${now.day},';
+    final targetDay = activeTab.value == 'Today' ? now : selectedDay.value;
+
+    return '${months[targetDay.month - 1]} ${targetDay.day}, ${targetDay.year}';
   }
 
   String get currentDayStr {
     final now = DateTime.now();
-    final days = [
-      'Monday',
-      'Tuesday',
-      'Wednesday',
-      'Thursday',
-      'Friday',
-      'Saturday',
-      'Sunday'
-    ];
-    return days[now.weekday - 1];
+    final targetDay = activeTab.value == 'Today' ? now : selectedDay.value;
+    if (isSameDay(now, targetDay)) return 'Today';
+    if (isSameDay(now.subtract(const Duration(days: 1)), targetDay)) {
+      return 'Yesterday';
+    }
+
+    return DayFormatterUtils.formatDate(targetDay, format: 'EEEE');
   }
 }

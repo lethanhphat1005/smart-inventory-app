@@ -7,7 +7,6 @@ import 'package:get/get.dart';
 
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
-import 'package:frontend/core/ui/widgets/t_bottom_nav_spacer_widget.dart';
 
 class EditProfileMobileView extends GetView<ProfileEditController> {
   const EditProfileMobileView({super.key});
@@ -22,12 +21,10 @@ class EditProfileMobileView extends GetView<ProfileEditController> {
           child: Column(
             children: [
               EditProfileHeaderWidget(),
-              // SizedBox(height: AppSizes.p32),
               EditProfileFormWidget(),
               SizedBox(height: AppSizes.p32),
               EditProfileSaveButtonWidget(),
               SizedBox(height: 40),
-              TBottomNavSpacerWidget(),
             ],
           ),
         ),

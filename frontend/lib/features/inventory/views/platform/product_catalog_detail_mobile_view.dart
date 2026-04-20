@@ -32,7 +32,6 @@ class ProductCatalogDetailMobileView
           slivers: [
             const ProductCatalogDetailHeaderWidget(),
 
-            // THÔNG TIN CƠ BẢN ĐÃ BỌC BẰNG OBX ĐỂ TỰ ĐỔI CHỮ
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(

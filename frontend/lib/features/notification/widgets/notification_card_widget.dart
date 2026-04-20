@@ -119,7 +119,7 @@ class NotificationCardWidget extends StatelessWidget {
                     width: 8,
                     height: 8,
                     decoration: BoxDecoration(
-                      color: AppColors.primary, // Chấm cam chủ đạo
+                      color: AppColors.primary,
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
@@ -140,10 +140,10 @@ class NotificationCardWidget extends StatelessWidget {
   }
 
   // =====================================
-  // HELPER: Cấu hình Icon & Màu sắc Pastel
+  // HELPER: Phân cấp Ưu tiên, Icon & Màu sắc
   // =====================================
   Map<String, dynamic> _getIconConfig(String type, bool isUnread) {
-    // Nếu ĐÃ ĐỌC: Đổi toàn bộ icon về màu xám mờ để giảm sự chú ý
+    // 0. NẾU ĐÃ ĐỌC: Chuyển về trạng thái xám mờ (Low Focus)
     if (!isUnread) {
       return {
         'icon': Iconsax.notification_bing_copy,
@@ -152,31 +152,54 @@ class NotificationCardWidget extends StatelessWidget {
       };
     }
 
-    // Nếu CHƯA ĐỌC: Dùng dải màu Toast siêu đẹp mà bạn đã cấu hình sẵn trong AppColors
+    // NẾU CHƯA ĐỌC: Phân rã theo cấp độ ưu tiên (Priority Hierarchy)
     switch (type) {
+      // CẤP 1 - URGENT (Khẩn cấp / Lỗi: Màu Đỏ Pastel)
+      case 'DISCREPANCY_ALERT':
       case 'LOW_STOCK':
         return {
-          'icon': Iconsax.box_remove_copy,
-          'color': AppColors.toastErrorGradientEnd, // Màu đỏ pastel
+          // Lệch kho dùng icon Warning, Hết hàng dùng icon Box Remove
+          'icon': type == 'DISCREPANCY_ALERT'
+              ? Iconsax.warning_2_copy
+              : Iconsax.box_remove_copy,
+          'color': AppColors.toastErrorGradientEnd,
           'bg': AppColors.toastErrorBg,
         };
-      case 'ORDER_CREATED':
-      case 'IMPORT':
-        return {
-          'icon': Iconsax.box_add_copy,
-          'color': AppColors.toastSuccessGradientEnd, // Màu xanh pastel
-          'bg': AppColors.toastSuccessBg,
-        };
+
+      // CẤP 2 - WARNING / ACTION (Cảnh báo / Gợi ý: Màu Vàng Cam Pastel)
+      case 'REORDER_SUGGESTION':
+      case 'ROLE_UPDATED':
       case 'SYSTEM':
         return {
-          'icon': Iconsax.info_circle_copy,
-          'color': AppColors.toastWarningGradientEnd, // Màu vàng cam
+          // Gợi ý dùng bóng đèn (idea), role/system dùng icon info
+          'icon': type == 'REORDER_SUGGESTION'
+              ? Iconsax.lamp_on_copy
+              : Iconsax.info_circle_copy,
+          'color': AppColors.toastWarningGradientEnd,
           'bg': AppColors.toastWarningBg,
         };
+
+      // CẤP 3 - SUCCESS / TRANSACTION (Giao dịch thành công: Màu Xanh Pastel)
+      case 'ORDER_CREATED':
+      case 'IMPORT':
+      case 'EXPORT':
+        return {
+          // Import/Tạo đơn dùng icon thêm hộp, Export dùng icon hộp có dấu tick
+          'icon':
+              type == 'EXPORT' ? Iconsax.box_tick_copy : Iconsax.box_add_copy,
+          'color': AppColors.toastSuccessGradientEnd,
+          'bg': AppColors.toastSuccessBg,
+        };
+
+      // CẤP 4 - BATCH / DEFAULT (Thông báo gộp / Chung: Màu Primary Brand)
+      case 'BATCH_LOW_STOCK':
       default:
         return {
-          'icon': Iconsax.notification_1_copy,
-          'color': AppColors.primary, // Cam đặc trưng
+          // Batch (nhiều sản phẩm) dùng icon xếp lớp (layer)
+          'icon': type == 'BATCH_LOW_STOCK'
+              ? Iconsax.layer_copy
+              : Iconsax.notification_1_copy,
+          'color': AppColors.primary, // Cam đặc trưng của App
           'bg': AppColors.primary.withOpacity(0.1),
         };
     }

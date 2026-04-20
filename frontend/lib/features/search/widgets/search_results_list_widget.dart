@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/features/search/widgets/search_filter_chips_widget.dart';
-import 'package:frontend/features/report/widgets/report/report_transaction_card_widget.dart'; // Nhớ import file này
+import 'package:frontend/features/report/widgets/report/report_transaction_card_widget.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
@@ -16,11 +16,13 @@ class SearchResultsListWidget extends GetView<TSearchController> {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
+      // 1. Nếu đang Loading (Gọi API)
       if (controller.isSearching.value) {
         return const Center(
             child: CircularProgressIndicator(color: AppColors.primary));
       }
 
+      // 2. Nếu ô search trống (Và không phải màn hình Transaction) -> Hiện Lịch sử
       if (controller.currentSearchQuery.value.isEmpty &&
           !controller.isTransactionSearch) {
         return const SingleChildScrollView(child: SearchHistoryWidget());
@@ -35,10 +37,12 @@ class SearchResultsListWidget extends GetView<TSearchController> {
           : controller.searchResults.length;
 
       return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // --- CHIPS LỌC ---
           if (controller.isTransactionSearch) const SearchFilterChipsWidget(),
 
-          // --- THANH GỢI Ý ---
+          // --- THANH GỢI Ý (Did you mean) ---
           if (controller.suggestion.isNotEmpty)
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
@@ -90,6 +94,18 @@ class SearchResultsListWidget extends GetView<TSearchController> {
               ),
             ),
 
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+            child: Text(
+              '$listLength ${TTexts.resultsFound.tr}',
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: AppColors.subText,
+              ),
+            ),
+          ),
+
           // --- DANH SÁCH HOẶC EMPTY STATE ---
           Expanded(
             child: isListEmpty
@@ -107,8 +123,8 @@ class SearchResultsListWidget extends GetView<TSearchController> {
                   )
                 : ListView.separated(
                     controller: controller.scrollController,
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 16, horizontal: 16),
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                     itemCount: listLength + 1,
                     separatorBuilder: (_, __) => controller.isTransactionSearch
                         ? const SizedBox(height: 12)
@@ -127,29 +143,32 @@ class SearchResultsListWidget extends GetView<TSearchController> {
                             : const SizedBox(height: 80);
                       }
 
-                      // RENDER GIAO DỊCH
+                      // --- RENDER GIAO DỊCH ---
                       if (controller.isTransactionSearch) {
                         final tx = controller.searchTransactionResults[index];
+                        final String typeLower = tx.type.toLowerCase();
 
-                        Color typeColor = AppColors.primaryText;
-                        Color moneyColor = AppColors.primaryText;
-                        Color itemsColor = AppColors.primaryText;
+                        Color themeColor = AppColors.primaryText;
                         String bottomLabel = 'Total Items / Transaction';
 
-                        if (tx.type == 'INBOUND') {
-                          typeColor = AppColors.stockIn;
-                          itemsColor = AppColors.stockIn;
-                          moneyColor = AppColors.stockOut;
-                        } else if (tx.type == 'OUTBOUND') {
-                          typeColor = AppColors.stockOut;
-                          itemsColor = AppColors.stockOut;
-                          moneyColor = AppColors.stockIn;
+                        if (typeLower == 'import') {
+                          themeColor = AppColors.stockIn;
+                        } else if (typeLower == 'export') {
+                          themeColor = AppColors.stockOut;
                         } else {
-                          typeColor = const Color(0xFFFF9900);
-                          itemsColor = const Color(0xFFFF9900);
-                          moneyColor = AppColors.stockIn;
+                          themeColor = const Color(0xFFFF9900);
                           bottomLabel = 'Check Items / Stock Stats';
                         }
+
+                        final String displayType = tx.type.isNotEmpty
+                            ? '${tx.type[0].toUpperCase()}${tx.type.substring(1).toLowerCase()}'
+                            : 'Unknown';
+
+                        final String itemCountDisplay = tx.itemCount > 0
+                            ? tx.itemCount.toString()
+                            : (tx.items.isNotEmpty
+                                ? tx.items.length.toString()
+                                : '0');
 
                         return GestureDetector(
                           onTap: () => controller.handleItemTap(tx),
@@ -158,20 +177,21 @@ class SearchResultsListWidget extends GetView<TSearchController> {
                             dateStr: tx.createdAt != null
                                 ? '${tx.createdAt!.day}/${tx.createdAt!.month}/${tx.createdAt!.year}'
                                 : 'N/A',
-                            typeDisplay: tx.type,
-                            typeColor: typeColor,
+                            typeDisplay: displayType,
+                            typeColor: themeColor,
                             leftBottomLabel: bottomLabel,
-                            itemsDisplay: tx.items.length.toString(),
-                            itemsColor: itemsColor,
-                            moneyDisplay: '\$${tx.totalPrice}',
-                            moneyColor: moneyColor,
-                            isInbound: tx.type == 'INBOUND',
-                            isOutbound: tx.type == 'OUTBOUND',
+                            itemsDisplay: itemCountDisplay,
+                            itemsColor: themeColor,
+                            moneyDisplay:
+                                '\$${tx.totalPrice.toStringAsFixed(2)}',
+                            moneyColor: themeColor,
+                            isInbound: typeLower == 'import',
+                            isOutbound: typeLower == 'export',
                           ),
                         );
                       }
 
-                      // RENDER SẢN PHẨM
+                      // --- RENDER SẢN PHẨM ---
                       final displayItem = controller.searchResults[index];
                       return SearchSimpleItemWidget(
                         displayItem: displayItem,

@@ -26,7 +26,7 @@ transactionRouter.use(authenticate, requireStoreContext);
  *  - sortBy?: 'createdAt' | 'totalPrice'
  *  - sortOrder?: 'asc' | 'desc'
  *  - type?: 'import' | 'export'
- *  - status?: 'pending' | 'completed' | 'cancelled'
+ *  - userId?: uuid, string
  */
 transactionRouter.get(
   '/',

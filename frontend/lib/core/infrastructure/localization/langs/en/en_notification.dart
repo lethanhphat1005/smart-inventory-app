@@ -26,4 +26,16 @@ final Map<String, String> enNotification = {
   TTexts.filterAlerts: 'Alerts',
   TTexts.filterTransactions: 'Transactions',
   TTexts.filterSystem: 'System',
+
+  TTexts.filterLowStock: 'Low Stock',
+  TTexts.filterDiscrepancy: 'Discrepancy',
+  TTexts.filterReorder: 'Reorder Suggestion',
+  TTexts.filterImport: 'Import',
+  TTexts.filterExport: 'Export',
+
+  TTexts.storeNotFound: 'Store not found.',
+  TTexts.cannotAccessStore: 'Cannot access store.',
+  TTexts.sessionExpiredTitle: 'Session Expired',
+  TTexts.sessionExpiredMessage:
+      'Your permissions have changed. Please log in again.',
 };

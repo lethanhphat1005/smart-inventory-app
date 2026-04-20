@@ -77,8 +77,6 @@ export class SearchRepository {
       categoryName: row.categoryName,
       productPackageId: row.productPackageId,
       displayName: row.displayName,
-      barcodeValue: row.barcodeValue,
-      barcodeType: row.barcodeType,
       importPrice: row.importPrice?.toNumber() ?? null,
       sellingPrice: row.sellingPrice?.toNumber() ?? null,
       quantity: row.quantity,
@@ -129,6 +127,14 @@ export class SearchRepository {
           LEFT JOIN "ProductPackage" pp
             ON pp.product_id = p.product_id
           AND pp.active_status = 'active'
+          LEFT JOIN (
+            SELECT
+              ppb.product_package_id,
+              string_agg(ppb.barcode, ' ') AS barcodes
+            FROM "ProductPackageBarcode" ppb
+            GROUP BY ppb.product_package_id
+          ) pb
+            ON pb.product_package_id = pp.product_package_id
           LEFT JOIN "Unit" u
             ON u.unit_id = pp.unit_id
           LEFT JOIN "Inventory" i
@@ -138,7 +144,7 @@ export class SearchRepository {
             AND (
               setweight(to_tsvector('simple', coalesce(p.name, '')), 'A') ||
               setweight(to_tsvector('simple', coalesce(pp.display_name, '')), 'A') ||
-              setweight(to_tsvector('simple', coalesce(pp.barcode_value, '')), 'A') ||
+              setweight(to_tsvector('simple', coalesce(pb.barcodes, '')), 'A') ||
               setweight(to_tsvector('simple', coalesce(p.brand, '')), 'B') ||
               setweight(to_tsvector('simple', coalesce(c.name, '')), 'C') ||
               setweight(to_tsvector('simple', coalesce(u.name, '')), 'C')
@@ -160,8 +166,6 @@ export class SearchRepository {
             c.name AS "categoryName",
             pp.product_package_id AS "productPackageId",
             pp.display_name AS "displayName",
-            pp.barcode_value AS "barcodeValue",
-            pp.barcode_type AS "barcodeType",
             pp.import_price AS "importPrice",
             pp.selling_price AS "sellingPrice",
             i.quantity AS "quantity",
@@ -172,7 +176,7 @@ export class SearchRepository {
             (
               setweight(to_tsvector('simple', coalesce(p.name, '')), 'A') ||
               setweight(to_tsvector('simple', coalesce(pp.display_name, '')), 'A') ||
-              setweight(to_tsvector('simple', coalesce(pp.barcode_value, '')), 'A') ||
+              setweight(to_tsvector('simple', coalesce(pb.barcodes, '')), 'A') ||
               setweight(to_tsvector('simple', coalesce(p.brand, '')), 'B') ||
               setweight(to_tsvector('simple', coalesce(c.name, '')), 'C') ||
               setweight(to_tsvector('simple', coalesce(u.name, '')), 'C')
@@ -183,6 +187,14 @@ export class SearchRepository {
           LEFT JOIN "ProductPackage" pp
             ON pp.product_id = p.product_id
           AND pp.active_status = 'active'
+          LEFT JOIN (
+            SELECT
+              ppb.product_package_id,
+              string_agg(ppb.barcode, ' ') AS barcodes
+            FROM "ProductPackageBarcode" ppb
+            GROUP BY ppb.product_package_id
+          ) pb
+            ON pb.product_package_id = pp.product_package_id
           LEFT JOIN "Unit" u
             ON u.unit_id = pp.unit_id
           LEFT JOIN "Inventory" i
@@ -199,8 +211,6 @@ export class SearchRepository {
           "categoryName",
           "productPackageId",
           "displayName",
-          "barcodeValue",
-          "barcodeType",
           "importPrice",
           "sellingPrice",
           "quantity",

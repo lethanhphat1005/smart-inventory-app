@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/infrastructure/constants/text_strings.dart'; // ĐÃ THÊM
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
+import 'package:get/get.dart'; // ĐÃ THÊM
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 
 class ReportTransactionCardWidget extends StatelessWidget {
@@ -37,7 +39,7 @@ class ReportTransactionCardWidget extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: AppSizes.p16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.white, // Nền trắng y hệt Receipt
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -50,19 +52,19 @@ class ReportTransactionCardWidget extends StatelessWidget {
       child: Column(
         children: [
           _buildRow(
-            'Transaction Number',
+            TTexts.transactionId.tr,
             transactionId,
             rightWidget: _buildFakeBarcode(),
           ),
           const SizedBox(height: 20),
           _buildRow(
-            'Transaction Date',
+            TTexts.transactionDate.tr,
             dateStr,
             rightWidget: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                const Text('Transaction Type',
-                    style: TextStyle(
+                Text(TTexts.transactionType.tr,
+                    style: const TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w500,
                         color: AppColors.subText)),
@@ -113,26 +115,33 @@ class ReportTransactionCardWidget extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(leftTitle,
-                style: const TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.subText,
-                    fontFamily: 'Poppins')),
-            const SizedBox(height: 4),
-            customLeftWidget ??
-                Text(leftValue,
-                    style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w400,
-                        color: AppColors.primaryText,
-                        fontFamily: 'Poppins')),
-          ],
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(leftTitle,
+                  style: const TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.subText,
+                      fontFamily: 'Poppins')),
+              const SizedBox(height: 4),
+              customLeftWidget ??
+                  Text(leftValue,
+                      style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w400,
+                          color: AppColors.primaryText,
+                          fontFamily: 'Poppins'),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1),
+            ],
+          ),
         ),
-        if (rightWidget != null) rightWidget,
+        if (rightWidget != null) ...[
+          const SizedBox(width: 24),
+          rightWidget,
+        ]
       ],
     );
   }

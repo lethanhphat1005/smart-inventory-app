@@ -7,7 +7,7 @@ import 'package:get/get.dart';
 import 'package:frontend/core/infrastructure/utils/error_handler_utils.dart';
 import 'package:frontend/core/infrastructure/models/product_model.dart';
 import 'package:frontend/core/infrastructure/models/product_package_model.dart';
-import 'package:frontend/core/infrastructure/models/inventory_model.dart'; // THÊM MODEL INVENTORY
+import 'package:frontend/core/infrastructure/models/inventory_model.dart';
 import 'package:frontend/core/state/services/store_service.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/ui/widgets/t_snackbars_widget.dart';
@@ -15,7 +15,6 @@ import 'package:frontend/features/inventory/providers/inventory_provider.dart';
 import 'package:frontend/routes/app_routes.dart';
 import 'package:frontend/core/ui/widgets/t_custom_dialog_widget.dart';
 
-// THÊM CONTROLLER ĐỂ REFRESH TỰ ĐỘNG
 import 'package:frontend/features/inventory/controllers/inventory_controller.dart';
 import 'package:frontend/features/inventory/controllers/inventory_insight_controller.dart';
 
@@ -41,7 +40,9 @@ class ProductCatalogDetailController extends GetxController with TErrorHandler {
     try {
       final storeService = Get.find<StoreService>();
       final role = storeService.currentRole.value.toLowerCase();
-      canManageProduct = (role == 'manager');
+      // ĐÃ FIX PHÂN QUYỀN: Cấp quyền cho cả owner, admin và manager
+      canManageProduct =
+          (role == 'owner' || role == 'admin' || role == 'manager');
     } catch (e) {
       canManageProduct = false;
     }
@@ -60,10 +61,8 @@ class ProductCatalogDetailController extends GetxController with TErrorHandler {
 
   Future<void> fetchPackages({bool isRefresh = false}) async {
     try {
-      // 1. ÉP LUÔN LUÔN BẬT LOADING ĐỂ SHIMMER CHẠY CẢ KHI PULL-TO-REFRESH
       isLoadingPackages.value = true;
 
-      // Tạo độ trễ nhỏ để trải nghiệm mượt mà không bị chớp giật
       if (isRefresh) {
         await Future.delayed(const Duration(milliseconds: 300));
       }
@@ -76,13 +75,11 @@ class ProductCatalogDetailController extends GetxController with TErrorHandler {
       final fetchedPackages = results[0] as List<ProductPackageModel>;
       final allInventories = results[1] as List<InventoryModel>;
 
-      // 2. DÙNG BLACKLIST: Lấy ra những ID CHẮC CHẮN ĐÃ BỊ INACTIVE TRONG KHO
       final deadInventoryPackageIds = allInventories
           .where((inv) => (inv.activeStatus).toLowerCase() == 'inactive')
           .map((inv) => inv.productPackageId)
           .toSet();
 
-      // 3. LỌC: Package phải 'active' VÀ không nằm trong sổ đen của kho
       final validPackages = fetchedPackages.where((p) {
         final isPackageActive = (p.activeStatus).toLowerCase() == 'active';
         final isInventoryDead =
@@ -101,22 +98,17 @@ class ProductCatalogDetailController extends GetxController with TErrorHandler {
 
   Future<void> refreshProductData() async {
     try {
-      // 1. Lấy thông tin mới nhất từ Server
       final data = await _provider.getProductDetail(product.productId);
       final updatedProduct = ProductModel.fromJson(data);
 
-      // 2. Cập nhật tên và hãng
       rxName.value = updatedProduct.name;
       rxBrand.value = updatedProduct.brand ?? '';
 
-      // 3. CHIÊU "LỪA" ĐIỆN THOẠI TẢI ẢNH MỚI NẰM Ở ĐÂY
       if (updatedProduct.imageUrl != null &&
           updatedProduct.imageUrl!.isNotEmpty) {
-        // Lấy thời gian hiện tại
         final thoiGian = DateTime.now().millisecondsSinceEpoch;
         final linkGoc = updatedProduct.imageUrl!;
 
-        // Nối thời gian vào đuôi link
         if (linkGoc.contains('?')) {
           rxImageUrl.value = "$linkGoc&v=$thoiGian";
         } else {
@@ -126,7 +118,6 @@ class ProductCatalogDetailController extends GetxController with TErrorHandler {
         rxImageUrl.value = '';
       }
 
-      // 4. Báo cho trang danh sách bên ngoài cập nhật theo
       if (Get.isRegistered<ProductCatalogController>()) {
         Get.find<ProductCatalogController>().fetchCategories();
       }
@@ -177,13 +168,63 @@ class ProductCatalogDetailController extends GetxController with TErrorHandler {
     });
   }
 
-  void deleteProduct() {
+  void deleteProduct() async {
     if (packages.isNotEmpty) {
-      TSnackbarsWidget.error(
-          title: TTexts.errorTitle.tr, message: TTexts.productNotEmptyError.tr);
-      return;
+      // Kiểm tra tồn kho của packages bên trong
+      try {
+        FullScreenLoaderUtils.openLoadingDialog(TTexts.loading.tr);
+        final allInvs = await _provider.getInventories();
+        final packageIds = packages.map((p) => p.productPackageId).toSet();
+
+        final remainingStockInvs = allInvs
+            .where((inv) =>
+                packageIds.contains(inv.productPackageId) && inv.quantity > 0)
+            .toList();
+
+        FullScreenLoaderUtils.stopLoading();
+
+        if (remainingStockInvs.isNotEmpty) {
+          // Nếu còn tồn kho thì chuyển sang outbound
+          Get.dialog(TCustomDialogWidget(
+              title: TTexts.inventoryNotEmptyTitle.tr,
+              description: TTexts.productHasRemainingStock.tr,
+              icon: const Text('📦', style: TextStyle(fontSize: 40)),
+              primaryButtonText: TTexts.clearAllStock.tr,
+              secondaryButtonText: TTexts.cancel.tr,
+              onSecondaryPressed: () => Get.back(),
+              onPrimaryPressed: () {
+                Get.back();
+                // Gom toàn bộ Data
+                final itemsToAdd = remainingStockInvs.map((inv) {
+                  final pkg = packages.firstWhere(
+                      (p) => p.productPackageId == inv.productPackageId);
+                  return {
+                    'package': pkg,
+                    'inventory': inv,
+                    'quantity': inv.quantity,
+                  };
+                }).toList();
+
+                // Đẩy sang Outbound
+                Get.toNamed(AppRoutes.outboundTransaction,
+                    arguments: {'autoAddItems': itemsToAdd});
+              }));
+          return;
+        } else {
+          // Nếu packages trống thì xóa package trước rồi mới đi xóa product
+          TSnackbarsWidget.error(
+              title: TTexts.errorTitle.tr,
+              message: TTexts.productNotEmptyError.tr);
+          return;
+        }
+      } catch (e) {
+        FullScreenLoaderUtils.stopLoading();
+        handleError(e);
+        return;
+      }
     }
 
+    // Logic xóa Product bình thường (như cũ)
     Get.dialog(
       TCustomDialogWidget(
         title: TTexts.deleteProduct.tr,
@@ -196,17 +237,13 @@ class ProductCatalogDetailController extends GetxController with TErrorHandler {
           Get.back();
           try {
             FullScreenLoaderUtils.openLoadingDialog(TTexts.deletingProduct.tr);
-
             await _provider.deleteProduct(product.productId);
-
             FullScreenLoaderUtils.stopLoading();
 
             if (Get.isRegistered<CategoryDetailController>()) {
               Get.find<CategoryDetailController>()
                   .fetchProducts(isRefresh: true);
             }
-
-            // Báo cho các màn hình Tổng update
             if (Get.isRegistered<InventoryController>()) {
               Get.find<InventoryController>()
                   .fetchDashboardData(isRefresh: true);
@@ -252,11 +289,12 @@ class ProductCatalogDetailController extends GetxController with TErrorHandler {
     });
   }
 
+  // ==========================================
+  // XÓA 1 PACKAGE CỤ THỂ
+  // ==========================================
   void deletePackage(ProductPackageModel package) async {
-    // 1. CHẶN NGAY NẾU ĐANG CÓ DIALOG MỞ
     if (_isDeleteDialogShowing) return;
 
-    // 2. CHẶN SLIDABLE GỌI LẠI ITEM ĐÃ XÓA
     if (!packages.any((p) => p.productPackageId == package.productPackageId)) {
       return;
     }
@@ -280,14 +318,20 @@ class ProductCatalogDetailController extends GetxController with TErrorHandler {
                   'count': currentQuantity.toString()
                 })})',
             icon: const Text('📦', style: TextStyle(fontSize: 40)),
-            primaryButtonText: TTexts.makeTransaction.tr,
+            primaryButtonText: TTexts.clearStock.tr, // Text mới
             secondaryButtonText: TTexts.cancel.tr,
             onSecondaryPressed: () => Get.back(),
             onPrimaryPressed: () {
-              // TODO: Điều hướng sang trang tạo Transaction
               Get.back();
-              TSnackbarsWidget.info(
-                  title: 'Info', message: 'Navigate to Transaction page');
+              Get.toNamed(AppRoutes.outboundTransaction, arguments: {
+                'autoAddItems': [
+                  {
+                    'package': package,
+                    'inventory': inv,
+                    'quantity': currentQuantity,
+                  }
+                ]
+              });
             },
           ),
           barrierDismissible: false,
@@ -295,6 +339,7 @@ class ProductCatalogDetailController extends GetxController with TErrorHandler {
         return;
       }
 
+      // Logic xóa Package bình thường
       final bool? shouldDelete = await Get.dialog<bool>(
         TCustomDialogWidget(
           title: TTexts.deletePackage.tr,
@@ -321,7 +366,6 @@ class ProductCatalogDetailController extends GetxController with TErrorHandler {
     }
   }
 
-  // Hàm phụ thực hiện lệnh gọi API xóa
   Future<void> _performDeletePackage(String packageId) async {
     try {
       FullScreenLoaderUtils.openLoadingDialog(TTexts.deletingPackage.tr);
@@ -333,7 +377,6 @@ class ProductCatalogDetailController extends GetxController with TErrorHandler {
           title: TTexts.successTitle.tr,
           message: TTexts.packageDeletedSuccess.tr);
 
-      // BÁO CHO CÁC TRANG KIA TỰ ĐỘNG CẬP NHẬT KHI XÓA THÀNH CÔNG 🟢
       if (Get.isRegistered<InventoryController>()) {
         Get.find<InventoryController>().fetchDashboardData(isRefresh: true);
       }

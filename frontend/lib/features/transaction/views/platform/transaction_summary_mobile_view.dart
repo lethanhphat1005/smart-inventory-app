@@ -24,37 +24,34 @@ class TransactionSummaryMobileView
       // KÍCH HOẠT HIỆU ỨNG BLUR CHO APPBAR
       extendBodyBehindAppBar: true,
       appBar: TAppBarWidget(
-        title: TTexts.transactionCompletedTitle.tr,
+        title: controller.isAdjustment
+            ? TTexts.adjustmentCompletedTitle.tr
+            : TTexts.transactionCompletedTitle.tr,
       ),
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
-        // Đẩy content xuống dưới AppBar
         padding: EdgeInsets.fromLTRB(
             AppSizes.p24, topOffset + 20, AppSizes.p24, AppSizes.p24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // HÌNH ẢNH NHỎ LẠI NHƯ YÊU CẦU
             Image.asset(TImages.coreImages.successTransaction,
                 width: 160, height: 160),
 
             const SizedBox(height: 16),
 
-            // TEXT SUCCESS MỎNG LẠI (w500 thay vì bold)
             Text(
-              TTexts.transactionSuccessTitle.tr,
-              style: const TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 22,
-                  fontWeight: FontWeight.w500, // Chữ thon gọn hơn
-                  color: AppColors.primaryText),
-            ),
+                controller.isAdjustment
+                    ? '${TTexts.adjustmentCompletedTitle.tr}!'
+                    : '${TTexts.transactionCompletedTitle.tr}!',
+                style: const TextStyle(/*...*/)),
             const SizedBox(height: 8),
             Text(
-              TTexts.transactionSuccessSub.tr,
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: AppColors.subText, fontSize: 14),
-            ),
+                controller.isAdjustment
+                    ? TTexts.adjustmentSuccessSub.tr
+                    : TTexts.transactionSuccessSub.tr,
+                textAlign: TextAlign.center,
+                style: const TextStyle(/*...*/)),
             const SizedBox(height: 32),
 
             // THẺ HÓA ĐƠN

@@ -27,7 +27,6 @@ export class NotificationController {
     sendResponse.success(res, null, { status: StatusCodes.OK });
   };
 
-  // API Lấy danh sách thông báo
   getNotifications = async (req: Request, res: Response): Promise<void> => {
     const user = requireReqUser(req);
     const storeId = req.headers['x-store-id'] as string;
@@ -56,7 +55,6 @@ export class NotificationController {
     sendResponse.success(res, notifications, { status: StatusCodes.OK });
   };
 
-  // API Đánh dấu đã đọc
   markAsRead = async (req: Request, res: Response): Promise<void> => {
     const user = requireReqUser(req);
     const notificationId = req.params.notificationId as string;
@@ -68,7 +66,6 @@ export class NotificationController {
     });
   };
 
-  // API Xóa mềm
   deleteNotification = async (req: Request, res: Response): Promise<void> => {
     const user = requireReqUser(req);
     const notificationId = req.params.notificationId as string;
@@ -83,7 +80,6 @@ export class NotificationController {
     });
   };
 
-  // Thêm API này
   markAllAsRead = async (req: Request, res: Response): Promise<void> => {
     const user = requireReqUser(req);
     const storeId = req.headers['x-store-id'] as string;
@@ -104,10 +100,9 @@ export class NotificationController {
     });
   };
 
-  // API Test gửi thông báo từ Postman
   testSend = async (req: Request, res: Response): Promise<void> => {
     const user = requireReqUser(req);
-    const storeId = req.headers['x-store-id'] as string; // 👉 Bắt storeId từ Header
+    const storeId = req.headers['x-store-id'] as string;
 
     if (!storeId) {
       res.status(StatusCodes.BAD_REQUEST).json({

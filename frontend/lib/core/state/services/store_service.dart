@@ -4,10 +4,11 @@ import 'package:get_storage/get_storage.dart';
 class StoreService extends GetxService {
   final storage = GetStorage();
 
-  // Chỉ quản lý thông tin Không gian làm việc (Store)
+  // Chỉ quản lý thông tin Không gian làm việc
   final RxString currentStoreId = ''.obs;
   final RxString currentStoreName = ''.obs;
   final RxString currentRole = 'staff'.obs;
+  final RxString currentStoreAddress = ''.obs;
   final RxString currentInviteCode = ''.obs; 
 
   Future<StoreService> init() async {
@@ -15,6 +16,7 @@ class StoreService extends GetxService {
     currentStoreId.value = storage.read('STORE_ID') ?? '';
     currentStoreName.value = storage.read('STORE_NAME') ?? '';
     currentRole.value = storage.read('STORE_ROLE') ?? 'staff';
+    currentStoreAddress.value = storage.read('STORE_ADDRESS') ?? '';
     currentInviteCode.value =
         storage.read('STORE_INVITE_CODE') ?? ''; 
     return this;
@@ -43,16 +45,40 @@ class StoreService extends GetxService {
     currentInviteCode.value = newCode;
   }
 
+  // Dùng khi đã có address và muốn lưu riêng
+  Future<void> saveStoreAddress(String address) async {
+    await storage.write('STORE_ADDRESS', address);
+    currentStoreAddress.value = address;
+  }
+
+  // Dùng khi edit store xong, cập nhật nhanh name + address
+  Future<void> updateStoreInfo({
+    String? name,
+    String? address,
+  }) async {
+    if (name != null) {
+      await storage.write('STORE_NAME', name);
+      currentStoreName.value = name;
+    }
+
+    if (address != null) {
+      await storage.write('STORE_ADDRESS', address);
+      currentStoreAddress.value = address;
+    }
+  }
+
   // Xóa dữ liệu Không gian làm việc (Dùng khi đăng xuất)
   Future<void> clearWorkspaceData() async {
     await storage.remove('STORE_ID');
     await storage.remove('STORE_NAME');
     await storage.remove('STORE_ROLE');
+    await storage.remove('STORE_ADDRESS');
     await storage.remove('STORE_INVITE_CODE');
 
     currentStoreId.value = '';
     currentStoreName.value = '';
     currentRole.value = 'staff';
+    currentStoreAddress.value = '';
     currentInviteCode.value = '';
   }
 }

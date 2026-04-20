@@ -21,9 +21,7 @@ class _SearchFilterBottomSheetWidgetState
   final TSearchController controller = Get.find();
 
   late String selectedType;
-  late String selectedStatus;
   DateTimeRange? selectedDateRange;
-
   late String selectedUserId;
   late String selectedUserName;
 
@@ -31,7 +29,6 @@ class _SearchFilterBottomSheetWidgetState
   void initState() {
     super.initState();
     selectedType = controller.filterType.value;
-    selectedStatus = controller.filterStatus.value;
     selectedDateRange = controller.filterDateRange.value;
     selectedUserId = controller.filterUserId.value;
     selectedUserName = controller.filterUserName.value;
@@ -58,7 +55,6 @@ class _SearchFilterBottomSheetWidgetState
 
   @override
   Widget build(BuildContext context) {
-    // Lấy ID thật của người đang đăng nhập để so sánh "Me"
     final currentAuthUserId =
         Get.find<UserService>().currentUser.value?.userId ?? 'USER-Admin';
 
@@ -66,7 +62,7 @@ class _SearchFilterBottomSheetWidgetState
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // --- CHỌN LOẠI ---
+        // --- CHỌN LOẠI (TYPE) ---
         Text(TTexts.transactionType.tr,
             style: const TextStyle(
                 fontSize: 14,
@@ -80,27 +76,7 @@ class _SearchFilterBottomSheetWidgetState
             _buildChoiceChip(TTexts.filterAll),
             _buildChoiceChip(TTexts.filterInbound),
             _buildChoiceChip(TTexts.filterOutbound),
-            _buildChoiceChip(TTexts.filterAdjustment),
           ].map((widget) => widget('type')).toList(),
-        ),
-        const SizedBox(height: 20),
-
-        // --- CHỌN TRẠNG THÁI ---
-        Text(TTexts.transactionStatus.tr,
-            style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: AppColors.primaryText)),
-        const SizedBox(height: 12),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            _buildChoiceChip(TTexts.filterAll),
-            _buildChoiceChip(TTexts.filterCompleted),
-            _buildChoiceChip(TTexts.filterPending),
-            _buildChoiceChip(TTexts.filterCancelled),
-          ].map((widget) => widget('status')).toList(),
         ),
         const SizedBox(height: 20),
 
@@ -148,6 +124,7 @@ class _SearchFilterBottomSheetWidgetState
         ),
         const SizedBox(height: 20),
 
+        // --- DANH SÁCH NHÂN VIÊN TỪ API ---
         Text(TTexts.createdByUser.tr,
             style: const TextStyle(
                 fontSize: 14,
@@ -155,87 +132,92 @@ class _SearchFilterBottomSheetWidgetState
                 color: AppColors.primaryText)),
         const SizedBox(height: 12),
         SizedBox(
-          height: 90, // Chiều cao đủ cho Avatar + Text
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemCount: controller.availableUsers.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 16),
-            itemBuilder: (context, index) {
-              final user = controller.availableUsers[index];
-              final isSelected = selectedUserId == user.id;
-              final isMe = user.id == currentAuthUserId;
-              final displayName =
-                  isMe ? TTexts.me.tr : user.name; // Gán chữ "Me"
+          height: 90,
+          // Bọc Obx để tự vẽ lại khi API trả về danh sách User
+          child: Obx(() {
+            if (controller.availableUsers.isEmpty) {
+              return const Center(
+                  child: CircularProgressIndicator(strokeWidth: 2));
+            }
 
-              return GestureDetector(
-                onTap: () {
-                  setState(() {
-                    if (isSelected) {
-                      selectedUserId = '';
-                      selectedUserName = '';
-                    } else {
-                      selectedUserId = user.id;
-                      selectedUserName = displayName;
-                    }
-                  });
-                },
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Hình Avatar có viền khi chọn
-                    Container(
-                      padding: const EdgeInsets.all(2),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: isSelected
-                              ? AppColors.primary
-                              : Colors.transparent,
-                          width: 2,
+            return ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: controller.availableUsers.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 16),
+              itemBuilder: (context, index) {
+                final user = controller.availableUsers[index];
+                final isSelected = selectedUserId == user.id;
+                final isMe = user.id == currentAuthUserId;
+                final displayName = isMe ? TTexts.me.tr : user.name;
+
+                return GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      if (isSelected) {
+                        selectedUserId = '';
+                        selectedUserName = '';
+                      } else {
+                        selectedUserId = user.id;
+                        selectedUserName = displayName;
+                      }
+                    });
+                  },
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(2),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: isSelected
+                                ? AppColors.primary
+                                : Colors.transparent,
+                            width: 2,
+                          ),
+                        ),
+                        child: ClipOval(
+                          child: CachedNetworkImage(
+                            imageUrl: user.avatarUrl,
+                            width: 50,
+                            height: 50,
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => Container(
+                                color: AppColors.softGrey.withOpacity(0.2),
+                                child: const Center(
+                                    child: CircularProgressIndicator(
+                                        strokeWidth: 2))),
+                            errorWidget: (context, url, error) => Container(
+                                color: AppColors.softGrey.withOpacity(0.2),
+                                child: const Icon(Iconsax.user_copy,
+                                    size: 24, color: AppColors.subText)),
+                          ),
                         ),
                       ),
-                      child: ClipOval(
-                        child: CachedNetworkImage(
-                          imageUrl: user.avatarUrl,
-                          width: 50,
-                          height: 50,
-                          fit: BoxFit.cover,
-                          placeholder: (context, url) => Container(
-                              color: AppColors.softGrey.withOpacity(0.2),
-                              child: const Center(
-                                  child: CircularProgressIndicator(
-                                      strokeWidth: 2))),
-                          errorWidget: (context, url, error) => Container(
-                              color: AppColors.softGrey.withOpacity(0.2),
-                              child: const Icon(Iconsax.user_copy,
-                                  size: 24, color: AppColors.subText)),
+                      const SizedBox(height: 6),
+                      SizedBox(
+                        width: 60,
+                        child: Text(
+                          displayName,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isSelected
+                                ? AppColors.primary
+                                : AppColors.primaryText,
+                            fontWeight:
+                                isSelected ? FontWeight.bold : FontWeight.w500,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 6),
-                    // Tên hiển thị bên dưới
-                    SizedBox(
-                      width: 60,
-                      child: Text(
-                        displayName,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: isSelected
-                              ? AppColors.primary
-                              : AppColors.primaryText,
-                          fontWeight:
-                              isSelected ? FontWeight.bold : FontWeight.w500,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
+                    ],
+                  ),
+                );
+              },
+            );
+          }),
         ),
         const SizedBox(height: 32),
 
@@ -247,7 +229,6 @@ class _SearchFilterBottomSheetWidgetState
                 onPressed: () {
                   setState(() {
                     selectedType = TTexts.filterAll;
-                    selectedStatus = TTexts.filterAll;
                     selectedDateRange = null;
                     selectedUserId = '';
                     selectedUserName = '';
@@ -268,12 +249,9 @@ class _SearchFilterBottomSheetWidgetState
             const SizedBox(width: 12),
             Expanded(
               child: ElevatedButton(
-                onPressed: () => controller.applyFilters(
-                    selectedType,
-                    selectedStatus,
-                    selectedDateRange,
-                    selectedUserId,
-                    selectedUserName),
+                // ĐÃ XÓA: selectedStatus
+                onPressed: () => controller.applyFilters(selectedType,
+                    selectedDateRange, selectedUserId, selectedUserName),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   backgroundColor: AppColors.primary,
@@ -294,9 +272,7 @@ class _SearchFilterBottomSheetWidgetState
 
   Widget Function(String) _buildChoiceChip(String textKey) {
     return (String category) {
-      final isSelected = category == 'type'
-          ? selectedType == textKey
-          : selectedStatus == textKey;
+      final isSelected = selectedType == textKey;
       return ChoiceChip(
         label: Text(textKey.tr,
             style: TextStyle(
@@ -314,8 +290,7 @@ class _SearchFilterBottomSheetWidgetState
         onSelected: (bool selected) {
           if (selected) {
             setState(() {
-              if (category == 'type') selectedType = textKey;
-              if (category == 'status') selectedStatus = textKey;
+              selectedType = textKey;
             });
           }
         },

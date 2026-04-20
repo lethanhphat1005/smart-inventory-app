@@ -7,7 +7,7 @@ class ReportTransactionDetailBinding extends Bindings {
   void dependencies() {
     Get.lazyPut<ReportTransactionDetailController>(
         () => ReportTransactionDetailController());
-    Get.lazyPut<ReportTransactionExportController>(
-        () => ReportTransactionExportController());
+    Get.put<ReportTransactionExportController>(
+        ReportTransactionExportController());
   }
 }

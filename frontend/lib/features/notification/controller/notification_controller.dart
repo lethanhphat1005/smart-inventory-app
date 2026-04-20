@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/infrastructure/models/notification_model.dart';
 import 'package:frontend/core/infrastructure/models/user_profile_model.dart';
+import 'package:frontend/core/state/services/store_service.dart';
 import 'package:frontend/features/notification/providers/notification_provider.dart';
+import 'package:frontend/features/notification/utils/notification_router.dart';
 import 'package:get/get.dart';
 import 'package:frontend/core/ui/widgets/t_snackbars_widget.dart';
 
@@ -24,6 +26,9 @@ class NotificationController extends GetxController {
 
   // Biến quản lý Filter
   var selectedFilter = 'ALL'.obs;
+
+  // Service lấy storeId
+  final storeService = Get.find<StoreService>();
 
   @override
   void onInit() {
@@ -95,9 +100,6 @@ class NotificationController extends GetxController {
   //       .subscribe();
   // }
 
-  // ==========================================
-  // PHÂN TRANG
-  // ==========================================
   void _setupPagination() {
     scrollController.addListener(() {
       if (scrollController.position.pixels >=
@@ -114,8 +116,16 @@ class NotificationController extends GetxController {
       _hasMore = true;
       isLoading.value = true;
 
+      final String currentStoreId = storeService.currentStoreId.value;
+      if (currentStoreId.isEmpty) {
+        return;
+      }
+
       final response = await _provider.fetchNotifications(
-          page: _currentPage, size: _pageSize, type: selectedFilter.value);
+          page: _currentPage,
+          size: _pageSize,
+          type: selectedFilter.value,
+          storeId: currentStoreId);
 
       if (response.statusCode == 200) {
         final List data = response.data['data'] ?? [];
@@ -135,8 +145,13 @@ class NotificationController extends GetxController {
       isLoadMore.value = true;
       _currentPage++;
 
+      final String currentStoreId = storeService.currentStoreId.value;
+      if (currentStoreId.isEmpty) {
+        return;
+      }
+
       final response = await _provider.fetchNotifications(
-          page: _currentPage, size: _pageSize);
+          page: _currentPage, size: _pageSize, storeId: currentStoreId);
 
       if (response.statusCode == 200) {
         final List data = response.data['data'] ?? [];
@@ -154,9 +169,6 @@ class NotificationController extends GetxController {
     }
   }
 
-  // ==========================================
-  // 3. LOGIC XỬ LÝ DỮ LIỆU
-  // ==========================================
   void _updateUnreadCount() {
     unreadCount.value = notifications.where((n) => !n.isRead).length;
   }
@@ -192,9 +204,6 @@ class NotificationController extends GetxController {
     }
   }
 
-  // ==========================================
-  // XÓA THÔNG BÁO CÓ HỖ TRỢ HOÀN TÁC (UNDO)
-  // ==========================================
   void deleteNotificationWithUndo(NotificationModel item, int index) {
     final context = Get.context;
     if (context == null) return;
@@ -233,7 +242,6 @@ class NotificationController extends GetxController {
           notifications.insert(safeIndex, item);
           _updateUnreadCount();
 
-          // 🌐 DỊCH CHỮ TRONG SNACKBAR LỖI
           TSnackbarsWidget.error(
               title: TTexts.connectionError.tr,
               message: TTexts.cannotDeleteNotification.tr);
@@ -242,16 +250,19 @@ class NotificationController extends GetxController {
     });
   }
 
-  // Hàm chuyển Filter khi bấm nút
   void changeFilter(String newFilter) {
-    if (selectedFilter.value == newFilter) return; // Nếu bấm trùng thì bỏ qua
+    if (selectedFilter.value == newFilter) return;
     selectedFilter.value = newFilter;
-    fetchNotifications(); // Gọi lại API từ trang 1 với filter mới
+    fetchNotifications();
   }
 
-  // ==========================================
-  // HÀM FORMAT THỜI GIAN
-  // ==========================================
+  void handleNotificationClick(NotificationModel item) {
+    if (!item.isRead) {
+      markAsRead(item.notificationId);
+    }
+    NotificationRouter.navigate(item.type, item.referenceId, item.storeId);
+  }
+
   String formatTimeAgo(dynamic timeData) {
     if (timeData == null) return '';
     try {
@@ -260,7 +271,6 @@ class NotificationController extends GetxController {
           : DateTime.parse(timeData.toString()).toLocal();
       final difference = DateTime.now().difference(date);
 
-      // 🌐 DỊCH KHOẢNG THỜI GIAN
       if (difference.inDays > 7) {
         return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
       } else if (difference.inDays > 0) {

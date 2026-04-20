@@ -111,9 +111,7 @@ class NotificationMobileScreen extends StatelessWidget {
                           timeAgo: controller.formatTimeAgo(item.createdAt),
                           onLongPress: () =>
                               controller.markAsRead(item.notificationId),
-                          onTap: () {
-                            // TODO: Xử lý chuyển đến các screen tương ứng dựa trên thông báo
-                          },
+                          onTap: () => controller.handleNotificationClick(item),
                         ),
                       ),
                     );

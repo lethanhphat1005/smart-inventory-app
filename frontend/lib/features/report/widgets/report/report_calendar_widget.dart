@@ -53,8 +53,6 @@ class ReportCalendarWidget extends GetView<ReportController> {
                 color: AppColors.primary, shape: BoxShape.circle),
             markerSize: 6,
           ),
-
-          // CUSTOM MARKER: Vẽ tối đa 3 chấm dưới mỗi ngày
           calendarBuilders: CalendarBuilders(
             markerBuilder: (context, day, events) {
               if (events.isEmpty) return const SizedBox();
@@ -67,16 +65,14 @@ class ReportCalendarWidget extends GetView<ReportController> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: displayEvents.map((event) {
-                    // Đổi màu chấm dựa trên type giao dịch
-                    Color dotColor = AppColors.primaryText;
-                    if (event.type.toUpperCase() == 'INBOUND') {
-                      dotColor = AppColors.stockIn;
-                    }
-                    if (event.type.toUpperCase() == 'OUTBOUND') {
-                      dotColor = AppColors.stockOut;
-                    }
-                    if (event.type.toUpperCase() == 'ADJUSTMENT') {
-                      dotColor = const Color(0xFFFF9900);
+                    Color dotColor =
+                        AppColors.primaryText; // Màu mặc định nếu có type lạ
+                    final typeLower = event.type.toLowerCase();
+
+                    if (typeLower == 'import') {
+                      dotColor = AppColors.stockIn; // Chấm màu Xanh lá
+                    } else if (typeLower == 'export') {
+                      dotColor = AppColors.stockOut; // Chấm màu Đỏ
                     }
 
                     return Container(

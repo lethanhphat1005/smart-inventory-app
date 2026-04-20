@@ -39,8 +39,7 @@ export class ProductService {
     auditLogRepositoryTx: new AuditLogRepository(db),
   });
 
-  // public để product-package dùng
-  public async checkProductExisted(
+  private async checkAndGetExistedProduct(
     storeId: string,
     productId: string,
   ): Promise<ProductSimpleResponseDto> {
@@ -56,14 +55,7 @@ export class ProductService {
       });
     }
 
-    return {
-      categoryId: existingProduct.productId,
-      productId: existingProduct.productId,
-      name: existingProduct.name,
-      imageUrl: existingProduct.imageUrl,
-      brand: existingProduct.brand,
-      storeId: existingProduct.storeId,
-    };
+    return existingProduct;
   }
 
   private async checkCategoryExisted(categoryId: string): Promise<void> {
@@ -112,7 +104,10 @@ export class ProductService {
     storeId: string,
     productId: string,
   ): Promise<DetailProductResponseDto> {
-    const product = await this.productRepository.findOne(storeId, productId);
+    const product = await this.productRepository.findDetailOne(
+      storeId,
+      productId,
+    );
 
     if (!product) {
       throw new CustomError({
@@ -256,7 +251,10 @@ export class ProductService {
     productId: string,
     data: UpdateProductDto,
   ): Promise<ProductResponseDto> {
-    const existingProduct = await this.checkProductExisted(storeId, productId);
+    const existingProduct = await this.checkAndGetExistedProduct(
+      storeId,
+      productId,
+    );
 
     if (data.categoryId) {
       await this.checkCategoryExisted(data.categoryId);
@@ -325,7 +323,7 @@ export class ProductService {
     userId: string,
     productId: string,
   ): Promise<void> {
-    await this.checkProductExisted(storeId, productId);
+    await this.checkAndGetExistedProduct(storeId, productId);
 
     await prisma.$transaction(async (tx) => {
       const {

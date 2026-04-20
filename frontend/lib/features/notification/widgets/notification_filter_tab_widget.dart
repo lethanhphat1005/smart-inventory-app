@@ -3,6 +3,7 @@ import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:frontend/features/notification/controller/notification_controller.dart';
+import 'package:frontend/features/notification/utils/notification_constants.dart';
 import 'package:get/get.dart';
 
 class NotificationFilterTabWidget extends StatelessWidget {
@@ -26,12 +27,22 @@ class NotificationFilterTabWidget extends StatelessWidget {
         children: [
           _buildFilterChip(TTexts.filterAll.tr, 'ALL', controller),
           const SizedBox(width: 8),
-          _buildFilterChip(TTexts.filterAlerts.tr, 'LOW_STOCK', controller),
+          _buildFilterChip(
+              TTexts.filterLowStock.tr,
+              "${NotificationTypes.lowStock},${NotificationTypes.batchLowStock}",
+              controller),
+          const SizedBox(width: 8),
+          _buildFilterChip(TTexts.filterDiscrepancy.tr,
+              NotificationTypes.inventoryDiscrepancy, controller),
+          const SizedBox(width: 8),
+          _buildFilterChip(TTexts.filterReorder.tr,
+              NotificationTypes.reorderSuggestion, controller),
           const SizedBox(width: 8),
           _buildFilterChip(
-              TTexts.filterTransactions.tr, 'ORDER_CREATED', controller),
+              TTexts.filterImport.tr, NotificationTypes.import, controller),
           const SizedBox(width: 8),
-          _buildFilterChip(TTexts.filterSystem.tr, 'SYSTEM', controller),
+          _buildFilterChip(
+              TTexts.filterExport.tr, NotificationTypes.export, controller),
         ],
       ),
     );

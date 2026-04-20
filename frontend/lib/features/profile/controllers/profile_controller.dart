@@ -6,7 +6,7 @@ import 'package:frontend/core/state/services/store_service.dart';
 import 'package:frontend/core/state/services/user_service.dart';
 import 'package:frontend/core/ui/widgets/t_snackbars_widget.dart';
 import 'package:frontend/features/auth/providers/auth_provider.dart';
-import 'package:frontend/features/profile/providers/profile_provider.dart';
+import 'package:frontend/features/profile/providers/store_provider.dart';
 import 'package:get/get.dart';
 import 'package:frontend/routes/app_routes.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';

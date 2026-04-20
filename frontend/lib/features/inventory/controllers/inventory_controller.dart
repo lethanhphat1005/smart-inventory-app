@@ -1,5 +1,7 @@
+import 'dart:convert'; // 🔥 Đã thêm import để parse JSON từ Audit Log
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/infrastructure/utils/error_handler_utils.dart';
+import 'package:frontend/core/infrastructure/utils/day_formatter_utils.dart';
 import 'package:frontend/core/state/services/store_service.dart';
 import 'package:frontend/core/state/services/user_service.dart';
 import 'package:frontend/core/ui/widgets/t_snackbars_widget.dart';
@@ -16,29 +18,23 @@ class InventoryController extends GetxController with TErrorHandler {
   final InventoryProvider _provider = InventoryProvider();
   final _box = GetStorage();
 
-  // --- Dữ liệu gốc từ API ---
   final RxList<CategoryModel> categories = <CategoryModel>[].obs;
   final RxList<ProductModel> products = <ProductModel>[].obs;
   final RxList<InventoryModel> inventories = <InventoryModel>[].obs;
   final RxList<CategoryStatModel> categoryStats = <CategoryStatModel>[].obs;
   final RxList<DistributionModel> topDistribution = <DistributionModel>[].obs;
 
-  // Biến lưu thứ tự Custom Catalog
   final RxList<String> customCategoryOrder = <String>[].obs;
-
   final RxBool isLoading = true.obs;
 
-  // --- Các chỉ số phái sinh cho Dashboard ---
   final RxInt totalActiveProducts = 0.obs;
   final RxDouble totalStockValue = 0.0.obs;
 
-  // Health
   final RxDouble stockHealthPercent = 0.0.obs;
   final RxInt healthyCount = 0.obs;
   final RxInt lowCount = 0.obs;
   final RxInt outCount = 0.obs;
 
-  // Flow Chart (MOCK DATA: 7 ngày gần nhất)
   final RxList<double> inboundFlow = <double>[].obs;
   final RxList<double> outboundFlow = <double>[].obs;
   final RxInt weeklyInbound = 0.obs;
@@ -54,24 +50,36 @@ class InventoryController extends GetxController with TErrorHandler {
   Future<void> fetchDashboardData({bool isRefresh = false}) async {
     try {
       isLoading.value = true;
-
       if (isRefresh) {
         await Future.delayed(const Duration(milliseconds: 300));
       }
+
+      final now = DateTime.now();
+      final startDateStr = DayFormatterUtils.formatApiDate(
+          now.subtract(const Duration(days: 6)));
+      final endDateStr =
+          DayFormatterUtils.formatApiDate(now.add(const Duration(days: 1)));
 
       final results = await Future.wait([
         _provider.getCategories(),
         _provider.getProducts(),
         _provider.getInventories(),
+        // 🔥 Lấy Audit Logs của đúng bảng Inventory để soi sự thay đổi vật lý
+        _provider.getAuditLogs(queryParams: {
+          'limit': 100,
+          'entityType': 'Inventory',
+          'startDate': startDateStr,
+          'endDate': endDateStr,
+        }),
       ]);
 
       final fetchedCategories = results[0] as List<CategoryModel>;
       final fetchedProducts = results[1] as List<ProductModel>;
       final fetchedInventories = results[2] as List<InventoryModel>;
+      final fetchedAuditLogs = results[3];
 
       final validCategoryIds =
           fetchedCategories.map((c) => c.categoryId).toSet();
-
       final validProducts = fetchedProducts
           .where((p) => validCategoryIds.contains(p.categoryId))
           .toList();
@@ -80,12 +88,9 @@ class InventoryController extends GetxController with TErrorHandler {
       final activeInventories = fetchedInventories.where((inv) {
         final pkg = inv.productPackage;
         if (pkg == null) return false;
-
         if ((pkg.activeStatus).toLowerCase() != 'active') return false;
         if ((inv.activeStatus).toLowerCase() == 'inactive') return false;
-
         if (!validProductIds.contains(pkg.productId)) return false;
-
         return true;
       }).toList();
 
@@ -94,6 +99,9 @@ class InventoryController extends GetxController with TErrorHandler {
       inventories.assignAll(activeInventories);
 
       _calculateDashboardInsights();
+
+      // 🔥 Truyền thẳng AuditLogs vào để tính toán In/Out
+      _calculateFlowChart(fetchedAuditLogs);
     } catch (e) {
       handleError(e);
     } finally {
@@ -101,9 +109,79 @@ class InventoryController extends GetxController with TErrorHandler {
     }
   }
 
+  void _calculateFlowChart(List<dynamic> auditLogs) {
+    List<double> inFlow = List.filled(7, 0.0);
+    List<double> outFlow = List.filled(7, 0.0);
+
+    final now = DateTime.now();
+    final startOfToday = DateTime(now.year, now.month, now.day);
+    int totalIn = 0;
+    int totalOut = 0;
+
+    // Quét qua Audit Logs hệt như cách của Home Controller
+    for (var log in auditLogs) {
+      final entityType = log['entityType']?.toString().toLowerCase() ??
+          log['entity_type']?.toString().toLowerCase();
+
+      // Chỉ phân tích log của kho
+      if (entityType != 'inventory') continue;
+
+      final dateStr =
+          log['performedAt'] ?? log['performed_at'] ?? log['createdAt'];
+      if (dateStr == null) continue;
+
+      final logDate = DateTime.parse(dateStr).toLocal();
+      final logStartOfDay = DateTime(logDate.year, logDate.month, logDate.day);
+      final differenceDays = startOfToday.difference(logStartOfDay).inDays;
+
+      if (differenceDays >= 0 && differenceDays < 7) {
+        final index = 6 - differenceDays;
+
+        dynamic oldRaw = log['oldValue'] ?? log['old_value'];
+        dynamic newRaw = log['newValue'] ?? log['new_value'];
+
+        Map<String, dynamic> oldVal = {};
+        Map<String, dynamic> newVal = {};
+
+        if (oldRaw is String) {
+          try {
+            oldVal = jsonDecode(oldRaw);
+          } catch (_) {}
+        } else if (oldRaw is Map) {
+          oldVal = Map<String, dynamic>.from(oldRaw);
+        }
+
+        if (newRaw is String) {
+          try {
+            newVal = jsonDecode(newRaw);
+          } catch (_) {}
+        } else if (newRaw is Map) {
+          newVal = Map<String, dynamic>.from(newRaw);
+        }
+
+        // Lấy số cũ và mới để tính lượng hàng In/Out tuyệt đối
+        int oldQty = int.tryParse(oldVal['quantity']?.toString() ?? '0') ?? 0;
+        int newQty = int.tryParse(newVal['quantity']?.toString() ?? '0') ?? 0;
+        int diff = newQty - oldQty;
+
+        if (diff > 0) {
+          inFlow[index] += diff.toDouble();
+          totalIn += diff;
+        } else if (diff < 0) {
+          outFlow[index] += diff.abs().toDouble();
+          totalOut += diff.abs();
+        }
+      }
+    }
+
+    inboundFlow.value = inFlow;
+    outboundFlow.value = outFlow;
+    weeklyInbound.value = totalIn;
+    weeklyOutbound.value = totalOut;
+  }
+
   void _loadCustomOrder() {
     List<dynamic>? saved = _box.read<List<dynamic>>(_customOrderKey);
-
     if (saved != null) {
       customCategoryOrder.assignAll(saved.cast<String>());
     } else {
@@ -121,12 +199,9 @@ class InventoryController extends GetxController with TErrorHandler {
     try {
       final storeService = Get.find<StoreService>();
       final userService = Get.find<UserService>();
-
       final storeId = storeService.currentStoreId.value;
       final userId = userService.currentUser.value?.userId ?? 'unknown_user';
-
       if (storeId.isEmpty) return 'custom_category_order_default';
-
       return 'custom_category_order_${storeId}_$userId';
     } catch (e) {
       return 'custom_category_order_default';
@@ -134,15 +209,15 @@ class InventoryController extends GetxController with TErrorHandler {
   }
 
   void _calculateDashboardInsights() {
-    // 1. Gán số liệu cơ bản
-    totalActiveProducts.value = inventories.length;
-
     double tempValue = 0.0;
+    int totalQtyInStock = 0;
     int hCount = 0;
     int lCount = 0;
     int oCount = 0;
 
     for (var inv in inventories) {
+      totalQtyInStock += inv.quantity;
+
       if (inv.productPackage != null) {
         tempValue += (inv.quantity * inv.productPackage!.importPrice);
       }
@@ -156,6 +231,7 @@ class InventoryController extends GetxController with TErrorHandler {
       }
     }
 
+    totalActiveProducts.value = totalQtyInStock;
     totalStockValue.value = tempValue;
     healthyCount.value = hCount;
     lowCount.value = lCount;
@@ -193,38 +269,28 @@ class InventoryController extends GetxController with TErrorHandler {
       tempDist.add(DistributionModel(name: cat.name, value: totalQty, max: 1));
     }
 
-    // =========================================================
-    // ĐOẠN CẬP NHẬT: SẮP XẾP DANH MỤC THÔNG MINH
-    // =========================================================
     tempCatStats.sort((a, b) {
-      // 1. Tìm thông tin gốc từ danh sách `categories` để xem nó có phải là Mặc định (isDefault) không
       final catA = categories.firstWhereOrNull((c) => c.name == a.name);
       final catB = categories.firstWhereOrNull((c) => c.name == b.name);
 
       final isDefaultA = catA?.isDefault ?? false;
       final isDefaultB = catB?.isDefault ?? false;
 
-      // Ưu tiên 1: Đẩy những thằng Mặc định (Uncategorized) lên Top đầu tiên
       if (isDefaultA && !isDefaultB) return -1;
       if (!isDefaultA && isDefaultB) return 1;
 
-      // 2. Tìm vị trí của Category trong mảng customOrder (nếu có)
       int indexA = customCategoryOrder.indexOf(a.name);
       int indexB = customCategoryOrder.indexOf(b.name);
 
-      // Ưu tiên 2: Xếp theo thứ tự Custom kéo thả
       if (indexA != -1 && indexB != -1) return indexA.compareTo(indexB);
       if (indexA != -1) return -1;
       if (indexB != -1) return 1;
 
-      // Ưu tiên 3: Xắp xếp theo Bảng chữ cái (Default)
       return a.name.compareTo(b.name);
     });
 
     categoryStats.value = tempCatStats;
-    // =========================================================
 
-    // Lọc ra Top 5 danh mục có Volume lớn nhất (giảm dần)
     tempDist.sort((a, b) => b.value.compareTo(a.value));
     topDistribution.value = tempDist.take(5).map((e) {
       return DistributionModel(
@@ -232,20 +298,10 @@ class InventoryController extends GetxController with TErrorHandler {
           value: e.value,
           max: maxDistValue == 0 ? 1 : maxDistValue);
     }).toList();
-
-    // --- MOCK DATA CHO FLOW CHART ---
-    inboundFlow.value = [12, 18, 15, 25, 22, 30, 28];
-    outboundFlow.value = [8, 15, 10, 20, 18, 25, 22];
-
-    weeklyInbound.value =
-        inboundFlow.fold(0, (sum, item) => sum + item.toInt());
-    weeklyOutbound.value =
-        outboundFlow.fold(0, (sum, item) => sum + item.toInt());
   }
 
   void onCategorySelected(String categoryName) {
     final match = categories.where((c) => c.name == categoryName);
-
     if (match.isNotEmpty) {
       Get.toNamed(AppRoutes.categoryDetail, arguments: match.first);
     } else {

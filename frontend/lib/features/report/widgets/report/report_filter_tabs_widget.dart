@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:get/get.dart';
@@ -11,23 +12,39 @@ class ReportFilterTabsWidget extends GetView<ReportController> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSizes.p16),
-      child: Obx(() => Row(
-            children: [
-              _buildTab('Today', controller.activeTab.value == 'Today'),
-              const SizedBox(width: 12),
-              _buildTab('Calendar', controller.activeTab.value == 'Calendar'),
-            ],
+      child: Obx(() => SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            child: Row(
+              children: [
+                _buildTab(
+                  logicKey: 'Today',
+                  displayText: TTexts.reportTabToday.tr,
+                  isActive: controller.activeTab.value == 'Today',
+                ),
+                const SizedBox(width: 12),
+                _buildTab(
+                  logicKey: 'Calendar',
+                  displayText: TTexts.reportTabCalendar.tr,
+                  isActive: controller.activeTab.value == 'Calendar',
+                ),
+              ],
+            ),
           )),
     );
   }
 
-  Widget _buildTab(String text, bool isActive) {
+  Widget _buildTab({
+    required String logicKey,
+    required String displayText,
+    required bool isActive,
+  }) {
     return GestureDetector(
-      onTap: () => controller.changeTab(text),
+      onTap: () => controller.changeTab(logicKey),
       child: Container(
+        // Trả lại padding nguyên bản đẹp đẽ của bạn
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
         decoration: BoxDecoration(
-          // GRADIENT ĐEN CHO TAB ACTIVE
           gradient: isActive
               ? const LinearGradient(
                   begin: Alignment.topCenter,
@@ -45,7 +62,7 @@ class ReportFilterTabsWidget extends GetView<ReportController> {
               : Border.all(color: AppColors.softGrey.withOpacity(0.3)),
         ),
         child: Text(
-          text,
+          displayText,
           style: TextStyle(
             fontFamily: 'Poppins',
             fontSize: 13,

@@ -16,7 +16,9 @@ export class AuditLogRepository {
 
   async findManyByStoreId(
     storeId: string,
-    query: ListAuditLogsQueryDto,
+    // Bổ sung thêm type { search?: string } để TypeScript không báo lỗi
+    // trong trường hợp DTO của bạn chưa định nghĩa trường search
+    query: ListAuditLogsQueryDto & { search?: string },
   ): Promise<{ items: AuditLogListItemDto[]; totalItems: number }> {
     const { page, limit } = normalizePagination(query);
     const {
@@ -27,10 +29,9 @@ export class AuditLogRepository {
       userId,
       startDate,
       endDate,
+      search,
     } = query;
 
-    // Xây dựng điều kiện truy vấn động (dynamic query)
-    // dựa trên các tham số filter mà client gửi lên
     const where: Prisma.AuditLogWhereInput = {
       storeId,
       ...(entityType && { entityType }),
@@ -44,8 +45,16 @@ export class AuditLogRepository {
       }),
     };
 
-    // NOTE: Chạy song song 2 truy vấn (lấy danh sách data và đếm tổng số)
-    // trong cùng 1 transaction để tối ưu hiệu suất phân trang
+    if (search) {
+      where.OR = [
+        {
+          note: {
+            contains: search,
+            mode: 'insensitive',
+          },
+        },
+      ];
+    }
     const [items, totalItems] = await this.db.$transaction([
       this.db.auditLog.findMany({
         where,
@@ -66,8 +75,6 @@ export class AuditLogRepository {
     };
   }
 
-  // NOTE: Hàm này nhận vào tx (Prisma.TransactionClient)
-  // để chạy chung giao dịch với module khác
   async createLog(data: CreateAuditLogDto): Promise<void> {
     await this.db.auditLog.create({
       data: {
@@ -76,8 +83,6 @@ export class AuditLogRepository {
         entityId: data.entityId,
         userId: data.userId,
         storeId: data.storeId,
-        // Dùng Nullish Coalescing (??)
-        // để tự động map null/undefined thành Prisma.DbNull
         oldValue: data.oldValue ?? Prisma.DbNull,
         newValue: data.newValue ?? Prisma.DbNull,
         note: data.note ?? null,

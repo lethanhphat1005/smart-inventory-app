@@ -19,10 +19,10 @@ export const initFirebaseAdmin = () => {
         credential: cert(serviceAccount),
       });
 
-      console.info('✅ [Firebase] Admin SDK initialized successfully');
+      console.info('[Firebase] Admin SDK initialized successfully');
     } catch (error) {
       console.error(
-        '❌ [Firebase] Lỗi khởi tạo Admin SDK. Vui lòng kiểm tra file serviceAccountKey.json',
+        '[Firebase] Lỗi khởi tạo Admin SDK. Vui lòng kiểm tra file serviceAccountKey.json',
         error,
       );
     }

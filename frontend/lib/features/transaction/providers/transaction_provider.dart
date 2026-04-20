@@ -50,19 +50,19 @@ class TransactionProvider {
     }
   }
 
-  Future<void> adjustInventory(String packageId,
-      {required String type,
-      required int quantity,
-      String? reason,
-      String? note}) async {
-    await _apiClient.post(
-        '/api/inventories/product-packages/$packageId/adjustments',
+  Future<void> batchAdjustInventories({
+    required List<Map<String, dynamic>> items,
+  }) async {
+    try {
+      await _apiClient.post(
+        '/api/inventories/adjustments',
         data: {
-          'type': type,
-          'quantity': quantity,
-          if (reason != null) 'reason': reason,
-          if (note != null) 'note': note
-        });
+          'items': items,
+        },
+      );
+    } catch (e) {
+      rethrow;
+    }
   }
 
   Future<void> updateProductPackage(

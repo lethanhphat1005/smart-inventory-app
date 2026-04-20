@@ -6,7 +6,11 @@ import 'package:frontend/features/auth/views/forgot_password_view.dart';
 import 'package:frontend/features/auth/views/login_view.dart';
 import 'package:frontend/features/auth/views/register_view.dart';
 import 'package:frontend/features/auth/views/verify_email_view.dart';
+import 'package:frontend/features/home/bindings/adjustment_history_binding.dart';
+import 'package:frontend/features/home/bindings/low_stock_binding.dart';
+import 'package:frontend/features/home/views/adjustment_history_view.dart';
 import 'package:frontend/features/home/views/home_view.dart';
+import 'package:frontend/features/home/views/low_stock_view.dart';
 import 'package:frontend/features/inventory/bindings/all_products_binding.dart';
 import 'package:frontend/features/inventory/bindings/category_form_binding.dart';
 import 'package:frontend/features/inventory/bindings/category_detail_binding.dart';
@@ -28,7 +32,9 @@ import 'package:frontend/features/inventory/views/product_catalog_view.dart';
 import 'package:frontend/features/inventory/views/product_form_view.dart';
 import 'package:frontend/features/navigation/bindings/navigation_binding.dart';
 import 'package:frontend/features/navigation/views/navigation_view.dart';
-import 'package:frontend/features/notification/view/platform/notification_mobile_screen.dart';
+import 'package:frontend/features/notification/bindings/reorder_suggestion_binding.dart';
+import 'package:frontend/features/notification/view/notification_view.dart';
+import 'package:frontend/features/notification/view/reorder_suggestion_view.dart';
 import 'package:frontend/features/onboarding/bindings/onboarding_binding.dart';
 import 'package:frontend/features/profile/bindings/profile_assigns_role_binding.dart';
 import 'package:frontend/features/profile/bindings/profile_binding.dart';
@@ -156,7 +162,7 @@ class AppPages {
       name: AppRoutes.joinStore,
       page: () => const JoinStoreView(),
       binding: JoinStoreBinding(),
-      transition: Transition.rightToLeft,
+      transition: Transition.cupertino,
     ),
 
     // -- Add member
@@ -164,7 +170,7 @@ class AppPages {
       name: AppRoutes.addMembers,
       page: () => const AddMembersView(),
       binding: AddMembersBinding(),
-      transition: Transition.rightToLeft,
+      transition: Transition.cupertino,
     ),
 
     // -- Main (Navigation)
@@ -185,6 +191,22 @@ class AppPages {
     GetPage(
       name: AppRoutes.home,
       page: () => const HomeView(),
+    ),
+
+    // -- Adjustment History
+    GetPage(
+      name: AppRoutes.adjustmentHistory,
+      page: () => const AdjustmentHistoryView(),
+      binding: AdjustmentHistoryBinding(),
+      transition: Transition.cupertino,
+    ),
+
+    // -- Low Stock
+    GetPage(
+      name: AppRoutes.lowStock,
+      page: () => const LowStockView(),
+      binding: LowStockBinding(),
+      transition: Transition.cupertino,
     ),
 
     // -- Inventory
@@ -337,7 +359,7 @@ class AppPages {
     // -- Notification
     GetPage(
       name: AppRoutes.notification,
-      page: () => const NotificationMobileScreen(),
+      page: () => const NotificationView(),
     ),
 
     // -- Profile
@@ -377,5 +399,11 @@ class AppPages {
       binding: ProfileAssignsRoleBinding(),
       transition: Transition.cupertino,
     ),
+
+    // -- Reorder suggestion
+    GetPage(
+        name: AppRoutes.reorderSuggestion,
+        page: () => const ReorderSuggestionView(),
+        binding: ReorderSuggestionBinding()),
   ];
 }

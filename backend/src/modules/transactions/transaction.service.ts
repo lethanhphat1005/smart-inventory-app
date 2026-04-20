@@ -4,6 +4,7 @@ import { StatusCodes } from 'http-status-codes';
 import { TransactionDetailRepository } from './repositories/transaction-detail.repository.js';
 import { TransactionRepository } from './repositories/transaction.repository.js';
 import { CustomError } from '../../common/errors/index.js';
+import { appEvents, eventBus } from '../../common/events/event-bus.js';
 import { StorageService } from '../../common/utils/index.js';
 import {
   normalizePagination,
@@ -312,6 +313,14 @@ export class TransactionService {
         } as Prisma.InputJsonObject,
       });
 
+      eventBus.emit(appEvents.LARGE_ORDER_CREATED, {
+        storeId: storeId,
+        transactionId: transaction.transactionId,
+        type: transaction.type,
+        totalPrice: transaction.totalPrice,
+        itemCount: data.items.length,
+      });
+
       return {
         ...transaction,
         items: data.items,
@@ -408,6 +417,14 @@ export class TransactionService {
             unitPrice: item.unitPrice,
           })),
         } as Prisma.InputJsonObject,
+      });
+
+      eventBus.emit(appEvents.LARGE_ORDER_CREATED, {
+        storeId: storeId,
+        transactionId: transaction.transactionId,
+        type: transaction.type,
+        totalPrice: transaction.totalPrice,
+        itemCount: data.items.length,
       });
 
       return {

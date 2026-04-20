@@ -17,11 +17,15 @@ class TEmptyStateWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 48.0, horizontal: 32.0),
-      child: Center(
+    // THAY ĐỔI Ở ĐÂY: Dùng Center + SingleChildScrollView để chống tràn khi mở bàn phím
+    return Center(
+      child: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
+        padding: const EdgeInsets.symmetric(vertical: 48.0, horizontal: 32.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize
+              .min, // QUAN TRỌNG: Ép Column chiếm chiều cao nhỏ nhất có thể
           children: [
             // 1. Icon với nền mờ bo tròn (Soft Blob Background)
             Container(

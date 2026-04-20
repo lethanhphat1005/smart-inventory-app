@@ -1,4 +1,4 @@
-import 'package:frontend/core/infrastructure/utils/url_helper.dart';
+import 'package:frontend/core/infrastructure/utils/url_helper_utils.dart';
 
 class SearchProductModel {
   final String productId;
@@ -41,7 +41,7 @@ class SearchProductModel {
     return SearchProductModel(
       productId: json['productId'] ?? '',
       productName: json['productName'] ?? 'Unknown',
-      imageUrl: UrlHelper.normalizeImageUrl(json['imageUrl']),
+      imageUrl: UrlHelperUtils.normalizeImageUrl(json['imageUrl']),
       brand: json['brand'],
       categoryId: json['categoryId'] ?? '',
       categoryName: json['categoryName'] ?? '',

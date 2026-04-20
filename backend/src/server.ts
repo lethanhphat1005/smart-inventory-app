@@ -4,7 +4,12 @@ import { errorHandler, pinoLogger } from './common/middlewares/index.js';
 import { sendResponse } from './common/utils/index.js';
 import { initFirebaseAdmin } from './config/firebase.config.js';
 import { initCronJobs } from './cron/index.js';
+import { smartDecisionRouter } from './modules/alerts/index.js';
 import { auditLogRouter } from './modules/audit-log/audit-log.route.js';
+import {
+  barcodeRouter,
+  productPackageBarcodeRouter,
+} from './modules/barcode/index.js';
 import { categoryRouter } from './modules/categories/index.js';
 import { chatbotRouter } from './modules/chat-bot/chatbot.route.js';
 import { inventoryRouter } from './modules/inventories/inventory.route.js';
@@ -42,10 +47,14 @@ app.get('/api/health', (_req: Request, res: Response<ApiResponse<null>>) => {
 });
 
 app.use('/api/stores', storeRouter);
+app.use('/api/barcodes', barcodeRouter);
 app.use('/api/products', [productRouter, productPackageProductRouter]);
 app.use('/api/categories', categoryRouter);
 app.use('/api/auth', userProfileRouter);
-app.use('/api/product-packages', productPackageRouter);
+app.use('/api/product-packages', [
+  productPackageRouter,
+  productPackageBarcodeRouter,
+]);
 app.use('/api/inventories', inventoryRouter);
 app.use('/api/transactions', transactionRouter);
 app.use('/api/audit-logs', auditLogRouter);
@@ -54,6 +63,7 @@ app.use('/api/search', searchRouter);
 app.use('/api/units', unitRouter);
 app.use('/api/store-members', storeMemberRouter);
 app.use('/api/chat-bot', chatbotRouter);
+app.use('/api/smart-decisions', smartDecisionRouter);
 
 app.use(errorHandler);
 

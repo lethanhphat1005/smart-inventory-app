@@ -23,13 +23,15 @@ export class TransactionRepository {
     storeId: string,
     query: ListTransactionsQueryDto,
   ): Promise<ListPaginationResponseDto<TransactionListItemDto>> {
-    const { page, limit, sortBy, sortOrder, type, startDate, endDate } = query;
+    const { page, limit, sortBy, sortOrder, type, userId, startDate, endDate } =
+      query;
 
     const dateRange = buildDateRangeFilter(startDate, endDate);
 
     const where: Prisma.TransactionWhereInput = {
       storeId,
       ...(type && { type }),
+      ...(userId && { userId }),
       ...(dateRange && {
         createdAt: dateRange,
       }),
@@ -103,7 +105,6 @@ export class TransactionRepository {
               select: {
                 productPackageId: true,
                 displayName: true,
-                barcodeValue: true,
                 product: {
                   select: {
                     imageUrl: true,
@@ -129,7 +130,6 @@ export class TransactionRepository {
       totalPrice: transaction.totalPrice.toNumber(),
       items: transaction.transactionDetails.map((item) => ({
         productPackageId: item.productPackage.productPackageId,
-        barcodeValue: item.productPackage.barcodeValue,
         displayName: item.productPackage.displayName,
         imageUrl: item.productPackage.product.imageUrl,
         quantity: item.quantity,

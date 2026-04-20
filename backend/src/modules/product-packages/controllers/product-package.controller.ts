@@ -12,8 +12,10 @@ import type {
   CreateProductPackageAndInventoryDto,
   ListProductPackagesResponseDto,
   PackageQueryDto,
+  ProductPackageDetailResponseDto,
   ProductPackageResponseDto,
   UpdateProductPackageDto,
+  CreatePackageAndInventoryResponseDto,
 } from '../product-package.dto.js';
 import type { Request, Response } from 'express';
 
@@ -39,7 +41,7 @@ export class ProductPackageController {
 
   getProductPackagesByProductId = async (
     req: Request,
-    res: Response<ApiResponse<ProductPackageResponseDto[]>>,
+    res: Response<ApiResponse<ProductPackageDetailResponseDto[]>>,
   ): Promise<void> => {
     const storeId = requireReqStoreContext(req).storeId;
     const { productId } = req.params;
@@ -57,7 +59,7 @@ export class ProductPackageController {
 
   getProductPackageById = async (
     req: Request,
-    res: Response<ApiResponse<ProductPackageResponseDto>>,
+    res: Response<ApiResponse<ProductPackageDetailResponseDto>>,
   ): Promise<void> => {
     const storeId = requireReqStoreContext(req).storeId;
     const { productPackageId } = req.params;
@@ -75,14 +77,14 @@ export class ProductPackageController {
 
   createProductPackage = async (
     req: Request,
-    res: Response<ApiResponse<ProductPackageResponseDto>>,
+    res: Response<ApiResponse<CreatePackageAndInventoryResponseDto>>,
   ): Promise<void> => {
     const storeId = requireReqStoreContext(req).storeId;
     const userId = requireReqUser(req).userId;
     const { productId } = req.params;
 
     const productPackage =
-      await this.productPackageService.createProductPackage(
+      await this.productPackageService.createProductPackageAndInventory(
         storeId,
         userId,
         productId as string,

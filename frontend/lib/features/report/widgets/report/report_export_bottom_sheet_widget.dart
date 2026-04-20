@@ -3,6 +3,7 @@ import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:frontend/core/infrastructure/models/transaction_model.dart';
 import 'package:frontend/features/report/controllers/report_export_controller.dart';
+import 'package:frontend/core/infrastructure/constants/text_strings.dart'; 
 import 'package:get/get.dart';
 
 class ReportExportBottomSheetWidget extends GetView<ReportExportController> {
@@ -30,7 +31,9 @@ class ReportExportBottomSheetWidget extends GetView<ReportExportController> {
                   child: Text("🖨", style: TextStyle(fontSize: 36))),
             ),
             const SizedBox(height: 24),
-            Text('Exporting... $percent%',
+            Text(
+                TTexts.exportingProgress.trParams(
+                    {'percent': percent.toString()}), 
                 style: const TextStyle(
                     fontFamily: 'Poppins',
                     fontSize: 20,
@@ -68,8 +71,8 @@ class ReportExportBottomSheetWidget extends GetView<ReportExportController> {
                 const Center(child: Text("🖨", style: TextStyle(fontSize: 36))),
           ),
           const SizedBox(height: 16),
-          const Text('Export Daily Report?',
-              style: TextStyle(
+          Text(TTexts.exportDailyReport.tr, 
+              style: const TextStyle(
                   fontFamily: 'Poppins',
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -79,7 +82,10 @@ class ReportExportBottomSheetWidget extends GetView<ReportExportController> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Text(
-              'Generate an Excel report containing ${transactions.length} transactions for $dateStr?',
+              TTexts.exportDailyReportDesc.trParams({
+                'count': transactions.length.toString(),
+                'date': dateStr,
+              }), 
               style: const TextStyle(
                   fontSize: 13, color: AppColors.subText, height: 1.5),
               textAlign: TextAlign.center,
@@ -98,8 +104,8 @@ class ReportExportBottomSheetWidget extends GetView<ReportExportController> {
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12)),
                   ),
-                  child: const Text('Cancel',
-                      style: TextStyle(
+                  child: Text(TTexts.cancel.tr,
+                      style: const TextStyle(
                           color: AppColors.primaryText,
                           fontWeight: FontWeight.w600)),
                 ),
@@ -116,8 +122,8 @@ class ReportExportBottomSheetWidget extends GetView<ReportExportController> {
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12)),
                   ),
-                  child: const Text('Export',
-                      style: TextStyle(
+                  child: Text(TTexts.export.tr, // 🔥 Đã đổi TTexts
+                      style: const TextStyle(
                           color: Colors.white, fontWeight: FontWeight.w600)),
                 ),
               ),

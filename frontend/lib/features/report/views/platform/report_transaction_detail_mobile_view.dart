@@ -1,5 +1,5 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:frontend/core/ui/widgets/t_app_bar_widget.dart';
@@ -20,124 +20,108 @@ class ReportTransactionDetailView
 
   @override
   Widget build(BuildContext context) {
-    // Tính toán bù trừ cho AppBar kính mờ
-    final double topOffset =
-        MediaQuery.of(context).padding.top + kToolbarHeight;
+    final double topPadding = MediaQuery.of(context).padding.top;
+    final double topOffset = topPadding + kToolbarHeight;
 
     return Scaffold(
-      backgroundColor: AppColors.surface,
+      backgroundColor: AppColors.background,
       extendBodyBehindAppBar: true,
-
-      // --- APPBAR VỚI HIỆU ỨNG BLUR VÀ NÚT EXPORT ---
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(kToolbarHeight),
-        child: ClipRRect(
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-            child: Container(
-              color: Colors.white.withOpacity(0.65),
-              child: SafeArea(
-                bottom: false,
-                child: TAppBarWidget(
-                  title: 'Transaction Detail',
-                  showBackArrow: true,
-                  actions: [
-                    IconButton(
-                      onPressed: () {
-                        if (controller.transaction.value != null) {
-                          TBottomSheetWidget.show(
-                            child: ReportTransactionExportBottomSheetWidget(
-                              transaction: controller.transaction.value!,
-                            ),
-                          );
-                        }
-                      },
-                      icon: const Icon(Iconsax.document_download_copy,
-                          color: AppColors.primaryText, size: 22),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
+      appBar: TAppBarWidget(
+        title: TTexts.transactionDetails.tr,
+        actions: [
+          IconButton(
+            icon: const Icon(Iconsax.document_download_copy,
+                color: AppColors.primaryText),
+            onPressed: () {
+              if (controller.transaction.value != null) {
+                TBottomSheetWidget.show(
+                  child: ReportTransactionExportBottomSheetWidget(
+                    transaction: controller.transaction.value!,
+                  ),
+                );
+              }
+            },
+          )
+        ],
       ),
-
-      // --- NỘI DUNG CHÍNH ---
       body: TRefreshIndicatorWidget(
-        edgeOffset: topOffset,
         onRefresh: () => controller.fetchTransactionDetail(),
         child: Obx(() {
-          // 1. TRẠNG THÁI LOADING
           if (controller.isLoading.value) {
             return ReportTransactionDetailShimmerWidget(topOffset: topOffset);
           }
 
           final tx = controller.transaction.value;
           if (tx == null) {
-            return const Center(child: Text('Transaction not found'));
+            return Center(child: Text(TTexts.transactionDetailsNotFound.tr));
           }
 
-          // 2. TRẠNG THÁI HIỂN THỊ DATA
-          return SingleChildScrollView(
+          return CustomScrollView(
             physics: const AlwaysScrollableScrollPhysics(
                 parent: BouncingScrollPhysics()),
-            padding: EdgeInsets.only(
-              top: topOffset + 24,
-              left: AppSizes.p16,
-              right: AppSizes.p16,
-              bottom: 120, // Khoảng trống cho Panel dưới đáy
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ReportTransactionDetailInfoCardWidget(tx: tx),
-                const SizedBox(height: 32),
-
-                const Text(
-                  'Transaction Items',
-                  style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primaryText),
+            slivers: [
+              SliverToBoxAdapter(child: SizedBox(height: topOffset + 24)),
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: AppSizes.p16),
+                sliver: SliverToBoxAdapter(
+                    child: ReportTransactionDetailInfoCardWidget(tx: tx)),
+              ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                      AppSizes.p20, 32, AppSizes.p20, 16),
+                  child: Text(TTexts.items.tr,
+                      style: const TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primaryText)),
                 ),
-                const SizedBox(height: 16),
-
-                // Rải danh sách Items thẳng vào Column
-                ...tx.items.map((item) =>
-                    ReportTransactionDetailItemCardWidget(item: item)),
-              ],
-            ),
+              ),
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: AppSizes.p16),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      final item = tx.items[index];
+                      return ReportTransactionDetailItemCardWidget(item: item);
+                    },
+                    childCount: tx.items.length,
+                  ),
+                ),
+              ),
+              const SliverToBoxAdapter(child: SizedBox(height: 120)),
+            ],
           );
         }),
       ),
-
-      // --- PANEL TỔNG TIỀN DƯỚI ĐÁY ---
-      bottomNavigationBar: Obx(() {
+      bottomSheet: Obx(() {
         if (controller.isLoading.value ||
             controller.transaction.value == null) {
           return const SizedBox.shrink();
         }
-
         final tx = controller.transaction.value!;
+
+        final totalQty = tx.type.toLowerCase() == 'adjustment'
+            ? tx.items.length
+            : tx.items
+                .fold(0, (sum, item) => sum + item.quantity.abs().toInt());
+
         final moneyFormatted =
             NumberFormat.currency(locale: 'en_US', symbol: '\$')
                 .format(tx.totalPrice);
-        final totalQty = tx.items.fold(0, (sum, item) => sum + item.quantity);
 
         return Container(
-          padding: const EdgeInsets.fromLTRB(
-              AppSizes.p24, AppSizes.p20, AppSizes.p24, AppSizes.p32),
+          padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
             boxShadow: [
               BoxShadow(
-                  color: AppColors.primaryText.withOpacity(0.05),
+                  color: Colors.black.withOpacity(0.05),
                   blurRadius: 20,
                   offset: const Offset(0, -5))
             ],
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -146,8 +130,8 @@ class ReportTransactionDetailView
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Total Items',
-                      style: TextStyle(
+                  Text(TTexts.totalItems.tr,
+                      style: const TextStyle(
                           fontSize: 12,
                           color: AppColors.subText,
                           fontWeight: FontWeight.w500)),
@@ -164,8 +148,8 @@ class ReportTransactionDetailView
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  const Text('Total Amount',
-                      style: TextStyle(
+                  Text(TTexts.totalAmount.tr,
+                      style: const TextStyle(
                           fontSize: 12,
                           color: AppColors.subText,
                           fontWeight: FontWeight.w500)),

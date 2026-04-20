@@ -1,4 +1,5 @@
 import 'package:frontend/core/infrastructure/models/product_package_model.dart';
+import 'package:frontend/core/infrastructure/models/transaction_model.dart';
 import 'package:frontend/core/infrastructure/network/app_client.dart';
 import 'package:frontend/core/infrastructure/models/category_model.dart';
 import 'package:frontend/core/infrastructure/models/product_model.dart';
@@ -95,10 +96,15 @@ class InventoryProvider {
     return response.data['data'] ?? response.data;
   }
 
-  Future<Map<String, dynamic>> createProductPackage(
-      String productId, Map<String, dynamic> data) async {
-    final response =
-        await _apiClient.post('/api/products/$productId/packages', data: data);
+Future<Map<String, dynamic>> createProductPackage(
+      String productId, Map<String, dynamic> packageData, Map<String, dynamic> inventoryData) async {
+    final response = await _apiClient.post(
+      '/api/products/$productId/packages', 
+      data: {
+        'package': packageData,
+        'inventory': inventoryData,
+      }
+    );
     return response.data['data'] ?? response.data;
   }
 
@@ -110,6 +116,23 @@ class InventoryProvider {
 
   Future<void> deleteProductPackage(String packageId) async {
     await _apiClient.delete('/api/product-packages/$packageId');
+  }
+
+  Future<List<dynamic>> getPackagesByProductId(String productId) async {
+    try {
+      final response = await _apiClient.get('/api/products/$productId/packages',
+          queryParameters: {'limit': 100});
+
+      final responseData = response.data['data'] ?? response.data;
+      if (responseData is Map && responseData.containsKey('items')) {
+        return responseData['items'] as List<dynamic>;
+      } else if (responseData is List) {
+        return responseData;
+      }
+      return [];
+    } catch (e) {
+      return [];
+    }
   }
 
   // ==========================================
@@ -170,5 +193,22 @@ class InventoryProvider {
 
   Future<void> deleteInventory(String packageId) async {
     await _apiClient.delete('/api/inventories/product-packages/$packageId');
+  }
+
+  // ==========================================
+  // TRANSACTIONS FLOW CHARTS
+  // ==========================================
+  Future<List<TransactionModel>> getTransactions(
+      {Map<String, dynamic>? queryParams}) async {
+    final listData = await _apiClient.getList('/api/transactions',
+        queryParameters: queryParams ?? {'limit': 100});
+    return listData.map((json) => TransactionModel.fromJson(json)).toList();
+  }
+
+  Future<List<dynamic>> getAuditLogs(
+      {Map<String, dynamic>? queryParams}) async {
+    final listData = await _apiClient.getList('/api/audit-logs',
+        queryParameters: queryParams ?? {'limit': 100});
+    return listData;
   }
 }

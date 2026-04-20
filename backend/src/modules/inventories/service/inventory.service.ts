@@ -1,10 +1,12 @@
+import crypto from 'crypto';
+
 import { StatusCodes } from 'http-status-codes';
 
 import { CustomError } from '../../../common/errors/index.js';
-import { appEvents, eventBus } from '../../../common/events/event-bus.js';
 import {
   buildPaginatedResponse,
   normalizePagination,
+  StorageService,
 } from '../../../common/utils/index.js';
 import { prisma } from '../../../db/prismaClient.js';
 import { TransactionType } from '../../../generated/prisma/enums.js';
@@ -13,9 +15,9 @@ import { InventoryRepository } from '../repository/inventory.repository.js';
 
 import type { DbClient } from '../../../common/types/index.js';
 import type { Prisma } from '../../../generated/prisma/client.js';
+import type { InventoryEventPublisher } from '../../alerts/inventory-event.publisher.js';
 import type {
   CreateInventoryDto,
-  InventoryAdjustmentDto,
   InventoryAdjustmentResponseDto,
   InventoryDetailResponseDto,
   ListInventoriesQueryDto,
@@ -23,22 +25,40 @@ import type {
   LowStockInventoriesResponseDto,
   UpdateInventoryDto,
   InventoryForTransactionData,
+  BatchInventoryAdjustmentDto,
+  InventoryListItemDto,
 } from '../dto/inventory.dto.js';
 
-/* Service xử lý business logic cho module Inventory.
-Chịu trách nhiệm kiểm tra tính hợp lệ của dữ liệu,
-áp dụng các ràng buộc nghiệp vụ
-trước khi gọi Repository để thao tác với cơ sở dữ liệu. */
 export class InventoryService {
   constructor(
     private readonly inventoryRepository: InventoryRepository,
-    private readonly auditLogRepository: AuditLogRepository,
+    private readonly inventoryEventPublisher: InventoryEventPublisher,
   ) {}
 
   createTxRepositories = (db: DbClient) => ({
     inventoryRepositoryTx: new InventoryRepository(db),
     auditLogRepositoryTx: new AuditLogRepository(db),
   });
+
+  private async getSignedUrlForItemImageUrl(
+    items: InventoryListItemDto[],
+  ): Promise<InventoryListItemDto[]> {
+    return await Promise.all(
+      items.map(async (item) => ({
+        ...item,
+        productPackage: {
+          ...item.productPackage,
+          product: {
+            ...item.productPackage.product,
+            imageUrl: await StorageService.getSignedUrl(
+              process.env.STORAGE_BUCKET ?? 'images',
+              item.productPackage.product.imageUrl,
+            ),
+          },
+        },
+      })),
+    );
+  }
 
   // Hàm helper dùng chung để kiểm tra sự tồn tại của kho hàng,
   // ném lỗi 404 nếu không tìm thấy
@@ -73,7 +93,13 @@ export class InventoryService {
         ...normalizedPagination,
       });
 
-    return buildPaginatedResponse(items, totalItems, normalizedPagination);
+    const itemsWithSignedUrl = await this.getSignedUrlForItemImageUrl(items);
+
+    return buildPaginatedResponse(
+      itemsWithSignedUrl,
+      totalItems,
+      normalizedPagination,
+    );
   }
 
   async getLowStockInventoriesByStoreId(
@@ -88,7 +114,13 @@ export class InventoryService {
         ...normalizedPagination,
       });
 
-    return buildPaginatedResponse(items, totalItems, normalizedPagination);
+    const itemsWithSignedUrl = await this.getSignedUrlForItemImageUrl(items);
+
+    return buildPaginatedResponse(
+      itemsWithSignedUrl,
+      totalItems,
+      normalizedPagination,
+    );
   }
 
   async getInventoryByProductPackageId(
@@ -138,85 +170,153 @@ export class InventoryService {
     });
   }
 
-  async adjustInventory(
+  async adjustInventories(
     storeId: string,
-    productPackageId: string,
     userId: string,
-    data: InventoryAdjustmentDto,
-  ): Promise<InventoryAdjustmentResponseDto> {
-    const existingInventory = await this.getExistingInventory(
-      storeId,
-      productPackageId,
-    );
+    data: BatchInventoryAdjustmentDto,
+  ): Promise<InventoryAdjustmentResponseDto[]> {
+    const { items } = data;
 
-    // Bẫy an toàn bổ sung:
-    // Kiểm tra số lượng giảm không được vượt quá số lượng đang có
-    if (
-      data.type === 'decrease' &&
-      existingInventory.quantity < data.quantity
-    ) {
+    // 1. TẠO MÃ LÔ ĐỂ GOM NHÓM VÀ TÌM KIẾM
+    // Đảm bảo bạn đã import crypto ở đầu file: import crypto from 'crypto';
+    const batchId = crypto.randomBytes(3).toString('hex').toUpperCase();
+    const searchPrefix = `[Lô-${batchId}]`;
+
+    const productPackageIds = items.map((item) => item.productPackageId);
+    const existingInventories =
+      await this.inventoryRepository.findManyActiveByProductPackageIds(
+        storeId,
+        productPackageIds,
+      );
+
+    if (existingInventories.length !== items.length) {
       throw new CustomError({
-        message: 'Số lượng giảm không được lớn hơn số lượng tồn kho hiện tại',
+        message:
+          'Một hoặc nhiều sản phẩm không tồn tại trong kho hoặc đã bị vô hiệu hóa!',
         status: StatusCodes.BAD_REQUEST,
       });
     }
 
-    const result = await prisma.$transaction(async (tx) => {
+    // Map lại để lookup O(1)
+    const inventoryMap = new Map(
+      existingInventories.map((inv) => [inv.productPackageId, inv]),
+    );
+
+    // 2. Validate nhanh số lượng xuất/giảm trước khi mở Transaction
+    for (const item of items) {
+      const existing = inventoryMap.get(item.productPackageId)!;
+
+      if (item.type === 'decrease' && existing.quantity < item.quantity) {
+        throw new CustomError({
+          message: `Số lượng giảm không được lớn hơn tồn kho hiện tại (Sản phẩm: ${item.productPackageId})`,
+          status: StatusCodes.BAD_REQUEST,
+        });
+      }
+    }
+
+    // MẢNG HỨNG CÁC SẢN PHẨM BỊ LỆCH KHO NHIỀU
+    const discrepancies: Array<{
+      productName: string;
+      systemQuantity: number;
+      actualQuantity: number;
+    }> = [];
+
+    // 3. Mở Transaction
+    const results = await prisma.$transaction(async (tx) => {
       const { inventoryRepositoryTx, auditLogRepositoryTx } =
         this.createTxRepositories(tx);
 
-      // Gọi Repository bằng hàm Atomic mới
-      const updated = await inventoryRepositoryTx.adjustQuantity(
-        existingInventory.inventoryId,
-        data.type,
-        data.quantity,
-      );
+      // Thêm inventoryId vào Type trả về nội bộ để lát phục vụ eventPublisher
+      const adjustments: (InventoryAdjustmentResponseDto & {
+        inventoryId: string;
+      })[] = [];
 
-      // Tính toán lượng thay đổi cho Audit Log
-      const changedQty = updated.quantity - existingInventory.quantity;
+      for (const item of items) {
+        const existingInventory = inventoryMap.get(item.productPackageId)!;
 
-      await auditLogRepositoryTx.createLog({
-        actionType: 'update',
-        entityType: 'Inventory',
-        entityId: existingInventory.inventoryId,
-        userId,
-        storeId,
-        note: data.note ?? null,
-        oldValue: {
-          quantity: existingInventory.quantity,
-        } as Prisma.InputJsonObject,
-        newValue: {
-          quantity: updated.quantity,
-          changedQuantity: changedQty,
-          adjustmentType: data.type,
-          reason: data.reason ?? null,
+        // Cập nhật số lượng
+        const updated = await inventoryRepositoryTx.adjustQuantity(
+          existingInventory.inventoryId,
+          item.type,
+          item.quantity,
+        );
+
+        const changedQty = updated.quantity - existingInventory.quantity;
+
+        // KIỂM TRA ĐỘ LỆCH VÀ PUSH VÀO MẢNG (KHÔNG BẮN EVENT Ở ĐÂY NỮA)
+        if (Math.abs(changedQty) >= 5) {
+          discrepancies.push({
+            productName:
+              existingInventory.productPackage.displayName ?? 'Sản phẩm',
+            systemQuantity: existingInventory.quantity,
+            actualQuantity: updated.quantity,
+          });
+        }
+
+        // TẠO GHI CHÚ CHỨA MÃ LÔ
+        const finalNote = item.note
+          ? `${searchPrefix} ${item.note}`
+          : searchPrefix;
+
+        // Ghi AuditLog độc lập cho từng productPackageId
+        await auditLogRepositoryTx.createLog({
+          actionType: 'update',
+          entityType: 'Inventory',
+          entityId: existingInventory.inventoryId,
+          userId,
+          storeId,
+          note: finalNote,
+          oldValue: {
+            quantity: existingInventory.quantity,
+          } as Prisma.InputJsonObject,
+          newValue: {
+            quantity: updated.quantity,
+            changedQuantity: changedQty,
+            adjustmentType: item.type,
+            reason: item.reason ?? null,
+            productPackageId: updated.productPackage.productPackageId,
+          } as Prisma.InputJsonObject,
+        });
+
+        adjustments.push({
+          inventoryId: existingInventory.inventoryId,
           productPackageId: updated.productPackage.productPackageId,
-        } as Prisma.InputJsonObject,
+          previousQuantity: existingInventory.quantity,
+          currentQuantity: updated.quantity,
+          changedQuantity: changedQty,
+          adjustmentType: item.type,
+          reason: item.reason ?? null,
+          note: item.note ?? null,
+          updatedAt: updated.updatedAt,
+        });
+      }
+
+      return adjustments;
+    });
+
+    // 4. PHÁT TÍN HIỆU LỆCH KHO GỘP (Chỉ bắn 1 lần duy nhất ngoài Transaction)
+    if (discrepancies.length > 0) {
+      this.inventoryEventPublisher.emitInventoryDiscrepancy({
+        storeId,
+        adjustmentId: batchId, // Mã Lô sẽ làm referenceId gửi qua FE
+        items: discrepancies,
       });
+    }
 
-      return {
-        productPackageId: updated.productPackage.productPackageId,
-        previousQuantity: existingInventory.quantity,
-        currentQuantity: updated.quantity,
-        changedQuantity: changedQty,
-        adjustmentType: data.type,
-        reason: data.reason ?? null,
-        note: data.note ?? null,
-        updatedAt: updated.updatedAt,
-      };
-    });
+    // 5. Phát tín hiệu hàng loạt thay vì lặp qua emitInventoryChanged
+    const changedEventItems = results.map((r) => ({
+      inventoryId: r.inventoryId,
+      oldQuantity: r.previousQuantity,
+      newQuantity: r.currentQuantity,
+    }));
 
-    // PHÁT TÍN HIỆU NGAY BÊN NGOÀI TRANSACTION (ĐÃ BỔ SUNG OLD_QUANTITY)
-    eventBus.emit(appEvents.INVENTORY_CHANGED, {
-      inventoryId: existingInventory.inventoryId,
+    this.inventoryEventPublisher.emitBatchInventoryChanged({
       storeId,
-      oldQuantity: result.previousQuantity,
-      // 👉 Truyền số lượng cũ để check lọc SPAM
-      newQuantity: result.currentQuantity,
-      // 👉 Truyền số lượng mới
+      items: changedEventItems,
     });
 
-    return result;
+    // Strip bớt inventoryId trước khi trả về FE để tuân thủ DTO
+    return results.map(({ inventoryId: _, ...rest }) => rest);
   }
 
   async createInventory(
@@ -275,7 +375,6 @@ export class InventoryService {
               activeStatus: 'active',
               quantity: restored.quantity,
               reorderThreshold: restored.reorderThreshold,
-              lastCount: restored.lastCount,
               productPackageId: restored.productPackage.productPackageId,
             } as Prisma.InputJsonObject,
           });
@@ -284,7 +383,7 @@ export class InventoryService {
         }
       }
 
-      const created = await inventoryRepository.create(data);
+      const created = await inventoryRepository.createOne(data);
 
       await auditLogRepositoryTx.createLog({
         actionType: 'create',
@@ -296,7 +395,6 @@ export class InventoryService {
         newValue: {
           quantity: created.quantity,
           reorderThreshold: created.reorderThreshold,
-          lastCount: created.lastCount,
           productPackageId: created.productPackage.productPackageId,
         } as Prisma.InputJsonObject,
       });
@@ -459,22 +557,26 @@ export class InventoryService {
             status: StatusCodes.BAD_REQUEST,
           });
       }
-    }); // <--- TRANSACTION THỰC SỰ KẾT THÚC TẠI ĐÂY
+    });
 
-    // 2. PHÁT TÍN HIỆU NGAY TẠI ĐÂY (HOÀN TOÀN BÊN NGOÀI TRANSACTION)
-    // Đảm bảo dữ liệu đã được lưu thành công vào DB mới phát tín hiệu
-    for (const item of inventoryItems) {
+    // 2. PHÁT TÍN HIỆU NGAY TẠI ĐÂY
+    const changedItems = inventoryItems.map((item) => {
       const newQuantity =
         transactionType === 'import'
           ? item.quantity + item.transactionQuantity
           : item.quantity - item.transactionQuantity;
 
-      eventBus.emit(appEvents.INVENTORY_CHANGED, {
+      return {
         inventoryId: item.inventoryId,
-        storeId,
-        newQuantity: newQuantity, // Gửi luôn số lượng mới đã tính toán
-      });
-    }
+        oldQuantity: item.quantity,
+        newQuantity: newQuantity,
+      };
+    });
+
+    this.inventoryEventPublisher.emitBatchInventoryChanged({
+      storeId,
+      items: changedItems,
+    });
   }
 
   async deleteInventory(

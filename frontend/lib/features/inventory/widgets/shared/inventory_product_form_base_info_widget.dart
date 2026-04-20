@@ -32,7 +32,7 @@ class InventoryProductFormBaseInfoWidget
                     hintText: controller.selectedCategory.value?.name ??
                         TTexts.tapToSelect.tr,
                     suffixIcon: controller.isCategoryLocked
-                        ? const Icon(Iconsax.lock_copy,
+                        ? const Icon(Iconsax.lock_1_copy,
                             size: 18, color: AppColors.softGrey)
                         : const Icon(Iconsax.arrow_down_1_copy, size: 20),
                     controller: TextEditingController(

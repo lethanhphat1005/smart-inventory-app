@@ -13,7 +13,7 @@ class InventoryDetailInfoGridWidget extends GetView<InventoryDetailController> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Dòng 1: Giao diện Xám trung tính (Neutral)
+        // Dòng 1: Giao diện Xám
         Row(
           children: [
             Expanded(
@@ -30,20 +30,19 @@ class InventoryDetailInfoGridWidget extends GetView<InventoryDetailController> {
         ),
         const SizedBox(height: AppSizes.p12),
         // Dòng 2: Giao diện Stand Out với Vibe Nhập/Xuất rõ ràng
-        Row(
-          children: [
-            // TODO: Kết nối API để lấy chính xác tổng số lượng đã nhập/xuất, càna Transaction
-            Expanded(
-                child: _buildHighlightGridItem(TTexts.totalStockInTitle.tr,
-                    "${controller.totalStockIn} ${TTexts.items.tr}",
-                    isStockIn: true)),
-            const SizedBox(width: AppSizes.p12),
-            Expanded(
-                child: _buildHighlightGridItem(TTexts.totalStockOutTitle.tr,
-                    "${controller.totalStockOut} ${TTexts.items.tr}",
-                    isStockIn: false)),
-          ],
-        ),
+        Obx(() => Row(
+              children: [
+                Expanded(
+                    child: _buildHighlightGridItem(TTexts.totalStockInTitle.tr,
+                        "${controller.totalStockIn} ${TTexts.items.tr}",
+                        isStockIn: true)),
+                const SizedBox(width: AppSizes.p12),
+                Expanded(
+                    child: _buildHighlightGridItem(TTexts.totalStockOutTitle.tr,
+                        "${controller.totalStockOut} ${TTexts.items.tr}",
+                        isStockIn: false)),
+              ],
+            )),
       ],
     );
   }
@@ -84,7 +83,7 @@ class InventoryDetailInfoGridWidget extends GetView<InventoryDetailController> {
     );
   }
 
-  // --- WIDGET CHỈ SỐ ĐẶC BIỆT (STAND OUT) ---
+  // --- WIDGET CHỈ SỐ ĐẶC BIỆT  ---
   Widget _buildHighlightGridItem(String title, String value,
       {required bool isStockIn}) {
     final color = isStockIn ? AppColors.stockIn : AppColors.alertText;

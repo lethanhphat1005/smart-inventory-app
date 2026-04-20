@@ -1,4 +1,4 @@
-enum InventoryActionType { iN , out, adjust }
+enum InventoryActionType { stockIn, stockOut, adjust }
 
 class InventoryHistoryModel {
   final String date;

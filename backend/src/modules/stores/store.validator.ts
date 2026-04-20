@@ -72,7 +72,6 @@ export const validateUpdateStore = (
   _res: Response,
   next: NextFunction,
 ): void => {
-  req.params = validateSchema(paramsSchema, req.params);
   req.body = validateSchema(updateStoreBodySchema, req.body);
   next();
 };

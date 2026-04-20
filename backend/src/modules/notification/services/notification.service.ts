@@ -27,7 +27,7 @@ export class NotificationService {
   ): Promise<void> {
     const storeName =
       await this.notificationRepository.getStoreNameById(storeId);
-    const displayTitle = `[${storeName}]\n${title}`;
+    const displayTitle = `${storeName}\n${title}`;
 
     // 2. Lưu vào Database
     const newNoti = await this.notificationRepository.createNotification(
@@ -46,6 +46,20 @@ export class NotificationService {
       return;
     }
 
+    let fcmPriority: 'high' | 'normal' = 'normal';
+    const sound: string = 'default';
+
+    if (
+      [
+        'DISCREPANCY_ALERT',
+        'LOW_STOCK',
+        'BATCH_LOW_STOCK',
+        'REORDER_SUGGESTION',
+      ].includes(type)
+    ) {
+      fcmPriority = 'high';
+    }
+
     // 4. Đóng gói Payload chuẩn
     const message: MulticastMessage = {
       notification: { title: displayTitle, body },
@@ -53,16 +67,24 @@ export class NotificationService {
         notificationId: newNoti.notificationId,
         type: newNoti.type,
         referenceId: newNoti.referenceId ?? '',
+        storeId: storeId,
       },
       tokens: tokens.map((t) => t.token),
       android: {
-        priority: 'high',
+        priority: fcmPriority,
         notification: {
-          sound: 'default',
-          channelId: 'high_importance_channel',
+          sound: sound,
+          channelId:
+            fcmPriority === 'high'
+              ? 'high_importance_channel'
+              : 'normal_channel',
         },
       },
-      apns: { payload: { aps: { sound: 'default' } } },
+      apns: {
+        payload: {
+          aps: { sound: sound, priority: fcmPriority === 'high' ? 10 : 5 },
+        },
+      },
     };
 
     // 4. Bắn qua Firebase và Dọn dẹp Token rác

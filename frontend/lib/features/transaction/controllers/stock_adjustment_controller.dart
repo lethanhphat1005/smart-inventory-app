@@ -5,13 +5,13 @@ import 'package:frontend/core/infrastructure/models/transaction_detail_model.dar
 import 'package:frontend/core/infrastructure/models/transaction_model.dart';
 import 'package:frontend/core/infrastructure/utils/error_handler_utils.dart';
 import 'package:frontend/core/infrastructure/utils/full_screen_loader_utils.dart';
+import 'package:frontend/core/ui/layouts/t_barcode_scanner_layout.dart';
 import 'package:frontend/core/ui/widgets/t_snackbars_widget.dart';
 import 'package:frontend/core/ui/widgets/t_custom_dialog_widget.dart';
 import 'package:frontend/features/transaction/models/adjustment_item_model.dart';
 import 'package:frontend/features/transaction/providers/transaction_provider.dart';
 import 'package:frontend/routes/app_routes.dart';
 import 'package:get/get.dart';
-import 'package:dio/dio.dart'; // Thêm để catch lỗi DioException HTTP 409
 
 class StockAdjustmentController extends GetxController with TErrorHandler {
   final TransactionProvider _provider = TransactionProvider();
@@ -40,9 +40,12 @@ class StockAdjustmentController extends GetxController with TErrorHandler {
             ? ProductPackageModel.fromJson(packageJson)
             : null;
 
+        final String realPackageId =
+            packageJson?['productPackageId'] ?? e['productPackageId'] ?? '';
+
         return AdjustmentItemRx(
-          id: e['id'] ?? '',
-          packageId: e['productPackageId'] ?? '',
+          id: e['inventoryId'] ?? e['id'] ?? '',
+          packageId: realPackageId,
           name: packageInfo?.displayName ?? TTexts.unknownProduct.tr,
           initialSystemQty: e['quantity'] ?? 0,
           packageInfo: packageInfo,
@@ -76,7 +79,6 @@ class StockAdjustmentController extends GetxController with TErrorHandler {
       allItems.where((item) => item.isChecked.value).length;
   bool get canSave => checkedItemsCount > 0;
 
-  // GỘP TẤT CẢ CÁC NOTE LẺ TẺ THÀNH 1 LIST CHUỖI
   String get combinedItemNotes {
     List<String> notes = [];
     for (var item in allItems) {
@@ -91,7 +93,6 @@ class StockAdjustmentController extends GetxController with TErrorHandler {
     Get.toNamed(AppRoutes.stockAdjustmentItem, arguments: item);
   }
 
-  // NÚT FAB: CHECK ALL (Chỉ Check những món chưa làm)
   void checkAllUncheckedItems() {
     Get.dialog(
       TCustomDialogWidget(
@@ -104,7 +105,7 @@ class StockAdjustmentController extends GetxController with TErrorHandler {
           for (var item in allItems) {
             if (!item.isChecked.value) {
               item.isChecked.value = true;
-              item.actualQty.value = item.systemQty.value; // Không bị lệch
+              item.actualQty.value = item.systemQty.value;
               item.selectedReason.value = '';
               item.note.value = '';
             }
@@ -116,7 +117,6 @@ class StockAdjustmentController extends GetxController with TErrorHandler {
     );
   }
 
-  // NÚT FAB: UNCHECK ALL (Reset lại toàn bộ thẻ)
   void uncheckAllItems() {
     Get.dialog(
       TCustomDialogWidget(
@@ -139,7 +139,6 @@ class StockAdjustmentController extends GetxController with TErrorHandler {
     );
   }
 
-  // BẪY LỖI THOÁT TRANG KHI ĐANG KIỂM KHO GIANG DỞ
   void handleExit() {
     if (checkedItemsCount > 0) {
       Get.dialog(
@@ -149,8 +148,8 @@ class StockAdjustmentController extends GetxController with TErrorHandler {
           icon: const Text('🚨', style: TextStyle(fontSize: 40)),
           primaryButtonText: TTexts.exitAnyway.tr,
           onPrimaryPressed: () {
-            Get.back(); // Đóng Dialog
-            Get.back(); // Đóng trang Stock Adjustment
+            Get.back();
+            Get.back();
           },
           secondaryButtonText: TTexts.cancel.tr,
         ),
@@ -160,9 +159,19 @@ class StockAdjustmentController extends GetxController with TErrorHandler {
     }
   }
 
-  // GOM CHUNG LẠI: CHỈ XÁC NHẬN VÀ BẮN API
   void handleSaveAdjustment() {
     if (!canSave) return;
+
+    final hasDifferences = allItems.any(
+        (i) => i.isChecked.value && i.actualQty.value != i.systemQty.value);
+
+    if (!hasDifferences) {
+      TSnackbarsWidget.warning(
+        title: TTexts.warningTitle.tr,
+        message: TTexts.noDifferencesFound.tr,
+      );
+      return;
+    }
 
     if (checkedItemsCount < totalItems) {
       Get.dialog(
@@ -171,8 +180,9 @@ class StockAdjustmentController extends GetxController with TErrorHandler {
           description: TTexts.incompleteSaveDesc.tr,
           icon: const Text('👀', style: TextStyle(fontSize: 40)),
           primaryButtonText: TTexts.proceedAdjustment.tr,
-          onPrimaryPressed: () {
+          onPrimaryPressed: () async {
             Get.back();
+            await Future.delayed(const Duration(milliseconds: 300));
             executeSave();
           },
           secondaryButtonText: TTexts.cancel.tr,
@@ -185,8 +195,9 @@ class StockAdjustmentController extends GetxController with TErrorHandler {
           description: TTexts.confirmSaveDesc.tr,
           icon: const Text('💾', style: TextStyle(fontSize: 40)),
           primaryButtonText: TTexts.confirm.tr,
-          onPrimaryPressed: () {
+          onPrimaryPressed: () async {
             Get.back();
+            await Future.delayed(const Duration(milliseconds: 300));
             executeSave();
           },
           secondaryButtonText: TTexts.cancel.tr,
@@ -195,92 +206,65 @@ class StockAdjustmentController extends GetxController with TErrorHandler {
     }
   }
 
-  // EXECUTE SAVE: CHUYỂN GIAO TOÀN BỘ LOGIC CHO BACKEND
   Future<void> executeSave() async {
     try {
       FullScreenLoaderUtils.openLoadingDialog(TTexts.saving.tr);
 
-      final itemsToUpdate = allItems.where((i) => i.isChecked.value).toList();
+      final itemsToUpdate = allItems.where((i) {
+        return i.isChecked.value && (i.actualQty.value != i.systemQty.value);
+      }).toList();
 
-      // 1. Xây dựng Ghi chú
-      String globalNote = combinedItemNotes;
       final addNote = additionalNoteController.text.trim();
-      if (addNote.isNotEmpty) {
-        if (globalNote.isNotEmpty) globalNote += "\n\n";
-        globalNote += "${TTexts.additionalNote.tr}\n$addNote";
-      }
-      if (globalNote.isEmpty) {
-        globalNote = TTexts.defaultAdjustmentNote.tr;
-      }
 
-      // 2. Xây dựng Payload
+      // 1. Chuyển đổi data
+      final batchItems = itemsToUpdate.map((item) {
+        String finalNote = item.note.value;
+        if (addNote.isNotEmpty) {
+          finalNote = finalNote.isNotEmpty ? "$finalNote - $addNote" : addNote;
+        }
+
+        return {
+          "productPackageId": item.packageId,
+          "type": "set", 
+          "quantity": item.actualQty.value,
+          "reason": item.selectedReason.value.isNotEmpty
+              ? item.selectedReason.value
+              : 'Stock Take',
+          "note": finalNote.isNotEmpty ? finalNote : null,
+        };
+      }).toList();
+
+      // 2. GỌI API ĐIỀU CHỈNH HÀNG LOẠT (1 LẦN DUY NHẤT)
+      await _provider.batchAdjustInventories(items: batchItems);
+
+      FullScreenLoaderUtils.stopLoading();
+
+      // 3. XỬ LÝ TẠO SUMMARY ĐỂ CHUYỂN TRANG
       double totalAdjustmentValue = 0.0;
-      List<Map<String, dynamic>> itemsPayload = [];
-
-      // TẠO LIST TRANSACTION DETAIL MODEL ĐỂ TRUYỀN SANG TRANG SUMMARY
       List<TransactionDetailModel> summaryDetails = [];
 
       for (var item in itemsToUpdate) {
         double unitPrice = item.packageInfo?.importPrice ?? 0.0;
         totalAdjustmentValue += (item.spread * unitPrice);
 
-        itemsPayload.add({
-          "productPackageId": item.packageId,
-          "systemQty": item.systemQty.value,
-          "actualQty": item.actualQty.value,
-          "unitPrice": unitPrice,
-          "reason": item.selectedReason.value.tr,
-          "note": item.note.value,
-        });
-
-        // Add vào model summary
         summaryDetails.add(TransactionDetailModel(
           productPackageId: item.packageId,
-          quantity: item.spread, // Chỉ lấy độ lệch
+          quantity: item.spread,
           unitPrice: unitPrice,
           packageInfo: item.packageInfo,
         ));
       }
 
-      // ignore: unused_local_variable
-      final payload = {
-        "type": "ADJUSTMENT",
-        "status": "COMPLETED",
-        "totalPrice": totalAdjustmentValue,
-        "note": globalNote,
-        "items": itemsPayload
-      };
-
-      // =========================================================================
-      // 🚧 TODO (BACKEND INTEGRATION - CƠ CHẾ KIỂM TRA ĐỤNG ĐỘ DỮ LIỆU):
-      // Frontend sẽ chỉ gọi 1 API duy nhất (VD: POST /api/transactions/adjustments).
-      // Backend BẮT BUỘC phải thực hiện luồng sau bằng DB Transaction (All or Nothing):
-      //
-      // 1. Nhận mảng `items` có chứa `systemQty` (số lượng tồn kho lúc Frontend đang đếm).
-      // 2. Query lại số lượng tồn kho mới nhất trong Database của từng `productPackageId`.
-      // 3. SO SÁNH: Nếu `systemQty` frontend gửi KHÁC với số lượng trong DB:
-      //    -> Chứng tỏ trong lúc NV A đếm kho, NV B đã xuất/nhập làm đổi số liệu.
-      //    -> Lập tức Rollback Transaction! Trả về lỗi HTTP 409 Conflict.
-      //    -> Format lỗi trả về phải chứa mảng `conflicts`: [{productPackageId, newSystemQty}].
-      // 4. NẾU KHỚP (An toàn): Tạo Transaction, Tạo TransactionDetail, Update Quantity/LastCount cho Inventory.
-      // =========================================================================
-
-      // MÔ PHỎNG CALL API: await _provider.createAdjustmentTransaction(payload);
-      await Future.delayed(const Duration(seconds: 1));
-
-      // TẠO TRANSACTION MODEL ĐỂ ĐIỀU HƯỚNG SANG SUMMARY
       final summaryTransaction = TransactionModel(
-        transactionId:
-            "ADJ-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}", // Fake ID tạm
-        createdAt: DateTime.now(),
-        type: 'ADJUSTMENT',
-        status: 'COMPLETED',
-        totalPrice: totalAdjustmentValue,
-        note: globalNote,
-        items: summaryDetails,
-      );
-
-      FullScreenLoaderUtils.stopLoading();
+          transactionId:
+              "ADJ-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}",
+          createdAt: DateTime.now(),
+          type: 'adjustment',
+          status: 'COMPLETED',
+          totalPrice: totalAdjustmentValue,
+          note: addNote.isNotEmpty ? addNote : 'Stock Take',
+          items: summaryDetails,
+          userId: 'system');
 
       Get.offNamed(AppRoutes.transactionSummary, arguments: summaryTransaction);
 
@@ -289,46 +273,21 @@ class StockAdjustmentController extends GetxController with TErrorHandler {
           message: TTexts.inventoryUpdatedSuccess.tr);
     } catch (e) {
       FullScreenLoaderUtils.stopLoading();
-
-      // BẪY LỖI 409 CONFLICT TỪ BACKEND TRẢ VỀ
-      if (e is DioException && e.response?.statusCode == 409) {
-        final List<dynamic> conflicts = e.response?.data['conflicts'] ?? [];
-        List<String> conflictedNames = [];
-
-        for (var conflict in conflicts) {
-          final String pkgId = conflict['productPackageId'];
-          final int newSystemQty =
-              conflict['newSystemQty']; // Lấy số System mới nhất Backend trả về
-
-          final index = allItems.indexWhere((i) => i.packageId == pkgId);
-          if (index != -1) {
-            final item = allItems[index];
-            conflictedNames.add(item.name);
-
-            // Cập nhật lại số liệu hệ thống & Uncheck thẻ đó để ép kiểm lại
-            item.systemQty.value = newSystemQty;
-            item.isChecked.value = false;
-          }
-        }
-
-        filteredItems.refresh();
-        Get.dialog(
-          TCustomDialogWidget(
-            title: TTexts.syncDataWarningTitle.tr,
-            description:
-                "${TTexts.syncDataWarningDesc.tr}\n\n${conflictedNames.map((e) => "• $e").join("\n")}",
-            icon: const Text('🔄', style: TextStyle(fontSize: 40)),
-            primaryButtonText: TTexts.confirm.tr,
-            onPrimaryPressed: () => Get.back(),
-          ),
-        );
-      } else {
-        handleError(e); // Quăng vào Error Handler chuẩn nếu không phải 409
-      }
+      handleError(e);
     }
   }
 
-  void openScanner() {}
+  void openScanner() {
+    Get.to(
+      () => TBarcodeScannerLayout(
+        title: TTexts.scanProductBarcode.tr,
+        onScanned: (code) {
+          Get.back();
+        },
+      ),
+      transition: Transition.downToUp,
+    );
+  }
 
   @override
   void onClose() {

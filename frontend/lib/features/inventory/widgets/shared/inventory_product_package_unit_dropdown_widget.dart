@@ -159,8 +159,7 @@ class _InventoryProductPackageUnitDropdownWidgetState
                                             style: const TextStyle(
                                                 fontFamily: 'Poppins',
                                                 fontSize: 12,
-                                                color: AppColors
-                                                    .subText, // ĐỔI SANG MÀU XÁM THEO Ý BẠN
+                                                color: AppColors.subText,
                                                 fontWeight: FontWeight.w500)),
                                       ],
                                     ),
@@ -184,22 +183,36 @@ class _InventoryProductPackageUnitDropdownWidgetState
   Widget build(BuildContext context) {
     final controller = Get.find<ProductFormController>();
 
+    // Kiểm tra xem có đang ở trạng thái Edit hay không
+    final isEditMode = controller.packageToEdit != null;
+
     return CompositedTransformTarget(
       link: _layerLink,
       child: GestureDetector(
-        onTap: _toggleDropdown,
+        // Khóa luôn sự kiện mở dropdown nếu đang ở chế độ Edit
+        onTap: isEditMode ? null : _toggleDropdown,
         child: AbsorbPointer(
           child: TTextFormFieldWidget(
             label: TTexts.unitLabel.tr,
             hintText: TTexts.selectUnit.tr,
             controller: controller.unitNameController,
             readOnly: true,
-            suffixIcon: AnimatedRotation(
-              turns: _isOpen ? 0.5 : 0.0,
-              duration: const Duration(milliseconds: 200),
-              child: const Icon(Iconsax.arrow_down_1_copy,
-                  size: 20, color: AppColors.primaryText),
-            ),
+            // Thay đổi icon dựa vào trạng thái Edit
+            suffixIcon: isEditMode
+                ? const Icon(
+                    Iconsax.lock_1_copy,
+                    size: 20,
+                    color: AppColors.subText,
+                  )
+                : AnimatedRotation(
+                    turns: _isOpen ? 0.5 : 0.0,
+                    duration: const Duration(milliseconds: 200),
+                    child: const Icon(
+                      Iconsax.arrow_down_1_copy,
+                      size: 20,
+                      color: AppColors.primaryText,
+                    ),
+                  ),
           ),
         ),
       ),

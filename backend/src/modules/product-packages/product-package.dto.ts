@@ -11,7 +11,17 @@ export type UnitResponseDto = Unit;
 
 export type ProductPackageResponseDto = Omit<
   ProductPackage,
-  'unitId' | 'productId'
+  'activeStatus' | 'createdAt' | 'updatedAt'
+>;
+
+export type ProductPackageSimpleResponseDto = Pick<
+  ProductPackage,
+  'productPackageId' | 'displayName' | 'variant'
+>;
+
+export type ProductPackageDetailResponseDto = Omit<
+  ProductPackage,
+  'unitId' | 'productId' | 'activeStatus' | 'updatedAt'
 > & {
   unit: Unit;
   category: Pick<Category, 'categoryId' | 'name'>;
@@ -22,30 +32,22 @@ export type ProductPackageResponseDto = Omit<
   > | null;
 };
 
-export type ProductPackageSimpleResponseDto = Pick<
-  ProductPackage,
-  'productPackageId' | 'displayName'
->;
-
 export type ProductPackageResponseForTransaction = Pick<
   ProductPackage,
-  'productPackageId' | 'displayName' | 'importPrice' | 'sellingPrice'
+  | 'productPackageId'
+  | 'displayName'
+  | 'variant'
+  | 'importPrice'
+  | 'sellingPrice'
 >;
 
-export type CreateProductPackageDto = Pick<ProductPackage, 'unitId'> &
-  Partial<
-    Pick<
-      ProductPackage,
-      'importPrice' | 'sellingPrice' | 'barcodeValue' | 'barcodeType'
-    >
-  >;
+type CreateProductPackageDto = Pick<ProductPackage, 'unitId'> &
+  Partial<Pick<ProductPackage, 'variant' | 'importPrice' | 'sellingPrice'>>;
 
-export type CreateProductPackageData = CreateProductPackageDto & {
-  productId: string;
-  displayName: string;
-};
+export type CreateProductPackageInput = CreateProductPackageDto &
+  Pick<ProductPackage, 'displayName' | 'productId'>;
 
-export type CreateInventoryData = Pick<
+export type CreateInventoryInput = Pick<
   CreateInventoryDto,
   'quantity' | 'reorderThreshold'
 >;
@@ -55,15 +57,25 @@ export type CreateProductPackageAndInventoryDto = {
   inventory: CreateInventoryDto;
 };
 
-export type UpdateProductPackageDto = Partial<
+/* Response của hàm create Package&Inventory để tránh warning DeprecationWarning
+Calling client.query() when the client is already executing a query
+is deprecated and will be removed in pg@9.0.
+Use async/await or an external async flow control mechanism instead. */
+export type CreatePackageAndInventoryResponseDto = Omit<
+  ProductPackageDetailResponseDto,
+  'unit' | 'category' | 'product'
+> &
+  Pick<ProductPackage, 'productId' | 'unitId'>;
+
+export type UpdateProductPackageInput = Partial<
   Pick<
     ProductPackage,
-    | 'displayName'
-    | 'importPrice'
-    | 'sellingPrice'
-    | 'barcodeValue'
-    | 'barcodeType'
+    'displayName' | 'variant' | 'importPrice' | 'sellingPrice' | 'unitId'
   >
+>;
+
+export type UpdateProductPackageDto = Partial<
+  Pick<ProductPackage, 'variant' | 'importPrice' | 'sellingPrice' | 'unitId'>
 >;
 
 /* Thừa kế type dựa trên schema Zod listPackageQuerySchema
@@ -78,4 +90,11 @@ type PackageQueryDto = {
 export type PackageQueryDto = z.infer<typeof listPackageQuerySchema>;
 
 export type ListProductPackagesResponseDto =
-  PaginationResponseDto<ProductPackageResponseDto>;
+  PaginationResponseDto<ProductPackageDetailResponseDto>;
+
+// data trả về khi query barcode
+export type BarcodeCandidateRecord = {
+  productName: string;
+  brand: string | null;
+  productPackage: ProductPackageResponseDto;
+};

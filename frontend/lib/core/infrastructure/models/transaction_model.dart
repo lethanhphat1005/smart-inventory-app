@@ -1,3 +1,4 @@
+// lib/core/infrastructure/models/transaction_model.dart
 import 'package:frontend/core/infrastructure/models/transaction_detail_model.dart';
 
 class TransactionModel {
@@ -6,8 +7,9 @@ class TransactionModel {
   final String? note;
   final double totalPrice;
   final String? userId;
-  final String type; // 'INBOUND', 'OUTBOUND', 'ADJUSTMENT'
-  final String status; // 'COMPLETED', 'PENDING', 'CANCELLED'
+  final String type;
+  final String status;
+  final int itemCount;
   final List<TransactionDetailModel> items;
 
   TransactionModel({
@@ -17,33 +19,29 @@ class TransactionModel {
     required this.totalPrice,
     this.userId,
     required this.type,
-    required this.status,
+    this.status = 'COMPLETED',
+    this.itemCount = 0,
     required this.items,
   });
-
-  // HÀM MỚI BỔ SUNG: Parse từ JSON thành Object
+  
   factory TransactionModel.fromJson(Map<String, dynamic> json) {
     return TransactionModel(
       transactionId: json['transactionId'] ?? json['transaction_id'],
-
-      // Parse DateTime an toàn
       createdAt: (json['createdAt'] != null || json['created_at'] != null)
           ? DateTime.tryParse(json['createdAt'] ?? json['created_at'])
           : null,
-
       note: json['note'],
-
-      // Parse double an toàn (đề phòng API trả về String hoặc Int)
       totalPrice: double.tryParse(json['totalPrice']?.toString() ??
               json['total_price']?.toString() ??
               '0') ??
           0.0,
-
       userId: json['userId'] ?? json['user_id'],
-      type: json['type'] ?? 'UNKNOWN',
-      status: json['status'] ?? 'UNKNOWN',
-
-      // Lặp qua mảng items (nếu có) và gọi fromJson của TransactionDetailModel
+      type: json['type']?.toString() ?? 'unknown',
+      status: json['status']?.toString().toUpperCase() ?? 'COMPLETED',
+      itemCount: int.tryParse(json['itemCount']?.toString() ??
+              json['item_count']?.toString() ??
+              '0') ??
+          0,
       items: json['items'] != null
           ? (json['items'] as List<dynamic>)
               .map((item) =>
@@ -58,6 +56,7 @@ class TransactionModel {
         'total_price': totalPrice,
         'type': type,
         'status': status,
+        'item_count': itemCount,
         'items': items.map((i) => i.toJson()).toList(),
       };
 }

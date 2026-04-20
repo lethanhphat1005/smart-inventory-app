@@ -136,6 +136,16 @@ class SplashController extends GetxController {
     } else if (authService.isLoggedIn.value) {
       // KIỂM TRA XEM ĐÃ CÓ CỬA HÀNG CHƯA BẰNG STORE SERVICE
       if (storeService.currentStoreId.value.isNotEmpty) {
+        if (NotificationService.pendingInitialMessage != null) {
+          debugPrint(
+              "🎯 Splash đã load xong! Bàn giao thông báo cho Router...");
+          final msg = NotificationService.pendingInitialMessage!;
+          NotificationService.pendingInitialMessage =
+              null; // Xóa cờ sau khi lấy
+          NotificationService.handleNotificationTap(msg);
+          return; // KẾT THÚC SPLASH TẠI ĐÂY, KHÔNG GỌI Get.offAllNamed() NỮA ĐỂ TRÁNH XUNG ĐỘT
+        }
+
         // Có rồi -> Vào thẳng Home bỏ qua màn chọn
         Get.offAllNamed(AppRoutes.main);
       } else {
