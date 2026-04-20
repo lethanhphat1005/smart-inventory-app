@@ -19,7 +19,10 @@ class InventoryInsightItemWidget extends StatelessWidget {
     final pkg = inventory.productPackage;
 
     final name = pkg?.displayName ?? TTexts.unknownProduct.tr;
-    final barcode = pkg?.barcodeValue ?? TTexts.na.tr;
+
+    // LẤY THÔNG TIN BRAND THAY VÌ BARCODE/UNIT CHO ĐỠ RỐI
+    final brand =
+        product?.brand?.isNotEmpty == true ? product!.brand! : TTexts.na.tr;
 
     final price = pkg?.sellingPrice ?? 0.0;
     final imageUrl = product?.imageUrl;
@@ -39,11 +42,9 @@ class InventoryInsightItemWidget extends StatelessWidget {
     }
 
     return GestureDetector(
-      // 🔥 ĐÃ FIX: Truyền thêm PackageId
       onTap: () {
         final productId = displayItem.product?.productId;
         final packageId = displayItem.inventory.productPackageId;
-        final barcode = displayItem.inventory.productPackage?.barcodeValue;
 
         if (productId != null || packageId.isNotEmpty) {
           Get.toNamed(
@@ -51,7 +52,6 @@ class InventoryInsightItemWidget extends StatelessWidget {
             arguments: productId,
             parameters: {
               if (packageId.isNotEmpty) 'packageId': packageId,
-              if (barcode != null && barcode.isNotEmpty) 'barcode': barcode,
             },
           );
         }
@@ -115,10 +115,14 @@ class InventoryInsightItemWidget extends StatelessWidget {
                         color: AppColors.primaryText),
                   ),
                   const SizedBox(height: AppSizes.p4),
+
+                  // HIỂN THỊ BRAND BASIC
                   Text(
-                    "${TTexts.barcodeLabel.tr}: $barcode",
+                    "${TTexts.brand.tr}: $brand",
                     style:
                         const TextStyle(color: AppColors.subText, fontSize: 12),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),

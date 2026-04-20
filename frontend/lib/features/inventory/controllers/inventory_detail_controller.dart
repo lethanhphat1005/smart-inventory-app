@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:frontend/core/infrastructure/models/product_package_barcode_model.dart';
 import 'package:frontend/core/infrastructure/utils/day_formatter_utils.dart';
 import 'package:frontend/core/ui/widgets/t_bottom_sheet_widget.dart';
 import 'package:frontend/core/infrastructure/utils/error_handler_utils.dart';
@@ -10,6 +11,7 @@ import 'package:frontend/features/inventory/controllers/inventory_insight_contro
 import 'package:frontend/features/inventory/models/inventory_insight_display_model.dart';
 import 'package:frontend/features/inventory/models/inventory_history_model.dart';
 import 'package:frontend/core/infrastructure/models/transaction_model.dart';
+import 'package:frontend/features/inventory/widgets/shared/inventory_barcode_list_bottom_sheet_widget.dart';
 import 'package:frontend/routes/app_routes.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -432,6 +434,15 @@ class InventoryDetailController extends GetxController with TErrorHandler {
     );
   }
 
+  void showBarcodeListBottomSheet() {
+    final package = currentDisplayItem.value?.inventory.productPackage;
+    if (package != null && package.barcodes.isNotEmpty) {
+      TBottomSheetWidget.show(
+        child: InventoryBarcodeListBottomSheetWidget(package: package),
+      );
+    }
+  }
+
   // ==========================================
   // GETTERS UI
   // ==========================================
@@ -439,12 +450,15 @@ class InventoryDetailController extends GetxController with TErrorHandler {
   InventoryInsightDisplayModel? get _item => currentDisplayItem.value;
   String get name =>
       _item?.inventory.productPackage?.displayName ?? TTexts.unknownProduct.tr;
+
   String get barcode =>
       _item?.inventory.productPackage?.barcodeValue ?? TTexts.na.tr;
+  List<ProductPackageBarcodeModel> get barcodes =>
+      _item?.inventory.productPackage?.barcodes ?? [];
+
   String? get imageUrl => _item?.product?.imageUrl;
   String get brand => _item?.product?.brand ?? '';
-  String get barcodeType =>
-      _item?.inventory.productPackage?.barcodeType ?? 'EAN';
+
   String get activeStatus =>
       _item?.inventory.productPackage?.activeStatus ?? 'active';
   String get categoryName => categoryNameObs.value;

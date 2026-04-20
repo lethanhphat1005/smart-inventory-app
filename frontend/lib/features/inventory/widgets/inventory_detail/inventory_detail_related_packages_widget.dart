@@ -36,9 +36,14 @@ class InventoryDetailRelatedPackagesWidget
         itemBuilder: (context, index) {
           final item = related[index];
           final pkg = item.inventory.productPackage;
+
           final name = pkg?.displayName ?? TTexts.unknownProduct.tr;
           final barcode = pkg?.barcodeValue ?? TTexts.na.tr;
           final stock = item.inventory.quantity;
+
+          // Xử lý đa mã vạch
+          final hasMultipleBarcodes = (pkg?.barcodes.length ?? 0) > 1;
+          final extraCount = hasMultipleBarcodes ? pkg!.barcodes.length - 1 : 0;
 
           return Container(
             decoration: BoxDecoration(
@@ -67,9 +72,29 @@ class InventoryDetailRelatedPackagesWidget
               title: Text(name,
                   style: const TextStyle(
                       fontSize: 14, fontWeight: FontWeight.w600)),
-              subtitle: Text("${TTexts.barcodeLabel.tr}: $barcode",
-                  style:
-                      const TextStyle(fontSize: 12, color: AppColors.subText)),
+              subtitle: Text.rich(
+                TextSpan(
+                  children: [
+                    TextSpan(
+                      text: "${TTexts.barcodeLabel.tr}: $barcode",
+                      style: const TextStyle(
+                          color: AppColors.subText, fontSize: 12),
+                    ),
+                    if (hasMultipleBarcodes)
+                      TextSpan(
+                        text: '  (+$extraCount mã)',
+                        style: const TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                  ],
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
               trailing: Text("$stock ${TTexts.left.tr}",
                   style: const TextStyle(
                       fontSize: 14, fontWeight: FontWeight.bold)),
