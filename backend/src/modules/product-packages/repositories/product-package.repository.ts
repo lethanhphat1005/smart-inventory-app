@@ -16,6 +16,7 @@ import type {
   ProductPackageResponseDto,
   CreatePackageAndInventoryResponseDto,
   BarcodeCandidateRecord,
+  ProductPackageListResponseDto,
 } from '../product-package.dto.js';
 
 const productPackageResponseSelect = {
@@ -51,6 +52,16 @@ const productPackageResponseSelect = {
       reorderThreshold: true,
     },
   },
+  productPackageBarcodes: {
+    select: {
+      barcode: true,
+      source: true,
+      isVerified: true,
+    },
+    orderBy: {
+      createdAt: 'asc',
+    },
+  },
 } satisfies Prisma.ProductPackageSelect;
 
 type ProductPackageRecord = Prisma.ProductPackageGetPayload<{
@@ -78,13 +89,14 @@ export class ProductPackageRepository {
         imageUrl: productPackage.product.imageUrl,
       },
       inventory: productPackage.inventory,
+      productPackageBarcodes: productPackage.productPackageBarcodes,
     };
   }
 
   async findManyByStore(
     storeId: string,
     query: PackageQueryDto,
-  ): Promise<ListPaginationResponseDto<ProductPackageDetailResponseDto>> {
+  ): Promise<ListPaginationResponseDto<ProductPackageListResponseDto>> {
     const { page, limit, categoryId, sortBy, sortOrder } = query;
 
     const where: Prisma.ProductPackageWhereInput = {
@@ -104,16 +116,43 @@ export class ProductPackageRepository {
         },
         skip: getPaginationSkip({ page, limit }),
         take: limit,
-        select: productPackageResponseSelect,
+        select: {
+          productPackageId: true,
+          displayName: true,
+          variant: true,
+          importPrice: true,
+          sellingPrice: true,
+          unitId: true,
+          product: {
+            select: {
+              productId: true,
+              imageUrl: true,
+            },
+          },
+          productPackageBarcodes: {
+            select: {
+              barcode: true,
+              source: true,
+              isVerified: true,
+            },
+            orderBy: {
+              createdAt: 'asc',
+            },
+          },
+        },
       }),
       this.db.productPackage.count({
         where,
       }),
     ]);
 
-    const items = productPackages.map((productPackage) =>
-      this.toResponseDto(productPackage),
-    );
+    const items = productPackages.map((productPackage) => {
+      return {
+        ...productPackage,
+        importPrice: productPackage.importPrice?.toNumber() ?? null,
+        sellingPrice: productPackage.sellingPrice?.toNumber() ?? null,
+      };
+    });
 
     return {
       items,
@@ -431,6 +470,13 @@ export class ProductPackageRepository {
             inventoryId: true,
             quantity: true,
             reorderThreshold: true,
+          },
+        },
+        productPackageBarcodes: {
+          select: {
+            barcode: true,
+            source: true,
+            isVerified: true,
           },
         },
       },
