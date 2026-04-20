@@ -23,6 +23,10 @@ class ProductCatalogDetailPackageItemWidget
 
   @override
   Widget build(BuildContext context) {
+    final String fullDisplayName = package.variant?.isNotEmpty == true
+        ? '${package.displayName} ${package.variant}'
+        : package.displayName;
+
     return Container(
       margin: const EdgeInsets.only(bottom: AppSizes.p12),
       child: Slidable(
@@ -73,7 +77,7 @@ class ProductCatalogDetailPackageItemWidget
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                package.displayName,
+                fullDisplayName,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(

@@ -11,6 +11,7 @@ class ProductPackageModel {
   final String productId;
   final String activeStatus;
   final String? barcodeType;
+  final String? variant;
   final UnitModel? unit;
   final ProductModel? product;
 
@@ -24,6 +25,7 @@ class ProductPackageModel {
     required this.productId,
     required this.activeStatus,
     this.barcodeType,
+    this.variant, 
     this.unit,
     this.product,
   });
@@ -41,6 +43,7 @@ class ProductPackageModel {
       productId: json['productId'] ?? json['product']?['productId'] ?? '',
       activeStatus: json['activeStatus'] ?? 'active',
       barcodeType: json['barcodeType'],
+      variant: json['variant'], 
       unit: json['unit'] != null ? UnitModel.fromJson(json['unit']) : null,
       product: json['product'] != null
           ? ProductModel.fromJson(json['product'])

@@ -15,38 +15,13 @@ class InventoryProductPackageFormFieldsWidget
 
   @override
   Widget build(BuildContext context) {
-    // KHAI BÁO BIẾN Ở ĐÂY, KHÔNG CẦN DÙNG OBX CHO BIẾN TĨNH
-    final isEditMode = controller.packageToEdit != null;
-
     return Form(
       key: controller.packageFormKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // 1. CHỌN ĐƠN VỊ (BỊ KHÓA NẾU LÀ EDIT MODE)
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              IgnorePointer(
-                ignoring: isEditMode,
-                child: Opacity(
-                  opacity: isEditMode ? 0.6 : 1.0,
-                  child: const InventoryProductPackageUnitDropdownWidget(),
-                ),
-              ),
-              if (isEditMode)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8.0, left: 4.0),
-                  child: Text(
-                    TTexts.unitLockedMessage.tr,
-                    style: const TextStyle(
-                        fontSize: 12,
-                        color: AppColors.alertText,
-                        fontStyle: FontStyle.italic),
-                  ),
-                ),
-            ],
-          ),
+          const InventoryProductPackageUnitDropdownWidget(),
           const SizedBox(height: 24),
 
           // 2. TÊN HIỂN THỊ PREVIEW
@@ -66,7 +41,6 @@ class InventoryProductPackageFormFieldsWidget
             controller: controller.packageVariantNameController,
           ),
 
-          // THANH GỢI Ý CHIPS (Đoạn này giữ nguyên Obx vì selectedUnitId là Rx)
           Obx(() {
             final suggestions = controller.variantNameSuggestions;
             if (suggestions.isEmpty) return const SizedBox.shrink();

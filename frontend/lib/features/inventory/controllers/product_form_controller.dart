@@ -199,7 +199,6 @@ class ProductFormController extends GetxController with TErrorHandler {
         nameController.text = freshName ?? productToEdit!.name;
         brandController.text = freshBrand ?? productToEdit!.brand ?? '';
       }
-
       if (args['package'] != null) {
         packageToEdit = args['package'] as ProductPackageModel;
 
@@ -207,6 +206,7 @@ class ProductFormController extends GetxController with TErrorHandler {
         salePriceController.text = packageToEdit!.sellingPrice.toString();
         barcodeController.text = packageToEdit!.barcodeValue ?? '';
         selectedUnitId.value = packageToEdit!.unitId;
+        packageVariantNameController.text = packageToEdit!.variant ?? '';
 
         _fetchAndSetThreshold(packageToEdit!.productPackageId);
       }
@@ -249,19 +249,6 @@ class ProductFormController extends GetxController with TErrorHandler {
             allUnits.firstWhereOrNull((u) => u.unitId == selectedUnitId.value);
         final unitName = unit?.name ?? '';
         unitNameController.text = unitName;
-
-        final fullName = packageToEdit!.displayName;
-        final baseName = productToEdit?.name ?? '';
-
-        String variant = fullName;
-        if (baseName.isNotEmpty) {
-          variant = variant.replaceAll(baseName, '').trim();
-        }
-        if (unitName.isNotEmpty) {
-          variant = variant.replaceAll(unitName, '').trim();
-        }
-
-        packageVariantNameController.text = variant;
       }
     } catch (e) {
       debugPrint("Error loading units: $e");
@@ -523,13 +510,12 @@ class ProductFormController extends GetxController with TErrorHandler {
       final newProduct = await _provider.createProduct(productPayload);
 
       final packagePayload = {
-        'displayNameSuffix': packageVariantNameController.text.trim().isNotEmpty
+        'variant': packageVariantNameController.text.trim().isNotEmpty
             ? packageVariantNameController.text.trim()
             : null,
         'unitId': selectedUnitId.value,
         'importPrice': double.tryParse(importPriceController.text),
         'sellingPrice': double.tryParse(salePriceController.text),
-        // Chú ý: Backend của bạn không lưu barcode trực tiếp qua payload này
       };
 
       final inventoryPayload = {
@@ -635,10 +621,10 @@ class ProductFormController extends GetxController with TErrorHandler {
 
       if (isUpdate) {
         final packagePayload = {
-          'displayNameSuffix':
-              packageVariantNameController.text.trim().isNotEmpty
-                  ? packageVariantNameController.text.trim()
-                  : null,
+          'variant': packageVariantNameController.text.trim().isNotEmpty
+              ? packageVariantNameController.text.trim()
+              : null,
+          'unitId': selectedUnitId.value,
           'importPrice': double.tryParse(importPriceController.text),
           'sellingPrice': double.tryParse(salePriceController.text),
         };
@@ -669,10 +655,9 @@ class ProductFormController extends GetxController with TErrorHandler {
       } else {
         // CREATE PACKAGE LẺ MODE
         final packagePayload = {
-          'displayNameSuffix':
-              packageVariantNameController.text.trim().isNotEmpty
-                  ? packageVariantNameController.text.trim()
-                  : null,
+          'variant': packageVariantNameController.text.trim().isNotEmpty
+              ? packageVariantNameController.text.trim()
+              : null,
           'unitId': selectedUnitId.value,
           'importPrice': double.tryParse(importPriceController.text),
           'sellingPrice': double.tryParse(salePriceController.text),
