@@ -3,6 +3,7 @@ import { z } from 'zod';
 import type { ProductPackage, Unit } from './product-package.type.js';
 import type { listPackageQuerySchema } from './product-package.validator.js';
 import type { PaginationResponseDto } from '../../common/types/pagination.type.js';
+import type { ProductPackageBarcode } from '../../generated/prisma/client.js';
 import type { Category } from '../categories/index.js';
 import type { CreateInventoryDto, Inventory } from '../inventories/index.js';
 import type { Product } from '../products/index.js';
@@ -30,6 +31,10 @@ export type ProductPackageDetailResponseDto = Omit<
     Inventory,
     'inventoryId' | 'quantity' | 'reorderThreshold'
   > | null;
+  productPackageBarcodes: Pick<
+    ProductPackageBarcode,
+    'barcode' | 'source' | 'isVerified'
+  >[];
 };
 
 export type ProductPackageResponseForTransaction = Pick<
@@ -89,8 +94,19 @@ type PackageQueryDto = {
 }; */
 export type PackageQueryDto = z.infer<typeof listPackageQuerySchema>;
 
+export type ProductPackageListResponseDto = Omit<
+  ProductPackageResponseDto,
+  'productId'
+> & {
+  product: Pick<Product, 'productId' | 'imageUrl'>;
+  productPackageBarcodes: Pick<
+    ProductPackageBarcode,
+    'barcode' | 'source' | 'isVerified'
+  >[];
+};
+
 export type ListProductPackagesResponseDto =
-  PaginationResponseDto<ProductPackageDetailResponseDto>;
+  PaginationResponseDto<ProductPackageListResponseDto>;
 
 // data trả về khi query barcode
 export type BarcodeCandidateRecord = {
