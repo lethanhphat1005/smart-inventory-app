@@ -6,7 +6,7 @@ export const redisClient = new Redis(
 );
 
 redisClient.on('connect', () => {
-  console.info('✅ Kết nối Redis thành công!');
+  console.info('Kết nối Redis thành công!');
 });
 
 redisClient.on('error', (err) => {
