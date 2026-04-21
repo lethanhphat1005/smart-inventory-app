@@ -96,7 +96,6 @@ final Map<String, String> enTransaction = {
   TTexts.selectExportType: "Select Export Types:",
   TTexts.quantityGreaterThanZero: "Quantity must be greater than 0",
   TTexts.unitPriceLabel: "Unit Price",
-  
 
   // Specific Reasons
   TTexts.reasonRetailSale: 'Retail Sale',
@@ -138,6 +137,8 @@ final Map<String, String> enTransaction = {
       "Please specify the quantity from the batches above.",
   TTexts.outboundTransaction: "Outbound Transaction",
   TTexts.loadingCreatingTransaction: "Creating transaction...",
+  TTexts.creatingExportTicket: "Creating export ticket...",
+  TTexts.exportTicketCreated: "Export ticket created successfully!",
 
   // -- Stock Adjustment
   TTexts.confirmAdjustmentTitle: "Start Inventory Check?",

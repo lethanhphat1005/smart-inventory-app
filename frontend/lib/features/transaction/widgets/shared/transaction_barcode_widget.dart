@@ -1,17 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:frontend/features/transaction/controllers/inbound_transaction_item_add_controller.dart';
+import 'package:frontend/features/transaction/controllers/outbound_transaction_item_add_controller.dart';
 import 'package:get/get.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 
-class TransactionBarcodeWidget
-    extends GetView<InboundTransactionItemAddController> {
+class TransactionBarcodeWidget extends StatelessWidget {
   const TransactionBarcodeWidget({super.key});
+
+  dynamic get _controller {
+    if (Get.isRegistered<OutboundTransactionItemAddController>()) {
+      return Get.find<OutboundTransactionItemAddController>();
+    } else if (Get.isRegistered<InboundTransactionItemAddController>()) {
+      return Get.find<InboundTransactionItemAddController>();
+    }
+    throw Exception("Không tìm thấy Controller (Inbound/Outbound)");
+  }
 
   @override
   Widget build(BuildContext context) {
+    final controller = _controller; // GỌI CONTROLLER RA
+
     return Obx(() {
       final barcodes = controller.fetchedBarcodesList;
       final hasMultipleBarcodes = barcodes.length > 1;
@@ -41,7 +52,6 @@ class TransactionBarcodeWidget
               ),
               child: Row(
                 children: [
-                  // 1. ICON BÊN TRÁI
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
@@ -54,8 +64,6 @@ class TransactionBarcodeWidget
                     child: _buildMockLinearBarcode(displayBarcode),
                   ),
                   const SizedBox(width: AppSizes.p16),
-
-                  // 2. THÔNG TIN MÃ VẠCH Ở GIỮA
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -119,8 +127,6 @@ class TransactionBarcodeWidget
                       ],
                     ),
                   ),
-
-                  // 3. MŨI TÊN CHỈ BÁO BẤM ĐƯỢC
                   if (hasMultipleBarcodes)
                     const Padding(
                       padding: EdgeInsets.only(left: 8.0),

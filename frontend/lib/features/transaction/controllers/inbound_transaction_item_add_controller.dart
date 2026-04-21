@@ -173,8 +173,9 @@ class InboundTransactionItemAddController extends GetxController
     if (fetchedBarcode.value.isNotEmpty) return fetchedBarcode.value;
     final pkg =
         _activeInventory.productPackage ?? initialItem.inventory.productPackage;
-    if (pkg?.barcodeValue != null && pkg!.barcodeValue!.isNotEmpty)
+    if (pkg?.barcodeValue != null && pkg!.barcodeValue!.isNotEmpty) {
       return pkg.barcodeValue!;
+    }
     return TTexts.na.tr;
   }
 

@@ -14,8 +14,6 @@ import 'package:frontend/core/infrastructure/models/inventory_model.dart';
 import 'package:frontend/core/infrastructure/models/product_model.dart';
 import 'package:frontend/core/infrastructure/models/product_package_model.dart';
 import 'package:frontend/features/search/widgets/search_filter_bottom_sheet_widget.dart';
-import 'package:frontend/features/transaction/controllers/inbound_transaction_controller.dart';
-import 'package:frontend/features/transaction/controllers/outbound_transaction_controller.dart';
 import 'package:frontend/routes/app_routes.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -49,11 +47,15 @@ class TSearchController extends GetxController with TErrorHandler {
   String dynamicHint = TTexts.searchEverything.tr;
 
   late final SearchTarget target;
+
+  // Biến lưu xem search được gọi từ đâu
+  String returnRouteContext = '';
+
   bool get isTransactionSearch => target == SearchTarget.transactions;
 
   bool get isAddingToCart =>
-      Get.isRegistered<OutboundTransactionController>() ||
-      Get.isRegistered<InboundTransactionController>();
+      returnRouteContext == AppRoutes.outboundTransaction ||
+      returnRouteContext == AppRoutes.inboundTransaction;
 
   final RxString filterType = TTexts.filterAll.obs;
 
@@ -76,12 +78,27 @@ class TSearchController extends GetxController with TErrorHandler {
   @override
   void onInit() {
     super.onInit();
-    final args = Get.arguments as Map<String, dynamic>? ?? {};
-    target = args['target'] as SearchTarget? ?? SearchTarget.inventory;
-    dynamicHint = args['hint'] ??
-        (isTransactionSearch
-            ? TTexts.searchTransactionHint.tr
-            : TTexts.searchEverything.tr);
+    final args = Get.arguments;
+
+    if (args is Map<String, dynamic>) {
+      target = args['target'] as SearchTarget? ?? SearchTarget.inventory;
+      dynamicHint = args['hint'] ??
+          (isTransactionSearch
+              ? TTexts.searchTransactionHint.tr
+              : TTexts.searchEverything.tr);
+    } else if (args is String) {
+      returnRouteContext = args;
+      target = SearchTarget.inventory;
+      if (args == AppRoutes.inboundTransaction ||
+          args == AppRoutes.outboundTransaction) {
+        dynamicHint = TTexts.searchProductToAdd.tr;
+      } else {
+        dynamicHint = TTexts.searchEverything.tr;
+      }
+    } else {
+      target = SearchTarget.inventory;
+      dynamicHint = TTexts.searchEverything.tr;
+    }
 
     if (isTransactionSearch) {
       _loadFilterUsers();
@@ -113,22 +130,18 @@ class TSearchController extends GetxController with TErrorHandler {
 
       if (storeId.isEmpty) return;
 
-      // Gọi API thật, trả về List<StoreMemberModel>
       final members = await _provider.getStoreMembers(storeId, currentUserId);
 
       if (members.isNotEmpty) {
         final mappedUsers = members.map((m) {
           final id = m.userId;
           final name = m.name;
-
           const String avatar = '';
-
           return SearchFilterUserModel(id: id, name: name, avatarUrl: avatar);
         }).toList();
 
         availableUsers.assignAll(mappedUsers);
       } else {
-        // Fallback nếu cửa hàng chưa có ai, tự hiện chính mình
         final myName = currentUser?.fullName ?? 'Admin';
         availableUsers.assignAll([
           SearchFilterUserModel(id: currentUserId, name: myName, avatarUrl: '')
@@ -192,15 +205,10 @@ class TSearchController extends GetxController with TErrorHandler {
   Future<void> _executeTransactionSearch(String query) async {
     final q = query.trim();
 
-    // ===============================================
-    // ĐÃ FIX: CHỐT CHẶN TRÁNH TRÀN DATA
-    // Kiểm tra xem có đang ở trạng thái "Trắng bóc" không
-    // ===============================================
     final bool hasNoFilters = filterType.value == TTexts.filterAll &&
         filterDateRange.value == null &&
         filterUserId.value.isEmpty;
 
-    // Nếu không gõ gì và cũng không có bộ lọc nào -> Xóa list và thoát luôn
     if (q.isEmpty && hasNoFilters) {
       searchTransactionResults.clear();
       return;
@@ -210,14 +218,12 @@ class TSearchController extends GetxController with TErrorHandler {
     hasMore.value = false;
 
     try {
-      // 1. CHUẨN BỊ THAM SỐ LỌC CHO API BACKEND
       Map<String, dynamic> queryParams = {
         'limit': 100,
         'sortBy': 'createdAt',
         'sortOrder': 'desc',
       };
 
-      // Map Type Filter
       if (filterType.value != TTexts.filterAll) {
         if (filterType.value == TTexts.filterInbound) {
           queryParams['type'] = 'import';
@@ -227,7 +233,6 @@ class TSearchController extends GetxController with TErrorHandler {
         }
       }
 
-      // Map Date Range Filter
       if (filterDateRange.value != null) {
         queryParams['startDate'] =
             DayFormatterUtils.formatApiDate(filterDateRange.value!.start);
@@ -235,11 +240,9 @@ class TSearchController extends GetxController with TErrorHandler {
             DayFormatterUtils.formatApiDate(filterDateRange.value!.end);
       }
 
-      // 2. GỌI API TỪ SEARCH PROVIDER
       List<TransactionModel> results =
           await _provider.searchTransactions(queryParams: queryParams);
 
-      // 3. LỌC Ở LOCAL (User ID & Text)
       if (filterUserId.value.isNotEmpty) {
         results =
             results.where((tx) => tx.userId == filterUserId.value).toList();
@@ -369,15 +372,11 @@ class TSearchController extends GetxController with TErrorHandler {
       final pkg = item.inventory.productPackage;
       final prod = item.product;
 
-      // TRƯỜNG HỢP A: ĐANG TẠO GIAO DỊCH (Chỉ click được vào Package)
-      if (isAddingToCart) {
-        if (pkg != null) {
-          if (Get.isRegistered<OutboundTransactionController>()) {
-            Get.toNamed(AppRoutes.outboundTransactionItemAdd, arguments: item);
-          } else {
-            Get.toNamed(AppRoutes.inboundTransactionItemAdd, arguments: item);
-          }
-        }
+      if (returnRouteContext == AppRoutes.outboundTransaction) {
+        Get.toNamed(AppRoutes.outboundTransactionItemAdd, arguments: item);
+        return;
+      } else if (returnRouteContext == AppRoutes.inboundTransaction) {
+        Get.toNamed(AppRoutes.inboundTransactionItemAdd, arguments: item);
         return;
       }
 
@@ -394,7 +393,7 @@ class TSearchController extends GetxController with TErrorHandler {
         // Chỉ có Category ID -> Tới Category Detail
         final catModel = CategoryModel(
             categoryId: prod.categoryId,
-            name: prod.name, // Tên danh mục đã gán tạm vào prod.name ở hàm map
+            name: prod.name,
             storeId: '',
             isDefault: false);
         Get.toNamed(AppRoutes.categoryDetail, arguments: catModel);
@@ -402,7 +401,7 @@ class TSearchController extends GetxController with TErrorHandler {
     }
   }
 
-  // 🟢 SMART MAPPING: Map linh hoạt dữ liệu null
+  // Map linh hoạt dữ liệu null
   InventoryInsightDisplayModel _mapToDisplayModel(SearchProductModel s) {
     bool isCategoryOnly = s.productId.isEmpty && s.categoryId.isNotEmpty;
     bool hasPackage =

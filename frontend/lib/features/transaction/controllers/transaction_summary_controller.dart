@@ -3,6 +3,7 @@ import 'package:frontend/core/infrastructure/models/transaction_model.dart';
 import 'package:frontend/core/infrastructure/utils/day_formatter_utils.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/features/home/controllers/home_controller.dart';
+import 'package:frontend/features/inventory/controllers/inventory_controller.dart';
 import 'package:frontend/features/transaction/widgets/transaction_summary/transaction_summary_details_bottom_sheet_widget.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/ui/widgets/t_bottom_sheet_widget.dart';
@@ -79,6 +80,9 @@ class TransactionSummaryController extends GetxController {
 
     if (Get.isRegistered<HomeController>()) {
       Get.find<HomeController>().loadAllHomeData();
+    }
+    if (Get.isRegistered<InventoryController>()) {
+      Get.find<InventoryController>().fetchDashboardData();
     }
   }
 
