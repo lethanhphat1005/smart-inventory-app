@@ -1,7 +1,6 @@
-import type {
-  ListPaginationQueryDto,
-  PaginationResponseDto,
-} from '../../../common/types/index.js';
+import { z } from 'zod';
+
+import type { PaginationResponseDto } from '../../../common/types/index.js';
 import type {
   AdjustmentType,
   Inventory,
@@ -10,6 +9,7 @@ import type {
   ProductSnapshot,
   Unit,
 } from '../inventory.type.js';
+import type { listInventoriesQuerySchema } from '../validator/inventory.validator.js';
 
 export type InventoryResponseDto = Inventory;
 
@@ -23,17 +23,19 @@ export type InventoryListItemDto = Omit<Inventory, 'productPackageId'> & {
 
 export type InventoryDetailResponseDto = InventoryListItemDto;
 
-export type InventorySortBy =
-  | 'updatedAt'
-  | 'quantity'
-  | 'reorderThreshold';
+export type InventorySortBy = 'updatedAt' | 'quantity' | 'reorderThreshold';
 
-export type ListInventoriesQueryDto =
-  ListPaginationQueryDto<InventorySortBy> & {
-    keyword?: string;
-    categoryId?: string;
-    inventoryStatus?: InventoryStatus;
-  };
+// export type ListInventoriesQueryDto =
+//   ListPaginationQueryDto<InventorySortBy> & {
+//     keyword?: string;
+//     categoryId?: string;
+//     inventoryStatus?: InventoryStatus;
+//   };
+
+// kế thừa type từ validator
+export type ListInventoriesQueryDto = z.infer<
+  typeof listInventoriesQuerySchema
+>;
 
 export type ListInventoriesResponseDto =
   PaginationResponseDto<InventoryListItemDto>;

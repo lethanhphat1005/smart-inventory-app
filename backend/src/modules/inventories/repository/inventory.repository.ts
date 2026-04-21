@@ -25,6 +25,7 @@ const inventorySelect = {
     select: {
       productPackageId: true,
       displayName: true,
+      variant: true,
       importPrice: true,
       sellingPrice: true,
       unit: {
@@ -86,12 +87,9 @@ export class InventoryRepository {
       productPackage: {
         productPackageId: item.productPackage.productPackageId,
         displayName: item.productPackage.displayName,
-        importPrice: item.productPackage.importPrice
-          ? Number(item.productPackage.importPrice)
-          : null,
-        sellingPrice: item.productPackage.sellingPrice
-          ? Number(item.productPackage.sellingPrice)
-          : null,
+        variant: item.productPackage.variant,
+        importPrice: item.productPackage.importPrice?.toNumber() ?? null,
+        sellingPrice: item.productPackage.sellingPrice?.toNumber() ?? null,
         unit: item.productPackage.unit,
         product: item.productPackage.product,
       },
@@ -142,8 +140,7 @@ export class InventoryRepository {
     storeId: string,
     query: ListInventoriesQueryDto,
   ): Promise<{ items: InventoryListItemDto[]; totalItems: number }> {
-    const { page, limit } = normalizePagination(query);
-    const { sortBy = 'updatedAt', sortOrder = 'desc', inventoryStatus } = query;
+    const { page, limit, sortBy, sortOrder, inventoryStatus } = query;
 
     const where = this.buildInventoryWhere(storeId, query);
 

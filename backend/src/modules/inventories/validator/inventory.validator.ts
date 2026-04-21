@@ -16,7 +16,7 @@ const paramsSchema = z.object({
 
 // Tự động ép kiểu (coerce) và gán giá trị mặc định
 // (default) cho các tham số phân trang, sắp xếp
-const listInventoriesQuerySchema = z.object({
+export const listInventoriesQuerySchema = z.object({
   page: z.coerce.number().int().min(1).optional().default(1),
   limit: z.coerce.number().int().min(1).max(100).optional().default(10),
   sortBy: z
