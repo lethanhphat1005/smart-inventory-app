@@ -10,14 +10,20 @@ import 'package:frontend/core/ui/widgets/t_snackbars_widget.dart';
 import 'package:frontend/core/ui/widgets/t_custom_dialog_widget.dart';
 import 'package:frontend/features/transaction/models/adjustment_item_model.dart';
 import 'package:frontend/features/transaction/providers/transaction_provider.dart';
+import 'package:frontend/features/inventory/providers/inventory_provider.dart';
+import 'package:frontend/core/ui/widgets/t_bottom_sheet_widget.dart';
+import 'package:frontend/features/inventory/widgets/shared/inventory_barcode_list_bottom_sheet_widget.dart';
 import 'package:frontend/routes/app_routes.dart';
 import 'package:get/get.dart';
 
 class StockAdjustmentController extends GetxController with TErrorHandler {
   final TransactionProvider _provider = TransactionProvider();
+  final InventoryProvider _inventoryProvider = InventoryProvider();
 
   final RxList<AdjustmentItemRx> allItems = <AdjustmentItemRx>[].obs;
   final RxList<AdjustmentItemRx> filteredItems = <AdjustmentItemRx>[].obs;
+
+  final RxMap<String, String> fetchedImages = <String, String>{}.obs;
 
   final TextEditingController searchController = TextEditingController();
   final TextEditingController additionalNoteController =
@@ -67,9 +73,13 @@ class StockAdjustmentController extends GetxController with TErrorHandler {
     } else {
       final keyword = query.trim().toLowerCase();
       filteredItems.assignAll(
-        allItems
-            .where((item) => item.name.toLowerCase().contains(keyword))
-            .toList(),
+        allItems.where((item) {
+          final matchName = item.name.toLowerCase().contains(keyword);
+          final matchBarcode =
+              item.packageInfo?.barcodeValue?.toLowerCase().contains(keyword) ??
+                  false;
+          return matchName || matchBarcode;
+        }).toList(),
       );
     }
   }
@@ -91,6 +101,12 @@ class StockAdjustmentController extends GetxController with TErrorHandler {
 
   void goToItemAdjustmentPage(AdjustmentItemRx item) {
     Get.toNamed(AppRoutes.stockAdjustmentItem, arguments: item);
+  }
+
+  void showBarcodeListBottomSheet(ProductPackageModel package) {
+    TBottomSheetWidget.show(
+      child: InventoryBarcodeListBottomSheetWidget(package: package),
+    );
   }
 
   void checkAllUncheckedItems() {
@@ -225,7 +241,7 @@ class StockAdjustmentController extends GetxController with TErrorHandler {
 
         return {
           "productPackageId": item.packageId,
-          "type": "set", 
+          "type": "set",
           "quantity": item.actualQty.value,
           "reason": item.selectedReason.value.isNotEmpty
               ? item.selectedReason.value
@@ -234,22 +250,23 @@ class StockAdjustmentController extends GetxController with TErrorHandler {
         };
       }).toList();
 
-      // 2. GỌI API ĐIỀU CHỈNH HÀNG LOẠT (1 LẦN DUY NHẤT)
+      // 2. Gọi api điều chỉnh 
       await _provider.batchAdjustInventories(items: batchItems);
 
       FullScreenLoaderUtils.stopLoading();
 
-      // 3. XỬ LÝ TẠO SUMMARY ĐỂ CHUYỂN TRANG
+      // 3. Xử lý tạo Summary và chuyển trang
       double totalAdjustmentValue = 0.0;
       List<TransactionDetailModel> summaryDetails = [];
 
       for (var item in itemsToUpdate) {
         double unitPrice = item.packageInfo?.importPrice ?? 0.0;
-        totalAdjustmentValue += (item.spread * unitPrice);
+        int spread = item.actualQty.value - item.systemQty.value;
+        totalAdjustmentValue += (spread * unitPrice);
 
         summaryDetails.add(TransactionDetailModel(
           productPackageId: item.packageId,
-          quantity: item.spread,
+          quantity: spread,
           unitPrice: unitPrice,
           packageInfo: item.packageInfo,
         ));
@@ -283,10 +300,60 @@ class StockAdjustmentController extends GetxController with TErrorHandler {
         title: TTexts.scanProductBarcode.tr,
         onScanned: (code) {
           Get.back();
+          _processScannedBarcode(code);
         },
       ),
       transition: Transition.downToUp,
     );
+  }
+
+  Future<void> _processScannedBarcode(String barcode) async {
+    final localMatch = allItems.firstWhereOrNull((item) {
+      final pkg = item.packageInfo;
+      if (pkg?.barcodeValue == barcode) return true;
+      if (pkg?.barcodes.any((b) => b.barcode == barcode) ?? false) return true;
+      return false;
+    });
+
+    if (localMatch != null) {
+      goToItemAdjustmentPage(localMatch);
+      return;
+    }
+
+    try {
+      FullScreenLoaderUtils.openLoadingDialog('Đang tìm trên hệ thống...');
+      final result = await _inventoryProvider.scanBarcode(barcode);
+      FullScreenLoaderUtils.stopLoading();
+
+      if (result['resolutionType'] == 'exact_match') {
+        final pkgJson = result['productPackage'];
+        final packageInfo = ProductPackageModel.fromJson(pkgJson);
+
+        final invJsonMap =
+            Map<String, dynamic>.from(pkgJson['inventory'] ?? {});
+        final String realPackageId = pkgJson['productPackageId'] ?? '';
+
+        final newItem = AdjustmentItemRx(
+          id: invJsonMap['inventoryId'] ?? '',
+          packageId: realPackageId,
+          name: packageInfo.displayName,
+          initialSystemQty: invJsonMap['quantity'] ?? 0,
+          packageInfo: packageInfo,
+        );
+
+        allItems.insert(0, newItem);
+        filterItems(searchController.text);
+        goToItemAdjustmentPage(newItem);
+      } else {
+        TSnackbarsWidget.warning(
+            title: TTexts.warningTitle.tr,
+            message: 'Mã vạch không tồn tại hoặc chưa được gán!');
+      }
+    } catch (e) {
+      FullScreenLoaderUtils.stopLoading();
+      TSnackbarsWidget.error(
+          title: TTexts.errorServerTitle.tr, message: 'Lỗi tìm mã: $e');
+    }
   }
 
   @override

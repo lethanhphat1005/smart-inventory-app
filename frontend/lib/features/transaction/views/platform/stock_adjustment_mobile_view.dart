@@ -4,7 +4,6 @@ import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:frontend/core/ui/widgets/t_app_bar_widget.dart';
 import 'package:frontend/core/ui/widgets/t_editable_search_bar_widget.dart';
-// IMPORT TEMPTYSTATEWIDGET
 import 'package:frontend/core/ui/widgets/t_empty_state_widget.dart';
 import 'package:frontend/features/transaction/controllers/stock_adjustment_controller.dart';
 import 'package:frontend/features/transaction/widgets/stock_adjustment/stock_adjustment_fab_widget.dart';
@@ -12,7 +11,7 @@ import 'package:frontend/features/transaction/widgets/stock_adjustment/stock_adj
 import 'package:frontend/features/transaction/widgets/stock_adjustment/stock_adjustment_additional_note_widget.dart';
 import 'package:frontend/features/transaction/widgets/stock_adjustment/stock_adjustment_bottom_bar_widget.dart';
 import 'package:get/get.dart';
-import 'package:iconsax_flutter/iconsax_flutter.dart'; // Thêm để dùng icon cho Empty State
+import 'package:iconsax_flutter/iconsax_flutter.dart';
 
 class StockAdjustmentMobileView extends GetView<StockAdjustmentController> {
   const StockAdjustmentMobileView({super.key});
@@ -62,12 +61,11 @@ class StockAdjustmentMobileView extends GetView<StockAdjustmentController> {
                 ),
                 Expanded(
                   child: Obx(() {
-                    // THAY THẾ BẰNG EMPTY STATE WIDGET
                     if (controller.filteredItems.isEmpty) {
                       return SingleChildScrollView(
                         physics: const BouncingScrollPhysics(),
                         child: TEmptyStateWidget(
-                          icon: Iconsax.search_normal_1_copy, // Icon kính lúp
+                          icon: Iconsax.search_normal_1_copy,
                           title: TTexts.noItemsFound.tr,
                           subtitle: TTexts.noItemsFoundDesc.tr,
                         ),
@@ -85,8 +83,10 @@ class StockAdjustmentMobileView extends GetView<StockAdjustmentController> {
                           return const StockAdjustmentAdditionalNoteWidget();
                         }
                         final item = controller.filteredItems[index];
+                        final originalIndex =
+                            controller.allItems.indexOf(item) + 1;
                         return StockAdjustmentItemCardWidget(
-                            item: item, index: index + 1);
+                            item: item, index: originalIndex);
                       },
                     );
                   }),

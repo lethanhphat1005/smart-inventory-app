@@ -1,17 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
-import 'package:frontend/core/infrastructure/utils/error_handler_utils.dart'; // Thêm Error Handler
+import 'package:frontend/core/infrastructure/utils/error_handler_utils.dart';
 import 'package:frontend/core/ui/widgets/t_snackbars_widget.dart';
 import 'package:frontend/features/transaction/controllers/stock_adjustment_controller.dart';
 import 'package:frontend/features/transaction/models/adjustment_item_model.dart';
+import 'package:frontend/core/ui/widgets/t_bottom_sheet_widget.dart';
+import 'package:frontend/features/inventory/widgets/shared/inventory_barcode_list_bottom_sheet_widget.dart';
+import 'package:frontend/features/transaction/providers/transaction_provider.dart';
+import 'package:frontend/core/infrastructure/models/product_package_barcode_model.dart';
+import 'package:frontend/core/infrastructure/utils/url_helper_utils.dart';
 import 'package:get/get.dart';
 
 class StockAdjustmentItemController extends GetxController with TErrorHandler {
+  final TransactionProvider _provider = TransactionProvider();
+
   late final AdjustmentItemRx item;
 
   late RxInt tempActualQty;
   late RxString tempSelectedReason;
   late TextEditingController tempNoteController;
+
+  final RxString fetchedBarcode = ''.obs;
+  final RxString fetchedImageUrl = ''.obs;
+  final RxList<ProductPackageBarcodeModel> fetchedBarcodesList =
+      <ProductPackageBarcodeModel>[].obs;
 
   final List<String> reasonOptions = [
     TTexts.damage,
@@ -29,6 +41,7 @@ class StockAdjustmentItemController extends GetxController with TErrorHandler {
       if (Get.arguments is AdjustmentItemRx) {
         item = Get.arguments;
         _initializeFormData();
+        _fetchFullPackageDetails();
       } else {
         Get.back();
         TSnackbarsWidget.error(
@@ -39,10 +52,107 @@ class StockAdjustmentItemController extends GetxController with TErrorHandler {
     }
   }
 
+  // HÀM CHUẨN HÓA URL
+  String _validateUrl(String? url) {
+    if (url == null || url.isEmpty) return '';
+    final normalized = UrlHelperUtils.normalizeImageUrl(url) ?? '';
+    if (!normalized.startsWith('http')) return '';
+    return normalized;
+  }
+
   void _initializeFormData() {
     tempActualQty = item.actualQty.value.obs;
     tempSelectedReason = item.selectedReason.value.obs;
     tempNoteController = TextEditingController(text: item.note.value);
+
+    if (Get.isRegistered<StockAdjustmentController>()) {
+      final cacheMap = Get.find<StockAdjustmentController>().fetchedImages;
+      fetchedImageUrl.value = _validateUrl(
+          cacheMap[item.packageId] ?? item.packageInfo?.product?.imageUrl);
+    } else {
+      fetchedImageUrl.value = _validateUrl(item.packageInfo?.product?.imageUrl);
+    }
+  }
+
+  Future<void> _fetchFullPackageDetails() async {
+    try {
+      final packageId = item.packageId;
+      String targetProductId = item.packageInfo?.productId ?? '';
+
+      // 1. LẤY MÃ VẠCH TỪ PACKAGE
+      if (packageId.isNotEmpty) {
+        final packageFullData =
+            await _provider.getProductPackageById(packageId);
+        if (targetProductId.isEmpty) {
+          targetProductId = packageFullData['productId'] ?? '';
+        }
+        if (packageFullData['productPackageBarcodes'] != null) {
+          final barcodes = (packageFullData['productPackageBarcodes'] as List)
+              .map((e) => ProductPackageBarcodeModel.fromJson(e))
+              .toList();
+          fetchedBarcodesList.assignAll(barcodes);
+
+          if (barcodes.isNotEmpty) {
+            fetchedBarcode.value = barcodes.first.barcode;
+          } else {
+            fetchedBarcode.value = packageFullData['barcodeValue'] ?? '';
+          }
+        } else {
+          fetchedBarcode.value = packageFullData['barcodeValue'] ?? '';
+        }
+      }
+
+      // 2. KÉO LUỒNG PHỤ LẤY ẢNH VÀ LƯU VÀO CACHE BÊN NGOÀI
+      if (targetProductId.isNotEmpty) {
+        try {
+          final productFullData =
+              await _provider.getProductById(targetProductId);
+
+          final String fetchedImg = _validateUrl(productFullData['imageUrl']);
+          if (fetchedImg.isNotEmpty) {
+            fetchedImageUrl.value = fetchedImg;
+
+            // GHI ẢNH ĐÃ CHUẨN HÓA VÀO CACHE ĐỂ BÊN NGOÀI DÙNG CHUNG
+            if (Get.isRegistered<StockAdjustmentController>()) {
+              Get.find<StockAdjustmentController>()
+                  .fetchedImages[item.packageId] = fetchedImg;
+            }
+          }
+        } catch (e) {
+          debugPrint('Lỗi fetch product image: $e');
+        }
+      }
+    } catch (e) {
+      debugPrint('Lỗi fetch chi tiết: $e');
+    }
+  }
+
+  String get imageUrl => fetchedImageUrl.value;
+
+  String get displayBarcode {
+    if (fetchedBarcode.value.isNotEmpty) return fetchedBarcode.value;
+    final barcodes = item.packageInfo?.barcodes ?? [];
+    if (barcodes.isNotEmpty) return barcodes.first.barcode;
+    return item.packageInfo?.barcodeValue ?? '';
+  }
+
+  bool get hasMultipleBarcodes =>
+      fetchedBarcodesList.length > 1 ||
+      (item.packageInfo?.barcodes.length ?? 0) > 1;
+  int get barcodeCount => fetchedBarcodesList.isNotEmpty
+      ? fetchedBarcodesList.length
+      : (item.packageInfo?.barcodes.length ?? 0);
+
+  void showBarcodeListBottomSheet() {
+    if (item.packageInfo != null && hasMultipleBarcodes) {
+      final updatedPackage = item.packageInfo!.copyWith(
+          barcodes: fetchedBarcodesList.isNotEmpty
+              ? fetchedBarcodesList
+              : item.packageInfo!.barcodes);
+      TBottomSheetWidget.show(
+        child: InventoryBarcodeListBottomSheetWidget(package: updatedPackage),
+      );
+    }
   }
 
   void incrementActualQty() {

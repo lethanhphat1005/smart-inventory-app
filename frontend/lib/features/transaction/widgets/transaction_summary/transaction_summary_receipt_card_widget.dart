@@ -12,6 +12,33 @@ class TransactionSummaryReceiptCardWidget
 
   @override
   Widget build(BuildContext context) {
+    // ==============================================================
+    // LOGIC XỬ LÝ MÀU SẮC VÀ DẤU (+/-) THEO YÊU CẦU CỦA BẠN
+    // ==============================================================
+    int totalQty = controller.transaction.items
+        .fold(0, (sum, item) => sum + item.quantity);
+    double totalPrice = controller.transaction.totalPrice;
+
+    String itemsDisplay = controller.itemsDisplay;
+    Color itemsColor = controller.itemsColor;
+    String moneyDisplay = controller.moneyDisplay;
+    Color moneyColor = controller.moneyColor;
+
+    if (controller.isOutbound) {
+      // Outbound (Xuất): Số lượng trừ đi (Đỏ), Tiền thu về (Xanh)
+      itemsDisplay = '- $totalQty';
+      itemsColor = AppColors.stockOut;
+      moneyDisplay = '+ \$${totalPrice.toStringAsFixed(2)}';
+      moneyColor = AppColors.stockIn;
+    } else if (controller.isInbound) {
+      // Inbound (Nhập): Số lượng tăng lên (Xanh), Tiền chi ra (Đỏ)
+      itemsDisplay = '+ $totalQty';
+      itemsColor = AppColors.stockIn;
+      moneyDisplay = '- \$${totalPrice.toStringAsFixed(2)}';
+      moneyColor = AppColors.stockOut;
+    }
+    // ==============================================================
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -65,31 +92,29 @@ class TransactionSummaryReceiptCardWidget
 
           // 3. THỐNG KÊ ITEM VÀ TỔNG TIỀN (GỘP CHUNG)
           _buildRow(
-            // ĐÃ FIX: Hiển thị Modified Products thay cho thẻ chung
             controller.isAdjustment
                 ? TTexts.modifiedProducts.tr
                 : TTexts.totalItemsTransaction.tr,
             '',
             customLeftWidget: Row(
               children: [
-                Text(controller.itemsDisplay,
+                Text(itemsDisplay, // Dùng biến logic mới
                     style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
-                        color: controller.itemsColor)),
+                        color: itemsColor)), // Dùng biến logic mới
 
-                // ĐÃ FIX: CHỈ HIỂN THỊ TIỀN NẾU KHÔNG PHẢI LÀ KIỂM KHO
                 if (!controller.isAdjustment) ...[
                   const Text(" / ",
                       style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w400,
                           color: AppColors.subText)),
-                  Text(controller.moneyDisplay,
+                  Text(moneyDisplay, // Dùng biến logic mới
                       style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
-                          color: controller.moneyColor)),
+                          color: moneyColor)), // Dùng biến logic mới
                 ],
               ],
             ),

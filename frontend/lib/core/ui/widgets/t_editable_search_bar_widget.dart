@@ -83,6 +83,7 @@ class TEditableSearchBarWidget extends StatelessWidget {
                   const SizedBox(width: 12),
                   Expanded(
                     child: TextField(
+                      cursorColor: AppColors.primary,
                       controller: controller,
                       onChanged: onChanged,
                       style: const TextStyle(

@@ -28,11 +28,9 @@ class OutboundTransactionController extends GetxController with TErrorHandler {
 
   final TextEditingController noteController = TextEditingController();
 
-  // ĐÃ SỬA: Dùng đúng các key TTexts bạn đã có sẵn
   final List<String> predefinedReasons = [
     TTexts.reasonRetailSale.tr,
     TTexts.reasonWholesale.tr,
-    TTexts.reasonDamaged.tr,
     TTexts.reasonOther.tr,
   ];
 
@@ -77,8 +75,7 @@ class OutboundTransactionController extends GetxController with TErrorHandler {
       if (newQty > stock) {
         TSnackbarsWidget.warning(
             title: TTexts.warningTitle.tr,
-            message:
-                "Số lượng vượt quá tồn kho"); // Hoặc dùng key TTexts.warningTitle của bạn
+            message: "Số lượng vượt quá tồn kho");
         return;
       }
 

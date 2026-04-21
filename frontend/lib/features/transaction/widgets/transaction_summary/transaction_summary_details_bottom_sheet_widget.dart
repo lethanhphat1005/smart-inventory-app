@@ -12,6 +12,11 @@ class TransactionSummaryDetailsBottomSheetWidget
 
   @override
   Widget build(BuildContext context) {
+    final items = controller.transaction.items;
+    final int totalItems = items.length;
+    const int maxDisplay = 3;
+    final int displayCount = totalItems > maxDisplay ? maxDisplay : totalItems;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -55,18 +60,18 @@ class TransactionSummaryDetailsBottomSheetWidget
               ],
             ),
           )
-        else
+        else ...[
           // ==========================================
-          // INBOUND/OUTBOUND -> HIỂN THỊ LIST CHI TIẾT
+          // INBOUND/OUTBOUND -> HIỂN THỊ LIST CHI TIẾT CÓ GIỚI HẠN
           // ==========================================
           ListView.separated(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             padding: EdgeInsets.zero,
-            itemCount: controller.transaction.items.length,
+            itemCount: displayCount,
             separatorBuilder: (_, __) => const SizedBox(height: 12),
             itemBuilder: (context, index) {
-              final item = controller.transaction.items[index];
+              final item = items[index];
               return Row(
                 children: [
                   Container(
@@ -103,7 +108,26 @@ class TransactionSummaryDetailsBottomSheetWidget
             },
           ),
 
-        // PHẦN HIỂN THỊ NOTE TỔNG (Vẫn giữ cho Adjustment)
+          // ==========================================
+          // DÒNG TEXT CHỈ BÁO CÒN NHIỀU SẢN PHẨM HƠN
+          // ==========================================
+          if (totalItems > maxDisplay)
+            Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: Center(
+                child: Text(
+                  '+ ${totalItems - maxDisplay} more...',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    fontStyle: FontStyle.italic,
+                    color: AppColors.subText,
+                  ),
+                ),
+              ),
+            ),
+        ],
+
         if (controller.transaction.note != null &&
             controller.transaction.note!.isNotEmpty) ...[
           const Padding(
