@@ -57,6 +57,7 @@ jobs:
     env:
       # env để tránh lỗi biến môi trường prisma.config.ts
       DATABASE_URL: "postgresql://postgres:postgres@localhost:54322/postgres"
+      DIRECT_URL: "postgresql://postgres:postgres@localhost:54322/postgres"
     defaults:
       run:
         shell: bash
