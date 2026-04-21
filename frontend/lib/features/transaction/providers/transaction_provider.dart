@@ -83,4 +83,22 @@ class TransactionProvider {
       throw Exception('Lỗi khi fetch danh sách tồn kho: $e');
     }
   }
+
+  Future<Map<String, dynamic>> getProductPackageById(String packageId) async {
+    try {
+      final response = await _apiClient.get('/api/product-packages/$packageId');
+      return response.data['data'] ?? response.data;
+    } catch (e) {
+      throw Exception('Lỗi khi fetch chi tiết product package: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>> getProductById(String productId) async {
+    try {
+      final response = await _apiClient.get('/api/products/$productId');
+      return response.data['data'] ?? response.data;
+    } catch (e) {
+      throw Exception('Lỗi khi fetch chi tiết product: $e');
+    }
+  }
 }

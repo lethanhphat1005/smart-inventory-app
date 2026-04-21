@@ -94,6 +94,9 @@ final Map<String, String> enTransaction = {
   TTexts.checkDetails: 'Check Details',
   TTexts.transactionDetails: 'Transaction Details',
   TTexts.selectExportType: "Select Export Types:",
+  TTexts.quantityGreaterThanZero: "Quantity must be greater than 0",
+  TTexts.unitPriceLabel: "Unit Price",
+  
 
   // Specific Reasons
   TTexts.reasonRetailSale: 'Retail Sale',

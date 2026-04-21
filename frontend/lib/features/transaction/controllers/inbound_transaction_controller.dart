@@ -7,6 +7,13 @@ import 'package:frontend/core/ui/layouts/t_barcode_scanner_layout.dart';
 import 'package:frontend/features/home/controllers/home_controller.dart';
 import 'package:frontend/features/report/controllers/report_controller.dart';
 import 'package:frontend/features/transaction/providers/transaction_provider.dart';
+// IMPORT THÊM CÁC FILE ĐỂ HỖ TRỢ ĐIỀU HƯỚNG BARCODE
+import 'package:frontend/features/inventory/providers/inventory_provider.dart';
+import 'package:frontend/core/infrastructure/models/product_model.dart';
+import 'package:frontend/core/infrastructure/models/product_package_model.dart';
+import 'package:frontend/core/infrastructure/models/inventory_model.dart';
+import 'package:frontend/features/inventory/models/inventory_insight_display_model.dart';
+
 import 'package:frontend/routes/app_routes.dart';
 import 'package:get/get.dart';
 import 'package:frontend/core/infrastructure/utils/full_screen_loader_utils.dart';
@@ -16,6 +23,8 @@ import 'package:frontend/core/ui/theme/app_colors.dart';
 
 class InboundTransactionController extends GetxController with TErrorHandler {
   final TransactionProvider _provider = TransactionProvider();
+  final InventoryProvider _inventoryProvider =
+      InventoryProvider(); // Thêm provider để gọi API quét mã
 
   final RxList<TransactionDetailModel> cartItems =
       <TransactionDetailModel>[].obs;
@@ -78,7 +87,6 @@ class InboundTransactionController extends GetxController with TErrorHandler {
     }
   }
 
-  // XÓA SẢN PHẨM (Dùng Emoji Icon)
   void removeItem(int index) {
     Get.dialog(
       TCustomDialogWidget(
@@ -97,7 +105,6 @@ class InboundTransactionController extends GetxController with TErrorHandler {
     );
   }
 
-  // 1. KIỂM TRA THAY ĐỔI GIÁ (IMPORT PRICE)
   void handleImportWithPriceCheck() {
     if (cartItems.isEmpty) {
       TSnackbarsWidget.warning(
@@ -105,7 +112,6 @@ class InboundTransactionController extends GetxController with TErrorHandler {
       return;
     }
 
-    // Lọc ra các item có giá nhập thay đổi so với giá nhập gốc
     final changedPriceItems = cartItems.where((item) {
       final originalPrice = item.packageInfo?.importPrice ?? 0.0;
       return (item.unitPrice - originalPrice).abs() > 0.01;
@@ -134,13 +140,12 @@ class InboundTransactionController extends GetxController with TErrorHandler {
           primaryButtonText: TTexts.updatePricesAndCreate.tr,
           onPrimaryPressed: () {
             Get.back();
-            _showConfirmImportDialog(updatePrice: true); // Cập nhật giá luôn
+            _showConfirmImportDialog(updatePrice: true);
           },
           secondaryButtonText: TTexts.justCreateTransaction.tr,
           onSecondaryPressed: () {
             Get.back();
-            _showConfirmImportDialog(
-                updatePrice: false); // Chỉ nhập hàng, không cập nhật giá gốc
+            _showConfirmImportDialog(updatePrice: false);
           },
         ),
       );
@@ -149,7 +154,6 @@ class InboundTransactionController extends GetxController with TErrorHandler {
     }
   }
 
-  // 2. XÁC NHẬN NHẬP KHO CHÍNH THỨC
   void _showConfirmImportDialog({required bool updatePrice}) {
     Get.dialog(
       TCustomDialogWidget(
@@ -168,7 +172,6 @@ class InboundTransactionController extends GetxController with TErrorHandler {
     );
   }
 
-  // Hoàn thiện import
   Future<void> completeImport({required bool updatePrice}) async {
     try {
       FullScreenLoaderUtils.openLoadingDialog(TTexts.creatingImportTicket.tr);
@@ -177,8 +180,6 @@ class InboundTransactionController extends GetxController with TErrorHandler {
           ? noteController.text.trim()
           : TTexts.manualImport.tr;
 
-      // 1. Format dữ liệu giỏ hàng chuẩn theo yêu cầu của Backend
-      // Backend cần: productPackageId, quantity, unitPrice
       final List<Map<String, dynamic>> itemsPayload = cartItems.map((item) {
         return {
           'productPackageId': item.productPackageId,
@@ -187,15 +188,11 @@ class InboundTransactionController extends GetxController with TErrorHandler {
         };
       }).toList();
 
-      // 2. GỌI API
       final response = await _provider.createImportTransaction(
         note: finalNote,
         items: itemsPayload,
       );
 
-      // 3. NẾU CHỌN CẬP NHẬT GIÁ MỚI -> BẮN API ĐỔI IMPORT PRICE
-      // Vì API import không tự đổi giá gốc (như mô tả trong backend là trả về Suggestions)
-      // Nên nếu user đồng ý, ta tự động bắn update.
       if (updatePrice) {
         final validItems = cartItems.where((item) =>
             item.productPackageId != null && item.productPackageId!.isNotEmpty);
@@ -210,19 +207,16 @@ class InboundTransactionController extends GetxController with TErrorHandler {
 
       FullScreenLoaderUtils.stopLoading();
 
-      // 4. Tạo Object để truyền sang trang Summary hiển thị
       final transaction = TransactionModel(
         transactionId: response['transactionId'] ?? 'NEW-TX',
         totalPrice: totalFunds,
         type: 'import',
         status: 'COMPLETED',
         note: finalNote,
-        createdAt:
-            DateTime.now(), // Hoặc lấy DateTime.parse(response['createdAt'])
+        createdAt: DateTime.now(),
         items: cartItems.toList(),
       );
 
-      // Reset dữ liệu màn hình cũ
       cartItems.clear();
       noteController.clear();
 
@@ -234,7 +228,6 @@ class InboundTransactionController extends GetxController with TErrorHandler {
         Get.find<HomeController>().loadAllHomeData();
       }
 
-      // Chuyển hướng sang hóa đơn thành công
       Get.offNamed(AppRoutes.transactionSummary, arguments: transaction);
 
       TSnackbarsWidget.success(
@@ -246,9 +239,6 @@ class InboundTransactionController extends GetxController with TErrorHandler {
     }
   }
 
-  // ==========================================
-  // BẪY LỖI THOÁT TRANG
-  // ==========================================
   void handleExit() {
     if (cartItems.isNotEmpty) {
       Get.dialog(
@@ -265,20 +255,83 @@ class InboundTransactionController extends GetxController with TErrorHandler {
         ),
       );
     } else {
-      Get.back(); // Nếu giỏ hàng trống thì cho thoát luôn
+      Get.back();
     }
   }
 
+  // =======================================================
+  // ĐÃ SỬA: MỞ CAMERA VÀ XỬ LÝ NHẢY TRANG NGAY LẬP TỨC
+  // =======================================================
   void openScanner() {
     Get.to(
       () => TBarcodeScannerLayout(
         title: TTexts.scanProductBarcode.tr,
         onScanned: (code) {
-          Get.back();
+          Get.back(); // Đóng camera ngay lập tức
+          _processScannedBarcode(code); // Gọi hàm xử lý logic
         },
       ),
       transition: Transition.downToUp,
     );
+  }
+
+  Future<void> _processScannedBarcode(String barcode) async {
+    try {
+      FullScreenLoaderUtils.openLoadingDialog('Đang tìm sản phẩm...');
+      final result = await _inventoryProvider.scanBarcode(barcode);
+      FullScreenLoaderUtils.stopLoading();
+
+      final resolutionType = result['resolutionType'];
+
+      if (resolutionType == 'exact_match') {
+        // TÌM THẤY MÃ CHUẨN -> TẠO MODEL VÀ NHẢY TRANG LUÔN
+        final pkgJson = result['productPackage'];
+
+        final packageModel = ProductPackageModel.fromJson(pkgJson);
+        final productModel = pkgJson['product'] != null
+            ? ProductModel.fromJson(pkgJson['product'])
+            : null;
+
+        // Chế tạo Inventory Model tương thích với UI Add Item
+        final invJsonMap =
+            Map<String, dynamic>.from(pkgJson['inventory'] ?? {});
+        invJsonMap['productPackageId'] = packageModel.productPackageId;
+        invJsonMap['productPackage'] =
+            pkgJson; // Bắt buộc phải gắn lại để parse
+        if (invJsonMap['inventoryId'] == null) invJsonMap['inventoryId'] = '';
+        if (invJsonMap['quantity'] == null) invJsonMap['quantity'] = 0;
+        if (invJsonMap['reorderThreshold'] == null) {
+          invJsonMap['reorderThreshold'] = 0;
+        }
+
+        final inventoryModel = InventoryModel.fromJson(invJsonMap);
+
+        final displayItem = InventoryInsightDisplayModel(
+          product: productModel,
+          inventory: inventoryModel,
+        );
+
+        // ĐIỀU HƯỚNG THẲNG SANG TRANG THÊM VÀO INBOUND KÈM THAM SỐ
+        Get.toNamed(AppRoutes.inboundTransactionItemAdd,
+            arguments: displayItem);
+      } else if (resolutionType == 'candidate_match') {
+        // CÓ NHIỀU MÃ GẦN GIỐNG -> CHƯA CHỐT ĐƯỢC
+        TSnackbarsWidget.warning(
+            title: 'Chưa xác nhận mã',
+            message:
+                'Hệ thống tìm thấy sản phẩm nhưng chưa được map chuẩn. Vui lòng xác nhận bên ngoài.');
+      } else {
+        // KHÔNG TÌM THẤY
+        TSnackbarsWidget.warning(
+            title: TTexts.warningTitle.tr,
+            message: 'Mã vạch không tồn tại trong hệ thống!');
+      }
+    } catch (e) {
+      FullScreenLoaderUtils.stopLoading();
+      TSnackbarsWidget.error(
+          title: TTexts.errorServerTitle.tr,
+          message: 'Không thể xử lý mã vạch: $e');
+    }
   }
 
   @override

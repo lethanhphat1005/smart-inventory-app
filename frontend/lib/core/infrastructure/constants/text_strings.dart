@@ -518,6 +518,8 @@ class TTexts {
   static const String invalidPrice = 'invalid_price';
   static const String barcodeDeletedSuccess = 'barcode_deleted_success';
   static const String barcodeDeleted = 'barcode_deleted';
+  static const String quantityGreaterThanZero = 'quantity_greater_than_zero';
+  static const String unitPriceLabel = 'unit_price_label';
 
   // --- View All Products
   static const String viewAllProducts = 'view_all_products';

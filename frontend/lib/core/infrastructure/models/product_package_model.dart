@@ -1,6 +1,6 @@
 import 'package:frontend/core/infrastructure/models/unit_model.dart';
 import 'package:frontend/core/infrastructure/models/product_model.dart';
-import 'package:frontend/core/infrastructure/models/product_package_barcode_model.dart'; // IMPORT MODEL MỚI
+import 'package:frontend/core/infrastructure/models/product_package_barcode_model.dart';
 
 class ProductPackageModel {
   final String productPackageId;
@@ -69,6 +69,55 @@ class ProductPackageModel {
       product: json['product'] != null
           ? ProductModel.fromJson(json['product'])
           : null,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'productPackageId': productPackageId,
+      'displayName': displayName,
+      'importPrice': importPrice,
+      'sellingPrice': sellingPrice,
+      'unitId': unitId,
+      'productId': productId,
+      'activeStatus': activeStatus,
+      'variant': variant,
+      'barcodeValue': barcodeValue,
+      'barcodeType': barcodeType,
+      'unit': unit?.toJson(),
+      'product': product?.toJson(),
+    };
+  }
+
+  ProductPackageModel copyWith({
+    String? productPackageId,
+    String? displayName,
+    double? importPrice,
+    double? sellingPrice,
+    String? unitId,
+    String? productId,
+    String? activeStatus,
+    String? variant,
+    List<ProductPackageBarcodeModel>? barcodes,
+    String? barcodeValue,
+    String? barcodeType,
+    UnitModel? unit,
+    ProductModel? product,
+  }) {
+    return ProductPackageModel(
+      productPackageId: productPackageId ?? this.productPackageId,
+      displayName: displayName ?? this.displayName,
+      importPrice: importPrice ?? this.importPrice,
+      sellingPrice: sellingPrice ?? this.sellingPrice,
+      unitId: unitId ?? this.unitId,
+      productId: productId ?? this.productId,
+      activeStatus: activeStatus ?? this.activeStatus,
+      variant: variant ?? this.variant,
+      barcodes: barcodes ?? this.barcodes,
+      barcodeValue: barcodeValue ?? this.barcodeValue,
+      barcodeType: barcodeType ?? this.barcodeType,
+      unit: unit ?? this.unit,
+      product: product ?? this.product,
     );
   }
 }
