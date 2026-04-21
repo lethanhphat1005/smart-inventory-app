@@ -1,15 +1,7 @@
 import { Redis } from 'ioredis';
 import 'dotenv/config';
 
-const redisPort = Number(process.env.REDIS_PORT ?? 6379);
-
-if (Number.isNaN(redisPort)) {
-  throw new Error('REDIS_PORT must be a valid number');
-}
-
-export const redisClient = new Redis({
-  host: process.env.REDIS_HOST ?? '127.0.0.1',
-  port: redisPort,
+export const redisClient = new Redis(process.env.REDIS_URL!, {
   keyPrefix: process.env.REDIS_PREFIX ?? '', // Prefix cho tất cả key
 
   lazyConnect: true, // Không connect ngay, chỉ connect khi có command đầu tiên
