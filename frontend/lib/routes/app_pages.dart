@@ -1,11 +1,15 @@
 import 'package:frontend/features/auth/bindings/forgot_password_binding.dart';
 import 'package:frontend/features/auth/bindings/login_binding.dart';
 import 'package:frontend/features/auth/bindings/register_binding.dart';
+import 'package:frontend/features/auth/bindings/reset_password_binding.dart';
 import 'package:frontend/features/auth/bindings/verify_email_binding.dart';
+import 'package:frontend/features/auth/bindings/verify_otp_binding.dart';
 import 'package:frontend/features/auth/views/forgot_password_view.dart';
 import 'package:frontend/features/auth/views/login_view.dart';
 import 'package:frontend/features/auth/views/register_view.dart';
+import 'package:frontend/features/auth/views/reset_password_view.dart';
 import 'package:frontend/features/auth/views/verify_email_view.dart';
+import 'package:frontend/features/auth/views/verify_otp_view.dart';
 import 'package:frontend/features/home/bindings/adjustment_history_binding.dart';
 import 'package:frontend/features/home/bindings/low_stock_binding.dart';
 import 'package:frontend/features/home/views/adjustment_history_view.dart';
@@ -402,8 +406,26 @@ class AppPages {
 
     // -- Reorder suggestion
     GetPage(
-        name: AppRoutes.reorderSuggestion,
-        page: () => const ReorderSuggestionView(),
-        binding: ReorderSuggestionBinding()),
+      name: AppRoutes.reorderSuggestion,
+      page: () => const ReorderSuggestionView(),
+      binding: ReorderSuggestionBinding(),
+      transition: Transition.cupertino,
+    ),
+
+    // -- Reset password
+    GetPage(
+      name: AppRoutes.resetPassword,
+      page: () => const ResetPasswordView(),
+      binding: ResetPasswordBinding(),
+      transition: Transition.cupertino,
+    ),
+
+    // -- Verify OTP
+    GetPage(
+      name: AppRoutes.verifyOTP,
+      page: () => const VerifyOTPView(),
+      binding: VerifyOTPBinding(),
+      transition: Transition.cupertino,
+    ),
   ];
 }
