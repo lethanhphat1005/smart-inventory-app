@@ -1,3 +1,4 @@
+import type { InventoryItemData } from './chatbot.type.js';
 export type ChatbotRequestDto = {
   message: string;
 };
@@ -5,5 +6,5 @@ export type ChatbotRequestDto = {
 export type ChatbotResponseDto = {
   aiIntent: string;
   botReply: string;
-  data?: unknown;
+  data?: InventoryItemData | unknown;
 };
