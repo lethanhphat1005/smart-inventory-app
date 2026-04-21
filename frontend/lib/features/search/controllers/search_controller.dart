@@ -6,20 +6,28 @@ import 'package:frontend/core/infrastructure/models/unit_model.dart';
 import 'package:frontend/core/infrastructure/utils/day_formatter_utils.dart';
 import 'package:frontend/core/infrastructure/utils/error_handler_utils.dart';
 import 'package:frontend/core/infrastructure/utils/url_helper_utils.dart';
+import 'package:frontend/core/infrastructure/utils/full_screen_loader_utils.dart';
+import 'package:frontend/core/ui/widgets/t_custom_dialog_widget.dart';
+import 'package:frontend/core/ui/widgets/t_snackbars_widget.dart';
 import 'package:frontend/core/state/services/store_service.dart';
 import 'package:frontend/core/state/services/user_service.dart';
 import 'package:frontend/core/ui/widgets/t_bottom_sheet_widget.dart';
+import 'package:frontend/core/ui/layouts/t_barcode_scanner_layout.dart';
 import 'package:frontend/features/inventory/models/inventory_insight_display_model.dart';
 import 'package:frontend/core/infrastructure/models/inventory_model.dart';
 import 'package:frontend/core/infrastructure/models/product_model.dart';
 import 'package:frontend/core/infrastructure/models/product_package_model.dart';
 import 'package:frontend/features/search/widgets/search_filter_bottom_sheet_widget.dart';
+import 'package:frontend/features/transaction/controllers/stock_adjustment_controller.dart';
+import 'package:frontend/features/transaction/models/adjustment_item_model.dart';
+import 'package:frontend/features/inventory/providers/inventory_provider.dart';
 import 'package:frontend/routes/app_routes.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:frontend/features/search/models/search_product_model.dart';
 import 'package:frontend/features/search/providers/search_provider.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
+import 'package:frontend/core/state/controllers/barcode_action_controller.dart';
 
 enum SearchTarget { global, inventory, transactions, users }
 
@@ -33,6 +41,7 @@ class SearchFilterUserModel {
 
 class TSearchController extends GetxController with TErrorHandler {
   final SearchProvider _provider = SearchProvider();
+  final InventoryProvider _inventoryProvider = InventoryProvider();
   final storage = GetStorage();
 
   final textController = TextEditingController();
@@ -48,7 +57,6 @@ class TSearchController extends GetxController with TErrorHandler {
 
   late final SearchTarget target;
 
-  // Biến lưu xem search được gọi từ đâu
   String returnRouteContext = '';
 
   bool get isTransactionSearch => target == SearchTarget.transactions;
@@ -57,8 +65,9 @@ class TSearchController extends GetxController with TErrorHandler {
       returnRouteContext == AppRoutes.outboundTransaction ||
       returnRouteContext == AppRoutes.inboundTransaction;
 
-  final RxString filterType = TTexts.filterAll.obs;
+  bool get isStockAdjustment => returnRouteContext == AppRoutes.stockAdjustment;
 
+  final RxString filterType = TTexts.filterAll.obs;
   final Rx<DateTimeRange?> filterDateRange = Rx<DateTimeRange?>(null);
 
   final RxString filterUserId = ''.obs;
@@ -89,8 +98,7 @@ class TSearchController extends GetxController with TErrorHandler {
     } else if (args is String) {
       returnRouteContext = args;
       target = SearchTarget.inventory;
-      if (args == AppRoutes.inboundTransaction ||
-          args == AppRoutes.outboundTransaction) {
+      if (isAddingToCart || isStockAdjustment) {
         dynamicHint = TTexts.searchProductToAdd.tr;
       } else {
         dynamicHint = TTexts.searchEverything.tr;
@@ -202,6 +210,27 @@ class TSearchController extends GetxController with TErrorHandler {
     }
   }
 
+  void confirmRemoveRecentSearch(String query) {
+    Get.dialog(
+      TCustomDialogWidget(
+        title: TTexts.deleteSearchTitle.tr,
+        description: '${TTexts.deleteSearchMessage.tr}\n\n"$query"',
+        icon: const Text('🗑️', style: TextStyle(fontSize: 40)),
+        primaryButtonText: TTexts.delete.tr,
+        secondaryButtonText: TTexts.cancel.tr,
+        onPrimaryPressed: () {
+          Get.back();
+          _removeRecentSearch(query);
+        },
+      ),
+    );
+  }
+
+  void _removeRecentSearch(String query) {
+    recentSearches.remove(query);
+    storage.write(_currentStorageKey, recentSearches.toList());
+  }
+
   Future<void> _executeTransactionSearch(String query) async {
     final q = query.trim();
 
@@ -276,11 +305,9 @@ class TSearchController extends GetxController with TErrorHandler {
           await _provider.searchProductsByKeyword(query, page: _currentPage);
       final List<SearchProductModel> rawItems = response['items'];
 
-      // Nếu đang thêm vào giỏ hàng: CHỈ TRẢ VỀ PACKAGES.
-      // Nếu đang search global: TRẢ VỀ TẤT CẢ (Categories, Products, Packages).
       final mappedItems = rawItems
           .where((i) {
-            if (isAddingToCart) {
+            if (isAddingToCart || isStockAdjustment) {
               return i.productPackageId != null &&
                   i.productPackageId!.isNotEmpty;
             }
@@ -330,7 +357,7 @@ class TSearchController extends GetxController with TErrorHandler {
       final List<SearchProductModel> rawItems = response['items'];
       final mappedNewItems = rawItems
           .where((i) {
-            if (isAddingToCart) {
+            if (isAddingToCart || isStockAdjustment) {
               return i.productPackageId != null &&
                   i.productPackageId!.isNotEmpty;
             }
@@ -353,44 +380,61 @@ class TSearchController extends GetxController with TErrorHandler {
     }
   }
 
-  // Điều hướng:
-  // Transaction: Chỉ cho search Product-package
-  // Report: Chỉ cho search Transaction
-  // Inventory: Cho search Category, Product-package và Product
   void handleItemTap(dynamic item) {
     if (!isTransactionSearch) saveRecentSearch(currentSearchQuery.value);
 
-    // 1. Dành cho kết quả Giao dịch
     if (isTransactionSearch && item is TransactionModel) {
       Get.toNamed(AppRoutes.transactionDetail,
           arguments: {'id': item.transactionId});
       return;
     }
 
-    // 2. Dành cho kết quả Hàng hóa
     if (!isTransactionSearch && item is InventoryInsightDisplayModel) {
       final pkg = item.inventory.productPackage;
       final prod = item.product;
 
       if (returnRouteContext == AppRoutes.outboundTransaction) {
-        Get.toNamed(AppRoutes.outboundTransactionItemAdd, arguments: item);
+        Get.offNamed(AppRoutes.outboundTransactionItemAdd, arguments: item);
         return;
       } else if (returnRouteContext == AppRoutes.inboundTransaction) {
-        Get.toNamed(AppRoutes.inboundTransactionItemAdd, arguments: item);
+        Get.offNamed(AppRoutes.inboundTransactionItemAdd, arguments: item);
+        return;
+      } else if (returnRouteContext == AppRoutes.stockAdjustment) {
+        if (pkg != null) {
+          final newItem = AdjustmentItemRx(
+            id: item.inventory.inventoryId,
+            packageId: pkg.productPackageId,
+            name: pkg.displayName,
+            initialSystemQty: item.inventory.quantity,
+            packageInfo: pkg,
+          );
+
+          if (Get.isRegistered<StockAdjustmentController>()) {
+            final saController = Get.find<StockAdjustmentController>();
+            final localMatch = saController.allItems
+                .firstWhereOrNull((i) => i.packageId == newItem.packageId);
+            if (localMatch != null) {
+              Get.offNamed(AppRoutes.stockAdjustmentItem,
+                  arguments: localMatch);
+            } else {
+              saController.allItems.insert(0, newItem);
+              saController.filterItems(saController.searchController.text);
+              Get.offNamed(AppRoutes.stockAdjustmentItem, arguments: newItem);
+            }
+          } else {
+            Get.offNamed(AppRoutes.stockAdjustmentItem, arguments: newItem);
+          }
+        }
         return;
       }
 
-      // TRƯỜNG HỢP B: SEARCH CHUNG BÌNH THƯỜNG
       if (pkg != null) {
-        // Có Package -> Tới trang Inventory Detail
         Get.toNamed(AppRoutes.inventoryDetail,
             arguments: prod?.productId ?? pkg.productId,
             parameters: {'packageId': pkg.productPackageId});
       } else if (prod != null && prod.productId.isNotEmpty) {
-        // Có Product nhưng chưa có Package -> Tới Product Catalog
         Get.toNamed(AppRoutes.productCatalogDetail, arguments: prod);
       } else if (prod != null && prod.categoryId.isNotEmpty) {
-        // Chỉ có Category ID -> Tới Category Detail
         final catModel = CategoryModel(
             categoryId: prod.categoryId,
             name: prod.name,
@@ -401,7 +445,109 @@ class TSearchController extends GetxController with TErrorHandler {
     }
   }
 
-  // Map linh hoạt dữ liệu null
+  void openScanner() {
+    Get.to(
+      () => TBarcodeScannerLayout(
+        title: TTexts.barCodeScan.tr,
+        onScanned: (code) {
+          // ĐÃ BỎ Get.back(); Ở ĐÂY ĐỂ GIỮ NGUYÊN MÀN HÌNH QUÉT
+          // VÀ HIỆN BOTTOM SHEET / LOADING ĐÈ LÊN TRÊN CAMERA
+
+          if (isAddingToCart || isStockAdjustment) {
+            _processScannedBarcodeForTransaction(code);
+          } else {
+            BarcodeActionController.instance.handleScannedBarcode(code);
+          }
+        },
+      ),
+      transition: Transition.downToUp,
+    );
+  }
+
+  Future<void> _processScannedBarcodeForTransaction(String barcode) async {
+    try {
+      FullScreenLoaderUtils.openLoadingDialog(TTexts.searchingProduct.tr);
+      final result = await _inventoryProvider.scanBarcode(barcode);
+      FullScreenLoaderUtils.stopLoading();
+
+      final resolutionType = result['resolutionType'];
+
+      if (resolutionType == 'exact_match') {
+        final pkgJson = result['productPackage'];
+        final packageModel = ProductPackageModel.fromJson(pkgJson);
+        final productModel = pkgJson['product'] != null
+            ? ProductModel.fromJson(pkgJson['product'])
+            : null;
+
+        final invJsonMap =
+            Map<String, dynamic>.from(pkgJson['inventory'] ?? {});
+        invJsonMap['productPackageId'] = packageModel.productPackageId;
+        invJsonMap['productPackage'] = pkgJson;
+        if (invJsonMap['inventoryId'] == null) invJsonMap['inventoryId'] = '';
+        if (invJsonMap['quantity'] == null) invJsonMap['quantity'] = 0;
+        if (invJsonMap['reorderThreshold'] == null) {
+          invJsonMap['reorderThreshold'] = 0;
+        }
+
+        final inventoryModel = InventoryModel.fromJson(invJsonMap);
+
+        if (isAddingToCart) {
+          final displayItem = InventoryInsightDisplayModel(
+            product: productModel,
+            inventory: inventoryModel,
+          );
+
+          if (returnRouteContext == AppRoutes.outboundTransaction) {
+            // Get.offNamed sẽ tự động đóng layout camera lại và lật sang trang Add Item
+            Get.offNamed(AppRoutes.outboundTransactionItemAdd,
+                arguments: displayItem);
+          } else {
+            Get.offNamed(AppRoutes.inboundTransactionItemAdd,
+                arguments: displayItem);
+          }
+        } else if (isStockAdjustment) {
+          final newItem = AdjustmentItemRx(
+            id: invJsonMap['inventoryId'] ?? '',
+            packageId: packageModel.productPackageId,
+            name: packageModel.displayName,
+            initialSystemQty: invJsonMap['quantity'] ?? 0,
+            packageInfo: packageModel,
+          );
+
+          if (Get.isRegistered<StockAdjustmentController>()) {
+            final saController = Get.find<StockAdjustmentController>();
+            final localMatch = saController.allItems.firstWhereOrNull(
+                (item) => item.packageId == newItem.packageId);
+
+            if (localMatch != null) {
+              Get.offNamed(AppRoutes.stockAdjustmentItem,
+                  arguments: localMatch);
+            } else {
+              saController.allItems.insert(0, newItem);
+              saController.filterItems(saController.searchController.text);
+              Get.offNamed(AppRoutes.stockAdjustmentItem, arguments: newItem);
+            }
+          } else {
+            Get.offNamed(AppRoutes.stockAdjustmentItem, arguments: newItem);
+          }
+        }
+      } else if (resolutionType == 'candidate_match') {
+        TSnackbarsWidget.warning(
+            title: TTexts.unconfirmedBarcodeTitle.tr,
+            message: TTexts.unconfirmedBarcodeMessage.tr);
+      } else {
+        TSnackbarsWidget.warning(
+            title: TTexts.warningTitle.tr,
+            message: TTexts.barcodeNotFoundMessage.tr);
+      }
+    } catch (e) {
+      FullScreenLoaderUtils.stopLoading();
+      TSnackbarsWidget.error(
+          title: TTexts.errorServerTitle.tr,
+          message: '${TTexts.errorProcessingBarcode.tr}: $e');
+    }
+  }
+
   InventoryInsightDisplayModel _mapToDisplayModel(SearchProductModel s) {
     bool isCategoryOnly = s.productId.isEmpty && s.categoryId.isNotEmpty;
     bool hasPackage =

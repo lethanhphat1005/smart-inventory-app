@@ -28,12 +28,7 @@ class TransactionSummaryDetailsBottomSheetWidget
             controller.transaction.transactionId ?? TTexts.na.tr),
         const SizedBox(height: 8),
         _buildInfoRow(TTexts.transactionDate.tr, controller.dateStr),
-
         const SizedBox(height: 16),
-
-        // ==========================================
-        // NẾU LÀ ADJUSTMENT -> HIỂN THỊ VẮN TẮT
-        // ==========================================
         if (controller.isAdjustment)
           Container(
             padding: const EdgeInsets.all(16),
@@ -61,9 +56,6 @@ class TransactionSummaryDetailsBottomSheetWidget
             ),
           )
         else ...[
-          // ==========================================
-          // INBOUND/OUTBOUND -> HIỂN THỊ LIST CHI TIẾT CÓ GIỚI HẠN
-          // ==========================================
           ListView.separated(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -107,16 +99,12 @@ class TransactionSummaryDetailsBottomSheetWidget
               );
             },
           ),
-
-          // ==========================================
-          // DÒNG TEXT CHỈ BÁO CÒN NHIỀU SẢN PHẨM HƠN
-          // ==========================================
           if (totalItems > maxDisplay)
             Padding(
               padding: const EdgeInsets.only(top: 12),
               child: Center(
                 child: Text(
-                  '+ ${totalItems - maxDisplay} more...',
+                  '+ ${totalItems - maxDisplay} ${TTexts.more.tr}...',
                   style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
@@ -127,7 +115,6 @@ class TransactionSummaryDetailsBottomSheetWidget
               ),
             ),
         ],
-
         if (controller.transaction.note != null &&
             controller.transaction.note!.isNotEmpty) ...[
           const Padding(
@@ -169,13 +156,10 @@ class TransactionSummaryDetailsBottomSheetWidget
             ],
           ),
         ],
-
         const Padding(
           padding: EdgeInsets.symmetric(vertical: 16),
           child: Divider(height: 1),
         ),
-
-        // Tổng tiền (Lệch)
         if (!controller.isAdjustment) ...[
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 16),
@@ -197,9 +181,7 @@ class TransactionSummaryDetailsBottomSheetWidget
             ],
           ),
         ],
-
         const SizedBox(height: 24),
-
         SizedBox(
           width: double.infinity,
           child: TPrimaryButtonWidget(

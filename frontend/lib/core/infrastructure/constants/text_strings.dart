@@ -62,6 +62,20 @@ class TTexts {
   static const String userLabel = "user_label";
   static const String me = "me";
   static const String resultsFound = "results found";
+  static const String updatePriceAndImport = "update_price_and_import";
+  static const String importOnly = "import_only";
+  static const String confirmImportDesc = "confirm_import_desc";
+  static const String sellingPriceChangeDetectedDesc =
+      "selling_price_change_detected_desc";
+  static const String updatePriceAndExport = "update_price_and_export";
+  static const String exportOnly = "export_only";
+  static const String confirmExportDesc = "confirm_export_desc";
+  static const String significantChangeDetected = "significant_change_detected";
+  static const String highQtyFluctuationDesc = "high_qty_fluctuation_desc";
+  static const String priceFluctuationDesc = "price_fluctuation_desc";
+  static const String andMore = "and_more";
+  static const String deleteSearchTitle = "delete_search_title";
+  static const String deleteSearchMessage = "delete_search_message";
 
   // -- Network Error Dialog
   static const String netErrorTitle = "net_error_title";
@@ -710,6 +724,12 @@ class TTexts {
   static const String inbound = "inbound";
   static const String outbound = "outbound";
   static const String stockAdjustment = "stockAdjustment";
+  static const String searchingProduct = "searching_product";
+  static const String unconfirmedBarcodeTitle = "unconfirmed_barcode_title";
+  static const String unconfirmedBarcodeMessage = "unconfirmed_barcode_message";
+  static const String barcodeNotFoundMessage = "barcode_not_found_message";
+  static const String errorProcessingBarcode = "error_processing_barcode";
+  static const String tReason = "t_reason";
 
   // --- Inbound ---
   static const String inboundTransaction = "inbound_transaction";

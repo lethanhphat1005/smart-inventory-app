@@ -22,6 +22,7 @@ class InboundTransactionItemAddController extends GetxController
 
   late final InventoryInsightDisplayModel initialItem;
   final Rxn<InventoryModel> freshInventoryData = Rxn<InventoryModel>();
+
   final RxBool isLoadingFreshData = true.obs;
 
   final TextEditingController quantityController =
@@ -69,7 +70,6 @@ class InboundTransactionItemAddController extends GetxController
   void _updateTotalPriceAndQuantity() {
     final qty = int.tryParse(quantityController.text) ?? 1;
     itemQuantity.value = qty;
-
     final price = double.tryParse(priceController.text) ?? 0.0;
     totalPrice.value = qty * price;
   }
@@ -79,16 +79,12 @@ class InboundTransactionItemAddController extends GetxController
       isLoadingFreshData.value = true;
       final packageId = initialItem.inventory.productPackageId;
 
-      // =============================================================
-      // FIX: CỐ GẮNG TÌM PRODUCT ID BẰNG MỌI CÁCH CHO LUỒNG BARCODE
-      // =============================================================
       String? targetProductId = initialItem.product?.productId;
       if (targetProductId == null || targetProductId.isEmpty) {
         targetProductId = initialItem.inventory.productPackage?.productId;
       }
 
       if (packageId.isNotEmpty) {
-        // 1. FETCH TỒN KHO VÀ GIÁ
         final invData =
             await _provider.getInventoryDetailByPackageId(packageId);
         freshInventoryData.value = InventoryModel.fromJson(invData);
@@ -100,7 +96,6 @@ class InboundTransactionItemAddController extends GetxController
           targetProductId = freshInventoryData.value?.productPackage?.productId;
         }
 
-        // 2. KÉO LUỒNG PHỤ LẤY BARCODE TỪ PACKAGE
         try {
           final packageFullData =
               await _provider.getProductPackageById(packageId);
@@ -124,11 +119,10 @@ class InboundTransactionItemAddController extends GetxController
             fetchedBarcode.value = packageFullData['barcodeValue'] ?? '';
           }
         } catch (e) {
-          debugPrint('Lỗi fetch package: $e');
+          debugPrint('Error fetching package details: $e'); // Đã sửa sang T.A
         }
       }
 
-      // 3. KÉO LUỒNG PHỤ LẤY BRAND, CATEGORY, IMAGE TỪ PRODUCT
       if (targetProductId != null && targetProductId.isNotEmpty) {
         try {
           final productFullData =
@@ -139,7 +133,7 @@ class InboundTransactionItemAddController extends GetxController
               productFullData['category']?['name'] ?? TTexts.uncategorized.tr;
           fetchedImageUrl.value = _validateUrl(productFullData['imageUrl']);
         } catch (e) {
-          debugPrint('Lỗi fetch product: $e');
+          debugPrint('Error fetching product image: $e'); // Đã sửa sang T.A
         }
       }
     } catch (e) {
@@ -219,7 +213,7 @@ class InboundTransactionItemAddController extends GetxController
       if (qty <= 0) {
         TSnackbarsWidget.warning(
             title: TTexts.warningTitle.tr,
-            message: TTexts.quantityGreaterThanZero.tr);
+            message: TTexts.quantityGreaterThanZero.tr); // Đã gắn localization
         return;
       }
       FullScreenLoaderUtils.openLoadingDialog(TTexts.loadingAddingToCart.tr);
@@ -237,17 +231,15 @@ class InboundTransactionItemAddController extends GetxController
         FullScreenLoaderUtils.stopLoading();
         TSnackbarsWidget.error(
             title: TTexts.errorTitle.tr,
-            message: 'Lỗi: Không tìm thấy ID của phân loại sản phẩm.');
+            message: TTexts.errorNoPackageId.tr); // Đã gắn localization
         return;
       }
 
       ProductModel finalProduct;
       if (initialItem.product != null) {
-        // Nếu Search thường -> Đã có product -> Chỉ cần copy đè ảnh mới
         finalProduct =
             initialItem.product!.copyWith(imageUrl: fetchedImageUrl.value);
       } else {
-        // Nếu Scan Barcode -> Product bị null -> Tự tạo một ProductModel mới để chứa Ảnh
         finalProduct = ProductModel.fromJson({
           'productId': package?.productId ?? '',
           'name': displayName,
@@ -260,7 +252,7 @@ class InboundTransactionItemAddController extends GetxController
         'productPackageId': realPkgId,
         'displayName': displayName,
         'packageInfo': package?.copyWith(
-          product: finalProduct, // Gắn Product (chắc chắn có ảnh) vào giỏ
+          product: finalProduct,
           barcodes: fetchedBarcodesList,
         ),
         'importPrice': package?.importPrice ?? 0.0,

@@ -9,6 +9,28 @@ final Map<String, String> enTransaction = {
   TTexts.outbound: "Outbound",
   TTexts.stockAdjustment: "Stock Adjustment",
   TTexts.exit: "Exit",
+  TTexts.searchingProduct: "Searching for product...",
+  TTexts.unconfirmedBarcodeTitle: "Unconfirmed Barcode",
+  TTexts.unconfirmedBarcodeMessage:
+      "Product found but not properly mapped. Please verify externally.",
+  TTexts.barcodeNotFoundMessage: "Barcode does not exist in the system!",
+  TTexts.errorProcessingBarcode: "Error processing barcode",
+  TTexts.tReason: "Reason",
+  TTexts.updatePriceAndImport: "Update & Import",
+  TTexts.importOnly: "Just Import",
+  TTexts.confirmImportDesc:
+      "Are you sure you want to complete this import transaction?",
+  TTexts.sellingPriceChangeDetectedDesc:
+      "Some items have a different selling price than the master catalog. Do you want to update the master price for future transactions?",
+  TTexts.updatePriceAndExport: "Update & Export",
+  TTexts.exportOnly: "Just Export",
+  TTexts.confirmExportDesc:
+      "Are you sure you want to complete this export transaction?",
+  TTexts.significantChangeDetected: "Significant Change Detected",
+  TTexts.highQtyFluctuationDesc:
+      "The following items have high quantity fluctuations (>= 10 units):",
+  TTexts.priceFluctuationDesc: "The following items have price changes.",
+  TTexts.andMore: "and more...",
 
   // -- Inbound
   TTexts.inboundTransaction: "Inbound Transaction",
@@ -94,8 +116,10 @@ final Map<String, String> enTransaction = {
   TTexts.checkDetails: 'Check Details',
   TTexts.transactionDetails: 'Transaction Details',
   TTexts.selectExportType: "Select Export Types:",
-  TTexts.quantityGreaterThanZero: "Quantity must be greater than 0",
+  TTexts.quantityGreaterThanZero: "Quantity must be greater than zero.",
   TTexts.unitPriceLabel: "Unit Price",
+  TTexts.deleteSearchTitle: "Delete Search History",
+  TTexts.deleteSearchMessage: "Are you sure you want to delete this search keyword?",
 
   // Specific Reasons
   TTexts.reasonRetailSale: 'Retail Sale',

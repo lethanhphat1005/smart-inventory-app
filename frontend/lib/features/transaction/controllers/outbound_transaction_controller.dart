@@ -59,9 +59,7 @@ class OutboundTransactionController extends GetxController with TErrorHandler {
 
     if (pkgId == null || pkgId.isEmpty) {
       TSnackbarsWidget.error(
-          title: TTexts.errorTitle.tr,
-          message: TTexts
-              .errorUnknownMessage.tr); // Thay errorNoPackageId bằng lỗi có sẵn
+          title: TTexts.errorTitle.tr, message: TTexts.errorNoPackageId.tr);
       return;
     }
 
@@ -75,7 +73,7 @@ class OutboundTransactionController extends GetxController with TErrorHandler {
       if (newQty > stock) {
         TSnackbarsWidget.warning(
             title: TTexts.warningTitle.tr,
-            message: "Số lượng vượt quá tồn kho");
+            message: TTexts.batchExceedsStock.tr);
         return;
       }
 
@@ -91,7 +89,7 @@ class OutboundTransactionController extends GetxController with TErrorHandler {
       if (quantity > stock) {
         TSnackbarsWidget.warning(
             title: TTexts.warningTitle.tr,
-            message: "Số lượng vượt quá tồn kho");
+            message: TTexts.batchExceedsStock.tr);
         return;
       }
       cartItems.add(TransactionDetailModel(
@@ -113,7 +111,7 @@ class OutboundTransactionController extends GetxController with TErrorHandler {
       if (newQuantity > item.currentStock) {
         TSnackbarsWidget.warning(
             title: TTexts.warningTitle.tr,
-            message: "Số lượng vượt quá tồn kho");
+            message: TTexts.batchExceedsStock.tr);
         return;
       }
 
@@ -132,15 +130,91 @@ class OutboundTransactionController extends GetxController with TErrorHandler {
     cartItems.removeAt(index);
   }
 
-  Future<void> completeExport() async {
+  void handleExportWithPriceCheck() {
     if (cartItems.isEmpty) {
       TSnackbarsWidget.warning(
-          title: TTexts.warningTitle.tr, message: "Giỏ hàng đang trống");
+          title: TTexts.warningTitle.tr, message: TTexts.emptyCartWarning.tr);
       return;
     }
 
+    final priceChangedItems = cartItems.where((item) {
+      final originalPrice = item.packageInfo?.sellingPrice ?? 0.0;
+      return item.unitPrice != originalPrice;
+    }).toList();
+
+    if (priceChangedItems.isNotEmpty) {
+      // 3. XÂY DỰNG DANH SÁCH CHI TIẾT GIÁ BÁN (TỐI ĐA 3)
+      String priceDetails = "${TTexts.priceFluctuationDesc.tr}\n";
+      for (var i = 0; i < priceChangedItems.length; i++) {
+        if (i >= 3) {
+          priceDetails += "\n... ${TTexts.andMore.tr}";
+          break;
+        }
+        final item = priceChangedItems[i];
+        final oldPrice = item.packageInfo?.sellingPrice ?? 0.0;
+        priceDetails +=
+            "\n• ${item.packageInfo?.displayName ?? TTexts.unknownProduct.tr}: \$${oldPrice.toStringAsFixed(2)} ➔ \$${item.unitPrice.toStringAsFixed(2)}";
+      }
+
+      priceDetails += "\n\n${TTexts.sellingPriceChangeDetectedDesc.tr}";
+
+      Get.dialog(
+        TCustomDialogWidget(
+          title: TTexts.priceChangeDetectedTitle.tr,
+          description: priceDetails,
+          icon: const Text('💰', style: TextStyle(fontSize: 40)),
+          primaryButtonText: TTexts.updatePriceAndExport.tr,
+          secondaryButtonText: TTexts.exportOnly.tr,
+          onPrimaryPressed: () {
+            Get.back();
+            _executeExport(
+                updatePrices: true, priceChangedItems: priceChangedItems);
+          },
+          onSecondaryPressed: () {
+            Get.back();
+            _executeExport(updatePrices: false);
+          },
+        ),
+      );
+    } else {
+      Get.dialog(
+        TCustomDialogWidget(
+          title: TTexts.confirmExportTitle.tr,
+          description: TTexts.confirmExportDesc.tr,
+          icon: const Text('📦', style: TextStyle(fontSize: 40)),
+          primaryButtonText: TTexts.confirm.tr,
+          secondaryButtonText: TTexts.cancel.tr,
+          onPrimaryPressed: () {
+            Get.back();
+            _executeExport(updatePrices: false);
+          },
+        ),
+      );
+    }
+  }
+
+  Future<void> _executeExport(
+      {bool updatePrices = false,
+      List<TransactionDetailModel>? priceChangedItems}) async {
     try {
       FullScreenLoaderUtils.openLoadingDialog(TTexts.creatingExportTicket.tr);
+
+      // Cập nhật giá bán niêm yết lên DB nếu user đồng ý
+      if (updatePrices && priceChangedItems != null) {
+        for (var item in priceChangedItems) {
+          if (item.productPackageId != null &&
+              item.productPackageId!.isNotEmpty) {
+            await _provider.updateProductPackage(
+              item.productPackageId!,
+              {
+                'sellingPrice': item.unitPrice,
+                'unitId': item.packageInfo?.unitId ??
+                    'u-default', // Kẹp unitId để tránh lỗi 400
+              },
+            );
+          }
+        }
+      }
 
       final String finalNote = noteController.text.trim().isNotEmpty
           ? "${selectedReason.value} - ${noteController.text.trim()}"
@@ -204,15 +278,15 @@ class OutboundTransactionController extends GetxController with TErrorHandler {
             final item = cartItems[index];
             final productName =
                 item.packageInfo?.displayName ?? TTexts.unknownProduct.tr;
-            conflictedNames
-                .add("$productName (Tồn: $newStock) ➔ Đã xóa khỏi giỏ");
+            conflictedNames.add(
+                "$productName (${TTexts.actualStock.tr}: $newStock) ➔ ${TTexts.autoRemovedFromCart.tr}");
             cartItems.removeAt(index);
           }
         }
         Get.dialog(TCustomDialogWidget(
-          title: "Sản phẩm vượt tồn kho",
+          title: TTexts.outOfStockTitle.tr,
           description:
-              "Một số sản phẩm vượt quá số lượng tồn kho hiện tại và đã được tự động loại bỏ.\n\nChi tiết:\n${conflictedNames.map((e) => "• $e").join("\n")}",
+              "${TTexts.outOfStockDesc.tr}\n\n${TTexts.updatedListLabel.tr}\n${conflictedNames.map((e) => "• $e").join("\n")}",
           icon: const Text('🛒', style: TextStyle(fontSize: 40)),
           primaryButtonText: TTexts.confirm.tr,
           onPrimaryPressed: () => Get.back(),
@@ -222,6 +296,7 @@ class OutboundTransactionController extends GetxController with TErrorHandler {
       }
     }
   }
+  // =========================================================================
 
   void openScanner() {
     Get.to(
@@ -238,7 +313,7 @@ class OutboundTransactionController extends GetxController with TErrorHandler {
 
   Future<void> _processScannedBarcode(String barcode) async {
     try {
-      FullScreenLoaderUtils.openLoadingDialog('Đang tìm sản phẩm...');
+      FullScreenLoaderUtils.openLoadingDialog(TTexts.searchingProduct.tr);
       final result = await _inventoryProvider.scanBarcode(barcode);
       FullScreenLoaderUtils.stopLoading();
 
@@ -272,17 +347,18 @@ class OutboundTransactionController extends GetxController with TErrorHandler {
             arguments: displayItem);
       } else if (resolutionType == 'candidate_match') {
         TSnackbarsWidget.warning(
-            title: 'Chưa xác nhận mã',
-            message:
-                'Sản phẩm chưa được gán chính xác. Vui lòng xác nhận bên ngoài.');
+            title: TTexts.unconfirmedBarcodeTitle.tr,
+            message: TTexts.unconfirmedBarcodeMessage.tr);
       } else {
         TSnackbarsWidget.warning(
-            title: TTexts.warningTitle.tr, message: 'Mã vạch không tồn tại!');
+            title: TTexts.warningTitle.tr,
+            message: TTexts.barcodeNotFoundMessage.tr);
       }
     } catch (e) {
       FullScreenLoaderUtils.stopLoading();
       TSnackbarsWidget.error(
-          title: TTexts.errorServerTitle.tr, message: 'Lỗi xử lý mã vạch: $e');
+          title: TTexts.errorServerTitle.tr,
+          message: '${TTexts.errorProcessingBarcode.tr}: $e');
     }
   }
 

@@ -7,24 +7,20 @@ import 'package:frontend/core/ui/layouts/t_barcode_scanner_layout.dart';
 import 'package:frontend/features/home/controllers/home_controller.dart';
 import 'package:frontend/features/report/controllers/report_controller.dart';
 import 'package:frontend/features/transaction/providers/transaction_provider.dart';
-// IMPORT THÊM CÁC FILE ĐỂ HỖ TRỢ ĐIỀU HƯỚNG BARCODE
 import 'package:frontend/features/inventory/providers/inventory_provider.dart';
 import 'package:frontend/core/infrastructure/models/product_model.dart';
 import 'package:frontend/core/infrastructure/models/product_package_model.dart';
 import 'package:frontend/core/infrastructure/models/inventory_model.dart';
 import 'package:frontend/features/inventory/models/inventory_insight_display_model.dart';
-
 import 'package:frontend/routes/app_routes.dart';
 import 'package:get/get.dart';
 import 'package:frontend/core/infrastructure/utils/full_screen_loader_utils.dart';
 import 'package:frontend/core/ui/widgets/t_snackbars_widget.dart';
 import 'package:frontend/core/ui/widgets/t_custom_dialog_widget.dart';
-import 'package:frontend/core/ui/theme/app_colors.dart';
 
 class InboundTransactionController extends GetxController with TErrorHandler {
   final TransactionProvider _provider = TransactionProvider();
-  final InventoryProvider _inventoryProvider =
-      InventoryProvider(); // Thêm provider để gọi API quét mã
+  final InventoryProvider _inventoryProvider = InventoryProvider();
 
   final RxList<TransactionDetailModel> cartItems =
       <TransactionDetailModel>[].obs;
@@ -39,8 +35,9 @@ class InboundTransactionController extends GetxController with TErrorHandler {
   void addToCart(Map<String, dynamic> productData,
       {int quantity = 1, double? customPrice}) {
     final String? pkgId = productData['productPackageId'];
+    final int stock = productData['currentStock'] ?? 0;
 
-    if (pkgId == null || pkgId.isEmpty || pkgId == "null") {
+    if (pkgId == null || pkgId.isEmpty) {
       TSnackbarsWidget.error(
           title: TTexts.errorTitle.tr, message: TTexts.errorNoPackageId.tr);
       return;
@@ -56,7 +53,7 @@ class InboundTransactionController extends GetxController with TErrorHandler {
         quantity: currentItem.quantity + quantity,
         unitPrice: customPrice ?? currentItem.unitPrice,
         packageInfo: productData['packageInfo'] ?? currentItem.packageInfo,
-        currentStock: currentItem.currentStock,
+        currentStock: stock,
         reorderThreshold: currentItem.reorderThreshold,
       );
     } else {
@@ -65,7 +62,7 @@ class InboundTransactionController extends GetxController with TErrorHandler {
         quantity: quantity,
         unitPrice: customPrice ?? productData['importPrice'] ?? 0.0,
         packageInfo: productData['packageInfo'],
-        currentStock: productData['currentStock'] ?? 0,
+        currentStock: stock,
         reorderThreshold: productData['reorderThreshold'] ?? 0,
       ));
     }
@@ -88,23 +85,12 @@ class InboundTransactionController extends GetxController with TErrorHandler {
   }
 
   void removeItem(int index) {
-    Get.dialog(
-      TCustomDialogWidget(
-        title: TTexts.removeItem.tr,
-        description: TTexts.confirmRemoveItemTransaction.tr,
-        icon: const Text('🗑️', style: TextStyle(fontSize: 40)),
-        primaryButtonText: TTexts.remove.tr,
-        onPrimaryPressed: () {
-          cartItems.removeAt(index);
-          Get.back();
-        },
-        secondaryButtonText: TTexts.cancel.tr,
-        onSecondaryPressed: () => Get.back(),
-      ),
-      barrierDismissible: false,
-    );
+    cartItems.removeAt(index);
   }
 
+  // =========================================================================
+  // LOGIC KIỂM TRA GIÁ VÀ CÁC DIALOG XÁC NHẬN CỦA INBOUND
+  // =========================================================================
   void handleImportWithPriceCheck() {
     if (cartItems.isEmpty) {
       TSnackbarsWidget.warning(
@@ -112,73 +98,82 @@ class InboundTransactionController extends GetxController with TErrorHandler {
       return;
     }
 
-    final changedPriceItems = cartItems.where((item) {
+    final priceChangedItems = cartItems.where((item) {
       final originalPrice = item.packageInfo?.importPrice ?? 0.0;
-      return (item.unitPrice - originalPrice).abs() > 0.01;
+      return item.unitPrice != originalPrice;
     }).toList();
 
-    if (changedPriceItems.isNotEmpty) {
+    if (priceChangedItems.isNotEmpty) {
+      // 2. DANH SÁCH CHI TIẾT GIÁ
+      String priceDetails = "${TTexts.priceFluctuationDesc.tr}\n";
+      for (var i = 0; i < priceChangedItems.length; i++) {
+        if (i >= 3) {
+          priceDetails += "\n... ${TTexts.andMore.tr}";
+          break;
+        }
+        final item = priceChangedItems[i];
+        final oldPrice = item.packageInfo?.importPrice ?? 0.0;
+        priceDetails +=
+            "\n• ${item.packageInfo?.displayName ?? TTexts.unknownProduct.tr}: \$${oldPrice.toStringAsFixed(2)} ➔ \$${item.unitPrice.toStringAsFixed(2)}";
+      }
+
+      priceDetails += "\n\n${TTexts.priceChangeDetectedDesc.tr}";
+
       Get.dialog(
         TCustomDialogWidget(
-          title: TTexts.priceChangeDetected.tr,
-          description: TTexts.priceChangeMessage.tr,
+          title: TTexts.priceChangeDetectedTitle.tr,
+          description: priceDetails,
           icon: const Text('💰', style: TextStyle(fontSize: 40)),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: changedPriceItems.map((item) {
-              final original = item.packageInfo?.importPrice ?? 0.0;
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: Text(
-                  "${item.packageInfo?.displayName}: \$${original.toStringAsFixed(2)} ➔ \$${item.unitPrice.toStringAsFixed(2)}",
-                  style: const TextStyle(
-                      fontSize: 13, color: AppColors.primaryText),
-                ),
-              );
-            }).toList(),
-          ),
-          primaryButtonText: TTexts.updatePricesAndCreate.tr,
+          primaryButtonText: TTexts.updatePriceAndImport.tr,
+          secondaryButtonText: TTexts.importOnly.tr,
           onPrimaryPressed: () {
             Get.back();
-            _showConfirmImportDialog(updatePrice: true);
+            _executeImport(
+                updatePrices: true, priceChangedItems: priceChangedItems);
           },
-          secondaryButtonText: TTexts.justCreateTransaction.tr,
           onSecondaryPressed: () {
             Get.back();
-            _showConfirmImportDialog(updatePrice: false);
+            _executeImport(updatePrices: false);
           },
         ),
       );
     } else {
-      _showConfirmImportDialog(updatePrice: false);
+      Get.dialog(
+        TCustomDialogWidget(
+          title: TTexts.confirmImportTitle.tr,
+          description: TTexts.confirmImportDesc.tr,
+          icon: const Text('📦', style: TextStyle(fontSize: 40)),
+          primaryButtonText: TTexts.confirm.tr,
+          secondaryButtonText: TTexts.cancel.tr,
+          onPrimaryPressed: () {
+            Get.back();
+            _executeImport(updatePrices: false);
+          },
+        ),
+      );
     }
   }
 
-  void _showConfirmImportDialog({required bool updatePrice}) {
-    Get.dialog(
-      TCustomDialogWidget(
-        title: TTexts.confirmImportTitle.tr,
-        description: TTexts.confirmImportDescription.tr,
-        icon: const Text('📦', style: TextStyle(fontSize: 40)),
-        primaryButtonText: TTexts.proceedImport.tr,
-        onPrimaryPressed: () {
-          Get.back();
-          completeImport(updatePrice: updatePrice);
-        },
-        secondaryButtonText: TTexts.cancel.tr,
-        onSecondaryPressed: () => Get.back(),
-      ),
-      barrierDismissible: false,
-    );
-  }
-
-  Future<void> completeImport({required bool updatePrice}) async {
+  Future<void> _executeImport(
+      {bool updatePrices = false,
+      List<TransactionDetailModel>? priceChangedItems}) async {
     try {
       FullScreenLoaderUtils.openLoadingDialog(TTexts.creatingImportTicket.tr);
 
-      final finalNote = noteController.text.trim().isNotEmpty
-          ? noteController.text.trim()
-          : TTexts.manualImport.tr;
+      if (updatePrices && priceChangedItems != null) {
+        for (var item in priceChangedItems) {
+          if (item.productPackageId != null &&
+              item.productPackageId!.isNotEmpty) {
+            await _provider.updateProductPackage(
+              item.productPackageId!,
+              {
+                'importPrice': item.unitPrice,
+                'unitId': item.packageInfo?.unitId ?? 'u-default',
+              },
+            );
+          }
+        }
+      }
 
       final List<Map<String, dynamic>> itemsPayload = cartItems.map((item) {
         return {
@@ -189,21 +184,9 @@ class InboundTransactionController extends GetxController with TErrorHandler {
       }).toList();
 
       final response = await _provider.createImportTransaction(
-        note: finalNote,
+        note: noteController.text.trim(),
         items: itemsPayload,
       );
-
-      if (updatePrice) {
-        final validItems = cartItems.where((item) =>
-            item.productPackageId != null && item.productPackageId!.isNotEmpty);
-
-        List<Future<void>> updateTasks = [];
-        for (var item in validItems) {
-          updateTasks.add(_provider.updateProductPackage(
-              item.productPackageId!, {'importPrice': item.unitPrice}));
-        }
-        await Future.wait(updateTasks);
-      }
 
       FullScreenLoaderUtils.stopLoading();
 
@@ -212,7 +195,7 @@ class InboundTransactionController extends GetxController with TErrorHandler {
         totalPrice: totalFunds,
         type: 'import',
         status: 'COMPLETED',
-        note: finalNote,
+        note: noteController.text.trim(),
         createdAt: DateTime.now(),
         items: cartItems.toList(),
       );
@@ -223,7 +206,6 @@ class InboundTransactionController extends GetxController with TErrorHandler {
       if (Get.isRegistered<ReportController>()) {
         Get.find<ReportController>().fetchTransactions();
       }
-
       if (Get.isRegistered<HomeController>()) {
         Get.find<HomeController>().loadAllHomeData();
       }
@@ -236,6 +218,71 @@ class InboundTransactionController extends GetxController with TErrorHandler {
     } catch (e) {
       FullScreenLoaderUtils.stopLoading();
       handleError(e);
+    }
+  }
+
+  void openScanner() {
+    Get.to(
+      () => TBarcodeScannerLayout(
+        title: TTexts.scanProductBarcode.tr,
+        onScanned: (code) {
+          Get.back();
+          _processScannedBarcode(code);
+        },
+      ),
+      transition: Transition.downToUp,
+    );
+  }
+
+  Future<void> _processScannedBarcode(String barcode) async {
+    try {
+      FullScreenLoaderUtils.openLoadingDialog(TTexts.searchingProduct.tr);
+      final result = await _inventoryProvider.scanBarcode(barcode);
+      FullScreenLoaderUtils.stopLoading();
+
+      final resolutionType = result['resolutionType'];
+
+      if (resolutionType == 'exact_match') {
+        final pkgJson = result['productPackage'];
+
+        final packageModel = ProductPackageModel.fromJson(pkgJson);
+        final productModel = pkgJson['product'] != null
+            ? ProductModel.fromJson(pkgJson['product'])
+            : null;
+
+        final invJsonMap =
+            Map<String, dynamic>.from(pkgJson['inventory'] ?? {});
+        invJsonMap['productPackageId'] = packageModel.productPackageId;
+        invJsonMap['productPackage'] = pkgJson;
+        if (invJsonMap['inventoryId'] == null) invJsonMap['inventoryId'] = '';
+        if (invJsonMap['quantity'] == null) invJsonMap['quantity'] = 0;
+        if (invJsonMap['reorderThreshold'] == null) {
+          invJsonMap['reorderThreshold'] = 0;
+        }
+
+        final inventoryModel = InventoryModel.fromJson(invJsonMap);
+
+        final displayItem = InventoryInsightDisplayModel(
+          product: productModel,
+          inventory: inventoryModel,
+        );
+
+        Get.toNamed(AppRoutes.inboundTransactionItemAdd,
+            arguments: displayItem);
+      } else if (resolutionType == 'candidate_match') {
+        TSnackbarsWidget.warning(
+            title: TTexts.unconfirmedBarcodeTitle.tr,
+            message: TTexts.unconfirmedBarcodeMessage.tr);
+      } else {
+        TSnackbarsWidget.warning(
+            title: TTexts.warningTitle.tr,
+            message: TTexts.barcodeNotFoundMessage.tr);
+      }
+    } catch (e) {
+      FullScreenLoaderUtils.stopLoading();
+      TSnackbarsWidget.error(
+          title: TTexts.errorServerTitle.tr,
+          message: '${TTexts.errorProcessingBarcode.tr}: $e');
     }
   }
 
@@ -256,81 +303,6 @@ class InboundTransactionController extends GetxController with TErrorHandler {
       );
     } else {
       Get.back();
-    }
-  }
-
-  // =======================================================
-  // ĐÃ SỬA: MỞ CAMERA VÀ XỬ LÝ NHẢY TRANG NGAY LẬP TỨC
-  // =======================================================
-  void openScanner() {
-    Get.to(
-      () => TBarcodeScannerLayout(
-        title: TTexts.scanProductBarcode.tr,
-        onScanned: (code) {
-          Get.back(); // Đóng camera ngay lập tức
-          _processScannedBarcode(code); // Gọi hàm xử lý logic
-        },
-      ),
-      transition: Transition.downToUp,
-    );
-  }
-
-  Future<void> _processScannedBarcode(String barcode) async {
-    try {
-      FullScreenLoaderUtils.openLoadingDialog('Đang tìm sản phẩm...');
-      final result = await _inventoryProvider.scanBarcode(barcode);
-      FullScreenLoaderUtils.stopLoading();
-
-      final resolutionType = result['resolutionType'];
-
-      if (resolutionType == 'exact_match') {
-        // TÌM THẤY MÃ CHUẨN -> TẠO MODEL VÀ NHẢY TRANG LUÔN
-        final pkgJson = result['productPackage'];
-
-        final packageModel = ProductPackageModel.fromJson(pkgJson);
-        final productModel = pkgJson['product'] != null
-            ? ProductModel.fromJson(pkgJson['product'])
-            : null;
-
-        // Chế tạo Inventory Model tương thích với UI Add Item
-        final invJsonMap =
-            Map<String, dynamic>.from(pkgJson['inventory'] ?? {});
-        invJsonMap['productPackageId'] = packageModel.productPackageId;
-        invJsonMap['productPackage'] =
-            pkgJson; // Bắt buộc phải gắn lại để parse
-        if (invJsonMap['inventoryId'] == null) invJsonMap['inventoryId'] = '';
-        if (invJsonMap['quantity'] == null) invJsonMap['quantity'] = 0;
-        if (invJsonMap['reorderThreshold'] == null) {
-          invJsonMap['reorderThreshold'] = 0;
-        }
-
-        final inventoryModel = InventoryModel.fromJson(invJsonMap);
-
-        final displayItem = InventoryInsightDisplayModel(
-          product: productModel,
-          inventory: inventoryModel,
-        );
-
-        // ĐIỀU HƯỚNG THẲNG SANG TRANG THÊM VÀO INBOUND KÈM THAM SỐ
-        Get.toNamed(AppRoutes.inboundTransactionItemAdd,
-            arguments: displayItem);
-      } else if (resolutionType == 'candidate_match') {
-        // CÓ NHIỀU MÃ GẦN GIỐNG -> CHƯA CHỐT ĐƯỢC
-        TSnackbarsWidget.warning(
-            title: 'Chưa xác nhận mã',
-            message:
-                'Hệ thống tìm thấy sản phẩm nhưng chưa được map chuẩn. Vui lòng xác nhận bên ngoài.');
-      } else {
-        // KHÔNG TÌM THẤY
-        TSnackbarsWidget.warning(
-            title: TTexts.warningTitle.tr,
-            message: 'Mã vạch không tồn tại trong hệ thống!');
-      }
-    } catch (e) {
-      FullScreenLoaderUtils.stopLoading();
-      TSnackbarsWidget.error(
-          title: TTexts.errorServerTitle.tr,
-          message: 'Không thể xử lý mã vạch: $e');
     }
   }
 

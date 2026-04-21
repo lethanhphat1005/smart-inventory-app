@@ -66,8 +66,9 @@ class OutboundTransactionBottomBarWidget
                   backgroundColor: isEmpty
                       ? AppColors.softGrey.withOpacity(0.5)
                       : AppColors.primary,
-                  onPressed:
-                      isEmpty ? () {} : () => controller.completeExport(),
+                  onPressed: isEmpty
+                      ? () {}
+                      : () => controller.handleExportWithPriceCheck(),
                 ),
               ),
             ],

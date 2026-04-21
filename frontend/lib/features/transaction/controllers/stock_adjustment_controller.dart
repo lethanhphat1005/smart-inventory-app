@@ -109,6 +109,7 @@ class StockAdjustmentController extends GetxController with TErrorHandler {
     );
   }
 
+  // DIALOG 1: XÁC NHẬN CHỌN TẤT CẢ
   void checkAllUncheckedItems() {
     Get.dialog(
       TCustomDialogWidget(
@@ -133,6 +134,7 @@ class StockAdjustmentController extends GetxController with TErrorHandler {
     );
   }
 
+  // DIALOG 2: XÁC NHẬN BỎ CHỌN TẤT CẢ
   void uncheckAllItems() {
     Get.dialog(
       TCustomDialogWidget(
@@ -155,6 +157,7 @@ class StockAdjustmentController extends GetxController with TErrorHandler {
     );
   }
 
+  // DIALOG 3: XÁC NHẬN THOÁT
   void handleExit() {
     if (checkedItemsCount > 0) {
       Get.dialog(
@@ -175,6 +178,7 @@ class StockAdjustmentController extends GetxController with TErrorHandler {
     }
   }
 
+  // DIALOG 4: XÁC NHẬN LƯU VÀ KIỂM TRA LỆCH
   void handleSaveAdjustment() {
     if (!canSave) return;
 
@@ -189,6 +193,42 @@ class StockAdjustmentController extends GetxController with TErrorHandler {
       return;
     }
 
+    // 1. TÌM CÁC SẢN PHẨM BIẾN ĐỘNG LỚN (>= 10)
+    final significantChanges = allItems.where((i) {
+      return i.isChecked.value &&
+          (i.actualQty.value - i.systemQty.value).abs() >= 10;
+    }).toList();
+
+    if (significantChanges.isNotEmpty) {
+      // Xây dựng danh sách text tối đa 3 món
+      String itemDetails = "${TTexts.highQtyFluctuationDesc.tr}\n";
+      for (var i = 0; i < significantChanges.length; i++) {
+        if (i >= 3) {
+          itemDetails += "\n... ${TTexts.andMore.tr}";
+          break;
+        }
+        final item = significantChanges[i];
+        itemDetails +=
+            "\n• ${item.name}: ${item.systemQty.value} ➔ ${item.actualQty.value}";
+      }
+
+      Get.dialog(
+        TCustomDialogWidget(
+          title: TTexts.significantChangeDetected.tr,
+          description: itemDetails,
+          icon: const Text('⚠️', style: TextStyle(fontSize: 40)),
+          primaryButtonText: TTexts.confirm.tr,
+          secondaryButtonText: TTexts.cancel.tr,
+          onPrimaryPressed: () {
+            Get.back();
+            executeSave();
+          },
+        ),
+      );
+      return;
+    }
+
+    // Nếu không có biến động lớn, hiện Dialog xác nhận
     if (checkedItemsCount < totalItems) {
       Get.dialog(
         TCustomDialogWidget(
@@ -196,9 +236,8 @@ class StockAdjustmentController extends GetxController with TErrorHandler {
           description: TTexts.incompleteSaveDesc.tr,
           icon: const Text('👀', style: TextStyle(fontSize: 40)),
           primaryButtonText: TTexts.proceedAdjustment.tr,
-          onPrimaryPressed: () async {
+          onPrimaryPressed: () {
             Get.back();
-            await Future.delayed(const Duration(milliseconds: 300));
             executeSave();
           },
           secondaryButtonText: TTexts.cancel.tr,
@@ -211,9 +250,8 @@ class StockAdjustmentController extends GetxController with TErrorHandler {
           description: TTexts.confirmSaveDesc.tr,
           icon: const Text('💾', style: TextStyle(fontSize: 40)),
           primaryButtonText: TTexts.confirm.tr,
-          onPrimaryPressed: () async {
+          onPrimaryPressed: () {
             Get.back();
-            await Future.delayed(const Duration(milliseconds: 300));
             executeSave();
           },
           secondaryButtonText: TTexts.cancel.tr,
@@ -232,7 +270,6 @@ class StockAdjustmentController extends GetxController with TErrorHandler {
 
       final addNote = additionalNoteController.text.trim();
 
-      // 1. Chuyển đổi data
       final batchItems = itemsToUpdate.map((item) {
         String finalNote = item.note.value;
         if (addNote.isNotEmpty) {
@@ -250,12 +287,10 @@ class StockAdjustmentController extends GetxController with TErrorHandler {
         };
       }).toList();
 
-      // 2. Gọi api điều chỉnh 
       await _provider.batchAdjustInventories(items: batchItems);
 
       FullScreenLoaderUtils.stopLoading();
 
-      // 3. Xử lý tạo Summary và chuyển trang
       double totalAdjustmentValue = 0.0;
       List<TransactionDetailModel> summaryDetails = [];
 
@@ -321,7 +356,7 @@ class StockAdjustmentController extends GetxController with TErrorHandler {
     }
 
     try {
-      FullScreenLoaderUtils.openLoadingDialog('Đang tìm trên hệ thống...');
+      FullScreenLoaderUtils.openLoadingDialog(TTexts.searchingProduct.tr);
       final result = await _inventoryProvider.scanBarcode(barcode);
       FullScreenLoaderUtils.stopLoading();
 
@@ -347,12 +382,13 @@ class StockAdjustmentController extends GetxController with TErrorHandler {
       } else {
         TSnackbarsWidget.warning(
             title: TTexts.warningTitle.tr,
-            message: 'Mã vạch không tồn tại hoặc chưa được gán!');
+            message: TTexts.barcodeNotFoundMessage.tr);
       }
     } catch (e) {
       FullScreenLoaderUtils.stopLoading();
       TSnackbarsWidget.error(
-          title: TTexts.errorServerTitle.tr, message: 'Lỗi tìm mã: $e');
+          title: TTexts.errorServerTitle.tr,
+          message: '${TTexts.errorProcessingBarcode.tr}: $e');
     }
   }
 

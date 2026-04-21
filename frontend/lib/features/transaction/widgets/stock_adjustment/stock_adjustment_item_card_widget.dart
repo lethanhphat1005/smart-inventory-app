@@ -171,7 +171,7 @@ class StockAdjustmentItemCardWidget extends GetView<StockAdjustmentController> {
               Text(
                 item.note.value.isNotEmpty
                     ? item.note.value
-                    : "Reason: ${item.selectedReason.value.tr}",
+                    : "${TTexts.reason.tr}: ${item.selectedReason.value.tr}",
                 style:
                     const TextStyle(fontSize: 12, color: AppColors.primaryText),
               ),

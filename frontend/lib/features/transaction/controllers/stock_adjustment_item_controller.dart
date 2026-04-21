@@ -19,6 +19,7 @@ class StockAdjustmentItemController extends GetxController with TErrorHandler {
   late RxInt tempActualQty;
   late RxString tempSelectedReason;
   late TextEditingController tempNoteController;
+  late TextEditingController actualQtyController;
 
   final RxString fetchedBarcode = ''.obs;
   final RxString fetchedImageUrl = ''.obs;
@@ -64,6 +65,16 @@ class StockAdjustmentItemController extends GetxController with TErrorHandler {
     tempActualQty = item.actualQty.value.obs;
     tempSelectedReason = item.selectedReason.value.obs;
     tempNoteController = TextEditingController(text: item.note.value);
+    actualQtyController =
+        TextEditingController(text: tempActualQty.value.toString());
+
+    actualQtyController.addListener(() {
+      final val = int.tryParse(actualQtyController.text) ?? 0;
+      if (tempActualQty.value != val) {
+        tempActualQty.value = val;
+        _updateAutomatedNote();
+      }
+    });
 
     if (Get.isRegistered<StockAdjustmentController>()) {
       final cacheMap = Get.find<StockAdjustmentController>().fetchedImages;
@@ -156,14 +167,14 @@ class StockAdjustmentItemController extends GetxController with TErrorHandler {
   }
 
   void incrementActualQty() {
-    tempActualQty.value++;
-    _updateAutomatedNote();
+    final current = int.tryParse(actualQtyController.text) ?? 0;
+    actualQtyController.text = (current + 1).toString();
   }
 
   void decrementActualQty() {
-    if (tempActualQty.value > 0) {
-      tempActualQty.value--;
-      _updateAutomatedNote();
+    final current = int.tryParse(actualQtyController.text) ?? 0;
+    if (current > 0) {
+      actualQtyController.text = (current - 1).toString();
     } else {
       TSnackbarsWidget.warning(
           title: TTexts.warningTitle.tr,
@@ -229,6 +240,7 @@ class StockAdjustmentItemController extends GetxController with TErrorHandler {
   @override
   void onClose() {
     tempNoteController.dispose();
+    actualQtyController.dispose();
     super.onClose();
   }
 }
