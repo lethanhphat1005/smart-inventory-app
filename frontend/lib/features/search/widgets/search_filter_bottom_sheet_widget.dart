@@ -64,19 +64,16 @@ class _SearchFilterBottomSheetWidgetState
       children: [
         // --- CHỌN LOẠI (TYPE) ---
         Text(TTexts.transactionType.tr,
-            style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: AppColors.primaryText)),
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
         const SizedBox(height: 12),
         Wrap(
-          spacing: 8,
-          runSpacing: 8,
+          spacing: 12,
           children: [
-            _buildChoiceChip(TTexts.filterAll),
+            // TRUYỀN ĐÚNG 1 THAM SỐ
+            _buildChoiceChip(TTexts.filterNone),
             _buildChoiceChip(TTexts.filterInbound),
             _buildChoiceChip(TTexts.filterOutbound),
-          ].map((widget) => widget('type')).toList(),
+          ],
         ),
         const SizedBox(height: 20),
 
@@ -133,7 +130,6 @@ class _SearchFilterBottomSheetWidgetState
         const SizedBox(height: 12),
         SizedBox(
           height: 90,
-          // Bọc Obx để tự vẽ lại khi API trả về danh sách User
           child: Obx(() {
             if (controller.availableUsers.isEmpty) {
               return const Center(
@@ -228,7 +224,7 @@ class _SearchFilterBottomSheetWidgetState
               child: OutlinedButton(
                 onPressed: () {
                   setState(() {
-                    selectedType = TTexts.filterAll;
+                    selectedType = TTexts.filterNone;
                     selectedDateRange = null;
                     selectedUserId = '';
                     selectedUserName = '';
@@ -249,7 +245,6 @@ class _SearchFilterBottomSheetWidgetState
             const SizedBox(width: 12),
             Expanded(
               child: ElevatedButton(
-                // ĐÃ XÓA: selectedStatus
                 onPressed: () => controller.applyFilters(selectedType,
                     selectedDateRange, selectedUserId, selectedUserName),
                 style: ElevatedButton.styleFrom(
@@ -270,31 +265,30 @@ class _SearchFilterBottomSheetWidgetState
     );
   }
 
-  Widget Function(String) _buildChoiceChip(String textKey) {
-    return (String category) {
-      final isSelected = selectedType == textKey;
-      return ChoiceChip(
-        label: Text(textKey.tr,
-            style: TextStyle(
-                fontSize: 13,
-                color: isSelected ? Colors.white : AppColors.primaryText)),
-        selected: isSelected,
-        selectedColor: AppColors.primary,
-        backgroundColor: AppColors.surface,
-        showCheckmark: false,
-        side: BorderSide(
-            color: isSelected
-                ? AppColors.primary
-                : AppColors.softGrey.withOpacity(0.2)),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        onSelected: (bool selected) {
-          if (selected) {
-            setState(() {
-              selectedType = textKey;
-            });
-          }
-        },
-      );
-    };
+  // ĐÃ CẬP NHẬT: Trả về hàm 1 tham số như cũ
+  Widget _buildChoiceChip(String textKey) {
+    final isSelected = selectedType == textKey;
+    return ChoiceChip(
+      label: Text(textKey.tr,
+          style: TextStyle(
+              fontSize: 13,
+              color: isSelected ? Colors.white : AppColors.primaryText)),
+      selected: isSelected,
+      selectedColor: AppColors.primary,
+      backgroundColor: AppColors.surface,
+      showCheckmark: false,
+      side: BorderSide(
+          color: isSelected
+              ? AppColors.primary
+              : AppColors.softGrey.withOpacity(0.2)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      onSelected: (bool selected) {
+        if (selected) {
+          setState(() {
+            selectedType = textKey;
+          });
+        }
+      },
+    );
   }
 }

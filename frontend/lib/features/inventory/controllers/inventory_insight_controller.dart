@@ -175,10 +175,6 @@ class InventoryInsightController extends GetxController with TErrorHandler {
         package.productId; // Lấy luôn productId từ đây cho an toàn
     final barcode = package.barcodeValue ?? '';
 
-    // Log ra sẽ thấy ID khớp 100% với Backend
-    debugPrint(
-        "===> DATA CHUẨN BỊ GỬI: ProductID: $productId | PackageID: $packageId");
-
     if (packageId.isEmpty || productId.isEmpty) {
       Get.snackbar("Lỗi dữ liệu", "Sản phẩm hoặc Lô hàng không có ID hợp lệ.");
       return;

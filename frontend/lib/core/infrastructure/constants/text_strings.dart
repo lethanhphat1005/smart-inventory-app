@@ -76,6 +76,12 @@ class TTexts {
   static const String andMore = "and_more";
   static const String deleteSearchTitle = "delete_search_title";
   static const String deleteSearchMessage = "delete_search_message";
+  static const String time = "time";
+  static const String allEmployees = "all_employees";
+  static const String loadingEmployees = "loading_employees";
+  static const String filterNone = "filter_none";
+  static const String supplier = "supplier";
+  static const String customer = "customer";
 
   // -- Network Error Dialog
   static const String netErrorTitle = "net_error_title";

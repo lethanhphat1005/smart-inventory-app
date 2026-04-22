@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/features/search/controllers/search_controller.dart';
 import 'package:frontend/features/search/widgets/search_input_field_widget.dart';
+import 'package:frontend/features/search/widgets/search_transaction_header_widget.dart'; // IMPORT WIDGET MỚI
 import 'package:frontend/features/search/widgets/search_results_list_widget.dart';
 
 class SearchMobileView extends GetView<TSearchController> {
@@ -15,7 +16,7 @@ class SearchMobileView extends GetView<TSearchController> {
       body: SafeArea(
         child: Column(
           children: [
-            // --- HEADER ---
+            // --- HEADER DYNAMIC ---
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Row(
@@ -27,14 +28,21 @@ class SearchMobileView extends GetView<TSearchController> {
                   ),
                   const SizedBox(width: 8),
 
-                  // Nhét Widget Input vào đây
-                  const Expanded(child: SearchInputFieldWidget()),
+                  // TÁCH LUỒNG RÕ RÀNG Ở ĐÂY
+                  Expanded(
+                    child: Obx(() {
+                      if (controller.isTransactionSearch) {
+                        return const SearchTransactionHeaderWidget(); // Header cho Transaction
+                      } else {
+                        return const SearchInputFieldWidget(); // Thanh nhập liệu cho Product
+                      }
+                    }),
+                  ),
                 ],
               ),
             ),
 
             // --- BODY ---
-            // Nhét Widget List Kết quả vào đây
             const Expanded(child: SearchResultsListWidget()),
           ],
         ),

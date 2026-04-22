@@ -49,6 +49,7 @@ class TSearchController extends GetxController with TErrorHandler {
   final scrollController = ScrollController();
 
   final RxString currentSearchQuery = ''.obs;
+
   final RxBool isSearching = false.obs;
   final RxBool isLoadingMore = false.obs;
   final RxBool hasMore = true.obs;
@@ -67,7 +68,7 @@ class TSearchController extends GetxController with TErrorHandler {
 
   bool get isStockAdjustment => returnRouteContext == AppRoutes.stockAdjustment;
 
-  final RxString filterType = TTexts.filterAll.obs;
+  final RxString filterType = TTexts.filterNone.obs;
   final Rx<DateTimeRange?> filterDateRange = Rx<DateTimeRange?>(null);
 
   final RxString filterUserId = ''.obs;
@@ -81,7 +82,10 @@ class TSearchController extends GetxController with TErrorHandler {
       <TransactionModel>[].obs;
   final RxList<String> recentSearches = <String>[].obs;
 
-  int _currentPage = 1;
+  int _currentPage = 1; // Dùng cho Product
+  int _txPage = 1; // Dùng cho Transaction
+  final int _txPageSize = 20;
+
   Timer? _debounce;
 
   @override
@@ -96,12 +100,17 @@ class TSearchController extends GetxController with TErrorHandler {
               ? TTexts.searchTransactionHint.tr
               : TTexts.searchEverything.tr);
     } else if (args is String) {
-      returnRouteContext = args;
-      target = SearchTarget.inventory;
-      if (isAddingToCart || isStockAdjustment) {
-        dynamicHint = TTexts.searchProductToAdd.tr;
+      if (args == 'transaction') {
+        target = SearchTarget.transactions;
+        dynamicHint = TTexts.searchTransactionHint.tr;
       } else {
-        dynamicHint = TTexts.searchEverything.tr;
+        returnRouteContext = args;
+        target = SearchTarget.inventory;
+        if (isAddingToCart || isStockAdjustment) {
+          dynamicHint = TTexts.searchProductToAdd.tr;
+        } else {
+          dynamicHint = TTexts.searchEverything.tr;
+        }
       }
     } else {
       target = SearchTarget.inventory;
@@ -175,17 +184,17 @@ class TSearchController extends GetxController with TErrorHandler {
     filterUserId.value = userId;
     filterUserName.value = userName;
     Get.back();
-    _executeTransactionSearch(currentSearchQuery.value);
+    _executeTransactionSearch(); // Không cần truyền text nữa
   }
 
   void removeFilter(String filterCategory) {
-    if (filterCategory == 'type') filterType.value = TTexts.filterAll;
+    if (filterCategory == 'type') filterType.value = TTexts.filterNone;
     if (filterCategory == 'date') filterDateRange.value = null;
     if (filterCategory == 'user') {
       filterUserId.value = '';
       filterUserName.value = '';
     }
-    _executeTransactionSearch(currentSearchQuery.value);
+    _executeTransactionSearch(); // Không cần truyền text nữa
   }
 
   void onSearchChanged(String query) {
@@ -193,12 +202,7 @@ class TSearchController extends GetxController with TErrorHandler {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
 
     if (isTransactionSearch) {
-      if (query.trim().isNotEmpty) {
-        _debounce = Timer(const Duration(milliseconds: 500),
-            () => _executeTransactionSearch(query.trim()));
-      } else {
-        _executeTransactionSearch('');
-      }
+      // Transaction không còn search bằng text nữa do Backend không hỗ trợ FTS
     } else {
       if (query.trim().length >= 2) {
         _debounce = Timer(const Duration(milliseconds: 500),
@@ -231,29 +235,32 @@ class TSearchController extends GetxController with TErrorHandler {
     storage.write(_currentStorageKey, recentSearches.toList());
   }
 
-  Future<void> _executeTransactionSearch(String query) async {
-    final q = query.trim();
-
-    final bool hasNoFilters = filterType.value == TTexts.filterAll &&
+  // ====================================================================
+  // ĐÃ CẬP NHẬT: TÌM KIẾM TRANSACTION CÓ PHÂN TRANG API (REAL PAGINATION)
+  // ====================================================================
+  Future<void> _executeTransactionSearch() async {
+    final bool hasNoFilters = filterType.value == 'None' &&
         filterDateRange.value == null &&
         filterUserId.value.isEmpty;
 
-    if (q.isEmpty && hasNoFilters) {
+    if (hasNoFilters) {
       searchTransactionResults.clear();
       return;
     }
 
     isSearching.value = true;
-    hasMore.value = false;
+    hasMore.value = true;
+    _txPage = 1;
 
     try {
       Map<String, dynamic> queryParams = {
-        'limit': 100,
+        'limit': _txPageSize,
+        'page': _txPage,
         'sortBy': 'createdAt',
         'sortOrder': 'desc',
       };
 
-      if (filterType.value != TTexts.filterAll) {
+      if (filterType.value != TTexts.filterNone) {
         if (filterType.value == TTexts.filterInbound) {
           queryParams['type'] = 'import';
         }
@@ -261,37 +268,72 @@ class TSearchController extends GetxController with TErrorHandler {
           queryParams['type'] = 'export';
         }
       }
-
       if (filterDateRange.value != null) {
         queryParams['startDate'] =
             DayFormatterUtils.formatApiDate(filterDateRange.value!.start);
         queryParams['endDate'] =
             DayFormatterUtils.formatApiDate(filterDateRange.value!.end);
       }
+      if (filterUserId.value.isNotEmpty) {
+        queryParams['userId'] = filterUserId.value;
+      }
 
       List<TransactionModel> results =
           await _provider.searchTransactions(queryParams: queryParams);
 
-      if (filterUserId.value.isNotEmpty) {
-        results =
-            results.where((tx) => tx.userId == filterUserId.value).toList();
-      }
-
-      if (q.isNotEmpty) {
-        results = results.where((tx) {
-          final matchId =
-              (tx.transactionId ?? '').toLowerCase().contains(q.toLowerCase());
-          final matchNote =
-              (tx.note ?? '').toLowerCase().contains(q.toLowerCase());
-          return matchId || matchNote;
-        }).toList();
-      }
-
       searchTransactionResults.assignAll(results);
+
+      if (results.length < _txPageSize) {
+        hasMore.value = false;
+      }
     } catch (e) {
       handleError(e);
     } finally {
       isSearching.value = false;
+    }
+  }
+
+  // ====================================================================
+  // ĐÃ THÊM: HÀM LOAD MORE RIÊNG CHO TRANSACTION
+  // ====================================================================
+  Future<void> _loadMoreTransactions() async {
+    if (isLoadingMore.value || !hasMore.value) return;
+    isLoadingMore.value = true;
+    _txPage++;
+
+    try {
+      Map<String, dynamic> queryParams = {
+        'limit': _txPageSize,
+        'page': _txPage,
+        'sortBy': 'createdAt',
+        'sortOrder': 'desc',
+      };
+
+      if (filterType.value != 'None') queryParams['type'] = filterType.value;
+      if (filterDateRange.value != null) {
+        queryParams['startDate'] =
+            DayFormatterUtils.formatApiDate(filterDateRange.value!.start);
+        queryParams['endDate'] =
+            DayFormatterUtils.formatApiDate(filterDateRange.value!.end);
+      }
+      if (filterUserId.value.isNotEmpty) {
+        queryParams['userId'] = filterUserId.value;
+      }
+
+      List<TransactionModel> results =
+          await _provider.searchTransactions(queryParams: queryParams);
+
+      if (results.isEmpty) {
+        hasMore.value = false;
+      } else {
+        searchTransactionResults.addAll(results);
+        if (results.length < _txPageSize) hasMore.value = false;
+      }
+    } catch (e) {
+      _txPage--;
+      handleError(e);
+    } finally {
+      isLoadingMore.value = false;
     }
   }
 
@@ -450,9 +492,6 @@ class TSearchController extends GetxController with TErrorHandler {
       () => TBarcodeScannerLayout(
         title: TTexts.barCodeScan.tr,
         onScanned: (code) {
-          // ĐÃ BỎ Get.back(); Ở ĐÂY ĐỂ GIỮ NGUYÊN MÀN HÌNH QUÉT
-          // VÀ HIỆN BOTTOM SHEET / LOADING ĐÈ LÊN TRÊN CAMERA
-
           if (isAddingToCart || isStockAdjustment) {
             _processScannedBarcodeForTransaction(code);
           } else {
@@ -498,7 +537,6 @@ class TSearchController extends GetxController with TErrorHandler {
           );
 
           if (returnRouteContext == AppRoutes.outboundTransaction) {
-            // Get.offNamed sẽ tự động đóng layout camera lại và lật sang trang Add Item
             Get.offNamed(AppRoutes.outboundTransactionItemAdd,
                 arguments: displayItem);
           } else {
@@ -600,10 +638,17 @@ class TSearchController extends GetxController with TErrorHandler {
     }
   }
 
+  // ====================================================================
+  // ĐÃ CẬP NHẬT: PHÂN NHÁNH RÕ RÀNG GIỮA SCROLL CỦA TX VÀ PRODUCT
+  // ====================================================================
   void _onScroll() {
     if (scrollController.position.pixels >=
         scrollController.position.maxScrollExtent - 200) {
-      _loadMore();
+      if (isTransactionSearch) {
+        _loadMoreTransactions(); // Nạp thêm Transaction
+      } else {
+        _loadMore(); // Nạp thêm Product
+      }
     }
   }
 
@@ -649,7 +694,7 @@ class TSearchController extends GetxController with TErrorHandler {
     searchResults.clear();
     searchTransactionResults.clear();
     suggestion.value = '';
-    if (isTransactionSearch) _executeTransactionSearch('');
+    if (isTransactionSearch) _executeTransactionSearch();
   }
 
   @override

@@ -137,8 +137,6 @@ class InventoryDetailController extends GetxController with TErrorHandler {
       List<InventoryInsightDisplayModel> related = [];
       InventoryInsightDisplayModel? initialItem;
 
-      debugPrint("===> ID nhận từ Route: $packageId");
-
       for (var pkgJson in rawPackages) {
         final pkgModel = ProductPackageModel.fromJson(pkgJson);
 
@@ -152,14 +150,9 @@ class InventoryDetailController extends GetxController with TErrorHandler {
         final mappedItem = InventoryInsightDisplayModel(
             product: parentProduct, inventory: invModel);
 
-        // LOG SO SÁNH ĐỂ BIẾT TẠI SAO SAI
-        debugPrint(
-            "Kiểm tra lô: ${pkgModel.displayName} | ID trong List: ${pkgModel.productPackageId} vs ID nhận: $packageId");
-
         // SO KHỚP CHÍNH XÁC
         if (packageId != null &&
             pkgModel.productPackageId.toString() == packageId.toString()) {
-          debugPrint("===> ĐÃ KHỚP: ${pkgModel.displayName}");
           initialItem = mappedItem;
         } else {
           related.add(mappedItem);
@@ -168,8 +161,6 @@ class InventoryDetailController extends GetxController with TErrorHandler {
 
       // Nếu không tìm thấy lô khớp, hệ thống mới lấy lô đầu tiên làm dự phòng
       if (initialItem == null && related.isNotEmpty) {
-        debugPrint(
-            "===> CẢNH BÁO: Không tìm thấy ID khớp, tự động lấy lô đầu tiên!");
         initialItem = related.removeAt(0);
       }
 

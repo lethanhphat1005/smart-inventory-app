@@ -11,7 +11,7 @@ class SearchFilterChipsWidget extends GetView<TSearchController> {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      final isTypeFiltered = controller.filterType.value != TTexts.filterAll;
+      final isTypeFiltered = controller.filterType.value != TTexts.filterNone;
       final isDateFiltered = controller.filterDateRange.value != null;
       final isUserFiltered = controller.filterUserId.value.isNotEmpty;
 
@@ -38,7 +38,6 @@ class SearchFilterChipsWidget extends GetView<TSearchController> {
                 children: [
                   if (isTypeFiltered)
                     _buildChip(controller.filterType.value.tr, 'type'),
-                  // ĐÃ XÓA CHIP STATUS
                   if (isDateFiltered)
                     _buildChip(
                         '${DateFormat('dd/MM').format(controller.filterDateRange.value!.start)} - ${DateFormat('dd/MM').format(controller.filterDateRange.value!.end)}',

@@ -82,7 +82,8 @@ class InventoryDetailRelatedPackagesWidget
                     ),
                     if (hasMultipleBarcodes)
                       TextSpan(
-                        text: '  (+$extraCount mã)',
+                        text:
+                            '  (+$extraCount ${TTexts.barcode.tr.toLowerCase()}})',
                         style: const TextStyle(
                           fontFamily: 'Poppins',
                           fontSize: 11,

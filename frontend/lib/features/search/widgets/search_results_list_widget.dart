@@ -118,7 +118,8 @@ class SearchResultsListWidget extends GetView<TSearchController> {
                       title: controller.isTransactionSearch
                           ? TTexts.noTransactionsFound.tr
                           : TTexts.noResultsFound.tr,
-                      subtitle: TTexts.errorNotFoundMessage.tr,
+                      subtitle: TTexts.errorNotFoundMessage
+                          .tr, // Giữ nguyên Parameter subtitle của bạn
                     ),
                   )
                 : ListView.separated(
@@ -162,7 +163,7 @@ class SearchResultsListWidget extends GetView<TSearchController> {
 
                         final String displayType = tx.type.isNotEmpty
                             ? '${tx.type[0].toUpperCase()}${tx.type.substring(1).toLowerCase()}'
-                            : 'Unknown';
+                            : TTexts.na.tr; // ĐÃ FIX TỪ 'Unknown'
 
                         final String itemCountDisplay = tx.itemCount > 0
                             ? tx.itemCount.toString()
@@ -173,10 +174,11 @@ class SearchResultsListWidget extends GetView<TSearchController> {
                         return GestureDetector(
                           onTap: () => controller.handleItemTap(tx),
                           child: ReportTransactionCardWidget(
-                            transactionId: tx.transactionId ?? 'N/A',
+                            transactionId: tx.transactionId ??
+                                TTexts.na.tr, // ĐÃ FIX TỪ 'N/A'
                             dateStr: tx.createdAt != null
                                 ? '${tx.createdAt!.day}/${tx.createdAt!.month}/${tx.createdAt!.year}'
-                                : 'N/A',
+                                : TTexts.na.tr, // ĐÃ FIX TỪ 'N/A'
                             typeDisplay: displayType,
                             typeColor: themeColor,
                             leftBottomLabel: bottomLabel,
