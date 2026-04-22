@@ -126,7 +126,6 @@ class HomeController extends GetxController with TErrorHandler {
         }
 
         // ==============================================================
-        // ĐÃ FIX: KHÔNG DÙNG CONTINUE NỮA. TẤT CẢ LOG ĐỀU PHẢI ĐƯỢC HIỂN THỊ.
         // CHỈ GẮN CỜ isManual = false ĐỂ KHÔNG BỊ ĐẾM VÀO CỤC "ADJUST"
         // ==============================================================
         bool isManual = true;
@@ -152,6 +151,10 @@ class HomeController extends GetxController with TErrorHandler {
         int oldQty = int.tryParse(oldVal['quantity']?.toString() ?? '0') ?? 0;
         int newQty = int.tryParse(newVal['quantity']?.toString() ?? '0') ?? 0;
         int diff = newQty - oldQty;
+
+        if (diff == 0) {
+          continue;
+        }
 
         if (diff < 0) lost += diff.abs();
         if (diff > 0) found += diff;

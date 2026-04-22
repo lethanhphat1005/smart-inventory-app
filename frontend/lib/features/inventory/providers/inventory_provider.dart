@@ -247,4 +247,14 @@ class InventoryProvider {
       '/api/product-packages/$productPackageId/barcodes/$barcode',
     );
   }
+  
+  // ==========================================
+  // INVENTORY DETAIL FETCH
+  // ==========================================
+  Future<InventoryModel> getInventoryById(String inventoryId) async {
+    // Gọi API lấy chi tiết inventory kèm theo Product và Package đầy đủ
+    final response = await _apiClient.get('/api/inventories/$inventoryId');
+    final data = response.data['data'] ?? response.data;
+    return InventoryModel.fromJson(data);
+  }
 }

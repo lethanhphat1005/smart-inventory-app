@@ -428,6 +428,7 @@ class TTexts {
   static const String currentQty = "current_qty";
   static const String errorProductOrPackageIdMissing =
       "error_product_or_package_id_missing";
+  static const String seeAllCategories = "see_all_categories";
 
   // -- Chatbot AI
   static const String chatbotName = "chatbot_name";

@@ -22,12 +22,12 @@ class AdjustmentHistoryController extends GetxController with TErrorHandler {
   Timer? _debounce;
 
   int _currentPage = 1;
-  final int _limit = 15;
+  final int _limit = 30;
   bool _hasMoreData = true;
 
   final Map<String, String> _nameDictionary = {};
 
-  String _hiddenBatchId = ''; // Thêm biến này để lưu mã Lô ngầm
+  String _hiddenBatchId = '';
 
   @override
   void onInit() {
@@ -114,7 +114,7 @@ class AdjustmentHistoryController extends GetxController with TErrorHandler {
 
       final rawLogs = await _provider.getAuditLogs(
         page: _currentPage,
-        limit: _limit, // CHỈ REQUEST 15 DÒNG
+        limit: _limit,
         search: apiSearchQuery,
         startDate: start,
         endDate: end,
@@ -148,6 +148,10 @@ class AdjustmentHistoryController extends GetxController with TErrorHandler {
 
         int oldQty = int.tryParse(oldVal['quantity']?.toString() ?? '0') ?? 0;
         int newQty = int.tryParse(newVal['quantity']?.toString() ?? '0') ?? 0;
+
+        if (oldQty == newQty) {
+          continue;
+        }
 
         // DÒ TÊN SẢN PHẨM BẰNG TỪ ĐIỂN
         String pName = '';

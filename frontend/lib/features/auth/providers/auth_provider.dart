@@ -11,6 +11,7 @@ class AuthProvider {
 
   final supabase = Supabase.instance.client;
 
+  // TODO: Bỏ vô env
   final String _serverClientId =
       '119247404487-9d27bve8fsfl6loh8468dg21l4io4otq.apps.googleusercontent.com';
 

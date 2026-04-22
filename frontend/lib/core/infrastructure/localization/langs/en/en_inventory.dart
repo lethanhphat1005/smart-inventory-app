@@ -3,6 +3,7 @@ import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 final Map<String, String> enInventory = {
   TTexts.inventoryHub: 'Inventory Hub',
   TTexts.manageProductsStock: 'Manage products & stock levels',
+  TTexts.seeAllCategories: "See All Categories",
   // -- Inventory Module
   TTexts.details: 'Details',
   TTexts.inboundOutbound7Days: 'Inbound vs Outbound (7 Days)',

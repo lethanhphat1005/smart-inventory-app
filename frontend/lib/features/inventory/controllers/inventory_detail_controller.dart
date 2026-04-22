@@ -137,42 +137,44 @@ class InventoryDetailController extends GetxController with TErrorHandler {
       List<InventoryInsightDisplayModel> related = [];
       InventoryInsightDisplayModel? initialItem;
 
+      debugPrint("===> ID nhận từ Route: $packageId");
+
       for (var pkgJson in rawPackages) {
         final pkgModel = ProductPackageModel.fromJson(pkgJson);
+
+        // Map Inventory dữ liệu
         final invJsonMap =
             Map<String, dynamic>.from(pkgJson['inventory'] ?? {});
         invJsonMap['productPackage'] = pkgJson;
         invJsonMap['productPackageId'] = pkgModel.productPackageId;
-        if (invJsonMap['inventoryId'] == null) {
-          invJsonMap['inventoryId'] = 'INV_MOCK_${pkgModel.productPackageId}';
-        }
-        if (invJsonMap['quantity'] == null) invJsonMap['quantity'] = 0;
-
         final invModel = InventoryModel.fromJson(invJsonMap);
+
         final mappedItem = InventoryInsightDisplayModel(
             product: parentProduct, inventory: invModel);
-        related.add(mappedItem);
 
-        if (packageId != null && pkgModel.productPackageId == packageId) {
+        // LOG SO SÁNH ĐỂ BIẾT TẠI SAO SAI
+        debugPrint(
+            "Kiểm tra lô: ${pkgModel.displayName} | ID trong List: ${pkgModel.productPackageId} vs ID nhận: $packageId");
+
+        // SO KHỚP CHÍNH XÁC
+        if (packageId != null &&
+            pkgModel.productPackageId.toString() == packageId.toString()) {
+          debugPrint("===> ĐÃ KHỚP: ${pkgModel.displayName}");
           initialItem = mappedItem;
-        } else if (initialItem == null &&
-            barcode != null &&
-            pkgModel.barcodeValue == barcode) {
-          initialItem = mappedItem;
+        } else {
+          related.add(mappedItem);
         }
       }
 
+      // Nếu không tìm thấy lô khớp, hệ thống mới lấy lô đầu tiên làm dự phòng
       if (initialItem == null && related.isNotEmpty) {
-        initialItem = related.first;
-      }
-      if (initialItem != null) {
-        related.removeWhere((item) =>
-            item.inventory.productPackageId ==
-            initialItem!.inventory.productPackageId);
+        debugPrint(
+            "===> CẢNH BÁO: Không tìm thấy ID khớp, tự động lấy lô đầu tiên!");
+        initialItem = related.removeAt(0);
       }
 
-      relatedPackagesList.assignAll(related);
       currentDisplayItem.value = initialItem;
+      relatedPackagesList.assignAll(related);
 
       if (initialItem != null) {
         final statsResults = await Future.wait([

@@ -55,6 +55,7 @@ class VerifyEmailController extends GetxController {
 
     try {
       // GỌI API KÈM TIMEOUT
+      // TODO: Sua thanh gui mail xac thuc email nguoi dung
       await authProvider
           .sendResetPasswordEmail(email)
           .timeout(const Duration(seconds: 15));
