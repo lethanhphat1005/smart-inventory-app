@@ -7,7 +7,7 @@ import {
 } from '../../common/utils/require-req.js';
 
 import type { ChatbotRequestDto, ChatbotResponseDto } from './chatbot.dto.js';
-import type { ChatbotService } from './chatbot.service.js';
+import type { ChatbotService } from './services/chatbot.service.js';
 import type { ApiResponse } from '../../common/types/api-response.type.js';
 import type { Request, Response } from 'express';
 

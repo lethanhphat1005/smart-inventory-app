@@ -1,4 +1,8 @@
+import type { OpenAI } from 'openai';
+
 export type DraftActionType = 'create_import' | 'create_export';
+
+export type ChatHistoryMessage = OpenAI.Chat.ChatCompletionMessageParam;
 
 export interface LLMProductItem {
   product_name: string;

@@ -1,15 +1,29 @@
 import { StatusCodes } from 'http-status-codes';
-import { OpenAI } from 'openai';
 import { v4 as uuidv4 } from 'uuid';
 
+import { CustomError } from '../../../common/errors/index.js';
 import {
-  getCoordinatorPrompt,
-  getFriendlyReplyPrompt,
-} from './chatbot.prompt.js';
-import { CHATBOT_TOOLS } from './chatbot.tool.js';
-import { CustomError } from '../../common/errors/index.js';
+  COORDINATOR_MODEL,
+  COORDINATOR_TEMPERATURE,
+  DRAFT_TTL_SECONDS,
+  FRIENDLY_REPLY_MODEL,
+  FRIENDLY_REPLY_TEMPERATURE,
+  LOCK_TTL_SECONDS,
+} from '../chatbot.constants.js';
+import {
+  buildChatDraftKey,
+  buildChatLockKey,
+  buildCoordinatorMessages,
+  findExactInventoryMatch,
+} from '../chatbot.mapper.js';
+import { getFriendlyReplyPrompt } from '../chatbot.prompt.js';
+import { CHAT_TOOLS } from '../tools/tool-registry.js';
 
-import type { ChatbotRequestDto, ChatbotResponseDto } from './chatbot.dto.js';
+import type { ChatMemoryService } from './chat-memory.service.js';
+import type { ListInventoriesQueryDto } from '../../inventories/dto/inventory.dto.js';
+import type { InventoryService } from '../../inventories/index.js';
+import type { TransactionService } from '../../transactions/transaction.service.js';
+import type { ChatbotRequestDto, ChatbotResponseDto } from '../chatbot.dto.js';
 import type {
   DraftAction,
   DraftActionType,
@@ -17,88 +31,41 @@ import type {
   LLMToolParams,
   TransactionItemPayload,
   TransactionPayload,
-} from './chatbot.type.js';
-import type { ListInventoriesQueryDto } from '../inventories/dto/inventory.dto.js';
-import type { InventoryService } from '../inventories/index.js';
-import type { TransactionService } from '../transactions/transaction.service.js';
+} from '../chatbot.type.js';
+import type { LLMProvider } from '../llm/llm.provider.js';
 import type { Redis } from 'ioredis';
 
-import 'dotenv/config';
-
 export class ChatbotService {
-  private openai: OpenAI;
-  private drafts = new Map<string, DraftAction>();
-  // Giữ lại 6 tin nhắn gần nhất (3 lượt hỏi - đáp)
-  private readonly MAX_HISTORY_LENGTH = 6;
-  // 5 phút
-  private readonly DRAFT_TTL_SECONDS = 300;
-  // 1 tiếng (Reset bộ nhớ sau 1 tiếng không chat)
-  private readonly HISTORY_TTL_SECONDS = 3600;
-
   constructor(
     private readonly inventoryService: InventoryService,
     private readonly transactionService: TransactionService,
     private readonly redisClient: Redis,
-  ) {
-    this.openai = new OpenAI({
-      baseURL: 'https://api.groq.com/openai/v1',
-      apiKey: process.env.GROQ_API_KEY,
-    });
-  }
+    private readonly chatMemoryService: ChatMemoryService,
+    private readonly llmProvider: LLMProvider,
+  ) {}
 
-  private async getChatHistory(
-    userId: string,
-  ): Promise<OpenAI.Chat.ChatCompletionMessageParam[]> {
-    const key = `chatbot:history:${userId}`;
-    const data = await this.redisClient.get(key);
-
-    return data ? JSON.parse(data) : [];
-  }
-
-  private async saveChatHistory(
-    userId: string,
-    userMsg: string,
-    assistantMsg: string,
-  ): Promise<void> {
-    const key = `chatbot:history:${userId}`;
-    let history = await this.getChatHistory(userId);
-
-    // Push tin nhắn mới vào mảng
-    history.push({ role: 'user', content: userMsg });
-    history.push({ role: 'assistant', content: assistantMsg });
-
-    // Cắt bớt nếu lịch sử quá dài (tránh tốn token)
-    if (history.length > this.MAX_HISTORY_LENGTH) {
-      history = history.slice(history.length - this.MAX_HISTORY_LENGTH);
-    }
-
-    await this.redisClient.set(
-      key,
-      JSON.stringify(history),
-      'EX',
-      this.HISTORY_TTL_SECONDS,
-    );
-  }
-
+  // tạo reply cho mọi request của user
   private async generateFriendlyReply(
     userMessage: string,
     systemContext: string,
   ): Promise<string> {
     try {
-      const response = await this.openai.chat.completions.create({
-        model: 'llama-3.1-8b-instant',
+      const response = await this.llmProvider.createChatCompletion({
+        model: FRIENDLY_REPLY_MODEL,
+        temperature: FRIENDLY_REPLY_TEMPERATURE,
         messages: [
-          { role: 'system', content: getFriendlyReplyPrompt() },
-
+          {
+            role: 'system',
+            content: getFriendlyReplyPrompt(),
+          },
           {
             role: 'user',
             content: `Câu nói: "${userMessage}"\nDữ liệu: ${systemContext}`,
           },
         ],
-        temperature: 0.6,
       });
 
-      return response.choices[0]?.message?.content || systemContext;
+      return response.choices[0]?.message?.content ?? systemContext;
     } catch (error) {
       console.error('[AI Responder Error]', error);
 
@@ -106,52 +73,127 @@ export class ChatbotService {
     }
   }
 
+  // tạo streaming reply cho các response thuần text
+  // private async *streamFriendlyReply(
+  //   userMessage: string,
+  //   systemContext: string,
+  // ): AsyncGenerator<string, string, void> {
+  //   try {
+  //     const stream = await this.llmProvider.createChatCompletionStream({
+  //       model: FRIENDLY_REPLY_MODEL,
+  //       stream: true,
+  //       temperature: FRIENDLY_REPLY_TEMPERATURE,
+  //       messages: [
+  //         {
+  //           role: 'system',
+  //           content: getFriendlyReplyPrompt(),
+  //         },
+  //         {
+  //           role: 'user',
+  //           content: `Câu nói: "${userMessage}"\nDữ liệu: ${systemContext}`,
+  //         },
+  //       ],
+  //     });
+
+  //     let fullReply = '';
+
+  //     for await (const chunk of stream) {
+  //       const delta = chunk.choices[0]?.delta?.content ?? '';
+
+  //       if (!delta) {
+  //         continue;
+  //       }
+
+  //       fullReply += delta;
+  //       yield delta;
+  //     }
+
+  //     return fullReply;
+  //   } catch (error) {
+  //     console.error('[AI Responder Error]', error);
+
+  //     return systemContext;
+  //   }
+  // }
+
+  // private async collectStream(
+  //   stream: AsyncGenerator<string, string, void>,
+  // ): Promise<string> {
+  //   let full = '';
+
+  //   for await (const chunk of stream) {
+  //     full += chunk;
+  //   }
+
+  //   return full;
+  // }
+
+  // private async generateStreamFriendlyReply(
+  //   userMessage: string,
+  //   systemContext: string,
+  // ): Promise<string> {
+  //   const stream = this.streamFriendlyReply(userMessage, systemContext);
+
+  //   return await this.collectStream(stream);
+  // }
+
   public async processMessage(
     storeId: string,
     userId: string,
     payload: ChatbotRequestDto,
   ): Promise<ChatbotResponseDto> {
-    const lockKey = `chatbot:lock:${userId}`;
+    const lockKey = buildChatLockKey(storeId, userId);
 
+    // set lockey khóa tạm thời để tránh spam request
+    // nếu key chưa tồn tại -> set thành công -> request được xử lý
+    // nếu key đã tồn tại -> set fail -> request bị reject (429)
     const acquired = await this.redisClient.set(
       lockKey,
       'locked',
-      'EX',
-      15,
-      'NX',
+      'EX', // lock tự hết hạn nếu có lỗi bất ngờ
+      LOCK_TTL_SECONDS,
+      'NX', // chỉ set khi key chưa tồn tại
     );
 
     if (!acquired) {
       throw new CustomError({
         message:
-          'AI đang suy nghĩ câu hỏi trước của bạn, vui lòng đợi vài giây nhé! ⏳',
+          'Tori đang suy nghĩ câu hỏi trước của bạn, vui lòng đợi vài giây nhé! ⏳',
         status: StatusCodes.TOO_MANY_REQUESTS,
       });
     }
 
     try {
-      const previousHistory = await this.getChatHistory(userId);
+      // lấy lịch sử hội thoại ngắn hạn từ Redis để giữ ngữ cảnh cho model
+      const previousHistory = await this.chatMemoryService.getChatHistory(
+        storeId,
+        userId,
+      );
 
-      const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
-        { role: 'system', content: getCoordinatorPrompt(storeId, userId) },
-        ...previousHistory,
-        { role: 'user', content: payload.message },
-      ];
+      // ghép system prompt + history + message hiện tại thành input cho model điều phối
+      const messages = buildCoordinatorMessages(
+        storeId,
+        userId,
+        previousHistory,
+        payload.message,
+      );
 
-      const response = await this.openai.chat.completions.create({
-        model: 'llama-3.1-8b-instant',
+      // gọi model coordinator để xác định intent và quyết định có cần gọi tool hay không
+      const response = await this.llmProvider.createChatCompletion({
+        model: COORDINATOR_MODEL,
         messages,
-        tools: CHATBOT_TOOLS,
+        tools: CHAT_TOOLS,
         tool_choice: 'auto',
-        temperature: 0.1,
+        temperature: COORDINATOR_TEMPERATURE,
       });
 
-      const responseMessage = response.choices[0]?.message;
-      const toolCalls = responseMessage?.tool_calls;
+      const responseMessage = response.choices[0]?.message; // chỉ lấy và xử lý response tốt nhất
+      const toolCalls = responseMessage?.tool_calls; // tool model quyết định gọi
 
       let finalResponse: ChatbotResponseDto;
 
       if (toolCalls && toolCalls.length > 0) {
+        // hiện tại chỉ xử lý tool call đầu tiên do model trả về.
         const toolCall = toolCalls[0];
 
         if (!toolCall || toolCall.type !== 'function') {
@@ -163,10 +205,12 @@ export class ChatbotService {
           const intent = toolCall.function.name;
           let params: LLMToolParams = {};
 
+          // parse arguments từ tool call để lấy các tham số đã được model trích xuất
           if (toolCall.function.arguments) {
             params = JSON.parse(toolCall.function.arguments) as LLMToolParams;
           }
 
+          // điều hướng sang handler tương ứng với intent mà model đã chọn
           switch (intent) {
             case 'get_low_stock':
               finalResponse = await this.handleGetLowStock(
@@ -210,6 +254,7 @@ export class ChatbotService {
           }
         }
       } else {
+        // nếu model không chọn tool nào, ưu tiên dùng câu trả lời trực tiếp của model
         finalResponse = {
           aiIntent: 'unknown',
           botReply:
@@ -218,7 +263,9 @@ export class ChatbotService {
         };
       }
 
-      await this.saveChatHistory(
+      // lưu lại cặp hỏi - đáp để dùng làm ngữ cảnh cho các lượt chat tiếp theo
+      await this.chatMemoryService.saveChatHistory(
+        storeId,
         userId,
         payload.message,
         finalResponse.botReply,
@@ -232,6 +279,7 @@ export class ChatbotService {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
       });
     } finally {
+      // luôn giải phóng lock kể cả khi xử lý thành công hay phát sinh lỗi
       await this.redisClient.del(lockKey);
     }
   }
@@ -240,7 +288,7 @@ export class ChatbotService {
     draftActionId: string,
     isConfirmed: boolean,
   ): Promise<string> {
-    const draftKey = `chatbot:draft:${draftActionId}`;
+    const draftKey = buildChatDraftKey(draftActionId);
     const draftData = await this.redisClient.get(draftKey);
 
     if (!draftData) {
@@ -255,6 +303,7 @@ export class ChatbotService {
     if (!isConfirmed) {
       await this.redisClient.del(draftKey); // Xóa khỏi Redis
 
+      // WARN: Những chỗ như này nếu nhập string khác thì sao?
       return await this.generateFriendlyReply(
         'Tôi muốn hủy giao dịch',
         'Đã hủy thao tác.',
@@ -298,6 +347,8 @@ export class ChatbotService {
       query,
     );
 
+    // NOTE: Nếu số lượng kết quả > 100 -> điều hướng user tới màn hình lowstock
+
     const allLowStockItems = (res.items as InventoryItemData[]).filter(
       (item) =>
         item.quantity <= (item.reorder_threshold ?? item.reorderThreshold ?? 0),
@@ -313,7 +364,10 @@ export class ChatbotService {
 
     return {
       aiIntent: 'get_low_stock',
-      botReply: await this.generateFriendlyReply(userMessage, systemContext),
+      botReply: await this.generateFriendlyReply(
+        userMessage,
+        systemContext,
+      ),
       data: { totalCount, items: displayItems },
     };
   }
@@ -345,11 +399,12 @@ export class ChatbotService {
       };
     }
 
-    const exactMatch = this.findExactMatch(searchResult, productName);
+    const exactMatch = findExactInventoryMatch(searchResult, productName);
     const firstResult = searchResult[0];
 
     if (exactMatch) {
-      const context = `Sản phẩm ${exactMatch.productPackage.displayName} có giá bán ${exactMatch.productPackage.sellingPrice} VNĐ. Tồn kho: ${exactMatch.quantity} ${exactMatch.productPackage.unit.name}.`;
+      const context = `Sản phẩm ${exactMatch.productPackage.displayName} có giá bán ${exactMatch.productPackage.sellingPrice} VNĐ.
+                        Tồn kho: ${exactMatch.quantity} ${exactMatch.productPackage.unit.name}.`;
 
       return {
         aiIntent: 'get_product_info',
@@ -359,7 +414,8 @@ export class ChatbotService {
     }
 
     if (searchResult.length === 1 && firstResult) {
-      const context = `Sản phẩm ${firstResult.productPackage.displayName} có giá bán ${firstResult.productPackage.sellingPrice} VNĐ. Tồn kho: ${firstResult.quantity} ${firstResult.productPackage.unit.name}.`;
+      const context = `Sản phẩm ${firstResult.productPackage.displayName} có giá bán ${firstResult.productPackage.sellingPrice} VNĐ.
+                        Tồn kho: ${firstResult.quantity} ${firstResult.productPackage.unit.name}.`;
 
       return {
         aiIntent: 'get_product_info',
@@ -431,7 +487,10 @@ export class ChatbotService {
       }
 
       let targetItem: InventoryItemData;
-      const exactMatch = this.findExactMatch(searchResult, item.product_name);
+      const exactMatch = findExactInventoryMatch(
+        searchResult,
+        item.product_name,
+      );
       const firstResult = searchResult[0];
 
       if (exactMatch) {
@@ -508,41 +567,45 @@ export class ChatbotService {
     };
 
     await this.redisClient.set(
-      `chatbot:draft:${draftId}`,
+      buildChatDraftKey(draftId),
       JSON.stringify(draftAction),
       'EX',
-      this.DRAFT_TTL_SECONDS,
+      DRAFT_TTL_SECONDS,
     );
 
     const systemContext = `Hệ thống chuẩn bị tạo phiếu ${actionText} cho các sản phẩm: ${successMessages.join('; ')}. Tổng tiền: ${grandTotal.toLocaleString('vi-VN')} VNĐ. Yêu cầu người dùng xác nhận.`;
 
     return {
       aiIntent: isExport ? 'confirm_export' : 'confirm_import',
-      botReply: await this.generateFriendlyReply(userMessage, systemContext),
+      botReply: await this.generateFriendlyReply(
+        userMessage,
+        systemContext,
+      ),
       data: { draftActionId: draftId },
     };
   }
-
-  // ==========================================
-  // UTILS (Giữ nguyên như cũ)
-  // ==========================================
 
   private async searchInventory(
     storeId: string,
     keyword: string,
   ): Promise<InventoryItemData[]> {
     const query = {
-      keyword,
+      keyword: keyword.trim(),
       limit: 5,
       page: 1,
     } as unknown as ListInventoriesQueryDto;
+
+    // 1. search với keyword gốc
     let res = await this.inventoryService.getInventoriesByStoreId(
       storeId,
       query,
     );
 
+    // 2. fallback bỏ ngoặc hoặc prefix
     if (res.items.length === 0) {
       const splitArr = keyword.split('(');
+
+      // TODO: Nên tối ưu ở đây
       const fallbackName = keyword.includes('(')
         ? (splitArr[0] ?? '').trim()
         : keyword
@@ -551,6 +614,24 @@ export class ChatbotService {
 
       if (fallbackName && fallbackName !== keyword) {
         query.keyword = fallbackName;
+
+        res = await this.inventoryService.getInventoriesByStoreId(
+          storeId,
+          query,
+        );
+      }
+    }
+
+    // 3. fallback normalize mạnh hơn (chỉ chạy nếu vẫn chưa có kết quả)
+    if (res.items.length === 0) {
+      const normalizedKeyword = keyword
+        .toLowerCase()
+        .replace(/[\s()-]/g, '')
+        .trim();
+
+      if (normalizedKeyword && normalizedKeyword !== keyword) {
+        query.keyword = normalizedKeyword;
+
         res = await this.inventoryService.getInventoriesByStoreId(
           storeId,
           query,
@@ -559,18 +640,5 @@ export class ChatbotService {
     }
 
     return res.items as InventoryItemData[];
-  }
-
-  private findExactMatch(
-    items: InventoryItemData[],
-    keyword: string,
-  ): InventoryItemData | undefined {
-    const normalizeName = (str?: string | null) =>
-      (str || '').toLowerCase().replace(/[\s()-]/g, '');
-
-    return items.find(
-      (i) =>
-        normalizeName(i.productPackage.displayName) === normalizeName(keyword),
-    );
   }
 }
