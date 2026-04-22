@@ -114,21 +114,35 @@ final Map<String, String> enAuth = {
 
   // Verify OTP
   TTexts.verifyOtpTitle: 'Verify OTP Code',
-  TTexts.verifyOtpSubtitle: 'Verification code has been sent to your email address:\n',
-  
+  TTexts.verifyOtpSubtitle:
+      'Verification code has been sent to your email address:\n',
+
   TTexts.verifyOtpErrorIncomplete: 'Please enter all 8 digits of the OTP.',
   TTexts.verifyOtpVerifying: 'Verifying...',
   TTexts.verifyOtpVerifyBtn: 'Verify',
   TTexts.verifyOtpFailedTitle: 'Verification Failed',
-  TTexts.verifyOtpFailedMessage: 'Incorrect or expired OTP code. Please try again.',
-  
+  TTexts.verifyOtpFailedMessage:
+      'Incorrect or expired OTP code. Please try again.',
+
   TTexts.verifyOtpNotReceived: 'Didn\'t receive the code? ',
   TTexts.verifyOtpResendNow: 'Resend now',
   TTexts.verifyOtpResendLater: 'Resend in',
   TTexts.verifyOtpResending: 'Resending code...',
   TTexts.verifyOtpResendSuccessTitle: 'Success',
-  TTexts.verifyOtpResendSuccessMessage: 'A new OTP code has been sent to your email.',
-  
+  TTexts.verifyOtpResendSuccessMessage:
+      'A new OTP code has been sent to your email.',
+
   TTexts.verifyOtpErrorTitle: 'Error',
   TTexts.verifyOtpResendFailed: 'Cannot resend code: @error',
+
+  // -- Reset password
+  TTexts.resetPasswordTitle: 'Set New Password',
+  TTexts.resetPasswordSubtitle:
+      'Please enter your new password to complete the recovery process.',
+  TTexts.newPasswordLabel: 'New Password',
+  TTexts.newPasswordHint: 'Enter new password',
+  TTexts.updatingPassword: 'Updating password...',
+  TTexts.updatePasswordBtn: 'Update Password',
+  TTexts.passwordLengthError: 'Password must be at least 6 characters.',
+  TTexts.resetPasswordFailedTitle: 'Update Failed',
 };

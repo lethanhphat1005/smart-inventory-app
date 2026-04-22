@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/routes/app_routes.dart';
 import 'package:get/get.dart';
 import 'package:frontend/features/auth/providers/auth_provider.dart';
@@ -25,51 +26,51 @@ class ResetPasswordController extends GetxController {
     final password = passwordController.text.trim();
     final confirmPassword = confirmPasswordController.text.trim();
 
-    // 1. Validate dữ liệu đầu vào
     if (password.isEmpty || password.length < 6) {
       TSnackbarsWidget.error(
-          title: 'Lỗi hợp lệ', message: 'Mật khẩu phải có ít nhất 6 ký tự.');
+        title: TTexts.errorTitle.tr,
+        message: TTexts.passwordLengthError.tr,
+      );
       return;
     }
 
     if (password != confirmPassword) {
       TSnackbarsWidget.error(
-          title: 'Lỗi hợp lệ', message: 'Mật khẩu xác nhận không khớp.');
+        title: TTexts.errorTitle.tr,
+        message: TTexts.registerErrorPasswordMismatchMessage.tr,
+      );
       return;
     }
 
     isLoading.value = true;
 
     try {
-      // 2. Bắt đầu loading
-      FullScreenLoaderUtils.openLoadingDialog('Đang cập nhật mật khẩu...');
+      FullScreenLoaderUtils.openLoadingDialog(TTexts.updatingPassword.tr);
 
-      // 3. Gọi Supabase để update mật khẩu (yêu cầu user đang có session hợp lệ từ bước verify OTP)
       await authProvider.updatePassword(password);
 
-      // 4. Đăng xuất để đảm bảo bảo mật, yêu cầu user đăng nhập lại bằng mật khẩu mới
       await authProvider.logout();
 
       FullScreenLoaderUtils.stopLoading();
 
-      // 5. Thông báo thành công
       TSnackbarsWidget.success(
-        title: 'Thành công',
-        message: 'Mật khẩu đã được thay đổi. Vui lòng đăng nhập lại.',
+        title: TTexts.successTitle.tr,
+        message: TTexts.passwordChangedSuccess.tr,
       );
 
-      // 6. Xóa stack và đưa về trang đăng nhập
       Get.offAllNamed(AppRoutes.login);
     } catch (e) {
       FullScreenLoaderUtils.stopLoading();
-      TSnackbarsWidget.error(title: 'Cập nhật thất bại', message: e.toString());
+      TSnackbarsWidget.error(
+        title: TTexts.resetPasswordFailedTitle.tr,
+        message: e.toString(),
+      );
     } finally {
       isLoading.value = false;
     }
   }
 
   void cancelReset() {
-    // Hủy bỏ và quay về đăng nhập
     Get.offAllNamed(AppRoutes.login);
   }
 }

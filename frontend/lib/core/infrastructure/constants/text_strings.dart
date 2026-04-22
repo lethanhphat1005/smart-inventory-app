@@ -1097,4 +1097,14 @@ class TTexts {
       "verify_otp_resend_success_message";
   static const String verifyOtpErrorTitle = "verify_otp_error_title";
   static const String verifyOtpResendFailed = "verify_otp_resend_failed";
+
+  // -- Reset password
+  static const String resetPasswordTitle = "reset_password_title";
+  static const String resetPasswordSubtitle = "reset_password_subtitle";
+  static const String newPasswordLabel = "new_password_label";
+  static const String newPasswordHint = "new_password_hint";
+  static const String updatingPassword = "updating_password";
+  static const String updatePasswordBtn = "update_password_btn";
+  static const String passwordLengthError = "password_length_error";
+  static const String resetPasswordFailedTitle = "reset_password_failed_title";
 }
