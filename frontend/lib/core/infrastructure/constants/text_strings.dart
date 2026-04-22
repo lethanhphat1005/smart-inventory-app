@@ -261,6 +261,8 @@ class TTexts {
   static const String gpsOffTitle = "gps_off_title";
   static const String gpsOffMessage = "gps_off_message";
   static const String locationErrorMessage = "location_error_message";
+  static const String warningEmptyName = "warning_empty_name";
+  static const String warningStoreExists = "warning_store_exists";
 
   // -- Invite Code & Join Store
   static const String inviteCodeTitle = "invite_code_title";

@@ -43,6 +43,9 @@ final Map<String, String> enWorkspace = {
       "Please turn on location services in your system settings.",
   TTexts.locationErrorMessage:
       "Could not fetch location. Please try again or type manually.",
+  TTexts.warningEmptyName: "Please enter a workspace name.",
+  TTexts.warningStoreExists:
+      "A workspace with this name or address already exists. Please try another.",
 
   // -- Invite Code & Join Store
   TTexts.inviteCodeTitle: "Your Invite Code",
