@@ -46,7 +46,8 @@ class ForgotPasswordController extends GetxController {
         message: TTexts.emailSentMessage.trParams({'email': email}),
       );
 
-      Get.toNamed(AppRoutes.verifyEmail, arguments: email);
+      // Get.toNamed(AppRoutes.verifyEmail, arguments: email);
+      Get.toNamed(AppRoutes.verifyOTP, arguments: email);
     } on AuthException catch (e) {
       FullScreenLoaderUtils.stopLoading();
       final errorMsg = e.message.toLowerCase();

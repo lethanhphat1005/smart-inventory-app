@@ -89,12 +89,12 @@ final Map<String, String> enAuth = {
   // Forgot Password / Verify
   TTexts.forgetPasswordTitle: 'Forgot Password?',
   TTexts.forgetPasswordSubtitle:
-      'Enter your email to receive a secure password reset link.',
+      'Enter your email to receive a secure 8-digit OTP code to reset your password.',
   TTexts.forgotPasswordBtn: 'Send to my email',
   TTexts.forgotPasswordInnerTitle: 'Enter your email',
   TTexts.goBack: 'Go back',
   TTexts.emailSentTitle: 'Email Sent',
-  TTexts.emailSentMessage: 'Reset link has been sent to @email',
+  TTexts.emailSentMessage: 'OTP code has been sent to @email',
   TTexts.emailSendFailed: 'Cannot send email. Please try again later.',
   TTexts.emailSending: 'Sending...',
   TTexts.verifyEmailTitle: 'Verify Email',
@@ -111,4 +111,38 @@ final Map<String, String> enAuth = {
   TTexts.resendEmailIn: 'after ',
   TTexts.emailAppNotFound: 'Not finding any kind of email.',
   TTexts.pickEmailApp: 'Pick an email',
+
+  // Verify OTP
+  TTexts.verifyOtpTitle: 'Verify OTP Code',
+  TTexts.verifyOtpSubtitle:
+      'Verification code has been sent to your email address:\n',
+
+  TTexts.verifyOtpErrorIncomplete: 'Please enter all 8 digits of the OTP.',
+  TTexts.verifyOtpVerifying: 'Verifying...',
+  TTexts.verifyOtpVerifyBtn: 'Verify',
+  TTexts.verifyOtpFailedTitle: 'Verification Failed',
+  TTexts.verifyOtpFailedMessage:
+      'Incorrect or expired OTP code. Please try again.',
+
+  TTexts.verifyOtpNotReceived: 'Didn\'t receive the code? ',
+  TTexts.verifyOtpResendNow: 'Resend now',
+  TTexts.verifyOtpResendLater: 'Resend in',
+  TTexts.verifyOtpResending: 'Resending code...',
+  TTexts.verifyOtpResendSuccessTitle: 'Success',
+  TTexts.verifyOtpResendSuccessMessage:
+      'A new OTP code has been sent to your email.',
+
+  TTexts.verifyOtpErrorTitle: 'Error',
+  TTexts.verifyOtpResendFailed: 'Cannot resend code: @error',
+
+  // -- Reset password
+  TTexts.resetPasswordTitle: 'Set New Password',
+  TTexts.resetPasswordSubtitle:
+      'Please enter your new password to complete the recovery process.',
+  TTexts.newPasswordLabel: 'New Password',
+  TTexts.newPasswordHint: 'Enter new password',
+  TTexts.updatingPassword: 'Updating password...',
+  TTexts.updatePasswordBtn: 'Update Password',
+  TTexts.passwordLengthError: 'Password must be at least 6 characters.',
+  TTexts.resetPasswordFailedTitle: 'Update Failed',
 };
