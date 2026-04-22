@@ -25,6 +25,7 @@ import type { InventoryService } from '../../inventories/index.js';
 import type { TransactionService } from '../../transactions/transaction.service.js';
 import type { ChatbotRequestDto, ChatbotResponseDto } from '../chatbot.dto.js';
 import type {
+  ChatHistoryMessage,
   DraftAction,
   DraftActionType,
   InventoryItemData,
@@ -144,15 +145,12 @@ export class ChatbotService {
   ): Promise<ChatbotResponseDto> {
     const lockKey = buildChatLockKey(storeId, userId);
 
-    // set lockey khóa tạm thời để tránh spam request
-    // nếu key chưa tồn tại -> set thành công -> request được xử lý
-    // nếu key đã tồn tại -> set fail -> request bị reject (429)
     const acquired = await this.redisClient.set(
       lockKey,
       'locked',
-      'EX', // lock tự hết hạn nếu có lỗi bất ngờ
+      'EX',
       LOCK_TTL_SECONDS,
-      'NX', // chỉ set khi key chưa tồn tại
+      'NX',
     );
 
     if (!acquired) {
@@ -164,13 +162,11 @@ export class ChatbotService {
     }
 
     try {
-      // lấy lịch sử hội thoại ngắn hạn từ Redis để giữ ngữ cảnh cho model
       const previousHistory = await this.chatMemoryService.getChatHistory(
         storeId,
         userId,
       );
 
-      // ghép system prompt + history + message hiện tại thành input cho model điều phối
       const messages = buildCoordinatorMessages(
         storeId,
         userId,
@@ -178,7 +174,25 @@ export class ChatbotService {
         payload.message,
       );
 
-      // gọi model coordinator để xác định intent và quyết định có cần gọi tool hay không
+      const cart = await this.chatMemoryService.getCartSession(storeId, userId);
+
+      if (cart && cart.items.length > 0) {
+        const cartDetails = cart.items
+          .map((i) => `${i.quantity} ${i.displayName}`)
+          .join(', ');
+        const actionName = cart.type === 'create_export' ? 'XUẤT' : 'NHẬP';
+
+        // Chèn ngay sau system prompt để AI luôn nhớ trạng thái giỏ hàng
+        messages.splice(1, 0, {
+          role: 'system',
+          content: `[TRẠNG THÁI GIỎ HÀNG TẠM]: Người dùng đang có một phiên ${actionName} kho chưa hoàn tất. Các mặt hàng đã thêm: ${cartDetails}. Hãy ưu tiên xử lý tiếp phiên này.`,
+        });
+      }
+
+      const messagesToSave: ChatHistoryMessage[] = [
+        { role: 'user', content: payload.message },
+      ];
+
       const response = await this.llmProvider.createChatCompletion({
         model: COORDINATOR_MODEL,
         messages,
@@ -187,13 +201,14 @@ export class ChatbotService {
         temperature: COORDINATOR_TEMPERATURE,
       });
 
-      const responseMessage = response.choices[0]?.message; // chỉ lấy và xử lý response tốt nhất
-      const toolCalls = responseMessage?.tool_calls; // tool model quyết định gọi
+      const responseMessage = response.choices[0]?.message;
+      const toolCalls = responseMessage?.tool_calls;
 
       let finalResponse: ChatbotResponseDto;
 
       if (toolCalls && toolCalls.length > 0) {
-        // hiện tại chỉ xử lý tool call đầu tiên do model trả về.
+        messagesToSave.push(responseMessage as ChatHistoryMessage);
+
         const toolCall = toolCalls[0];
 
         if (!toolCall || toolCall.type !== 'function') {
@@ -201,75 +216,129 @@ export class ChatbotService {
             aiIntent: 'unknown',
             botReply: 'Lỗi truy xuất công cụ hệ thống.',
           };
+
+          messagesToSave.push({
+            role: 'tool',
+            tool_call_id: toolCall?.id || 'unknown',
+            content: 'Lỗi hệ thống: Không thể xử lý tool.',
+          });
         } else {
           const intent = toolCall.function.name;
           let params: LLMToolParams = {};
 
-          // parse arguments từ tool call để lấy các tham số đã được model trích xuất
-          if (toolCall.function.arguments) {
-            params = JSON.parse(toolCall.function.arguments) as LLMToolParams;
+          try {
+            if (toolCall.function.arguments) {
+              params = JSON.parse(toolCall.function.arguments) as LLMToolParams;
+            }
+          } catch (e) {
+            console.error('Lỗi parse arguments từ tool:', e);
           }
 
-          // điều hướng sang handler tương ứng với intent mà model đã chọn
-          switch (intent) {
-            case 'get_low_stock':
-              finalResponse = await this.handleGetLowStock(
-                storeId,
+          const validationResult = this.isToolCallEligible(
+            intent,
+            params,
+            payload.message,
+          );
+
+          if (!validationResult.isValid) {
+            finalResponse = {
+              aiIntent: 'clarify',
+              botReply: await this.generateFriendlyReply(
                 payload.message,
-              );
-              break;
-            case 'get_product_info':
-              finalResponse = await this.handleGetProductInfo(
-                storeId,
-                params.product_name,
-                payload.message,
-              );
-              break;
-            case 'create_export':
-              finalResponse = await this.handleTransactionDraft(
-                storeId,
-                userId,
-                'create_export',
-                params,
-                payload.message,
-              );
-              break;
-            case 'create_import':
-              finalResponse = await this.handleTransactionDraft(
-                storeId,
-                userId,
-                'create_import',
-                params,
-                payload.message,
-              );
-              break;
-            default:
-              finalResponse = {
-                aiIntent: 'unknown',
-                botReply: await this.generateFriendlyReply(
+                validationResult.reason ||
+                  'Thông tin chưa đủ, yêu cầu người dùng làm rõ.',
+              ),
+            };
+
+            messagesToSave.push({
+              role: 'tool',
+              tool_call_id: toolCall.id,
+              content: `Bị chặn bởi Guardrail: ${validationResult.reason}`,
+            });
+          } else {
+            switch (intent) {
+              case 'get_low_stock':
+                finalResponse = await this.handleGetLowStock(
+                  storeId,
                   payload.message,
-                  'Dạ, tính năng này hiện chưa khả dụng trên hệ thống.',
-                ),
-              };
+                );
+                break;
+              case 'get_product_info':
+                finalResponse = await this.handleGetProductInfo(
+                  storeId,
+                  params.product_name,
+                  payload.message,
+                );
+                break;
+              case 'create_export':
+                finalResponse = await this.handleTransactionDraft(
+                  storeId,
+                  userId,
+                  'create_export',
+                  params,
+                  payload.message,
+                );
+                break;
+              case 'create_import':
+                finalResponse = await this.handleTransactionDraft(
+                  storeId,
+                  userId,
+                  'create_import',
+                  params,
+                  payload.message,
+                );
+                break;
+              default:
+                finalResponse = {
+                  aiIntent: 'unknown',
+                  botReply: await this.generateFriendlyReply(
+                    payload.message,
+                    'Dạ, tính năng này hiện chưa khả dụng trên hệ thống.',
+                  ),
+                };
+            }
+
+            const toolContent = finalResponse.data
+              ? JSON.stringify(finalResponse.data)
+              : finalResponse.aiIntent.includes('confirm')
+                ? 'Đã tạo Draft, chờ xác nhận'
+                : 'Không có dữ liệu';
+
+            messagesToSave.push({
+              role: 'tool',
+              tool_call_id: toolCall.id,
+              content: toolContent,
+            });
           }
         }
       } else {
-        // nếu model không chọn tool nào, ưu tiên dùng câu trả lời trực tiếp của model
         finalResponse = {
           aiIntent: 'unknown',
-          botReply:
-            responseMessage?.content ||
-            'Em chưa hiểu ý anh/chị, mình có thể nói rõ hơn được không ạ?',
+          botReply: await this.generateFriendlyReply(
+            payload.message,
+            `LỆNH KIỂM DUYỆT HỆ THỐNG: Người dùng đang chat một câu không yêu cầu gọi tool. 
+            - Nếu đây là lời chào hỏi cơ bản, hãy chào lại thân thiện.
+            - Nếu đây là câu hỏi kiến thức ngoài luồng (như người nổi tiếng, lịch sử, toán học, code...), TUYỆT ĐỐI KHÔNG trả lời nội dung. BẮT BUỘC áp dụng CÔNG THỨC TỪ CHỐI trong quy tắc "KỶ LUẬT NGOÀI LUỒNG".`,
+          ),
         };
       }
 
-      // lưu lại cặp hỏi - đáp để dùng làm ngữ cảnh cho các lượt chat tiếp theo
-      await this.chatMemoryService.saveChatHistory(
-        storeId,
-        userId,
-        payload.message,
-        finalResponse.botReply,
-      );
+      messagesToSave.push({
+        role: 'assistant',
+        content: finalResponse.botReply,
+      });
+
+      if (finalResponse.aiIntent !== 'unknown') {
+        await this.chatMemoryService.saveChatHistory(
+          storeId,
+          userId,
+          messagesToSave,
+        );
+      } else {
+        // Nếu user hỏi lan man quá nhiều, chủ động clear history luôn để reset AI
+        // (Tùy chọn: bạn có thể bỏ dòng này nếu muốn nhẹ tay hơn)
+        await this.chatMemoryService.clearChatHistory(storeId, userId);
+      }
 
       return finalResponse;
     } catch (error) {
@@ -279,9 +348,70 @@ export class ChatbotService {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
       });
     } finally {
-      // luôn giải phóng lock kể cả khi xử lý thành công hay phát sinh lỗi
       await this.redisClient.del(lockKey);
     }
+  }
+
+  private isToolCallEligible(
+    intent: string,
+    params: LLMToolParams,
+    userMessage: string,
+  ): { isValid: boolean; reason?: string } {
+    const normalizedMessage = userMessage.toLowerCase();
+
+    // 1. Chặn lỗi META-IN-DOMAIN: Người dùng chỉ đang "hỏi cách dùng" chứ không muốn thực thi
+    const metaKeywords = ['cách', 'làm sao', 'hướng dẫn', 'có thể', 'hỗ trợ'];
+    const isAskingForHelp = metaKeywords.some((kw) =>
+      normalizedMessage.includes(kw),
+    );
+
+    if (isAskingForHelp) {
+      return {
+        isValid: false,
+        reason:
+          'Người dùng chỉ đang hỏi cách sử dụng hệ thống hoặc hỏi về chức năng, không yêu cầu thực thi. Hãy giải thích chức năng cho họ, TUYỆT ĐỐI không bịa dữ liệu.',
+      };
+    }
+
+    // 2. Validate từng intent cụ thể
+    switch (intent) {
+      case 'get_product_info':
+        if (!params.product_name || params.product_name.trim() === '') {
+          return {
+            isValid: false,
+            reason:
+              'Bạn đang tìm sản phẩm nào vậy? Hãy cho Tori biết tên sản phẩm nhé.',
+          };
+        }
+        break;
+
+      case 'create_import':
+      case 'create_export': {
+        const items = params.products || [];
+        const hasSingleItem = params.product_name && params.quantity;
+
+        if (items.length === 0 && !hasSingleItem) {
+          return {
+            isValid: false,
+            reason: `Bạn muốn ${intent === 'create_import' ? 'nhập' : 'xuất'} sản phẩm gì và số lượng bao nhiêu? Cung cấp đủ thông tin để Tori tạo phiếu nhé.`,
+          };
+        }
+
+        // Kiểm tra xem số lượng có hợp lý không (tránh AI bịa số âm hoặc số 0)
+        if (hasSingleItem && Number(params.quantity) <= 0) {
+          return { isValid: false, reason: 'Số lượng phải lớn hơn 0 bạn nhé.' };
+        }
+        break;
+      }
+
+      case 'get_low_stock':
+        // get_low_stock không cần tham số, luôn hợp lệ nếu đi qua được check Meta-in-domain
+        break;
+      default:
+        break;
+    }
+
+    return { isValid: true };
   }
 
   public async confirmDraftAction(
@@ -302,6 +432,11 @@ export class ChatbotService {
 
     if (!isConfirmed) {
       await this.redisClient.del(draftKey); // Xóa khỏi Redis
+
+      await this.chatMemoryService.clearChatHistory(
+        draft.storeId,
+        draft.userId,
+      );
 
       // WARN: Những chỗ như này nếu nhập string khác thì sao?
       return await this.generateFriendlyReply(
@@ -325,6 +460,9 @@ export class ChatbotService {
     }
 
     await this.redisClient.del(draftKey);
+
+    await this.chatMemoryService.clearChatHistory(draft.storeId, draft.userId);
+    await this.chatMemoryService.clearCartSession(draft.storeId, draft.userId);
 
     return await this.generateFriendlyReply(
       'Xác nhận thành công',
@@ -364,10 +502,7 @@ export class ChatbotService {
 
     return {
       aiIntent: 'get_low_stock',
-      botReply: await this.generateFriendlyReply(
-        userMessage,
-        systemContext,
-      ),
+      botReply: await this.generateFriendlyReply(userMessage, systemContext),
       data: { totalCount, items: displayItems },
     };
   }
@@ -428,7 +563,7 @@ export class ChatbotService {
       aiIntent: 'choose_product',
       botReply: await this.generateFriendlyReply(
         userMessage,
-        `Hệ thống tìm thấy nhiều kết quả cho "${productName}". Yêu cầu người dùng chọn chính xác trong danh sách.`,
+        `Hệ thống tìm thấy nhiều kết quả cho "${productName}". HÃY NÓI NGẮN GỌN: "Tori tìm thấy vài sản phẩm tương tự. Bạn vui lòng chọn chính xác ở danh sách bên dưới nhé 👇". TUYỆT ĐỐI KHÔNG tự liệt kê sản phẩm.`,
       ),
       data: { originalIntent: 'get_product_info', items: searchResult },
     };
@@ -462,9 +597,12 @@ export class ChatbotService {
     const isExport = intent === 'create_export';
     const actionText = isExport ? 'XUẤT KHO' : 'NHẬP KHO';
 
-    const transactionItems: TransactionItemPayload[] = [];
-    let grandTotal = 0;
-    const successMessages: string[] = [];
+    // 1. LẤY GIỎ HÀNG HIỆN TẠI (hoặc tạo mới)
+    let cart = await this.chatMemoryService.getCartSession(storeId, userId);
+
+    if (!cart || cart.type !== intent) {
+      cart = { type: intent, items: [] };
+    }
 
     for (const item of itemsToProcess) {
       if (!item.product_name || !item.quantity) {
@@ -481,28 +619,28 @@ export class ChatbotService {
           aiIntent: intent,
           botReply: await this.generateFriendlyReply(
             userMessage,
-            `Lỗi: Không tìm thấy "${item.product_name}" trong kho. Thao tác đã bị hủy.`,
+            `Lỗi: Không tìm thấy "${item.product_name}". Các mặt hàng trước đó vẫn được giữ trong giỏ.`,
           ),
         };
       }
 
+      // Xử lý exact match (đã rút gọn cho dễ đọc, bạn giữ nguyên logic match của bạn)
       let targetItem: InventoryItemData;
       const exactMatch = findExactInventoryMatch(
         searchResult,
         item.product_name,
       );
-      const firstResult = searchResult[0];
 
       if (exactMatch) {
         targetItem = exactMatch;
-      } else if (searchResult.length === 1 && firstResult) {
-        targetItem = firstResult;
+      } else if (searchResult.length === 1) {
+        targetItem = searchResult[0]!;
       } else {
         return {
           aiIntent: 'choose_product',
           botReply: await this.generateFriendlyReply(
             userMessage,
-            `Cảnh báo: Tìm thấy nhiều mặt hàng giống "${item.product_name}". Yêu cầu người dùng chọn chính xác để tiếp tục.`,
+            `Tìm thấy nhiều mặt hàng giống "${item.product_name}". HÃY NÓI NGẮN GỌN: "Có vài sản phẩm trùng tên, bạn click chọn đúng loại muốn ${isExport ? 'xuất' : 'nhập'} ở bên dưới giúp Tori nha 👇". TUYỆT ĐỐI KHÔNG tự liệt kê.`,
           ),
           data: {
             originalIntent: intent,
@@ -517,39 +655,58 @@ export class ChatbotService {
         ? Number(pkg.sellingPrice)
         : Number(pkg.importPrice);
 
-      if (price <= 0) {
-        return {
-          aiIntent: intent,
-          botReply: await this.generateFriendlyReply(
-            userMessage,
-            `Lỗi: Sản phẩm "${pkg.displayName}" chưa được cài đặt giá ${isExport ? 'bán' : 'nhập'}. Thao tác bị hủy.`,
-          ),
-        };
-      }
-
-      if (isExport && targetItem.quantity < item.quantity) {
-        return {
-          aiIntent: intent,
-          botReply: await this.generateFriendlyReply(
-            userMessage,
-            `Lỗi: "${pkg.displayName}" chỉ còn ${targetItem.quantity} ${pkg.unit.name}, không đủ để xuất ${item.quantity}. Thao tác bị hủy.`,
-          ),
-        };
-      }
-
-      transactionItems.push({
-        productPackageId: pkg.productPackageId,
-        quantity: Number(item.quantity),
-        unitPrice: price,
-      });
-
-      const itemTotal = item.quantity * price;
-
-      grandTotal += itemTotal;
-      successMessages.push(
-        `${item.quantity} ${pkg.displayName} (${itemTotal.toLocaleString('vi-VN')}đ)`,
+      // 2. LOGIC CỘNG DỒN GIỎ HÀNG
+      const existingItem = cart.items.find(
+        (i) => i.productPackageId === pkg.productPackageId,
       );
+      const newQuantity = existingItem
+        ? existingItem.quantity + Number(item.quantity)
+        : Number(item.quantity);
+
+      // Validate tồn kho với TỔNG SỐ LƯỢNG (cũ + mới)
+      if (isExport && targetItem.quantity < newQuantity) {
+        return {
+          aiIntent: intent,
+          botReply: await this.generateFriendlyReply(
+            userMessage,
+            `Lỗi: Không đủ hàng. Kho còn ${targetItem.quantity}, nhưng bạn đang muốn xuất tổng cộng ${newQuantity} (tính cả trong giỏ).`,
+          ),
+        };
+      }
+
+      // Cập nhật mảng items trong Cart
+      if (existingItem) {
+        existingItem.quantity = newQuantity;
+      } else {
+        cart.items.push({
+          productPackageId: pkg.productPackageId,
+          displayName: pkg.displayName,
+          quantity: Number(item.quantity),
+          unitPrice: price,
+        });
+      }
     }
+
+    // 3. LƯU GIỎ HÀNG VÀO REDIS
+    await this.chatMemoryService.saveCartSession(storeId, userId, cart);
+
+    // 4. TẠO LẠI DRAFT VỚI TOÀN BỘ GIỎ HÀNG
+    let grandTotal = 0;
+    const successMessages: string[] = [];
+    const transactionItems: TransactionItemPayload[] = cart.items.map(
+      (cartItem) => {
+        const itemTotal = cartItem.quantity * cartItem.unitPrice;
+
+        grandTotal += itemTotal;
+        successMessages.push(`${cartItem.quantity} ${cartItem.displayName}`);
+
+        return {
+          productPackageId: cartItem.productPackageId,
+          quantity: cartItem.quantity,
+          unitPrice: cartItem.unitPrice,
+        };
+      },
+    );
 
     const payload: TransactionPayload = {
       note: `${isExport ? 'Xuất' : 'Nhập'} kho nhiều sản phẩm qua AI Assistant`,
@@ -573,14 +730,11 @@ export class ChatbotService {
       DRAFT_TTL_SECONDS,
     );
 
-    const systemContext = `Hệ thống chuẩn bị tạo phiếu ${actionText} cho các sản phẩm: ${successMessages.join('; ')}. Tổng tiền: ${grandTotal.toLocaleString('vi-VN')} VNĐ. Yêu cầu người dùng xác nhận.`;
+    const systemContext = `Đã cập nhật giỏ hàng ${actionText}. Hiện có: ${successMessages.join(', ')}. Tổng tiền: ${grandTotal.toLocaleString('vi-VN')} VNĐ. Hỏi xem người dùng muốn thêm gì nữa không hay chốt đơn.`;
 
     return {
       aiIntent: isExport ? 'confirm_export' : 'confirm_import',
-      botReply: await this.generateFriendlyReply(
-        userMessage,
-        systemContext,
-      ),
+      botReply: await this.generateFriendlyReply(userMessage, systemContext),
       data: { draftActionId: draftId },
     };
   }

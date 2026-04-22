@@ -4,7 +4,7 @@ export const COORDINATOR_MODEL = 'llama-3.1-8b-instant';
 export const FRIENDLY_REPLY_MODEL = 'llama-3.1-8b-instant';
 
 export const COORDINATOR_TEMPERATURE = 0.1;
-export const FRIENDLY_REPLY_TEMPERATURE = 0.6;
+export const FRIENDLY_REPLY_TEMPERATURE = 0.3;
 
 export const MAX_HISTORY_LENGTH = 6;
 export const DRAFT_TTL_SECONDS = 300;

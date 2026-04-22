@@ -49,3 +49,15 @@ export interface InventoryItemData {
   reorderThreshold?: number;
   productPackage: InventoryPackageData;
 }
+
+export interface CartItem {
+  productPackageId: string;
+  displayName: string;
+  quantity: number;
+  unitPrice: number;
+}
+
+export interface CartSession {
+  type: DraftActionType;
+  items: CartItem[];
+}
