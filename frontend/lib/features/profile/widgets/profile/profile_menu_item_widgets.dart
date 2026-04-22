@@ -48,7 +48,7 @@ class ProfileMenuItemWidget extends StatelessWidget {
           trailing: const Icon(
             Iconsax.arrow_right_3_copy,
             size: AppSizes.p14,
-            color: AppColors.divider,
+            color: AppColors.subText,
           ),
         ),
       ),
