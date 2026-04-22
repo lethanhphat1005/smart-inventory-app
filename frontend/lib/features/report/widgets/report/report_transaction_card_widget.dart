@@ -35,6 +35,28 @@ class ReportTransactionCardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ==============================================================
+    // LOGIC MÀU SẮC VÀ DẤU VÀO 
+    // ==============================================================
+    String finalItemsDisplay = itemsDisplay;
+    Color finalItemsColor = itemsColor;
+    String finalMoneyDisplay = moneyDisplay;
+    Color finalMoneyColor = moneyColor;
+
+    if (isInbound) {
+      // Nhập (Import): Số lượng (+) Xanh, Tiền chi ra (-) Đỏ
+      finalItemsDisplay = '+ $itemsDisplay';
+      finalItemsColor = AppColors.stockIn;
+      finalMoneyDisplay = '- $moneyDisplay';
+      finalMoneyColor = AppColors.stockOut;
+    } else if (isOutbound) {
+      // Xuất (Export): Số lượng (-) Đỏ, Tiền thu về (+) Xanh
+      finalItemsDisplay = '- $itemsDisplay';
+      finalItemsColor = AppColors.stockOut;
+      finalMoneyDisplay = '+ $moneyDisplay';
+      finalMoneyColor = AppColors.stockIn;
+    }
+
     return Container(
       margin: const EdgeInsets.only(bottom: AppSizes.p16),
       padding: const EdgeInsets.all(20),
@@ -85,21 +107,21 @@ class ReportTransactionCardWidget extends StatelessWidget {
             '',
             customLeftWidget: Row(
               children: [
-                Text(itemsDisplay,
+                Text(finalItemsDisplay, // ĐÃ ÁP DỤNG LOGIC BIẾN Ở ĐÂY
                     style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
-                        color: itemsColor)),
+                        color: finalItemsColor)), // ĐÃ ÁP DỤNG LOGIC BIẾN Ở ĐÂY
                 const Text(" / ",
                     style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w400,
                         color: AppColors.subText)),
-                Text(moneyDisplay,
+                Text(finalMoneyDisplay, // ĐÃ ÁP DỤNG LOGIC BIẾN Ở ĐÂY
                     style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
-                        color: moneyColor)),
+                        color: finalMoneyColor)), // ĐÃ ÁP DỤNG LOGIC BIẾN Ở ĐÂY
               ],
             ),
             rightWidget: _buildCustomLayerIcon(),

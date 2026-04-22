@@ -1,6 +1,9 @@
 import 'dart:io';
 import 'package:excel/excel.dart';
+import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/infrastructure/models/transaction_model.dart';
+import 'package:frontend/core/state/services/store_service.dart';
+import 'package:frontend/core/state/services/user_service.dart';
 import 'package:frontend/core/ui/widgets/t_snackbars_widget.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -10,7 +13,6 @@ import 'package:permission_handler/permission_handler.dart';
 
 class ReportTransactionExportController extends GetxController {
   final RxBool isExporting = false.obs;
-
   final RxDouble exportProgress = 0.0.obs;
   final RxString exportStatus = ''.obs;
 
@@ -18,91 +20,213 @@ class ReportTransactionExportController extends GetxController {
     try {
       isExporting.value = true;
       exportProgress.value = 0.0;
-      exportStatus.value = 'Preparing to export...';
+      exportStatus.value = TTexts.exportPreparing.tr;
 
-      // 1. Xin quyền (Tiến độ 10%)
       exportProgress.value = 0.1;
-      exportStatus.value = 'Checking permissions...';
+      exportStatus.value = TTexts.exportPermissionChecking.tr;
       if (Platform.isAndroid) {
         var status = await Permission.storage.status;
         if (!status.isGranted) {
           await Permission.storage.request();
         }
       }
-      await Future.delayed(
-          const Duration(milliseconds: 300)); // Delay tạo độ mượt UI
+      await Future.delayed(const Duration(milliseconds: 300));
 
-      // 2. Khởi tạo Excel (Tiến độ 30%)
       exportProgress.value = 0.3;
-      exportStatus.value = 'Creating document...';
+      exportStatus.value = TTexts.exportCreatingDoc.tr;
       var excel = Excel.createExcel();
+
       String rawId = tx.transactionId ?? 'Tx';
       String shortId = rawId.length > 15 ? rawId.substring(0, 15) : rawId;
       String sheetName = 'Receipt_$shortId';
+      if (sheetName.length > 31) {
+        sheetName = sheetName.substring(0, 31);
+      }
 
       Sheet sheetObject = excel[sheetName];
       excel.setDefaultSheet(sheetName);
-      CellStyle boldStyle = CellStyle(bold: true);
 
-      // 3. Đổ dữ liệu Header (Tiến độ 50%)
-      exportProgress.value = 0.5;
-      exportStatus.value = 'Writing transaction info...';
+      // ==========================================
+      // LẤY DỮ LIỆU CỬA HÀNG VÀ NGƯỜI DÙNG
+      // ==========================================
+      final storeService = Get.find<StoreService>();
+      final userService = Get.find<UserService>();
+
+      final exporterName =
+          userService.currentUser.value?.fullName ?? TTexts.unknownUser.tr;
+      final storeName = storeService.currentStoreName.value.isNotEmpty
+          ? storeService.currentStoreName.value
+          : TTexts.mainHQStore.tr;
+      final storeAddress = storeService.currentStoreAddress.value.isNotEmpty
+          ? storeService.currentStoreAddress.value
+          : TTexts.na.tr;
+
+      final exportTime =
+          DateFormat('dd/MM/yyyy HH:mm:ss').format(DateTime.now());
       final dateFormatted =
           DateFormat('dd/MM/yyyy HH:mm').format(tx.createdAt ?? DateTime.now());
 
-      sheetObject.appendRow([TextCellValue('TRANSACTION RECEIPT')]);
-      sheetObject.appendRow([
-        TextCellValue('Transaction ID:'),
-        TextCellValue(tx.transactionId ?? 'N/A')
-      ]);
-      sheetObject.appendRow([TextCellValue('Type:'), TextCellValue(tx.type)]);
-      sheetObject
-          .appendRow([TextCellValue('Status:'), TextCellValue(tx.status)]);
-      sheetObject
-          .appendRow([TextCellValue('Date:'), TextCellValue(dateFormatted)]);
+      // ==========================================
+      // THIẾT LẬP STYLE (Đã sử dụng ExcelColor)
+      // ==========================================
+      CellStyle titleStyle = CellStyle(
+        bold: true,
+        fontSize: 16,
+        fontColorHex: ExcelColor.fromHexString('#FF8A00'), // Màu Cam
+      );
+
+      CellStyle headerStyle = CellStyle(
+        bold: true,
+        horizontalAlign: HorizontalAlign.Center,
+        verticalAlign: VerticalAlign.Center,
+        backgroundColorHex: ExcelColor.fromHexString('#FF8A00'), // Nền Cam
+        fontColorHex: ExcelColor.fromHexString('#FFFFFF'), // Chữ Trắng
+      );
+
+      CellStyle boldStyle = CellStyle(bold: true);
+
+      // 3. Đổ dữ liệu Header
+      exportProgress.value = 0.5;
+      exportStatus.value = TTexts.exportWritingTxInfo.tr;
+
+      sheetObject.appendRow([TextCellValue('')]); // Dòng 0
+
+      // Tiêu đề
       sheetObject.appendRow(
-          [TextCellValue('Total Amount:'), DoubleCellValue(tx.totalPrice)]);
-      sheetObject.appendRow([TextCellValue('')]);
+          [TextCellValue(TTexts.exportExcelSystemName.tr)]); // Dòng 1
+      sheetObject.cell(CellIndex.indexByString("A2")).cellStyle = titleStyle;
+
+      sheetObject
+          .appendRow([TextCellValue(TTexts.exportReceiptTitle.tr)]); // Dòng 2
+      sheetObject.cell(CellIndex.indexByString("A3")).cellStyle = boldStyle;
+
+      sheetObject.appendRow([TextCellValue('')]); // Dòng 3
+
+      // Thông tin Doanh nghiệp / Cửa hàng
+      sheetObject.appendRow([
+        TextCellValue(TTexts.exportExcelStoreName.tr),
+        TextCellValue(storeName)
+      ]);
+      sheetObject.cell(CellIndex.indexByString("A5")).cellStyle = boldStyle;
 
       sheetObject.appendRow([
-        TextCellValue('No.'),
-        TextCellValue('Product Name'),
-        TextCellValue('Barcode'),
-        TextCellValue('Unit Price (\$)'),
-        TextCellValue('Quantity'),
-        TextCellValue('Total (\$)'),
+        TextCellValue(TTexts.exportExcelAddress.tr),
+        TextCellValue(storeAddress)
+      ]);
+      sheetObject.cell(CellIndex.indexByString("A6")).cellStyle = boldStyle;
+
+      sheetObject.appendRow([
+        TextCellValue(TTexts.exportExcelExportedBy.tr),
+        TextCellValue(exporterName)
+      ]);
+      sheetObject.cell(CellIndex.indexByString("A7")).cellStyle = boldStyle;
+
+      sheetObject.appendRow([
+        TextCellValue(TTexts.exportExcelExportTime.tr),
+        TextCellValue(exportTime)
+      ]);
+      sheetObject.cell(CellIndex.indexByString("A8")).cellStyle = boldStyle;
+
+      sheetObject.appendRow([TextCellValue('')]); // Dòng 9
+
+      // Thông tin chi tiết Phiếu
+      sheetObject.appendRow([
+        TextCellValue('${TTexts.exportExcelColId.tr}:'),
+        TextCellValue(tx.transactionId ?? TTexts.na.tr)
+      ]);
+      sheetObject.cell(CellIndex.indexByString("A10")).cellStyle = boldStyle;
+
+      sheetObject.appendRow([
+        TextCellValue('${TTexts.exportExcelColType.tr}:'),
+        TextCellValue(tx.type.toUpperCase())
+      ]);
+      sheetObject.cell(CellIndex.indexByString("A11")).cellStyle = boldStyle;
+
+      sheetObject.appendRow([
+        TextCellValue('${TTexts.exportExcelColStatus.tr}:'),
+        TextCellValue(tx.status.toUpperCase())
+      ]);
+      sheetObject.cell(CellIndex.indexByString("A12")).cellStyle = boldStyle;
+
+      sheetObject.appendRow(
+          [TextCellValue(TTexts.dateAndTime.tr), TextCellValue(dateFormatted)]);
+      sheetObject.cell(CellIndex.indexByString("A13")).cellStyle = boldStyle;
+
+      sheetObject.appendRow([TextCellValue('')]); // Dòng 14
+
+      // Header Bảng Items
+      sheetObject.appendRow([
+        TextCellValue(TTexts.exportExcelColNo.tr),
+        TextCellValue(TTexts.exportColProductName.tr),
+        TextCellValue(TTexts.exportColBarcode.tr),
+        TextCellValue(TTexts.exportColUnitPrice.tr),
+        TextCellValue(TTexts.exportColQuantity.tr),
+        TextCellValue(TTexts.exportColTotal.tr),
       ]);
 
+      // Phủ màu cam cho Header (Dòng 16 trong Excel = rowIndex 15)
       for (int i = 0; i < 6; i++) {
         sheetObject
-            .cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: 7))
-            .cellStyle = boldStyle;
+            .cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: 15))
+            .cellStyle = headerStyle;
       }
+
       await Future.delayed(const Duration(milliseconds: 400));
 
-      // 4. Đổ dữ liệu Items (Tiến độ 70%)
+      // 4. Đổ dữ liệu Items
       exportProgress.value = 0.7;
-      exportStatus.value = 'Processing items...';
+      exportStatus.value = TTexts.exportProcessingItems.tr;
+
+      int totalItemsCount = 0;
+      int startingDataRow = 16;
+
       for (int i = 0; i < tx.items.length; i++) {
         final item = tx.items[i];
-        final productName = item.packageInfo?.displayName ?? 'Unknown Product';
-        final barcode = item.packageInfo?.barcodeValue ?? 'N/A';
-        final itemTotal = item.unitPrice * item.quantity;
+        final productName =
+            item.packageInfo?.displayName ?? TTexts.unknownProduct.tr;
+        final barcode = item.packageInfo?.barcodeValue ?? TTexts.na.tr;
+
+        final displayQty = item.quantity.abs().toInt();
+        final itemTotal = item.unitPrice * displayQty;
+
+        totalItemsCount += displayQty;
 
         sheetObject.appendRow([
           IntCellValue(i + 1),
           TextCellValue(productName),
           TextCellValue(barcode),
           DoubleCellValue(item.unitPrice),
-          IntCellValue(item.quantity),
+          IntCellValue(displayQty),
           DoubleCellValue(itemTotal),
         ]);
       }
+
+      // Dòng Grand Total
+      sheetObject.appendRow([TextCellValue('')]);
+      final grandTotalRowIndex = startingDataRow + tx.items.length + 1;
+
+      sheetObject.appendRow([
+        TextCellValue(''),
+        TextCellValue(''),
+        TextCellValue(''),
+        TextCellValue(TTexts.exportExcelGrandTotal.tr),
+        IntCellValue(totalItemsCount),
+        DoubleCellValue(tx.totalPrice),
+      ]);
+
+      // In đậm dòng tổng kết
+      for (int i = 3; i < 6; i++) {
+        sheetObject
+            .cell(CellIndex.indexByColumnRow(
+                columnIndex: i, rowIndex: grandTotalRowIndex))
+            .cellStyle = boldStyle;
+      }
+
       await Future.delayed(const Duration(milliseconds: 300));
 
-      // 5. Lưu File (Tiến độ 90% -> 100%)
+      // 5. Lưu File
       exportProgress.value = 0.9;
-      exportStatus.value = 'Saving file...';
+      exportStatus.value = TTexts.exportSavingFile.tr;
       final fileBytes = excel.save();
       if (fileBytes == null) throw Exception("Failed to generate Excel file");
 
@@ -122,35 +246,30 @@ class ReportTransactionExportController extends GetxController {
         ..writeAsBytesSync(fileBytes);
 
       exportProgress.value = 1.0;
-      exportStatus.value = 'Export Complete!';
-      await Future.delayed(const Duration(
-          milliseconds: 400)); // Dừng lại 1 xíu cho user thấy 100%
+      exportStatus.value = TTexts.exportComplete.tr;
+      await Future.delayed(const Duration(milliseconds: 400));
 
-      // Đóng Bottom Sheet
       if (Get.isBottomSheetOpen == true) Get.back();
 
-      // 6. Snackbar thành công
       TSnackbarsWidget.success(
-        title: 'Export Successful',
-        message: 'File saved to Downloads folder.',
-        actionText: 'OPEN', // Truyền text cho nút Action
+        title: TTexts.exportSuccessTitle.tr,
+        message: TTexts.exportFileSaved.tr,
+        actionText: TTexts.exportOpenBtn.tr,
         onActionPressed: () async {
           final result = await OpenFile.open(filePath);
 
-          // Xử lý lỗi không có app đọc Excel
           if (result.type != ResultType.done) {
-            // TSnackbarsWidget dùng ScaffoldMessenger nên tự nó ghi đè/tắt cái cũ nếu được cấu hình tốt
             TSnackbarsWidget.error(
-              title: 'Cannot open file',
-              message:
-                  'No app found to read Excel (.xlsx) files. Please install Microsoft Excel or Google Sheets on your device.',
+              title: TTexts.exportCannotOpen.tr,
+              message: TTexts.exportNoAppFoundDetail.tr,
             );
           }
         },
       );
     } catch (e) {
       if (Get.isBottomSheetOpen == true) Get.back();
-      TSnackbarsWidget.error(title: 'Export Failed', message: e.toString());
+      TSnackbarsWidget.error(
+          title: TTexts.exportFailedTitle.tr, message: e.toString());
     } finally {
       isExporting.value = false;
     }

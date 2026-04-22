@@ -39,7 +39,27 @@ class ReportHistoryHeaderWidget extends StatelessWidget {
                 Obx(() {
                   final count = reportCtrl.filteredTransactions.length;
 
-                  final timeLabel = reportCtrl.activeTab.value.toLowerCase();
+                  final now = DateTime.now();
+                  final selectedDate = reportCtrl.selectedDay.value;
+
+                  // Đưa cả 2 về cùng thời điểm 00:00:00 để so sánh chuẩn số ngày
+                  final today = DateTime(now.year, now.month, now.day);
+                  final selected = DateTime(
+                      selectedDate.year, selectedDate.month, selectedDate.day);
+
+                  final difference = selected.difference(today).inDays;
+
+                  String timeLabel;
+                  if (difference == 0) {
+                    timeLabel = TTexts.today.tr.toLowerCase();
+                  } else if (difference == 1) {
+                    timeLabel = TTexts.tomorrow.tr.toLowerCase();
+                  } else if (difference == -1) {
+                    timeLabel = TTexts.yesterday.tr.toLowerCase();
+                  } else {
+                    // Mặc định hiển thị dạng 25 Apr 2026
+                    timeLabel = DateFormat('dd MMM yyyy').format(selectedDate);
+                  }
 
                   return Text(
                     "$count ${TTexts.reportTransactionsOverview.tr} $timeLabel",

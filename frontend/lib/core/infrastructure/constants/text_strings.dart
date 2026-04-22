@@ -367,6 +367,7 @@ class TTexts {
   static const String filtered = 'filtered';
   static const String today = 'today';
   static const String yesterday = 'yesterday';
+  static const String tomorrow = 'tomorrow';
   static const String note = 'note';
   static const String productName = 'product_name';
   static const String overviewInfoTitle = 'overview_info_title';
@@ -1120,4 +1121,43 @@ class TTexts {
   static const String currentStockLabel = "current_stock_label";
   static const String alertThresholdLabel = "alert_threshold_label";
   static const String suggestedImportLabel = "suggested_import_label";
+
+  // -- Export Excel Report
+  static const String exportExcelSystemName = "export_excel_system_name";
+  static const String exportExcelTitle = "export_excel_title";
+  static const String exportExcelDate = "export_excel_date";
+  static const String exportExcelTotalTx = "export_excel_total_tx";
+  static const String exportExcelColNo = "export_excel_col_no";
+  static const String exportExcelColId = "export_excel_col_id";
+  static const String exportExcelColTime = "export_excel_col_time";
+  static const String exportExcelColType = "export_excel_col_type";
+  static const String exportExcelColStatus = "export_excel_col_status";
+  static const String exportExcelColItems = "export_excel_col_items";
+  static const String exportExcelColAmount = "export_excel_col_amount";
+  static const String exportExcelGrandTotal = "export_excel_grand_total";
+  static const String exportPermissionChecking = "export_permission_checking";
+  static const String exportCreatingDoc = "export_creating_doc";
+  static const String exportWritingSummary = "export_writing_summary";
+  static const String exportProcessingTx = "export_processing_tx";
+  static const String exportSavingFile = "export_saving_file";
+  static const String exportComplete = "export_complete";
+  static const String exportFileSaved = "export_file_saved";
+  static const String exportOpenBtn = "export_open_btn";
+  static const String exportCannotOpen = "export_cannot_open";
+  static const String exportNoAppFound = "export_no_app_found";
+  static const String exportPreparing = "export_preparing";
+  static const String exportWritingTxInfo = "export_writing_tx_info";
+  static const String exportReceiptTitle = "export_receipt_title";
+  static const String exportColProductName = "export_col_product_name";
+  static const String exportColBarcode = "export_col_barcode";
+  static const String exportColUnitPrice = "export_col_unit_price";
+  static const String exportColQuantity = "export_col_quantity";
+  static const String exportColTotal = "export_col_total";
+  static const String exportProcessingItems = "export_processing_items";
+  static const String exportSuccessTitle = "export_success_title";
+  static const String exportNoAppFoundDetail = "export_no_app_found_detail";
+  static const String exportExcelStoreName = "export_excel_store_name";
+  static const String exportExcelAddress = "export_excel_address";
+  static const String exportExcelExportedBy = "export_excel_exported_by";
+  static const String exportExcelExportTime = "export_excel_export_time";
 }

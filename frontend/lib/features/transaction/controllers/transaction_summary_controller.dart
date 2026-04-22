@@ -34,19 +34,13 @@ class TransactionSummaryController extends GetxController {
     return AppColors.primaryText;
   }
 
-  // Số lượng Items
-  int get totalItems {
-    if (isAdjustment) {
-      return transaction.items.length;
-    }
-    return transaction.items.fold(0, (sum, item) => sum + item.quantity.abs());
-  }
+  // Lấy số lượng dòng hàng (items) thay vì cộng dồn quantity
+  int get totalItems => transaction.items.length;
 
-  // Giao diện y hệt Report: Bỏ dấu +/-
-  String get itemsDisplay => totalItems.toString();
+  String get itemsDisplay => "$totalItems ${TTexts.items.tr}";
   Color get itemsColor => themeColor;
 
-  // Tiền: Bỏ dấu +/- lằng nhằng, dùng chung màu chủ đạo
+  // Tiền
   double get rawTotal => transaction.totalPrice;
   String get moneyDisplay => '\$${rawTotal.abs().toStringAsFixed(2)}';
   Color get moneyColor => themeColor;
@@ -58,7 +52,6 @@ class TransactionSummaryController extends GetxController {
     if (isOutbound) return TTexts.outbound.tr;
     if (isAdjustment) return TTexts.stockAdjustment.tr;
 
-    // Viết hoa chữ cái đầu cho đẹp
     if (transaction.type.isNotEmpty) {
       return '${transaction.type[0].toUpperCase()}${transaction.type.substring(1).toLowerCase()}';
     }

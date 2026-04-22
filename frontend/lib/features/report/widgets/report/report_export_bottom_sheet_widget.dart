@@ -3,7 +3,7 @@ import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:frontend/core/infrastructure/models/transaction_model.dart';
 import 'package:frontend/features/report/controllers/report_export_controller.dart';
-import 'package:frontend/core/infrastructure/constants/text_strings.dart'; 
+import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:get/get.dart';
 
 class ReportExportBottomSheetWidget extends GetView<ReportExportController> {
@@ -32,8 +32,8 @@ class ReportExportBottomSheetWidget extends GetView<ReportExportController> {
             ),
             const SizedBox(height: 24),
             Text(
-                TTexts.exportingProgress.trParams(
-                    {'percent': percent.toString()}), 
+                TTexts.exportingProgress
+                    .trParams({'percent': percent.toString()}),
                 style: const TextStyle(
                     fontFamily: 'Poppins',
                     fontSize: 20,
@@ -71,7 +71,7 @@ class ReportExportBottomSheetWidget extends GetView<ReportExportController> {
                 const Center(child: Text("🖨", style: TextStyle(fontSize: 36))),
           ),
           const SizedBox(height: 16),
-          Text(TTexts.exportDailyReport.tr, 
+          Text(TTexts.exportDailyReport.tr,
               style: const TextStyle(
                   fontFamily: 'Poppins',
                   fontSize: 18,
@@ -85,7 +85,7 @@ class ReportExportBottomSheetWidget extends GetView<ReportExportController> {
               TTexts.exportDailyReportDesc.trParams({
                 'count': transactions.length.toString(),
                 'date': dateStr,
-              }), 
+              }),
               style: const TextStyle(
                   fontSize: 13, color: AppColors.subText, height: 1.5),
               textAlign: TextAlign.center,
@@ -122,7 +122,7 @@ class ReportExportBottomSheetWidget extends GetView<ReportExportController> {
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12)),
                   ),
-                  child: Text(TTexts.export.tr, // 🔥 Đã đổi TTexts
+                  child: Text(TTexts.export.tr,
                       style: const TextStyle(
                           color: Colors.white, fontWeight: FontWeight.w600)),
                 ),

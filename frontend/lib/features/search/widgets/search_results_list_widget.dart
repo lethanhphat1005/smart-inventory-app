@@ -163,22 +163,18 @@ class SearchResultsListWidget extends GetView<TSearchController> {
 
                         final String displayType = tx.type.isNotEmpty
                             ? '${tx.type[0].toUpperCase()}${tx.type.substring(1).toLowerCase()}'
-                            : TTexts.na.tr; // ĐÃ FIX TỪ 'Unknown'
+                            : TTexts.na.tr;
 
-                        final String itemCountDisplay = tx.itemCount > 0
-                            ? tx.itemCount.toString()
-                            : (tx.items.isNotEmpty
-                                ? tx.items.length.toString()
-                                : '0');
+                        final String itemCountDisplay =
+                            "${tx.itemCount} ${TTexts.items.tr}";
 
                         return GestureDetector(
                           onTap: () => controller.handleItemTap(tx),
                           child: ReportTransactionCardWidget(
-                            transactionId: tx.transactionId ??
-                                TTexts.na.tr, // ĐÃ FIX TỪ 'N/A'
+                            transactionId: tx.transactionId ?? TTexts.na.tr,
                             dateStr: tx.createdAt != null
                                 ? '${tx.createdAt!.day}/${tx.createdAt!.month}/${tx.createdAt!.year}'
-                                : TTexts.na.tr, // ĐÃ FIX TỪ 'N/A'
+                                : TTexts.na.tr,
                             typeDisplay: displayType,
                             typeColor: themeColor,
                             leftBottomLabel: bottomLabel,

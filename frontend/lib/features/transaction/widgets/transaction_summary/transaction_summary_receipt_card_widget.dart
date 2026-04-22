@@ -13,31 +13,26 @@ class TransactionSummaryReceiptCardWidget
   @override
   Widget build(BuildContext context) {
     // ==============================================================
-    // LOGIC XỬ LÝ MÀU SẮC VÀ DẤU (+/-) THEO YÊU CẦU CỦA BẠN
+    // REPORT CARD INFO
     // ==============================================================
-    int totalQty = controller.transaction.items
-        .fold(0, (sum, item) => sum + item.quantity);
-    double totalPrice = controller.transaction.totalPrice;
-
-    String itemsDisplay = controller.itemsDisplay;
-    Color itemsColor = controller.itemsColor;
-    String moneyDisplay = controller.moneyDisplay;
-    Color moneyColor = controller.moneyColor;
+    String finalItemsDisplay = controller.itemsDisplay;
+    Color finalItemsColor = controller.itemsColor;
+    String finalMoneyDisplay = controller.moneyDisplay;
+    Color finalMoneyColor = controller.moneyColor;
 
     if (controller.isOutbound) {
-      // Outbound (Xuất): Số lượng trừ đi (Đỏ), Tiền thu về (Xanh)
-      itemsDisplay = '- $totalQty';
-      itemsColor = AppColors.stockOut;
-      moneyDisplay = '+ \$${totalPrice.toStringAsFixed(2)}';
-      moneyColor = AppColors.stockIn;
+      // Outbound (Xuất): items (-) Đỏ, Tiền (+) Xanh
+      finalItemsDisplay = '- ${controller.itemsDisplay}';
+      finalItemsColor = AppColors.stockOut;
+      finalMoneyDisplay = '+ ${controller.moneyDisplay}';
+      finalMoneyColor = AppColors.stockIn;
     } else if (controller.isInbound) {
-      // Inbound (Nhập): Số lượng tăng lên (Xanh), Tiền chi ra (Đỏ)
-      itemsDisplay = '+ $totalQty';
-      itemsColor = AppColors.stockIn;
-      moneyDisplay = '- \$${totalPrice.toStringAsFixed(2)}';
-      moneyColor = AppColors.stockOut;
+      // Inbound (Nhập): items (+) Xanh, Tiền (-) Đỏ
+      finalItemsDisplay = '+ ${controller.itemsDisplay}';
+      finalItemsColor = AppColors.stockIn;
+      finalMoneyDisplay = '- ${controller.moneyDisplay}';
+      finalMoneyColor = AppColors.stockOut;
     }
-    // ==============================================================
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -64,7 +59,7 @@ class TransactionSummaryReceiptCardWidget
           ),
           const SizedBox(height: 20),
 
-          // 2. NGÀY GIỜ VÀ LOẠI GIAO DỊCH (GỘP CHUNG)
+          // 2. NGÀY GIỜ VÀ LOẠI GIAO DỊCH
           _buildRow(
             TTexts.transactionDate.tr,
             controller.dateStr,
@@ -90,31 +85,28 @@ class TransactionSummaryReceiptCardWidget
           ),
           const SizedBox(height: 20),
 
-          // 3. THỐNG KÊ ITEM VÀ TỔNG TIỀN (GỘP CHUNG)
+          // 3. THỐNG KÊ ITEM VÀ TỔNG TIỀN
           _buildRow(
-            controller.isAdjustment
-                ? TTexts.modifiedProducts.tr
-                : TTexts.totalItemsTransaction.tr,
+            controller.bottomLabel,
             '',
             customLeftWidget: Row(
               children: [
-                Text(itemsDisplay, // Dùng biến logic mới
+                Text(finalItemsDisplay,
                     style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
-                        color: itemsColor)), // Dùng biến logic mới
-
+                        color: finalItemsColor)),
                 if (!controller.isAdjustment) ...[
                   const Text(" / ",
                       style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w400,
                           color: AppColors.subText)),
-                  Text(moneyDisplay, // Dùng biến logic mới
+                  Text(finalMoneyDisplay,
                       style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
-                          color: moneyColor)), // Dùng biến logic mới
+                          color: finalMoneyColor)),
                 ],
               ],
             ),
@@ -139,7 +131,8 @@ class TransactionSummaryReceiptCardWidget
                   style: const TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w500,
-                      color: AppColors.subText)),
+                      color: AppColors.subText,
+                      fontFamily: 'Poppins')),
               const SizedBox(height: 4),
               customLeftWidget ??
                   Text(
@@ -147,7 +140,8 @@ class TransactionSummaryReceiptCardWidget
                     style: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w400,
-                        color: AppColors.primaryText),
+                        color: AppColors.primaryText,
+                        fontFamily: 'Poppins'),
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
                   ),
