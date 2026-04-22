@@ -192,7 +192,7 @@ class StoreItemWidget extends StatelessWidget {
         style: TextStyle(
           color: color,
           fontWeight: FontWeight.w900,
-          fontSize: 20,
+          fontSize: AppSizes.p20,
         ),
       ),
     );

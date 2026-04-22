@@ -62,7 +62,7 @@ class EditStoreListWidgets extends StatelessWidget {
               vertical: AppSizes.p8,
             ),
             child: Text(
-              "Members (${controller.memberCount.value})",
+              "${TTexts.profileListMembers.tr} (${controller.memberCount.value})",
               style: const TextStyle(
                 fontSize: AppSizes.p16,
                 fontWeight: FontWeight.w700,

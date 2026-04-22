@@ -29,10 +29,10 @@ class EditStoreCardWidgets extends StatelessWidget {
             style: const TextStyle(
               color: AppColors.primary,
               fontWeight: FontWeight.w700,
-              fontSize: 18,
+              fontSize: AppSizes.p18,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSizes.p12),
           Obx(
             () => Container(
               padding: const EdgeInsets.all(AppSizes.p16),
@@ -46,8 +46,8 @@ class EditStoreCardWidgets extends StatelessWidget {
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.04),
-                    blurRadius: 18,
-                    offset: const Offset(0, 8),
+                    blurRadius: AppSizes.p18,
+                    offset: const Offset(0, AppSizes.p8),
                   ),
                 ],
               ),
@@ -56,14 +56,14 @@ class EditStoreCardWidgets extends StatelessWidget {
                 children: [
                   // ICON BOX
                   Container(
-                    width: 56,
-                    height: 56,
+                    width: AppSizes.p56,
+                    height: AppSizes.p56,
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(18),
+                      borderRadius: BorderRadius.circular(AppSizes.radius18),
                       gradient: const LinearGradient(
                         colors: [
-                          Color(0xFFFFE7D1),
-                          Color(0xFFFFD3A8),
+                          AppColors.lightOrange,
+                          AppColors.lightOrangeGradientEnd,
                         ],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
@@ -72,11 +72,11 @@ class EditStoreCardWidgets extends StatelessWidget {
                     child: const Icon(
                       Iconsax.shop_copy,
                       color: AppColors.primary,
-                      size: 28,
+                      size: AppSizes.p28,
                     ),
                   ),
 
-                  const SizedBox(width: 14),
+                  const SizedBox(width: AppSizes.p14),
 
                   // CONTENT
                   Expanded(
@@ -90,12 +90,12 @@ class EditStoreCardWidgets extends StatelessWidget {
                               child: Text(
                                 controller.storeName.value.isNotEmpty
                                     ? controller.storeName.value
-                                    : 'Store name',
+                                    : TTexts.profileStoreName.tr,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
                                   fontWeight: FontWeight.w700,
-                                  fontSize: 17,
+                                  fontSize: AppSizes.p17,
                                   color: AppColors.primaryText,
                                 ),
                               ),
@@ -103,31 +103,31 @@ class EditStoreCardWidgets extends StatelessWidget {
                           ],
                         ),
 
-                        const SizedBox(height: 10),
+                        const SizedBox(height: AppSizes.p10),
 
                         // ADDRESS
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const Padding(
-                              padding: EdgeInsets.only(top: 2),
+                              padding: EdgeInsets.only(top: AppSizes.p2),
                               child: Icon(
                                 Iconsax.location_copy,
-                                size: 15,
+                                size: AppSizes.p15,
                                 color: AppColors.subText,
                               ),
                             ),
-                            const SizedBox(width: 8),
+                            const SizedBox(width: AppSizes.p8),
                             Expanded(
                               child: Text(
                                 editStoreController
                                         .storeAddress.value.isNotEmpty
                                     ? editStoreController.storeAddress.value
-                                    : "Chưa có địa chỉ",
+                                    : TTexts.profileNoAddress.tr,
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
-                                  fontSize: 13,
+                                  fontSize: AppSizes.p13,
                                   height: 1.45,
                                   color: AppColors.subText,
                                 ),
@@ -136,21 +136,21 @@ class EditStoreCardWidgets extends StatelessWidget {
                           ],
                         ),
 
-                        const SizedBox(height: 8),
+                        const SizedBox(height: AppSizes.p8),
 
                         // MEMBERS
                         Row(
                           children: [
                             const Icon(
                               Iconsax.profile_2user_copy,
-                              size: 15,
+                              size: AppSizes.p15,
                               color: AppColors.subText,
                             ),
-                            const SizedBox(width: 8),
+                            const SizedBox(width: AppSizes.p8),
                             Text(
-                              "${editStoreController.memberCount.value} members",
+                              "${editStoreController.memberCount.value} ${TTexts.profileMembers.tr}",
                               style: const TextStyle(
-                                fontSize: 13,
+                                fontSize: AppSizes.p13,
                                 fontWeight: FontWeight.w500,
                                 color: AppColors.subText,
                               ),
@@ -158,7 +158,7 @@ class EditStoreCardWidgets extends StatelessWidget {
                           ],
                         ),
 
-                        const SizedBox(height: 14),
+                        const SizedBox(height: AppSizes.p14),
 
                         // EDIT BUTTON
                         Align(
@@ -172,8 +172,8 @@ class EditStoreCardWidgets extends StatelessWidget {
                             },
                             child: Container(
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 14,
-                                vertical: 8,
+                                horizontal: AppSizes.p14,
+                                vertical: AppSizes.p8,
                               ),
                               decoration: BoxDecoration(
                                 color: AppColors.primary,
@@ -181,8 +181,8 @@ class EditStoreCardWidgets extends StatelessWidget {
                                 boxShadow: [
                                   BoxShadow(
                                     color: AppColors.primary.withOpacity(0.18),
-                                    blurRadius: 12,
-                                    offset: const Offset(0, 4),
+                                    blurRadius: AppSizes.p12,
+                                    offset: const Offset(0, AppSizes.p4),
                                   ),
                                 ],
                               ),
@@ -191,15 +191,15 @@ class EditStoreCardWidgets extends StatelessWidget {
                                 children: [
                                   const Icon(
                                     Iconsax.edit_2_copy,
-                                    size: 14,
+                                    size: AppSizes.p14,
                                     color: AppColors.whiteText,
                                   ),
-                                  const SizedBox(width: 6),
+                                  const SizedBox(width: AppSizes.p6),
                                   Text(
                                     TTexts.editStoreBtnEdit.tr,
                                     style: const TextStyle(
                                       color: AppColors.whiteText,
-                                      fontSize: 13,
+                                      fontSize: AppSizes.p13,
                                       fontWeight: FontWeight.w700,
                                     ),
                                   ),

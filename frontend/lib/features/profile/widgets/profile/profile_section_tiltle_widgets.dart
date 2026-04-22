@@ -21,7 +21,7 @@ class ProfileSectionTitleWidget extends StatelessWidget {
         child: Text(
           title.tr.toUpperCase(),
           style: const TextStyle(
-            fontSize: 11,
+            fontSize: AppSizes.p11,
             letterSpacing: 1.2,
             fontWeight: FontWeight.bold,
             color: AppColors.subText,

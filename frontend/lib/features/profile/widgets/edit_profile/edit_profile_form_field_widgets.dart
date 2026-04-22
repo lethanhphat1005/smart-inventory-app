@@ -83,19 +83,19 @@ class EditProfileFormWidget extends GetView<ProfileEditController> {
                     : controller.getCurrentLocation,
                 avatar: controller.isLoadingAddress.value
                     ? const SizedBox(
-                        width: 14,
-                        height: 14,
+                        width: AppSizes.p14,
+                        height: AppSizes.p14,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(
                         Iconsax.gps_copy,
-                        size: 14,
+                        size: AppSizes.p14,
                         color: AppColors.primary,
                       ),
                 label: Text(
                   TTexts.useCurrentLocation.tr,
                   style: const TextStyle(
-                    fontSize: 12,
+                    fontSize: AppSizes.p12,
                     fontWeight: FontWeight.bold,
                   ),
                 ),

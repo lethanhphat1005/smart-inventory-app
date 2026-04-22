@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:frontend/features/profile/controllers/profile_controller.dart';
@@ -13,28 +14,28 @@ class ProfileInfoWidget extends StatelessWidget {
 
     return Column(
       children: [
-        const SizedBox(height: AppSizes.p12), //
+        const SizedBox(height: AppSizes.p12),
 
         // Hiển thị Tên
         Obx(() => Text(
               controller.fullName.value.isEmpty
-                  ? "Đang tải..."
+                  ? TTexts.loading.tr
                   : controller.fullName.value,
               style: const TextStyle(
-                fontSize: 20,
+                fontSize: AppSizes.p20,
                 fontWeight: FontWeight.bold,
                 color: AppColors.primaryText,
               ),
             )),
 
-        const SizedBox(height: 4),
+        const SizedBox(height: AppSizes.p4),
 
         // Hiển thị Email
         Obx(() => Text(
               controller.email.value,
               style: const TextStyle(
                 color: AppColors.subText,
-                fontSize: 14,
+                fontSize: AppSizes.p14,
               ),
             )),
       ],

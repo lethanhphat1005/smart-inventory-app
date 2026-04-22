@@ -55,7 +55,8 @@ class _TPhoneFormFieldWidgetState extends State<TPhoneFormFieldWidget> {
     if (!widget.enabled) {
       borderColor = Colors.transparent;
     } else if (_focusNode.hasFocus) {
-      borderColor = isValid ? Colors.green : AppColors.primary;
+      borderColor =
+          isValid ? AppColors.toastSuccessGradientStart : AppColors.primary;
     } else {
       borderColor = Colors.grey.shade300;
     }
@@ -157,11 +158,8 @@ class _TPhoneFormFieldWidgetState extends State<TPhoneFormFieldWidget> {
               ),
               suffixIcon: (hasText && widget.enabled)
                   ? IconButton(
-                      icon: const Icon(
-                        Icons.cancel,
-                        size: AppSizes.p20,
-                        color: Colors.grey,
-                      ),
+                      icon: const Icon(Icons.cancel,
+                          size: AppSizes.p20, color: AppColors.lightGreyBorder),
                       onPressed: () {
                         widget.controller.clear();
                         widget.onChanged("");
@@ -188,7 +186,7 @@ class _TPhoneFormFieldWidgetState extends State<TPhoneFormFieldWidget> {
             child: Text(
               TTexts.editPhoneNumberInvalid.tr,
               style: const TextStyle(
-                color: Colors.red,
+                color: AppColors.alertText,
                 fontSize: AppSizes.p12,
                 fontFamily: 'Poppins',
               ),

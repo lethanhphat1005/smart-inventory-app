@@ -61,7 +61,7 @@ class TTexts {
   static const String activeFilters = "active_filters";
   static const String userLabel = "user_label";
   static const String me = "me";
-  static const String resultsFound = "results found";
+  static const String resultsFound = "results_found";
 
   // -- Network Error Dialog
   static const String netErrorTitle = "net_error_title";
@@ -131,7 +131,7 @@ class TTexts {
   static const String rememberMe = "remember_me";
   static const String forgotPassword = "forgot_password";
   static const String loginBtn = "login_btn";
-  static const String loggingIn = "logging";
+  static const String loggingIn = "logging_in";
   static const String continueWithGoogle = "continue_with_google";
   static const String loginErrorEmptyFieldsTitle =
       "login_error_empty_fields_title";
@@ -980,6 +980,17 @@ class TTexts {
   static const String itemFoundText = "item_found_text";
   static const String defaultUnit = "default_unit";
   static const String specificNoteHint = "specific_note_hint";
+  static const String profileNoAddress = 'profile_no_address';
+  static const String profileNoPhoneNumber = 'profile_no_phone_number';
+  static const String profileNoEmail = 'profile_no_email';
+  static const String profilePhoneNumberBottomSheet =
+      'profile_phone_number_bottom_sheet';
+  static const String profileEmailBottomSheet = 'profile_email_bottom_sheet';
+  static const String profileAddressBottomSheet =
+      'profile_address_bottom_sheet';
+  static const String profileMembers = 'profile_members';
+  static const String profileListMembers = 'profile_list_members';
+  static const String profileStoreName = 'profile_store_name';
 
   //--Edit profile
   static const String editTitle = 'edit_title';
