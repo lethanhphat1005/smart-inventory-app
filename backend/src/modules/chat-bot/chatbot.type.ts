@@ -1,4 +1,8 @@
+import type { OpenAI } from 'openai';
+
 export type DraftActionType = 'create_import' | 'create_export';
+
+export type ChatHistoryMessage = OpenAI.Chat.ChatCompletionMessageParam;
 
 export interface LLMProductItem {
   product_name: string;
@@ -44,4 +48,16 @@ export interface InventoryItemData {
   reorder_threshold?: number;
   reorderThreshold?: number;
   productPackage: InventoryPackageData;
+}
+
+export interface CartItem {
+  productPackageId: string;
+  displayName: string;
+  quantity: number;
+  unitPrice: number;
+}
+
+export interface CartSession {
+  type: DraftActionType;
+  items: CartItem[];
 }

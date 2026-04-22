@@ -47,12 +47,12 @@ export default defineConfig([
       semi: ["error", "always"], // Bắt buộc có dấu ; ở cuối statement
       quotes: ["error", "single", { avoidEscape: true }], // Bắt buộc dùng nháy đơn, trừ khi cần escape
 
-      // Cảnh báo nếu 1 dòng quá 80 ký tự
+      // Cảnh báo nếu 1 dòng quá 100 ký tự
       // ignoreUrls / ignoreStrings để đỡ quá gắt với URL hoặc string dài
       "max-len": [
         "warn",
         {
-          code: 80,
+          code: 100,
           ignoreUrls: true,
           ignoreStrings: true,
           ignoreTemplateLiterals: true,
