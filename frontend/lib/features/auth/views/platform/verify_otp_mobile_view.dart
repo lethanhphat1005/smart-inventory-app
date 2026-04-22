@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/features/auth/widgets/verify_otp/verify_otp_action_button_widget.dart';
 import 'package:frontend/features/auth/widgets/verify_otp/verify_otp_input_form_widget.dart';
 import 'package:frontend/features/auth/widgets/verify_otp/verify_otp_resend_code_text_widget.dart';
@@ -14,9 +15,8 @@ class VerifyOtpMobileView extends GetView<VerifyOtpController> {
   @override
   Widget build(BuildContext context) {
     return AuthStandardLayout(
-      title: 'Xác thực mã OTP',
-      subtitle:
-          'Mã xác thực đã được gửi đến địa chỉ email:\n${controller.email}',
+      title: TTexts.verifyOtpTitle.tr,
+      subtitle: '${TTexts.verifyOtpSubtitle.tr}${controller.email}',
       child: Padding(
         padding: EdgeInsets.only(
           bottom: MediaQuery.of(context).viewInsets.bottom,

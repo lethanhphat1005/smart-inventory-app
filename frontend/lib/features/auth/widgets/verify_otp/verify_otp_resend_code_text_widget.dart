@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/features/auth/controllers/verify_otp_controller.dart';
 import 'package:get/get.dart';
@@ -15,16 +16,16 @@ class VerifyOTPResendCodeTextWidget extends StatelessWidget {
         () => Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
-              'Chưa nhận được mã? ',
-              style: TextStyle(color: AppColors.subText, fontSize: 14),
+            Text(
+              TTexts.verifyOtpNotReceived.tr,
+              style: const TextStyle(color: AppColors.subText, fontSize: 14),
             ),
             GestureDetector(
               onTap: controller.canResend.value ? controller.resendOtp : null,
               child: Text(
                 controller.canResend.value
-                    ? 'Gửi lại ngay'
-                    : 'Gửi lại sau (${controller.countdown.value}s)',
+                    ? TTexts.verifyOtpResendNow.tr
+                    : '${TTexts.verifyOtpResendLater.tr} (${controller.countdown.value}s)',
                 style: TextStyle(
                   color: controller.canResend.value
                       ? AppColors.primary

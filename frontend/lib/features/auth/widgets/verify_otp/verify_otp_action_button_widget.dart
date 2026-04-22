@@ -16,10 +16,10 @@ class VerifyOTPButtonWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Nút Xác nhận
         Obx(() => TPrimaryButtonWidget(
-              text:
-                  controller.isLoading.value ? 'Đang xác thực...' : 'Xác nhận',
+              text: controller.isLoading.value
+                  ? TTexts.verifyOtpVerifying.tr
+                  : TTexts.verifyOtpVerifyBtn.tr,
               onPressed:
                   controller.isLoading.value ? null : controller.verifyOtp,
             )),
@@ -66,7 +66,7 @@ class VerifyOTPButtonWidget extends StatelessWidget {
 
         // Nút Quay lại
         TPrimaryButtonWidget(
-          text: 'Quay lại',
+          text: TTexts.backToLogin.tr,
           isOutlined: true,
           textColor: AppColors.primaryText,
           onPressed: () => Get.back(),

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/features/auth/controllers/verify_email_controller.dart';
 import 'package:frontend/routes/app_routes.dart';
 import 'package:get/get.dart';
@@ -53,19 +54,21 @@ class VerifyOtpController extends GetxController {
     if (!canResend.value) return;
 
     try {
-      FullScreenLoaderUtils.openLoadingDialog('Đang gửi lại mã...');
+      FullScreenLoaderUtils.openLoadingDialog(TTexts.verifyOtpResending.tr);
 
       await authProvider.sendResetPasswordEmail(email);
 
       FullScreenLoaderUtils.stopLoading();
       TSnackbarsWidget.success(
-          title: 'Thành công',
-          message: 'Mã OTP mới đã được gửi đến email của bạn.');
+          title: TTexts.verifyOtpResendSuccessTitle.tr,
+          message: TTexts.verifyOtpResendSuccessMessage.tr);
 
       startTimer();
     } catch (e) {
       FullScreenLoaderUtils.stopLoading();
-      TSnackbarsWidget.error(title: 'Lỗi', message: 'Không thể gửi lại mã: $e');
+      TSnackbarsWidget.error(
+          title: TTexts.verifyOtpErrorTitle.tr,
+          message: TTexts.verifyOtpResendFailed.tr);
     }
   }
 
@@ -74,14 +77,15 @@ class VerifyOtpController extends GetxController {
 
     if (otp.isEmpty || otp.length < 8) {
       TSnackbarsWidget.error(
-          title: 'Lỗi', message: 'Vui lòng nhập đủ 8 chữ số mã OTP.');
+          title: TTexts.verifyOtpErrorTitle.tr,
+          message: TTexts.verifyOtpErrorIncomplete.tr);
       return;
     }
 
     isLoading.value = true;
 
     try {
-      FullScreenLoaderUtils.openLoadingDialog('Đang xác thực mã OTP...');
+      FullScreenLoaderUtils.openLoadingDialog(TTexts.verifyOtpVerifying.tr);
 
       await authProvider.verifyRecoveryOtp(email: email, otp: otp);
 
@@ -92,8 +96,8 @@ class VerifyOtpController extends GetxController {
       FullScreenLoaderUtils.stopLoading();
 
       TSnackbarsWidget.error(
-        title: 'Xác thực thất bại',
-        message: 'Mã OTP không chính xác hoặc đã hết hạn. Vui lòng thử lại.',
+        title: TTexts.verifyOtpFailedTitle.tr,
+        message: TTexts.verifyOtpFailedMessage.tr,
       );
     } finally {
       isLoading.value = false;
