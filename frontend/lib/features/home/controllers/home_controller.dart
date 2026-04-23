@@ -211,26 +211,55 @@ class HomeController extends GetxController with TErrorHandler {
   // ====================================
   // CÁC HÀM DOANH THU & BIỂU ĐỒ
   // ====================================
+
   Map<String, double> _calculateAxisLimits(List<double> values) {
-    if (values.isEmpty) return {'min': -1.0, 'max': 4.0, 'interval': 1.25};
+    // Giá trị mặc định khi chưa có dữ liệu
+    if (values.isEmpty || values.every((v) => v == 0)) {
+      return {'min': -10.0, 'max': 40.0, 'interval': 10.0};
+    }
+
     double minVal = values.reduce(min);
     double maxVal = values.reduce(max);
+
+    // Luôn giữ mốc 0 để làm điểm neo trực quan
     if (minVal > 0) minVal = 0;
     if (maxVal < 0) maxVal = 0;
-    double amplitude = (maxVal - minVal).abs();
-    if (amplitude == 0) amplitude = 1.0;
-    double padding = amplitude * 0.1;
-    double finalMin = (minVal - padding).floorToDouble();
-    double tempMax = (maxVal + padding).ceilToDouble();
-    double range = tempMax - finalMin;
-    double interval = (range / 4).ceilToDouble();
-    double finalMax = finalMin + (interval * 4);
+
+    double rawRange = maxVal - minVal;
+    // Chia làm 4 khoảng để tạo ra 5 đường kẻ ngang
+    double roughInterval = rawRange / 4;
+
+    // Tìm magnitude (bậc của số: 1, 10, 100, 1000...)
+    double magnitude = pow(10, (log(roughInterval) / ln10).floor()).toDouble();
+    double normalized = roughInterval / magnitude;
+
+    // Chọn bước nhảy "đẹp" gần nhất
+    double niceStep;
+    if (normalized < 1.5) {
+      niceStep = 1;
+    } else if (normalized < 3) {
+      niceStep = 2;
+    } else if (normalized < 7) {
+      niceStep = 5;
+    } else {
+      niceStep = 10;
+    }
+    double interval = niceStep * magnitude;
+
+    // Căn chỉnh Min và Max theo Interval
+    double finalMin = (minVal / interval).floor() * interval;
+    double finalMax = (maxVal / interval).ceil() * interval;
+
+    // Đảm bảo biên độ luôn đủ 4 khoảng để grid không bị thưa quá
+    if ((finalMax - finalMin) / interval < 4) {
+      finalMax = finalMin + (interval * 4);
+    }
+
     return {'min': finalMin, 'max': finalMax, 'interval': interval};
   }
 
   List<FlSpot> get lineChartSpots {
     final today = DateTime.now();
-
     Map<int, double> buckets = {};
     for (int i = 0; i <= 24; i += 2) {
       buckets[i] = 0.0;
@@ -242,7 +271,14 @@ class HomeController extends GetxController with TErrorHandler {
       if (d.year == today.year &&
           d.month == today.month &&
           d.day == today.day) {
-        final amt = t.totalPrice / 1000;
+        // LOGIC DÒNG TIỀN: Bán (+) / Nhập (-) / Điều chỉnh (0)
+        double amt = t.totalPrice;
+        if (t.type.toLowerCase() == 'import') {
+          amt = -amt;
+        } else if (t.type.toLowerCase() == 'adjustment') {
+          amt = 0.0;
+        }
+
         final bucketHour = (d.hour ~/ 2) * 2;
         buckets[bucketHour] = (buckets[bucketHour] ?? 0) + amt;
       }
@@ -255,12 +291,8 @@ class HomeController extends GetxController with TErrorHandler {
     }
 
     if (spots.isEmpty) {
-      spots.add(const FlSpot(0.0, 0.0));
-      spots.add(const FlSpot(2.0, 0.0));
-    } else if (spots.length == 1) {
-      spots.insert(0, const FlSpot(0.0, 0.0));
+      spots.addAll([const FlSpot(0, 0), const FlSpot(2, 0)]);
     }
-
     return spots;
   }
 
@@ -280,7 +312,14 @@ class HomeController extends GetxController with TErrorHandler {
 
       if (d.isAfter(startOfThisWeek.subtract(const Duration(seconds: 1))) &&
           d.isBefore(startOfThisWeek.add(const Duration(days: 7)))) {
-        daily[d.weekday] = (daily[d.weekday] ?? 0) + (t.totalPrice / 1000);
+        double amt = t.totalPrice / 1000;
+        if (t.type.toLowerCase() == 'import') {
+          amt = -amt;
+        } else if (t.type.toLowerCase() == 'adjustment') {
+          amt = 0.0;
+        }
+
+        daily[d.weekday] = (daily[d.weekday] ?? 0) + amt;
       }
     }
     return daily.values.toList();
@@ -299,7 +338,7 @@ class HomeController extends GetxController with TErrorHandler {
 
   double _calculateChange(double current, double previous) {
     if (previous == 0) return current > 0 ? 100.0 : 0.0;
-    return ((current - previous) / previous) * 100;
+    return ((current - previous) / previous.abs()) * 100;
   }
 
   double _sumRevenueByDate(DateTime date) {
@@ -307,7 +346,16 @@ class HomeController extends GetxController with TErrorHandler {
       if (t.createdAt == null) return false;
       final d = t.createdAt!.toLocal();
       return d.year == date.year && d.month == date.month && d.day == date.day;
-    }).fold(0.0, (sum, t) => sum + t.totalPrice);
+    }).fold(0.0, (sum, t) {
+      double amt = t.totalPrice;
+      if (t.type.toLowerCase() == 'import') {
+        amt = -amt;
+      } else if (t.type.toLowerCase() == 'adjustment') {
+        amt = 0.0;
+      }
+
+      return sum + amt;
+    });
   }
 
   double _sumRevenueByWeek(int weeksAgo) {
@@ -321,7 +369,16 @@ class HomeController extends GetxController with TErrorHandler {
               .toLocal()
               .isAfter(start.subtract(const Duration(seconds: 1))) &&
           t.createdAt!.toLocal().isBefore(end);
-    }).fold(0.0, (sum, t) => sum + t.totalPrice);
+    }).fold(0.0, (sum, t) {
+      double amt = t.totalPrice;
+      if (t.type.toLowerCase() == 'import') {
+        amt = -amt;
+      } else if (t.type.toLowerCase() == 'adjustment') {
+        amt = 0.0;
+      }
+
+      return sum + amt;
+    });
   }
 
   // ====================================

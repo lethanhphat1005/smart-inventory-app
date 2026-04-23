@@ -90,13 +90,34 @@ class _HomeRevenueLineChartWidgetState extends State<HomeRevenueLineChartWidget>
                 leftTitles: AxisTitles(
                   sideTitles: SideTitles(
                     showTitles: true,
-                    interval: limits['interval'],
+                    interval: limits[
+                        'interval'], // Sử dụng interval động từ Controller
                     reservedSize: 45,
-                    getTitlesWidget: (v, _) => Text(
-                      '${v.toStringAsFixed(1)}k\$',
-                      style: const TextStyle(
-                          fontSize: 10, color: AppColors.softGrey),
-                    ),
+                    getTitlesWidget: (value, meta) {
+                      // Logic định dạng nhãn thông minh
+                      String label;
+                      double absVal = value.abs();
+
+                      if (absVal >= 1000000) {
+                        label = '${(value / 1000000).toStringAsFixed(1)}M\$';
+                      } else if (absVal >= 1000) {
+                        label = '${(value / 1000).toStringAsFixed(1)}k\$';
+                      } else {
+                        label = '${value.toInt()}\$';
+                      }
+
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: Text(
+                          label,
+                          style: const TextStyle(
+                            color: AppColors.subText,
+                            fontSize: 10,
+                            fontFamily: 'Poppins',
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ),
                 bottomTitles: AxisTitles(
@@ -111,19 +132,17 @@ class _HomeRevenueLineChartWidgetState extends State<HomeRevenueLineChartWidget>
 
               borderData: FlBorderData(show: false),
 
-              // LINE
+              // Line
               lineBarsData: [
                 LineChartBarData(
                   spots: animatedSpots,
-                  isCurved: false, // giữ đoạn thẳng rõ ràng
+                  isCurved: false,
                   color: AppColors.primary,
                   barWidth: 3,
                   dotData: const FlDotData(show: false),
                 ),
               ],
             ),
-
-            // 🔥 QUAN TRỌNG: tắt animation của fl_chart để xài animation gốc của bạn
             duration: Duration.zero,
           );
         },
@@ -131,7 +150,7 @@ class _HomeRevenueLineChartWidgetState extends State<HomeRevenueLineChartWidget>
     });
   }
 
-  // 🔥 CORE LOGIC: vẽ từng đoạn (Giữ nguyên 100% code của bạn)
+  // Core Logic Animation
   List<FlSpot> _buildSegmentSpots(List<FlSpot> spots, double progress) {
     final totalSegments = spots.length - 1;
     final segmentProgress = progress * totalSegments;
@@ -143,10 +162,8 @@ class _HomeRevenueLineChartWidgetState extends State<HomeRevenueLineChartWidget>
       final end = spots[i + 1];
 
       if (segmentProgress >= i + 1) {
-        // đoạn đã xong
         result.add(start);
       } else if (segmentProgress >= i) {
-        // đoạn đang vẽ
         final t = segmentProgress - i;
 
         final easedT = Curves.easeInOut.transform(t);
@@ -162,7 +179,6 @@ class _HomeRevenueLineChartWidgetState extends State<HomeRevenueLineChartWidget>
       }
     }
 
-    // 🔥 đảm bảo full khi xong
     if (progress == 1) {
       return List.from(spots);
     }
@@ -170,7 +186,7 @@ class _HomeRevenueLineChartWidgetState extends State<HomeRevenueLineChartWidget>
     return result;
   }
 
-  // ĐÃ FIX: Tự động vẽ các mốc 00:00, 06:00, 12:00, 18:00
+  //  Tự động vẽ các mốc 00:00, 06:00, 12:00, 18:00
   Widget _bottomTitles(double val, TitleMeta meta) {
     if (val % 6 == 0 && val <= 24) {
       // Đổi 24h thành 00h cho chuẩn định dạng đồng hồ
