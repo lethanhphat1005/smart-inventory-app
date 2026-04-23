@@ -98,6 +98,7 @@ flutter:
     - assets/images/core/
     - assets/images/profile/
     - assets/images/onboarding/
+    - assets/images/chatbot/
     - assets/mock_data/
 
   # Fonts phải nằm lùi vào 2 space bên trong flutter:

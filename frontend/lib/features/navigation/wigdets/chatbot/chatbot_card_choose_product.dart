@@ -25,93 +25,91 @@ class ChatCardChooseProduct extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 20),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
-            bottomRight: Radius.circular(20),
-            bottomLeft: Radius.circular(6),
-          ),
-          border: Border.all(color: AppColors.primary.withOpacity(0.4)),
+          borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: AppColors.primary.withOpacity(0.06),
-              blurRadius: 16,
-              offset: const Offset(0, 6),
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 24,
+              offset: const Offset(0, 8),
             )
           ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
             // Tiêu đề
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.08),
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(20)),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Iconsax.task_square,
-                      color: AppColors.primary, size: 20),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      message.text,
-                      style: const TextStyle(
-                        fontSize: 14.5,
-                        color: AppColors.primaryText,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ],
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              child: Text(
+                message.text,
+                style: const TextStyle(
+                  fontSize: 14.5,
+                  color: AppColors.primaryText,
+                  fontWeight: FontWeight.w500,
+                  fontFamily: 'Poppins',
+                ),
               ),
             ),
-            const Divider(height: 1, color: AppColors.divider),
 
-            // Danh sách sản phẩm cho phép click
+            // Danh sách Option
             ListView.separated(
-              padding: EdgeInsets.zero,
+              padding: const EdgeInsets.only(bottom: 8),
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: items.length,
               separatorBuilder: (_, __) =>
-                  const Divider(height: 1, color: AppColors.divider),
+                  Divider(height: 1, color: Colors.grey.shade100, indent: 56),
               itemBuilder: (context, index) {
                 final item = items[index];
-                final pkg = item['productPackage'];
-                final displayName = pkg?['displayName'] ?? 'Không tên';
-                final stock = item['quantity'] ?? 0;
-                final unit = pkg?['unit']?['name'] ?? '';
+                final pkg = item['productPackage'] ?? item;
+
+                final displayName = pkg['displayName'] ??
+                    pkg['product']?['name'] ??
+                    'Unknown product';
+                final quantity = item['quantity'] ?? pkg['quantity'] ?? 0;
+                final unit = pkg['unit']?['name'] ?? '';
+
+                // Lấy threshold từ backend
+                final threshold = int.tryParse(
+                        item['reorder_threshold']?.toString() ??
+                            item['reorderThreshold']?.toString() ??
+                            pkg['reorder_threshold']?.toString() ??
+                            '10') ??
+                    10;
+
+                // LOGIC 3 MÀU
+                Color stockColor;
+                String stockText;
+
+                if (quantity == 0) {
+                  stockColor = AppColors.stockOut; // Đỏ
+                  stockText = "Out of stock";
+                } else if (quantity <= threshold) {
+                  stockColor = AppColors.primary; // Cam gốc cảnh báo
+                  stockText = "Low: $quantity $unit".trim();
+                } else {
+                  stockColor = AppColors.stockIn; // Xanh lá
+                  stockText = "Left: $quantity $unit".trim();
+                }
 
                 return InkWell(
                   onTap: () {
-                    if (message.isResolved) return; // Tránh bấm nhiều lần
+                    if (message.isResolved) return;
+                    final originalIntent = data['originalIntent'];
+                    final qty = data['quantity'] ?? 1;
 
-                    final originalIntent = data[
-                        'originalIntent']; // 'create_import' hoặc 'create_export'
-                    final quantity = data['quantity'] ?? 1;
-
-                    // Ghép thành câu lệnh hoàn chỉnh
                     String command = "";
                     if (originalIntent == 'get_product_info') {
-                      command =
-                          "Xem thông tin chính xác sản phẩm \"$displayName\"";
+                      command = "Check exact info of \"$displayName\"";
                     } else if (originalIntent == 'create_import') {
-                      command =
-                          "Yêu cầu nhập $quantity sản phẩm mang tên chính xác là \"$displayName\"";
+                      command = "Import $qty of exactly \"$displayName\"";
                     } else if (originalIntent == 'create_export') {
-                      command =
-                          "Yêu cầu xuất $quantity sản phẩm mang tên chính xác là \"$displayName\"";
+                      command = "Export $qty of exactly \"$displayName\"";
                     }
 
-                    // Vô hiệu hóa thẻ này
                     message.isResolved = true;
                     controller.messages.refresh();
-
-                    // Đưa câu lệnh lên ô nhập và tự động gửi
                     controller.textController.text = command;
                     controller.sendMessage();
                   },
@@ -120,14 +118,19 @@ class ChatCardChooseProduct extends StatelessWidget {
                         horizontal: 16, vertical: 12),
                     child: Row(
                       children: [
+                        // Icon Box thay vì hình vuông nhạt
                         Container(
-                          padding: const EdgeInsets.all(8),
+                          padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: Colors.grey.shade100,
-                            borderRadius: BorderRadius.circular(8),
+                            color: const Color(0xFFF8F9FA),
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.grey.shade200),
                           ),
-                          child: const Icon(Iconsax.box,
-                              size: 20, color: AppColors.subText),
+                          child: Icon(Iconsax.box,
+                              size: 18,
+                              color: message.isResolved
+                                  ? Colors.grey
+                                  : AppColors.subText),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
@@ -137,25 +140,31 @@ class ChatCardChooseProduct extends StatelessWidget {
                               Text(
                                 displayName,
                                 style: TextStyle(
-                                  fontSize: 14.5,
+                                  fontSize: 14,
                                   color: message.isResolved
                                       ? Colors.grey
                                       : AppColors.primaryText,
-                                  fontWeight: FontWeight.w600,
+                                  fontWeight: FontWeight.w500,
+                                  fontFamily: 'Poppins',
                                 ),
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                "Tồn kho: $stock $unit",
-                                style: const TextStyle(
-                                    fontSize: 12, color: AppColors.subText),
+                                stockText,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: message.isResolved
+                                      ? Colors.grey
+                                      : stockColor,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
                             ],
                           ),
                         ),
                         Icon(
                           Iconsax.arrow_right_3,
-                          size: 18,
+                          size: 16,
                           color: message.isResolved
                               ? Colors.grey.shade300
                               : AppColors.primary,

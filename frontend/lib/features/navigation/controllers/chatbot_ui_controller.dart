@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/utils/error_handler_utils.dart';
+import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/features/navigation/providers/chatbot_provider.dart';
 import 'package:get/get.dart';
 import 'package:frontend/features/navigation/models/chat_message_model.dart';
@@ -65,14 +66,57 @@ class ChatbotUiController extends GetxController with TErrorHandler {
   }
 
   void resetChat() {
-    messages.clear();
-    // Thêm lại câu chào mừng mặc định
-    //  messages.add(ChatMessage(text: TTexts.chatbotWelcomeMsg.tr, isUser: false));
-
-    // (Tuỳ chọn) Nếu muốn đổi store thì tự động đóng cửa sổ chat lại
-    if (isChatOpen.value) {
-      isChatOpen.value = false;
-    }
+    Get.dialog(
+      AlertDialog(
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: const Text(
+          "Reset Conversation",
+          style: TextStyle(
+              fontFamily: 'Poppins', fontWeight: FontWeight.w600, fontSize: 18),
+        ),
+        content: const Text(
+          "Are you sure you want to clear all messages? This action cannot be undone.",
+          style: TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 14,
+              color: AppColors.primaryText),
+        ),
+        actionsPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        actions: [
+          // Nút Cancel
+          TextButton(
+            onPressed: () => Get.back(),
+            child: const Text("Cancel",
+                style: TextStyle(
+                    color: AppColors.subText,
+                    fontFamily: 'Poppins',
+                    fontWeight: FontWeight.w500)),
+          ),
+          // Nút Reset (Màu cam Primary)
+          ElevatedButton(
+            onPressed: () {
+              messages.clear(); // Xóa sạch tin nhắn
+              Get.back(); // Đóng Dialog
+              Get.back(); // Out ra khỏi Chatbot Window (như bạn yêu cầu)
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            ),
+            child: const Text("Reset",
+                style: TextStyle(
+                    fontFamily: 'Poppins', fontWeight: FontWeight.w600)),
+          ),
+        ],
+      ),
+    );
   }
 
   // Mới (Khớp với Backend 2 pha):
