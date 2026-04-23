@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/state/controllers/barcode_action_controller.dart';
 import 'package:frontend/core/ui/layouts/t_barcode_scanner_layout.dart';
 import 'package:frontend/routes/app_routes.dart';
 import 'package:get/get.dart';
@@ -47,9 +48,10 @@ class HomeQuickActionsWidget extends StatelessWidget {
                 ),
                 onTap: () {
                   Get.to(() => TBarcodeScannerLayout(
-                        title: TTexts.homeScanBarcode.tr,
                         onScanned: (code) {
-                          Get.back();
+                          // Gọi controller xử lý logic điều hướng/bottom sheet
+                          BarcodeActionController.instance
+                              .handleScannedBarcode(code);
                         },
                       ));
                 },

@@ -487,6 +487,18 @@ class TSearchController extends GetxController with TErrorHandler {
     }
   }
 
+  void openBarcodeScanner() {
+    Get.to(() => TBarcodeScannerLayout(
+          onScanned: (code) {
+            // Đóng scanner trước khi hiện kết quả
+            // Get.back();
+
+            // FIX: Gọi logic xử lý tập trung
+            BarcodeActionController.instance.handleScannedBarcode(code);
+          },
+        ));
+  }
+
   void openScanner() {
     Get.to(
       () => TBarcodeScannerLayout(

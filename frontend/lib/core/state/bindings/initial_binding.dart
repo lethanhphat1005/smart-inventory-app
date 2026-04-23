@@ -15,8 +15,8 @@ class InitialBinding extends Bindings {
     // Get.put(ProfileAssignsRoleController(), permanent: true);
 
     Get.put(BarcodeScannerController(), permanent: true);
-    Get.lazyPut<BarcodeActionController>(() => BarcodeActionController(),
-        fenix: true);
+    Get.put(BarcodeActionController(), permanent: true);
+    
     Get.put(NetworkController(), permanent: true);
   }
 }

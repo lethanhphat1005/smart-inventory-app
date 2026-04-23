@@ -1160,4 +1160,25 @@ class TTexts {
   static const String exportExcelAddress = "export_excel_address";
   static const String exportExcelExportedBy = "export_excel_exported_by";
   static const String exportExcelExportTime = "export_excel_export_time";
+
+  // -- Barcode Scanner Bottom Sheets 
+  static const String barcodeSimilarTitle = "barcode_similar_title";
+  static const String barcodeSimilarDesc = "barcode_similar_desc";
+  static const String barcodeLinkingLoader = "barcode_linking_loader";
+  static const String barcodeLinkSuccessMsg = "barcode_link_success_msg";
+  static const String barcodeLinkConflictError = "barcode_link_conflict_error";
+  static const String barcodeCreateNewBtn = "barcode_create_new_btn";
+  
+  static const String barcodeNoDataTitle = "barcode_no_data_title";
+  static const String barcodeNoDataDesc = "barcode_no_data_desc";
+  static const String barcodeAddNewBtn = "barcode_add_new_btn";
+  
+  static const String barcodePrefillTitle = "barcode_prefill_title";
+  static const String barcodePrefillDesc = "barcode_prefill_desc";
+  static const String barcodeAddToStoreBtn = "barcode_add_to_store_btn";
+  static const String barcodeUnknown = "barcode_unknown";
+  
+  static const String barcodeCheckingLoader = "barcode_checking_loader";
+  static const String barcodeScanErrorTitle = "barcode_scan_error_title";
+  static const String barcodeCopied = "barcode_copied";
 }

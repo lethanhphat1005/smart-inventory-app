@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:get/get.dart';
 import 'package:frontend/core/ui/widgets/t_bottom_sheet_widget.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
@@ -16,47 +18,87 @@ class TBarcodeCandidateBottomSheet {
     final InventoryProvider provider = InventoryProvider();
 
     TBottomSheetWidget.show(
-      title: 'Sản phẩm tương tự',
+      title: TTexts.barcodeSimilarTitle.tr,
       child: Padding(
         padding: const EdgeInsets.only(bottom: AppSizes.p24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Hệ thống tìm thấy sản phẩm có thể khớp với mã vạch này. Chọn một sản phẩm để gán mã, hoặc tạo mới.',
-              style: TextStyle(
+            Text(
+              TTexts.barcodeSimilarDesc.tr,
+              style: const TextStyle(
                   color: AppColors.subText,
                   fontSize: AppSizes.p14,
                   fontFamily: 'Poppins'),
             ),
+            const SizedBox(height: AppSizes.p12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('${TTexts.barcodeLabel.tr}: $barcode',
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primaryText)),
+                  InkWell(
+                    onTap: () {
+                      Clipboard.setData(ClipboardData(text: barcode));
+                      TSnackbarsWidget.success(
+                          title: TTexts.successTitle.tr,
+                          message: TTexts.barcodeCopied.tr);
+                    },
+                    child: const Icon(Icons.copy_rounded,
+                        color: AppColors.primary, size: 18),
+                  ),
+                ],
+              ),
+            ),
             const SizedBox(height: AppSizes.p16),
             ConstrainedBox(
-              constraints: BoxConstraints(maxHeight: Get.height * 0.4),
+              constraints: BoxConstraints(maxHeight: Get.height * 0.35),
               child: ListView.separated(
                 shrinkWrap: true,
+                physics: const BouncingScrollPhysics(),
                 itemCount: candidates.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 8),
+                separatorBuilder: (_, __) => const SizedBox(height: 12),
                 itemBuilder: (context, index) {
                   final candidate = candidates[index]['productPackage'];
                   return Container(
                     decoration: BoxDecoration(
-                      border: Border.all(color: AppColors.divider),
-                      borderRadius: BorderRadius.circular(AppSizes.radius8),
+                      color: AppColors.white,
+                      border:
+                          Border.all(color: AppColors.primary.withOpacity(0.3)),
+                      borderRadius: BorderRadius.circular(AppSizes.radius12),
                     ),
                     child: ListTile(
-                      title: Text(candidate['displayName'] ?? '',
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 4),
+                      title: Text(
+                          candidate['displayName'] ?? TTexts.unknownProduct.tr,
                           style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontFamily: 'Poppins',
-                              fontSize: 14)),
-                      subtitle: Text('Giá: ${candidate['sellingPrice']} đ',
-                          style: const TextStyle(color: AppColors.primary)),
-                      trailing:
-                          const Icon(Icons.link, color: AppColors.subText),
+                              color: AppColors.primaryText,
+                              fontSize: 15)),
+                      subtitle: Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Text(
+                            '${TTexts.sellingPrice.tr}: ${candidate['sellingPrice']} \$',
+                            style: const TextStyle(
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.w500)),
+                      ),
+                      trailing: const Icon(Icons.link_rounded,
+                          color: AppColors.primary),
                       onTap: () async {
                         Get.back(); // Đóng Bottom Sheet
                         FullScreenLoaderUtils.openLoadingDialog(
-                            'Đang liên kết mã vạch...');
+                            TTexts.barcodeLinkingLoader.tr);
                         try {
                           await provider.confirmBarcodeMapping(
                             barcode: barcode,
@@ -70,14 +112,13 @@ class TBarcodeCandidateBottomSheet {
                             'package': candidate,
                           });
                           TSnackbarsWidget.success(
-                              title: 'Thành công',
-                              message: 'Đã liên kết mã vạch với sản phẩm này.');
+                              title: TTexts.successTitle.tr,
+                              message: TTexts.barcodeLinkSuccessMsg.tr);
                         } catch (e) {
                           FullScreenLoaderUtils.stopLoading();
                           TSnackbarsWidget.error(
-                              title: 'Lỗi',
-                              message:
-                                  'Mã vạch bị trùng hoặc kẹt ở sản phẩm khác.');
+                              title: TTexts.errorTitle.tr,
+                              message: TTexts.barcodeLinkConflictError.tr);
                         }
                       },
                     ),
@@ -85,13 +126,13 @@ class TBarcodeCandidateBottomSheet {
                 },
               ),
             ),
-            const SizedBox(height: AppSizes.p16),
+            const SizedBox(height: AppSizes.p24),
             SizedBox(
               width: double.infinity,
               child: OutlinedButton(
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: AppSizes.p16),
-                  side: const BorderSide(color: AppColors.primary),
+                  side: const BorderSide(color: AppColors.primary, width: 1.5),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(AppSizes.radius12)),
                 ),
@@ -105,8 +146,8 @@ class TBarcodeCandidateBottomSheet {
                     'freshBrand': prefill['brand'],
                   });
                 },
-                child: const Text('Tạo sản phẩm mới hoàn toàn',
-                    style: TextStyle(
+                child: Text(TTexts.barcodeCreateNewBtn.tr,
+                    style: const TextStyle(
                         color: AppColors.primary, fontWeight: FontWeight.bold)),
               ),
             )
