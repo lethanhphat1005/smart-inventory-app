@@ -7,6 +7,25 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:38888872312:android:5326c519e54a26fdba508d",
+        "android_client_info": {
+          "package_name": "com.fourmonkeysstudio.storix"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyABWzxYnCQM4DSSZFzhOXBP-zuxdBzN56k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:38888872312:android:4801deab2d620c37ba508d",
         "android_client_info": {
           "package_name": "com.group21.storix"
