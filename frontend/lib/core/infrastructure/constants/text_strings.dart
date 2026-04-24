@@ -445,6 +445,8 @@ class TTexts {
   static const String errorProductOrPackageIdMissing =
       "error_product_or_package_id_missing";
   static const String seeAllCategories = "see_all_categories";
+  static const String initialQuantityLabel = "initial_quantity_label";
+  static const String initialQuantityHint = "initial_quantity_hint";
 
   // -- Chatbot AI
   static const String chatbotName = "chatbot_name";

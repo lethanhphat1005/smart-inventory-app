@@ -23,6 +23,8 @@ class AuthStandardLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
+
     // Sử dụng AnnotatedRegion để ghi đè màu Status Bar riêng cho màn hình này
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light.copyWith(
@@ -37,7 +39,7 @@ class AuthStandardLayout extends StatelessWidget {
         body: SingleChildScrollView(
           child: Column(
             children: [
-              // 1. Nửa trên: Header động
+              // 1. Nửa trên: Header động (Ảnh nền tràn viền lên sát mép trên)
               AuthHeaderWidget(
                 title: title,
                 subtitle: subtitle,
@@ -58,7 +60,12 @@ class AuthStandardLayout extends StatelessWidget {
                     topRight: Radius.circular(AppSizes.radius16),
                   ),
                 ),
-                padding: const EdgeInsets.all(AppSizes.p24),
+                padding: EdgeInsets.fromLTRB(
+                  AppSizes.p24,
+                  AppSizes.p24,
+                  AppSizes.p24,
+                  AppSizes.p24 + bottomPadding, // Đẩy Form lên an toàn
+                ),
                 child: child, // Form truyền vào sẽ nằm ở đây
               ),
             ],

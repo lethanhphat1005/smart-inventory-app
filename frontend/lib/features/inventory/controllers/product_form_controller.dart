@@ -59,6 +59,8 @@ class ProductFormController extends GetxController with TErrorHandler {
   final TextEditingController importPriceController = TextEditingController();
   final TextEditingController salePriceController = TextEditingController();
   final TextEditingController thresholdController = TextEditingController();
+  final TextEditingController quantityController =
+      TextEditingController(text: '0');
 
   final RxList<UnitModel> allUnits = <UnitModel>[].obs;
   final RxString selectedUnitId = ''.obs;
@@ -596,6 +598,14 @@ class ProductFormController extends GetxController with TErrorHandler {
     return 0;
   }
 
+  int _getParsedQuantity() {
+    final text = quantityController.text.trim();
+    if (text.isEmpty) return 0;
+    final val = int.tryParse(text);
+    if (val != null && val >= 0) return val;
+    return 0; // Trả về 0 nếu nhập sai hoặc để trống
+  }
+
   // ==========================================
   // CORE API SAVE LOGICS
   // ==========================================
@@ -836,7 +846,7 @@ class ProductFormController extends GetxController with TErrorHandler {
           'sellingPrice': parsePrice(salePriceController.text),
         };
         final inventoryPayload = {
-          'quantity': 0,
+          'quantity': _getParsedQuantity(),
           'reorderThreshold': thresholdVal,
         };
 
@@ -1048,6 +1058,7 @@ class ProductFormController extends GetxController with TErrorHandler {
     packageDisplayNameController.dispose();
     packageVariantNameController.dispose();
     barcodeInputController.dispose();
+    quantityController.dispose();
     super.onClose();
   }
 }

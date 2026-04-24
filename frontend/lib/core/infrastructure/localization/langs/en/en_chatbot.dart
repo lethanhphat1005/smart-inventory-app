@@ -26,9 +26,9 @@ final Map<String, String> enChatbot = {
   TTexts.chatbotSuggestionSub:
       'Choose a suggestion or type your request below.',
   TTexts.chatbotPromptLowStock: 'What items are running low?',
-  TTexts.chatbotPromptCheckInfo: 'Check info: ',
-  TTexts.chatbotPromptImport: 'Create import: ',
-  TTexts.chatbotPromptExport: 'Create export: ',
+  TTexts.chatbotPromptCheckInfo: 'Check info',
+  TTexts.chatbotPromptImport: 'Create import',
+  TTexts.chatbotPromptExport: 'Create export',
   TTexts.chatbotConfirmImport: 'Confirm Import',
   TTexts.chatbotConfirmExport: 'Confirm Export',
   TTexts.chatbotResolved: '(Resolved)',

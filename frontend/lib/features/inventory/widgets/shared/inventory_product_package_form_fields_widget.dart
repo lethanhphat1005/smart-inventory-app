@@ -70,49 +70,90 @@ class InventoryProductPackageFormFieldsWidget
           ),
           const SizedBox(height: 24),
 
-          // 5. THRESHOLD (NGƯỠNG CẢNH BÁO) - ĐÃ TRẢ LẠI NHƯ CŨ
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Expanded(
-                flex: 2,
-                child: TTextFormFieldWidget(
-                  label: TTexts.reorderThresholdLabel.tr,
-                  hintText: TTexts.zero.tr,
-                  keyboardType: TextInputType.number,
-                  controller: controller.thresholdController,
-                  validator: (v) {
-                    if (v != null && v.trim().isNotEmpty) {
-                      final parsed = int.tryParse(v.trim());
-                      if (parsed == null) return TTexts.invalidNumber.tr;
-                      if (parsed <= 0) {
-                        return TTexts.thresholdMustBeGreaterThanZero.tr;
-                      }
-                    }
-                    return null;
-                  },
-                ),
-              ),
-              const SizedBox(width: 8),
-              Padding(
-                padding: const EdgeInsets.only(top: 24),
-                child: Tooltip(
-                  message: TTexts.leaveEmptyForNoLimit.tr,
-                  triggerMode: TooltipTriggerMode.tap,
-                  preferBelow: false,
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryText.withOpacity(0.9),
-                    borderRadius: BorderRadius.circular(8),
+          // 5. THRESHOLD & INITIAL QUANTITY
+          Obx(() {
+            final isEdit = controller.formMode.value == 'edit_package';
+
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // --- CỘT 1: THRESHOLD ---
+                Expanded(
+                  flex: 2,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: TTextFormFieldWidget(
+                          label: TTexts.reorderThresholdLabel.tr,
+                          hintText: TTexts.zero.tr,
+                          keyboardType: TextInputType.number,
+                          controller: controller.thresholdController,
+                          validator: (v) {
+                            if (v != null && v.trim().isNotEmpty) {
+                              final parsed = int.tryParse(v.trim());
+                              if (parsed == null) {
+                                return TTexts.invalidNumber.tr;
+                              }
+                              if (parsed <= 0) {
+                                return TTexts.thresholdMustBeGreaterThanZero.tr;
+                              }
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Padding(
+                        padding: const EdgeInsets.only(
+                            top: 8), // Chỉnh lại padding để icon cân bằng
+                        child: Tooltip(
+                          message: TTexts.leaveEmptyForNoLimit.tr,
+                          triggerMode: TooltipTriggerMode.tap,
+                          preferBelow: false,
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryText.withOpacity(0.9),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          textStyle: const TextStyle(
+                              color: Colors.white,
+                              fontFamily: 'Poppins',
+                              fontSize: 12),
+                          child: const Icon(Iconsax.info_circle_copy,
+                              color: AppColors.softGrey, size: 22),
+                        ),
+                      ),
+                    ],
                   ),
-                  textStyle: const TextStyle(
-                      color: Colors.white, fontFamily: 'Poppins', fontSize: 12),
-                  child: const Icon(Iconsax.info_circle_copy,
-                      color: AppColors.softGrey, size: 22),
                 ),
-              ),
-              const Expanded(flex: 1, child: SizedBox.shrink()),
-            ],
-          ),
+
+                // --- CỘT 2: INITIAL QUANTITY (CHỈ HIỆN KHI TẠO MỚI) ---
+                if (!isEdit) ...[
+                  const SizedBox(width: 16),
+                  Expanded(
+                    flex: 2,
+                    child: TTextFormFieldWidget(
+                      label: TTexts.initialQuantityLabel.tr,
+                      hintText: TTexts.initialQuantityHint.tr,
+                      keyboardType: TextInputType.number,
+                      controller: controller.quantityController,
+                      validator: (v) {
+                        if (v != null && v.trim().isNotEmpty) {
+                          final parsed = int.tryParse(v.trim());
+                          if (parsed == null || parsed < 0) {
+                            return TTexts.invalidNumber.tr;
+                          }
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                ] else ...[
+                  const Expanded(flex: 2, child: SizedBox.shrink()),
+                ]
+              ],
+            );
+          }),
           const SizedBox(height: 24),
 
           // 6. BARCODE INPUT

@@ -1,4 +1,3 @@
-// lib/core/ui/widgets/t_bottom_sheet_widget.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
@@ -31,7 +30,6 @@ class TBottomSheetWidget extends StatelessWidget {
       ),
       isScrollControlled: isScrollControlled,
       isDismissible: isDismissible,
-      // Thời gian trượt lên mặc định
       enterBottomSheetDuration: const Duration(milliseconds: 350),
       exitBottomSheetDuration: const Duration(milliseconds: 250),
       barrierColor: Colors.black.withOpacity(0.4),
@@ -40,12 +38,13 @@ class TBottomSheetWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // THÊM TWEEN ANIMATION Ở ĐÂY ĐỂ TẠO HIỆU ỨNG NẢY (BOUNCE)
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
+    final defaultPadding = padding ?? const EdgeInsets.all(AppSizes.p24);
+
     return TweenAnimationBuilder<double>(
-      tween: Tween<double>(begin: 80.0, end: 0.0), // Bắt đầu thấp hơn 80px
-      duration: const Duration(
-          milliseconds: 600), // Kéo dài hơn thời gian trượt của GetX
-      curve: Curves.easeOutBack, // ĐÂY LÀ ĐƯỜNG CONG TẠO ĐỘ NẢY (Overshoot)
+      tween: Tween<double>(begin: 80.0, end: 0.0),
+      duration: const Duration(milliseconds: 600),
+      curve: Curves.easeOutBack,
       builder: (context, value, childWidget) {
         return Transform.translate(
           offset: Offset(0, value),
@@ -53,7 +52,7 @@ class TBottomSheetWidget extends StatelessWidget {
         );
       },
       child: Container(
-        padding: padding ?? const EdgeInsets.all(AppSizes.p24),
+        padding: defaultPadding.add(EdgeInsets.only(bottom: bottomPadding)),
         decoration: const BoxDecoration(
           color: AppColors.background,
           borderRadius:
