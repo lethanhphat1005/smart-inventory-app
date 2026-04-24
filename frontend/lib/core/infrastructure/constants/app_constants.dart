@@ -3,7 +3,7 @@ class AppConstants {
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
     defaultValue: 'http://10.0.2.2:3000',
-    // defaultValue: 'http://192.168.1.14:3000',
+    // defaultValue: 'http://52.77.34.242',
   );
 
   static const String supabaseUrl = String.fromEnvironment(
