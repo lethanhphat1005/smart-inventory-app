@@ -1,4 +1,4 @@
-// src/config/firebase.config.ts
+import 'dotenv/config';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
@@ -8,9 +8,15 @@ export const initFirebaseAdmin = () => {
   // Sử dụng getApps().length thay vì admin.apps.length
   if (!getApps().length) {
     try {
-      // Đọc file serviceAccountKey.json từ thư mục gốc của project
-      const serviceAccountPath = join(process.cwd(), 'serviceAccountKey.json');
+      // Đọc file serviceAccountKey.json từ thư mục gốc của project (dev)
+      // Đọc file từ bind mount /secrets của instance chạy docker (prod)
+      const serviceAccountPath =
+        process.env.NODE_ENV === 'production'
+          ? process.env.FIREBASE_SERVICE_ACCOUNT_PATH ??
+            '/run/secrets/serviceAccountKey.json'
+          : join(process.cwd(), 'serviceAccountKey.json');
       const serviceAccount = JSON.parse(
+        // eslint-disable-next-line security/detect-non-literal-fs-filename
         readFileSync(serviceAccountPath, 'utf8'),
       );
 
