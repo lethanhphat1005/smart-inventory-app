@@ -124,7 +124,6 @@ class App extends StatelessWidget {
       title: 'Storix',
       debugShowCheckedModeBanner: false,
 
-      // Cấu hình Device Preview kết hợp tự động tắt bàn phím khi chạm ngoài màn hình
       // builder: (context, child) {
       //   final devicePreviewChild = DevicePreview.appBuilder(
       //     context,

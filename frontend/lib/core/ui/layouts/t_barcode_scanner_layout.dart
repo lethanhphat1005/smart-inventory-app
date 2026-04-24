@@ -1,5 +1,7 @@
-// lib/core/widgets/t_barcode_scanner_layout.dart
 import 'package:flutter/material.dart';
+import 'package:frontend/core/infrastructure/constants/text_strings.dart';
+import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:frontend/core/ui/widgets/t_custom_header_widget.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:get/get.dart';
@@ -44,13 +46,165 @@ class _TBarcodeScannerLayoutState extends State<TBarcodeScannerLayout>
     super.dispose();
   }
 
+  // === UI HIỂN THỊ POPUP NHẬP MÃ THỦ CÔNG (ĐÃ LÀM THANH THOÁT HƠN) ===
+  void _showManualEntryDialog() {
+    final TextEditingController manualController = TextEditingController();
+
+    Get.dialog(
+      Dialog(
+        backgroundColor: AppColors.background,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppSizes.radius16)),
+        child: Stack(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                  AppSizes.p20, AppSizes.p32, AppSizes.p20, AppSizes.p24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Icon
+                  Container(
+                    padding: const EdgeInsets.all(
+                        AppSizes.p12), // Giảm padding để icon bớt to
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.08),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.keyboard_alt_outlined,
+                        size: 32, color: AppColors.primary),
+                  ),
+                  const SizedBox(height: AppSizes.p16),
+
+                  // Tiêu đề
+                  Text(
+                    TTexts.manualBarcodeEntryTitle.tr,
+                    style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.primaryText,
+                        fontFamily: 'Poppins'),
+                  ),
+                  const SizedBox(height: 6),
+
+                  // Mô tả
+                  Text(
+                    TTexts.manualBarcodeEntryDesc.tr,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w400,
+                        color: AppColors.subText,
+                        fontFamily: 'Poppins',
+                        height: 1.3),
+                  ),
+                  const SizedBox(height: AppSizes.p24),
+
+                  // Ô Nhập Text (Mỏng và phẳng hơn)
+                  TextField(
+                    controller: manualController,
+                    keyboardType: TextInputType.number,
+                    autofocus: true,
+                    style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 2),
+                    textAlign: TextAlign.center,
+                    decoration: InputDecoration(
+                      isDense: true, // Ép mỏng Textfield
+                      hintText: TTexts.enterBarcodeHint.tr,
+                      hintStyle: const TextStyle(
+                          letterSpacing: 0,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w400,
+                          color: AppColors.softGrey),
+                      filled: true,
+                      fillColor: AppColors.surface, // Nền xám nhạt thay vì viền
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppSizes.radius12),
+                        borderSide: BorderSide.none, // Bỏ viền mặc định
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppSizes.radius12),
+                        borderSide: const BorderSide(
+                            color: AppColors.primary,
+                            width: 1.2), // Viền focus mảnh
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                          vertical: 14, horizontal: 16),
+                    ),
+                    onSubmitted: (val) {
+                      if (val.trim().isNotEmpty) {
+                        Get.back(); // Đóng dialog
+                        if (widget.onScanned != null) {
+                          widget.onScanned!(val.trim());
+                        }
+                      }
+                    },
+                  ),
+                  const SizedBox(height: AppSizes.p24),
+
+                  // Nút Xác nhận
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        elevation: 0, // Bỏ bóng để nút phẳng và hiện đại
+                        backgroundColor: AppColors.primary,
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 14), // Giảm độ dày nút
+                        shape: RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.circular(AppSizes.radius12)),
+                      ),
+                      onPressed: () {
+                        final val = manualController.text.trim();
+                        if (val.isNotEmpty) {
+                          Get.back(); // Đóng dialog
+                          if (widget.onScanned != null) widget.onScanned!(val);
+                        }
+                      },
+                      child: Text(
+                        TTexts.confirm.tr,
+                        style: const TextStyle(
+                            color: AppColors.whiteText,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Nút Tắt (X) ở góc trên
+            Positioned(
+              top: 8,
+              right: 8,
+              child: IconButton(
+                splashRadius: 20,
+                icon: const Icon(Icons.close,
+                    color: AppColors.softGrey, size: 20),
+                onPressed: () => Get.back(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ).then((_) {
+      // Khi đóng Dialog, mở lại camera
+      scannerController.resumeScan();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final scanAreaWidth = size.width * 0.75;
     final scanAreaHeight = size.height * 0.50;
     final scanAreaTop = (size.height - scanAreaHeight) / 2;
-    const double borderRadius = 40.0; // Độ cong của khung
+    const double borderRadius = 40.0;
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -63,7 +217,7 @@ class _TBarcodeScannerLayoutState extends State<TBarcodeScannerLayout>
                 scannerController.onDetect(capture, widget.onScanned),
           ),
 
-          // 2. Overlay & 4 góc cong (Vẽ chuẩn xác)
+          // 2. Overlay
           Positioned.fill(
             child: CustomPaint(
               painter: ScannerOverlayPainter(
@@ -74,9 +228,9 @@ class _TBarcodeScannerLayoutState extends State<TBarcodeScannerLayout>
             ),
           ),
 
-          // 3. FIX HEADER: Dùng Positioned để đè lên trên cùng
+          // 3. Header
           Positioned(
-            top: MediaQuery.of(context).padding.top + 10, // Cách mép trên chuẩn
+            top: MediaQuery.of(context).padding.top + 10,
             left: 20,
             right: 20,
             child: TCustomHeaderWidget(
@@ -130,28 +284,28 @@ class _TBarcodeScannerLayoutState extends State<TBarcodeScannerLayout>
               ],
             );
           }),
+
+          // 5. NÚT NHẬP MÃ THỦ CÔNG
           Positioned(
             top: MediaQuery.of(context).padding.top + 10,
             right: 20,
-            child: IconButton(
-              icon: const Icon(Icons.keyboard, color: Colors.white),
-              onPressed: () {
-                // Dừng camera để tránh loạn
-                scannerController.pauseScan();
-                Get.defaultDialog(
-                  title: "Test Emulator",
-                  content: TextField(
-                    decoration:
-                        const InputDecoration(hintText: "Nhập mã barcode..."),
-                    onSubmitted: (val) {
-                      Get.back();
-                      if (widget.onScanned != null) widget.onScanned!(val);
-                    },
-                  ),
-                );
-              },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.4),
+                shape: BoxShape.circle,
+              ),
+              child: IconButton(
+                icon: const Icon(Icons.keyboard_alt_outlined,
+                    color: Colors.white, size: 24),
+                tooltip: TTexts.manualBarcodeEntryTitle.tr,
+                onPressed: () {
+                  // Dừng camera trước khi mở bàn phím để tránh giật lag
+                  scannerController.pauseScan();
+                  _showManualEntryDialog();
+                },
+              ),
             ),
-          ),  
+          ),
         ],
       ),
     );
@@ -177,7 +331,6 @@ class ScannerOverlayPainter extends CustomPainter {
     final rect = Rect.fromLTWH(left, top, scanAreaWidth, scanAreaHeight);
     final rrect = RRect.fromRectAndRadius(rect, Radius.circular(borderRadius));
 
-    // 1. Vẽ lớp nền tối mờ
     final backgroundPaint = Paint()..color = Colors.black.withOpacity(0.6);
     final backgroundPath = Path()
       ..addRect(Rect.fromLTWH(0, 0, size.width, size.height))
@@ -185,16 +338,14 @@ class ScannerOverlayPainter extends CustomPainter {
       ..fillType = PathFillType.evenOdd;
     canvas.drawPath(backgroundPath, backgroundPaint);
 
-    // 2. Vẽ 4 góc trắng (Sử dụng Arc để bo theo khung)
     final borderPaint = Paint()
       ..color = Colors.white
       ..style = PaintingStyle.stroke
       ..strokeWidth = 4.0
       ..strokeCap = StrokeCap.round;
 
-    const cornerSize = 40.0; // Độ dài của đoạn kẻ ở góc
+    const cornerSize = 40.0;
 
-    // --- Góc Top Left ---
     canvas.drawPath(
         Path()
           ..moveTo(left, top + cornerSize)
@@ -204,7 +355,6 @@ class ScannerOverlayPainter extends CustomPainter {
           ..lineTo(left + cornerSize, top),
         borderPaint);
 
-    // --- Góc Top Right ---
     canvas.drawPath(
         Path()
           ..moveTo(left + scanAreaWidth - cornerSize, top)
@@ -218,7 +368,6 @@ class ScannerOverlayPainter extends CustomPainter {
           ..lineTo(left + scanAreaWidth, top + cornerSize),
         borderPaint);
 
-    // --- Góc Bottom Left ---
     canvas.drawPath(
         Path()
           ..moveTo(left, top + scanAreaHeight - cornerSize)
@@ -232,7 +381,6 @@ class ScannerOverlayPainter extends CustomPainter {
           ..lineTo(left + cornerSize, top + scanAreaHeight),
         borderPaint);
 
-    // --- Góc Bottom Right ---
     canvas.drawPath(
         Path()
           ..moveTo(left + scanAreaWidth - cornerSize, top + scanAreaHeight)

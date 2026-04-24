@@ -12,6 +12,7 @@ final Map<String, String> enCore = {
   TTexts.one: '1',
   TTexts.two: '2',
   TTexts.three: '3',
+  TTexts.resultsFound: 'results found',
   TTexts.errorAccessRestrictedTitle: 'Access Restricted',
   TTexts.errorAccessRestrictedSubtitle:
       'This application is exclusively optimized for Smartphones. Please access via a mobile device or a standard desktop web browser for the full experience.',

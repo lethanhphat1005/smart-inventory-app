@@ -37,12 +37,15 @@ class _HomeRevenueLineChartWidgetState extends State<HomeRevenueLineChartWidget>
   // Tự động quy đổi M (triệu), k (ngàn) và bỏ chữ k nếu dưới 1000
   String _formatCurrency(double value) {
     double absVal = value.abs();
+    // Giữ lại dấu trừ nếu là số âm
+    String sign = value < 0 ? '-' : '';
+
     if (absVal >= 1000000) {
-      return '\$${(value / 1000000).toStringAsFixed(1)}M';
+      return '$sign\$${(absVal / 1000000).toStringAsFixed(1)}M';
     } else if (absVal >= 1000) {
-      return '\$${(value / 1000).toStringAsFixed(1)}k';
+      return '$sign\$${(absVal / 1000).toStringAsFixed(1)}k';
     } else {
-      return '\$${value.toInt()}';
+      return '$sign\$${absVal.toInt()}';
     }
   }
 
@@ -63,9 +66,11 @@ class _HomeRevenueLineChartWidgetState extends State<HomeRevenueLineChartWidget>
 
           return LineChart(
             LineChartData(
+              clipData: const FlClipData.all(),
+
               minX: 0.0,
               maxX: 24.0,
-              minY: 0.0,
+              minY: limits['min'],
               maxY: limits['max'],
 
               // TOOLTIP (CÁC CHẤM CHẠM TRÊN BIỂU ĐỒ)
@@ -90,6 +95,21 @@ class _HomeRevenueLineChartWidgetState extends State<HomeRevenueLineChartWidget>
                 show: true,
                 horizontalInterval: limits['interval'],
                 drawVerticalLine: false,
+                getDrawingHorizontalLine: (value) {
+                  // Tô đậm đường mốc $0 để phân chia rõ âm dương
+                  if (value == 0) {
+                    return FlLine(
+                      color: AppColors.softGrey.withOpacity(0.2),
+                      strokeWidth: 2,
+                      dashArray: null, // Đường liền
+                    );
+                  }
+                  return FlLine(
+                    color: AppColors.softGrey.withOpacity(0.2),
+                    strokeWidth: 1,
+                    dashArray: [5, 5], // Đường đứt nét
+                  );
+                },
               ),
 
               // TITLES (TRỤC X / TRỤC Y)
@@ -107,13 +127,13 @@ class _HomeRevenueLineChartWidgetState extends State<HomeRevenueLineChartWidget>
                       return Padding(
                         padding: const EdgeInsets.only(right: 8),
                         child: Text(
-                          // Đồng bộ hàm format tiền tệ cho trục Y
                           _formatCurrency(value),
                           style: const TextStyle(
                             color: AppColors.subText,
                             fontSize: 10,
                             fontFamily: 'Poppins',
                           ),
+                          textAlign: TextAlign.right,
                         ),
                       );
                     },
