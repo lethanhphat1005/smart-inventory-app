@@ -34,6 +34,18 @@ class _HomeRevenueLineChartWidgetState extends State<HomeRevenueLineChartWidget>
     super.dispose();
   }
 
+  // Tự động quy đổi M (triệu), k (ngàn) và bỏ chữ k nếu dưới 1000
+  String _formatCurrency(double value) {
+    double absVal = value.abs();
+    if (absVal >= 1000000) {
+      return '\$${(value / 1000000).toStringAsFixed(1)}M';
+    } else if (absVal >= 1000) {
+      return '\$${(value / 1000).toStringAsFixed(1)}k';
+    } else {
+      return '\$${value.toInt()}';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Obx(() {
@@ -51,19 +63,18 @@ class _HomeRevenueLineChartWidgetState extends State<HomeRevenueLineChartWidget>
 
           return LineChart(
             LineChartData(
-              // ĐÃ FIX: Khóa cứng trục X là 24 tiếng để biểu đồ không bị dãn ngang
               minX: 0.0,
               maxX: 24.0,
-              minY: limits['min'],
+              minY: 0.0,
               maxY: limits['max'],
 
-              // TOOLTIP
+              // TOOLTIP (CÁC CHẤM CHẠM TRÊN BIỂU ĐỒ)
               lineTouchData: LineTouchData(
                 touchTooltipData: LineTouchTooltipData(
                   getTooltipColor: (_) => AppColors.primary,
                   getTooltipItems: (touchedSpots) => touchedSpots.map((s) {
                     return LineTooltipItem(
-                      '${s.y.toStringAsFixed(1)}k\$',
+                      _formatCurrency(s.y),
                       const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -81,7 +92,7 @@ class _HomeRevenueLineChartWidgetState extends State<HomeRevenueLineChartWidget>
                 drawVerticalLine: false,
               ),
 
-              // TITLES
+              // TITLES (TRỤC X / TRỤC Y)
               titlesData: FlTitlesData(
                 rightTitles:
                     const AxisTitles(sideTitles: SideTitles(showTitles: false)),
@@ -90,26 +101,14 @@ class _HomeRevenueLineChartWidgetState extends State<HomeRevenueLineChartWidget>
                 leftTitles: AxisTitles(
                   sideTitles: SideTitles(
                     showTitles: true,
-                    interval: limits[
-                        'interval'], // Sử dụng interval động từ Controller
+                    interval: limits['interval'],
                     reservedSize: 45,
                     getTitlesWidget: (value, meta) {
-                      // Logic định dạng nhãn thông minh
-                      String label;
-                      double absVal = value.abs();
-
-                      if (absVal >= 1000000) {
-                        label = '${(value / 1000000).toStringAsFixed(1)}M\$';
-                      } else if (absVal >= 1000) {
-                        label = '${(value / 1000).toStringAsFixed(1)}k\$';
-                      } else {
-                        label = '${value.toInt()}\$';
-                      }
-
                       return Padding(
                         padding: const EdgeInsets.only(right: 8),
                         child: Text(
-                          label,
+                          // Đồng bộ hàm format tiền tệ cho trục Y
+                          _formatCurrency(value),
                           style: const TextStyle(
                             color: AppColors.subText,
                             fontSize: 10,
@@ -189,7 +188,6 @@ class _HomeRevenueLineChartWidgetState extends State<HomeRevenueLineChartWidget>
   //  Tự động vẽ các mốc 00:00, 06:00, 12:00, 18:00
   Widget _bottomTitles(double val, TitleMeta meta) {
     if (val % 6 == 0 && val <= 24) {
-      // Đổi 24h thành 00h cho chuẩn định dạng đồng hồ
       final hourStr =
           val.toInt() == 24 ? '00' : val.toInt().toString().padLeft(2, '0');
       return SideTitleWidget(

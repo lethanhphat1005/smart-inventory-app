@@ -64,22 +64,28 @@ final Map<String, String> enCore = {
   TTexts.splashLoadingServices: 'Loading core services...',
   TTexts.splashLoadingUser: 'Verifying user data...',
 
-  // -- Network Error Dialog (Đã cập nhật giao diện bắt buộc)
+  // -- Network Error Dialog 
   TTexts.netErrorTitle: 'No Internet Connection',
   TTexts.netErrorDescription:
       'This app requires an active internet connection to sync inventory data. Please check your network and try again.',
-  TTexts.netErrorReloadBtn: 'Reload', // Nút mới
-  TTexts.netErrorCheckWifiBtn: 'Check WiFi Settings', // Nút mới
+  TTexts.netErrorReloadBtn: 'Reload', 
+  TTexts.netErrorCheckWifiBtn: 'Check WiFi Settings', 
   TTexts.netChecking: 'Checking connection...',
   TTexts.netErrorWaiting: 'Waiting for network...',
   TTexts.netErrorRetryFailedMessage:
-      'Still no internet connection. Please try again.', // THÊM DÒNG NÀY
+      'Still no internet connection. Please try again.',
 
   TTexts.barCodeScan: 'Bar Code Scan',
 
   TTexts.create: "Create",
   TTexts.cancel: "Cancel",
+  TTexts.tryAgain: "Try again",
 
   TTexts.unknownProduct: 'Unknown Product',
   TTexts.na: 'N/A',
+
+  TTexts.errorUiTitle: "Temporary UI Error!",
+  TTexts.errorUiMessage:
+      "A small part of the application encountered an issue. Please go back or restart the app.",
+  TTexts.ignore: "Ignore",
 };

@@ -54,11 +54,8 @@ class VerifyEmailController extends GetxController {
     isResending.value = true;
 
     try {
-      // GỌI API KÈM TIMEOUT
-      // TODO: Sua thanh gui mail xac thuc email nguoi dung
-      await authProvider
-          .sendResetPasswordEmail(email)
-          .timeout(const Duration(seconds: 15));
+      isResending.value = true;
+      await authProvider.sendVerificationEmail(email);
 
       TSnackbarsWidget.success(
         title: TTexts.successTitle.tr,

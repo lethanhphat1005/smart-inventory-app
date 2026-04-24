@@ -1,5 +1,6 @@
 import 'package:frontend/core/infrastructure/localization/langs/en/en_auth.dart';
 import 'package:frontend/core/infrastructure/localization/langs/en/en_barcode.dart';
+import 'package:frontend/core/infrastructure/localization/langs/en/en_chatbot.dart';
 import 'package:frontend/core/infrastructure/localization/langs/en/en_core.dart';
 import 'package:frontend/core/infrastructure/localization/langs/en/en_export.dart';
 import 'package:frontend/core/infrastructure/localization/langs/en/en_home.dart';
@@ -28,4 +29,5 @@ final Map<String, String> enUS = {
   ...enReorderSuggestion,
   ...enExport,
   ...enBarcode,
+  ...enChatbot
 };

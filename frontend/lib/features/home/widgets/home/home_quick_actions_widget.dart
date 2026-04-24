@@ -74,20 +74,19 @@ class HomeQuickActionsWidget extends StatelessWidget {
               ],
 
               // 3. THẺ VIEW REPORTS
-              const SizedBox(width: AppSizes.p16),
-              _buildPremiumCard(
-                icon: Iconsax.chart_square_copy,
-                title: TTexts.homeViewReports.tr,
-                subtitle: TTexts.homeViewReportsSub.tr,
-                gradient: const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [Color(0xFF7B61FF), Color(0xFF5835E5)],
-                ),
-                onTap: () {
-                  // TODO: Toi man hinh report
-                },
-              ),
+              // const SizedBox(width: AppSizes.p16),
+              // _buildPremiumCard(
+              //   icon: Iconsax.chart_square_copy,
+              //   title: TTexts.homeViewReports.tr,
+              //   subtitle: TTexts.homeViewReportsSub.tr,
+              //   gradient: const LinearGradient(
+              //     begin: Alignment.topLeft,
+              //     end: Alignment.bottomRight,
+              //     colors: [Color(0xFF7B61FF), Color(0xFF5835E5)],
+              //   ),
+              //   onTap: () {
+              //   },
+              // ),
 
               // 4. THẺ VIEW ADJUSTMENTS (ĐÃ ĐỔI SANG MÀU XANH TEAL TRÁNH TRÙNG MÀU APP)
               const SizedBox(width: AppSizes.p16),

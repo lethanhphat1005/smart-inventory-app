@@ -5,6 +5,7 @@ import 'package:frontend/core/infrastructure/utils/token_utils.dart';
 import 'package:frontend/core/state/services/auth_service.dart';
 import 'package:frontend/core/state/services/notification_service.dart';
 import 'package:frontend/core/state/services/user_service.dart';
+import 'package:frontend/core/ui/widgets/t_custom_dialog_widget.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:frontend/routes/app_routes.dart';
@@ -13,7 +14,8 @@ import 'package:frontend/core/state/services/store_service.dart';
 class SplashController extends GetxController {
   // 1. State variables
   final RxDouble progress = 0.0.obs;
-  final RxString loadingMessage = TTexts.splashLoadingStart.tr.obs;
+  // Khởi tạo text mặc định tránh rỗng
+  final RxString loadingMessage = "Starting...".obs;
 
   @override
   void onInit() {
@@ -23,7 +25,8 @@ class SplashController extends GetxController {
 
   // 3. Private methods
   Future<void> _initializeApp() async {
-    // 2. Cập nhật danh sách Tasks dùng Locale
+    progress.value = 0.0;
+
     final List<Map<String, dynamic>> tasks = [
       {
         'message': TTexts.splashLoadingInternet.tr,
@@ -40,16 +43,30 @@ class SplashController extends GetxController {
       },
     ];
 
-    for (int i = 0; i < tasks.length; i++) {
-      loadingMessage.value = tasks[i]['message'];
+    try {
+      for (int i = 0; i < tasks.length; i++) {
+        loadingMessage.value = tasks[i]['message'];
 
-      await tasks[i]['action']();
+        await tasks[i]['action']();
 
-      progress.value = (i + 1) / tasks.length;
-      await Future.delayed(const Duration(milliseconds: 500));
+        progress.value = (i + 1) / tasks.length;
+        await Future.delayed(const Duration(milliseconds: 500));
+      }
+
+      _navigateToNextScreen();
+    } catch (e) {
+      debugPrint('🚨 Tiến trình Splash bị chặn: $e');
+
+      // NẾU BẮT ĐƯỢC LỖI SERVER SẬP -> HIỆN DIALOG LIVE BẮT THỬ LẠI
+      if (e.toString().contains('SERVER_CONNECTION_ERROR')) {
+        _showServerDownDialog();
+      }
+      // CÁC LỖI NGHIÊM TRỌNG KHÁC (như Token chết) -> XOÁ DATA VÀ RA LOGIN
+      else {
+        await Get.find<AuthService>().clearAuthData();
+        _navigateToNextScreen();
+      }
     }
-
-    _navigateToNextScreen();
   }
 
   /// TÁC VỤ 1: KIỂM TRA INTERNET
@@ -85,43 +102,49 @@ class SplashController extends GetxController {
   Future<void> _checkUserAuthentication() async {
     final authService = Get.find<AuthService>();
 
-    // 1. Nếu chưa từng đăng nhập -> Bỏ qua
+    // Nếu chưa từng đăng nhập -> Bỏ qua
     if (!authService.isLoggedIn.value) {
       await Future.delayed(const Duration(milliseconds: 300));
       return;
     }
 
-    // 2. Đã lưu Remember Me
-    try {
-      final userService = Get.find<UserService>();
-      final isProfileLoaded = await userService.fetchAndSaveProfile();
+    // Đã lưu Remember Me
+    final userService = Get.find<UserService>();
+    final isProfileLoaded = await userService.fetchAndSaveProfile();
 
-      if (!isProfileLoaded) {
-        // LỖI Ở ĐÂY: Lấy profile thất bại (Thường do mạng vừa bật chưa ổn định)
-
-        // KIỂM TRA BẰNG TOKEN UTILS
-        if (TokenUtils.isSessionExpired) {
-          // Chỉ khi nào Token thực sự đã chết hoặc hết hạn thì mới ném lỗi để Đăng xuất
-          throw Exception('Session expired or Invalid');
-        } else {
-          // Token vẫn còn sống nhăn, chỉ là API Profile bị nghẽn mạng lúc vừa bật Wifi.
-          // Ta tha cho nó, cho phép vào App bình thường!
-          debugPrint(
-              'Profile API failed, but Session is still active. Proceeding to Main...');
-          // Có mạng trở lại, token còn sống, tranh thủ cập nhật Notification Token
-          await NotificationService.registerTokenWithBackend();
-        }
+    if (!isProfileLoaded) {
+      // KIỂM TRA BẰNG TOKEN UTILS (Giữ nguyên logic của bạn)
+      if (TokenUtils.isSessionExpired) {
+        // Token chết thật -> Ném lỗi để xoá data
+        throw Exception('Session expired or Invalid');
       } else {
-        debugPrint('Xác thực và tải profile thành công!');
-        // Load profile thành công, mọi thứ hoàn hảo, cập nhật Notification Token
-        await NotificationService.registerTokenWithBackend();
+        // Token sống nhưng tải Profile lỗi (SERVER SẬP)
+        // -> Ném lỗi ra ngoài để bật Hộp thoại Thử lại, KHÔNG cho vào app!
+        throw Exception('SERVER_CONNECTION_ERROR');
       }
-    } catch (e) {
-      debugPrint('Phiên đăng nhập đã chết hoặc có lỗi nghiêm trọng: $e');
-
-      // 3. CHỈ XÓA SẠCH DỮ LIỆU KHI CHẮC CHẮN TOKEN ĐÃ HỎNG
-      await authService.clearAuthData();
+    } else {
+      debugPrint('Xác thực và tải profile thành công!');
+      await NotificationService.registerTokenWithBackend();
     }
+  }
+
+  void _showServerDownDialog() {
+    Get.dialog(
+      PopScope(
+        canPop: false, // Chặn bấm nút Back để thoát
+        child: TCustomDialogWidget(
+          icon: const Text('☁️', style: TextStyle(fontSize: 40)),
+          title: TTexts.errorServerTitle.tr,
+          description: TTexts.errorServerMessage.tr,
+          primaryButtonText: TTexts.tryAgain.tr,
+          onPrimaryPressed: () {
+            Get.back(); // Đóng Dialog
+            _initializeApp(); // Chạy lại toàn bộ vòng kiểm tra từ đầu
+          },
+        ),
+      ),
+      barrierDismissible: false, // Bấm ra ngoài không tắt được
+    );
   }
 
   void _navigateToNextScreen() {
@@ -134,16 +157,15 @@ class SplashController extends GetxController {
     if (isFirstTime) {
       Get.offAllNamed(AppRoutes.onboarding);
     } else if (authService.isLoggedIn.value) {
-      // KIỂM TRA XEM ĐÃ CÓ CỬA HÀNG CHƯA BẰNG STORE SERVICE
+      // Kiểm tra có cửa hàng chưa
       if (storeService.currentStoreId.value.isNotEmpty) {
         if (NotificationService.pendingInitialMessage != null) {
           debugPrint(
               "🎯 Splash đã load xong! Bàn giao thông báo cho Router...");
           final msg = NotificationService.pendingInitialMessage!;
-          NotificationService.pendingInitialMessage =
-              null; // Xóa cờ sau khi lấy
+          NotificationService.pendingInitialMessage = null;
           NotificationService.handleNotificationTap(msg);
-          return; // KẾT THÚC SPLASH TẠI ĐÂY, KHÔNG GỌI Get.offAllNamed() NỮA ĐỂ TRÁNH XUNG ĐỘT
+          return;
         }
 
         // Có rồi -> Vào thẳng Home bỏ qua màn chọn

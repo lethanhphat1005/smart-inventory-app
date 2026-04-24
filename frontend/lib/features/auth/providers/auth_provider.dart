@@ -69,6 +69,14 @@ class AuthProvider {
     );
   }
 
+  Future<void> sendVerificationEmail(String email) async {
+    await supabase.auth.resend(
+      type: OtpType.signup,
+      email: email,
+      emailRedirectTo: 'https://smart-inventory-web-fawn.vercel.app/welcome',
+    );
+  }
+
   Future<AuthResponse> login({
     required String email,
     required String password,

@@ -1,22 +1,26 @@
-// lib/features/workspace/widgets/store_selection_card_widget.dart
 import 'package:flutter/material.dart';
+import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
+import 'package:get/get.dart';
 
 class StoreSelectionCardWidget extends StatelessWidget {
   final String title, role;
   final IconData icon;
   final Color iconColor;
   final VoidCallback onTap;
+  final bool isActive;
 
-  const StoreSelectionCardWidget(
-      {super.key,
-      required this.title,
-      required this.role,
-      required this.icon,
-      required this.iconColor,
-      required this.onTap});
+  const StoreSelectionCardWidget({
+    super.key,
+    required this.title,
+    required this.role,
+    required this.icon,
+    required this.iconColor,
+    required this.onTap,
+    this.isActive = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -25,26 +29,46 @@ class StoreSelectionCardWidget extends StatelessWidget {
       decoration: BoxDecoration(
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withOpacity(0.03),
+              color: isActive
+                  ? AppColors.primary
+                      .withOpacity(0.15) // Tỏa bóng cam nhẹ nếu Active
+                  : Colors.black.withOpacity(0.03),
               blurRadius: 15,
               offset: const Offset(0, 5)),
         ],
+        borderRadius: BorderRadius.circular(AppSizes.radius16),
+        // Lớp nền Gradient đóng vai trò làm viền nếu isActive = true
+        gradient: isActive
+            ? const LinearGradient(
+                colors: [
+                  Color(0xFFF8A875), // Cam nhạt
+                  AppColors.primary, // Cam đậm hệ thống
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              )
+            : null,
       ),
-      // Bọc Material để tạo hiệu ứng Ripple (Gợn sóng) khi click
+      // Padding chính là độ dày của viền Gradient (1.5px)
+      padding: EdgeInsets.all(isActive ? 1.5 : 0),
       child: Material(
         color: AppColors.background,
-        borderRadius: BorderRadius.circular(AppSizes.radius16),
-        clipBehavior:
-            Clip.antiAlias, // Cắt InkWell không bị tràn ra ngoài góc bo tròn
+        borderRadius:
+            BorderRadius.circular(AppSizes.radius16 - (isActive ? 1.5 : 0)),
+        clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: onTap,
-          splashColor: AppColors.primary.withOpacity(0.1), // Sóng màu cam nhạt
+          splashColor: AppColors.primary.withOpacity(0.1),
           highlightColor: AppColors.primary.withOpacity(0.05),
           child: Container(
             padding: const EdgeInsets.all(AppSizes.p20),
             decoration: BoxDecoration(
-              border: Border.all(color: AppColors.surface, width: 2),
-              borderRadius: BorderRadius.circular(AppSizes.radius16),
+              // Nếu không Active thì giữ nguyên viền xám, nếu Active thì vô hiệu hóa để hiện viền Gradient
+              border: isActive
+                  ? null
+                  : Border.all(color: AppColors.surface, width: 2),
+              borderRadius: BorderRadius.circular(
+                  AppSizes.radius16 - (isActive ? 1.5 : 0)),
             ),
             child: Row(
               children: [
@@ -68,8 +92,27 @@ class StoreSelectionCardWidget extends StatelessWidget {
                     ],
                   ),
                 ),
-                const Icon(Iconsax.arrow_right_3_copy,
-                    color: AppColors.softGrey, size: 18),
+                // Hiển thị Badge "Current" nếu đang ở trong cửa hàng này
+                if (isActive)
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      TTexts.activeStoreBadge.tr,
+                      style: const TextStyle(
+                        color: AppColors.primary,
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  )
+                else
+                  const Icon(Iconsax.arrow_right_3_copy,
+                      color: AppColors.softGrey, size: 18),
               ],
             ),
           ),

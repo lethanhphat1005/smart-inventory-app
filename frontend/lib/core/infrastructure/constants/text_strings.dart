@@ -93,6 +93,10 @@ class TTexts {
   static const String netErrorRetryFailedMessage =
       "net_error_retry_failed_message";
   static const String barCodeScan = "bar_code_scan";
+  static const String errorUiTitle = "error_ui_title";
+  static const String errorUiMessage = "error_ui_message";
+  static const String ignore = "ignore";
+  static const String splashLoadingProfile = "splash_loading_profile";
 
   // -- Error / Restricted Access
   static const String errorTitle = "error_title";
@@ -241,6 +245,9 @@ class TTexts {
   static const String whatIsWorkspace = "what_is_workspace";
   static const String workspaceDescription = "workspace_description";
   static const String understood = "understood";
+  static const String storeSelectionSuccessTitle = "store_selection_success_title";
+  static const String storeSelectionSuccessMessage = "store_selection_success_message";
+  static const String activeStoreBadge = "active_store_badge";
 
   // -- Create Workspace
   static const String createStoreTitle = "create_store_title";
