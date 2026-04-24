@@ -99,6 +99,8 @@ class LoginController extends GetxController {
         password,
         rememberMe.value,
       );
+      final storeService = Get.find<StoreService>();
+      await storeService.clearWorkspaceData();
 
       // TẮT LOADING KHI THÀNH CÔNG
       FullScreenLoaderUtils.stopLoading();
@@ -110,14 +112,7 @@ class LoginController extends GetxController {
         }),
       );
 
-      final storeService = Get.find<StoreService>();
-      if (storeService.currentStoreId.value.isNotEmpty) {
-        // Đã có Workspace được lưu -> Vào thẳng Home
-        Get.offAllNamed(AppRoutes.main);
-      } else {
-        // Chưa có Workspace -> Bắt buộc vào trang Chọn Workspace
-        Get.offAllNamed(AppRoutes.storeSelection);
-      }
+      Get.offAllNamed(AppRoutes.storeSelection);
     } on AuthException catch (e) {
       FullScreenLoaderUtils.stopLoading();
 
@@ -189,6 +184,9 @@ class LoginController extends GetxController {
       //  ĐĂNG NHẬP GOOGLE THÀNH CÔNG -> ĐĂNG KÝ FCM TOKEN
       await NotificationService.registerTokenWithBackend();
 
+      final storeService = Get.find<StoreService>();
+      await storeService.clearWorkspaceData();
+
       FullScreenLoaderUtils.stopLoading();
 
       TSnackbarsWidget.success(
@@ -198,16 +196,7 @@ class LoginController extends GetxController {
         }),
       );
 
-      // ==========================================
-      // KIỂM TRA ĐIỀU HƯỚNG TRANG DỰA VÀO WORKSPACE
-      // (Áp dụng luôn cho cả Google Sign In)
-      // ==========================================
-      final storeService = Get.find<StoreService>();
-      if (storeService.currentStoreId.value.isNotEmpty) {
-        Get.offAllNamed(AppRoutes.main);
-      } else {
-        Get.offAllNamed(AppRoutes.storeSelection);
-      }
+      Get.offAllNamed(AppRoutes.storeSelection);
     } catch (e) {
       FullScreenLoaderUtils.stopLoading();
       debugPrint('❌ Google Auth Error: $e');
