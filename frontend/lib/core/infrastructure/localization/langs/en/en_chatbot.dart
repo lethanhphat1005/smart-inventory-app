@@ -1,7 +1,7 @@
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 
 final Map<String, String> enChatbot = {
-  TTexts.chatbotName: 'AI Storix',
+  TTexts.chatbotName: 'Tori',
   TTexts.chatbotOnline: 'Online',
   TTexts.chatbotInputHint: 'Type a message...',
   TTexts.chatbotWelcomeMsg:

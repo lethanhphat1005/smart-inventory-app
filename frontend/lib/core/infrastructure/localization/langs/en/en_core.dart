@@ -12,6 +12,7 @@ final Map<String, String> enCore = {
   TTexts.one: '1',
   TTexts.two: '2',
   TTexts.three: '3',
+  TTexts.resultsFound: 'results found',
   TTexts.errorAccessRestrictedTitle: 'Access Restricted',
   TTexts.errorAccessRestrictedSubtitle:
       'This application is exclusively optimized for Smartphones. Please access via a mobile device or a standard desktop web browser for the full experience.',
@@ -64,12 +65,12 @@ final Map<String, String> enCore = {
   TTexts.splashLoadingServices: 'Loading core services...',
   TTexts.splashLoadingUser: 'Verifying user data...',
 
-  // -- Network Error Dialog 
+  // -- Network Error Dialog
   TTexts.netErrorTitle: 'No Internet Connection',
   TTexts.netErrorDescription:
       'This app requires an active internet connection to sync inventory data. Please check your network and try again.',
-  TTexts.netErrorReloadBtn: 'Reload', 
-  TTexts.netErrorCheckWifiBtn: 'Check WiFi Settings', 
+  TTexts.netErrorReloadBtn: 'Reload',
+  TTexts.netErrorCheckWifiBtn: 'Check WiFi Settings',
   TTexts.netChecking: 'Checking connection...',
   TTexts.netErrorWaiting: 'Waiting for network...',
   TTexts.netErrorRetryFailedMessage:

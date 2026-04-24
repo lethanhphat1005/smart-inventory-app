@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/infrastructure/models/product_package_model.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
@@ -11,21 +12,21 @@ class InventoryBarcodeListBottomSheetWidget extends StatelessWidget {
   const InventoryBarcodeListBottomSheetWidget(
       {super.key, required this.package});
 
-  // Chuyển đổi source thô thành text thân thiện
+  // Chuyển đổi source thô thành text dịch (TTexts)
   String _getFriendlySource(String source) {
     switch (source.toLowerCase()) {
       case 'user_confirmed':
-        return 'Xác nhận bởi người dùng';
+        return TTexts.sourceUserConfirmed.tr;
       case 'seed':
-        return 'Dữ liệu mẫu (Hệ thống)';
+        return TTexts.sourceSeed.tr;
       case 'admin':
-        return 'Thêm bởi Quản trị viên';
+        return TTexts.sourceAdmin.tr;
       case 'barcode_flow_create':
-        return 'Tạo từ luồng quét mã';
+        return TTexts.sourceBarcodeFlow.tr;
       case 'api_import':
-        return 'Nhập từ API (Hệ thống ngoài)';
+        return TTexts.sourceApi.tr;
       default:
-        return 'Khác';
+        return TTexts.sourceOther.tr;
     }
   }
 
@@ -37,29 +38,23 @@ class InventoryBarcodeListBottomSheetWidget extends StatelessWidget {
       children: [
         // 1. Icon Header
         Container(
-          width: 72,
-          height: 72,
+          width: 64,
+          height: 64,
           decoration: BoxDecoration(
-            color: AppColors.softGrey.withOpacity(0.08),
-            borderRadius: BorderRadius.circular(AppSizes.radius16),
-            border: Border.all(
-              color: AppColors.softGrey.withOpacity(0.1),
-              width: 1.5,
-            ),
+            color: AppColors.primary.withOpacity(0.08),
+            shape: BoxShape.circle,
           ),
           child: const Center(
-            child: Text(
-              "🤳",
-              style: TextStyle(fontSize: 36),
-            ),
+            child:
+                Icon(Iconsax.barcode_copy, color: AppColors.primary, size: 32),
           ),
         ),
         const SizedBox(height: AppSizes.p16),
 
         // 2. Title
-        const Text(
-          'Danh sách mã vạch',
-          style: TextStyle(
+        Text(
+          TTexts.barcodeListTitle.tr,
+          style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
             color: AppColors.primaryText,
@@ -68,9 +63,9 @@ class InventoryBarcodeListBottomSheetWidget extends StatelessWidget {
         ),
         const SizedBox(height: AppSizes.p8),
 
-        // 3. Subtitle
+        // 3. Subtitle (Sản phẩm: Tên)
         Text(
-          'Sản phẩm: ${package.displayName}',
+          '${TTexts.productLabel.tr}: ${package.displayName}',
           textAlign: TextAlign.center,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
@@ -88,72 +83,106 @@ class InventoryBarcodeListBottomSheetWidget extends StatelessWidget {
           constraints: BoxConstraints(
             maxHeight: Get.height * 0.45,
           ),
-          child: ListView.separated(
-            shrinkWrap: true,
-            physics: const BouncingScrollPhysics(),
-            itemCount: package.barcodes.length,
-            separatorBuilder: (context, index) =>
-                const SizedBox(height: AppSizes.p12),
-            itemBuilder: (context, index) {
-              final barcodeItem = package.barcodes[index];
-              return Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.divider),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(10),
+          child: package.barcodes.isEmpty
+              ? Center(
+                  child: Text(TTexts.errorNotFoundMessage.tr,
+                      style: const TextStyle(color: AppColors.subText)))
+              : ListView.separated(
+                  shrinkWrap: true,
+                  physics: const BouncingScrollPhysics(),
+                  itemCount: package.barcodes.length,
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(height: AppSizes.p12),
+                  itemBuilder: (context, index) {
+                    final barcodeItem = package.barcodes[index];
+                    return Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: AppSizes.p16, vertical: AppSizes.p12),
                       decoration: BoxDecoration(
-                        color: AppColors.primary.withOpacity(0.1),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(Iconsax.barcode_copy,
-                          color: AppColors.primary, size: 22),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Text(
-                                barcodeItem.barcode,
-                                style: const TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.primaryText,
-                                ),
-                              ),
-                              if (barcodeItem.isVerified) ...[
-                                const SizedBox(width: 6),
-                                const Icon(Iconsax.verify_copy,
-                                    color: Colors.green, size: 16),
-                              ]
-                            ],
+                        color: AppColors.surface,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppColors.divider, width: 1),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.02),
+                            blurRadius: 5,
+                            offset: const Offset(0, 2),
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Nguồn: ${_getFriendlySource(barcodeItem.source)}',
-                            style: const TextStyle(
-                              fontFamily: 'Poppins',
-                              fontSize: 12,
-                              color: AppColors.softGrey,
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: AppColors.white,
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: AppColors.divider),
+                            ),
+                            child: const Icon(Iconsax.scan_barcode_copy,
+                                color: AppColors.primaryText, size: 22),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        barcodeItem.barcode,
+                                        style: const TextStyle(
+                                          fontFamily: 'Poppins',
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.bold,
+                                          color: AppColors.primaryText,
+                                          letterSpacing: 1.2,
+                                        ),
+                                      ),
+                                    ),
+                                    if (barcodeItem.isVerified)
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 6, vertical: 2),
+                                        decoration: BoxDecoration(
+                                          color: Colors.green.withOpacity(0.1),
+                                          borderRadius:
+                                              BorderRadius.circular(4),
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            const Icon(Iconsax.verify_copy,
+                                                color: Colors.green, size: 12),
+                                            const SizedBox(width: 4),
+                                            Text(TTexts.verifiedLabel.tr,
+                                                style: const TextStyle(
+                                                    color: Colors.green,
+                                                    fontSize: 10,
+                                                    fontWeight:
+                                                        FontWeight.bold)),
+                                          ],
+                                        ),
+                                      )
+                                  ],
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  '${TTexts.sourceLabel.tr}: ${_getFriendlySource(barcodeItem.source)}',
+                                  style: const TextStyle(
+                                    fontFamily: 'Poppins',
+                                    fontSize: 12,
+                                    color: AppColors.softGrey,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],
                       ),
-                    ),
-                  ],
+                    );
+                  },
                 ),
-              );
-            },
-          ),
         ),
         const SizedBox(height: AppSizes.p16),
       ],

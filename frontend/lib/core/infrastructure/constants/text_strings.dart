@@ -1243,6 +1243,23 @@ class TTexts {
   static const String barcodeScanErrorTitle = "barcode_scan_error_title";
   static const String barcodeCopied = "barcode_copied";
 
+  static const String manualBarcodeEntryTitle = "manual_barcode_entry_title";
+  static const String manualBarcodeEntryDesc = "manual_barcode_entry_desc";
+  static const String barcodeListTitle = "barcode_list_title";
+  static const String sourceLabel = "source_label";
+  static const String sourceUserConfirmed = "source_user_confirmed";
+  static const String sourceSeed = "source_seed";
+  static const String sourceAdmin = "source_admin";
+  static const String sourceBarcodeFlow = "source_barcode_flow";
+  static const String sourceApi = "source_api";
+  static const String sourceOther = "source_other";
+  static const String verifiedLabel = "verified_label";
+  static const String barcodeCandidateTitle = "barcode_candidate_title";
+  static const String barcodeCandidateSubtitle = "barcode_candidate_subtitle";
+  static const String barcodeMatchesMultipleProducts = "barcode_matches_multiple_products";
+  static const String skipLabel = "skip_label";
+  static const String createProduct = "create_product";
+
   // -- Verify OTP
   static const String verifyOtpTitle = "verify_otp_title";
   static const String verifyOtpSubtitle = "verify_otp_subtitle";
