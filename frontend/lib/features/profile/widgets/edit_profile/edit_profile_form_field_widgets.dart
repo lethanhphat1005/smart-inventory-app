@@ -59,8 +59,8 @@ class EditProfileFormWidget extends GetView<ProfileEditController> {
 
             /// ADDRESS
             TTextFormFieldWidget(
-              label: TTexts.storeAddressLabel.tr,
-              hintText: TTexts.searchAddressHint.tr,
+              label: TTexts.editStoreAddressLabel.tr,
+              hintText: TTexts.editStoreAddressHint.tr,
               controller: controller.addressController,
               prefixIcon: Iconsax.location_copy,
               maxLines: 2,

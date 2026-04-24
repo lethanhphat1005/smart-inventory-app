@@ -1072,6 +1072,10 @@ class TTexts {
   static const String assignsRoleOwner = 'assigns_role_owner';
   static const String assignsRoleSearchHint = 'assigns_role_search_hint';
 
+  //Exceptions
+  static const String userNotFound = "user_not_found";
+  static const String userIdNotFound = "user_id_not_found";
+
   //Member
   static const String profileNoMembers = 'profile_no_members';
   static const String profileNoMembersSubtitle = 'profile_no_members_subtitle';

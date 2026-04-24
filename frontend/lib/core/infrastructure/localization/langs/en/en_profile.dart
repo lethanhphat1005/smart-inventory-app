@@ -40,7 +40,7 @@ final Map<String, String> enProfile = {
   TTexts.editTitle: 'Edit Profile',
   TTexts.editLoading: 'Loading',
   TTexts.editEmail: 'Email',
-  TTexts.editName: 'Full Name',
+  TTexts.editName: 'Full Name*',
   TTexts.editHintName: 'Enter full name',
   TTexts.editHintEmail: 'Enter email',
   TTexts.editUpdate: 'Update',
@@ -110,4 +110,8 @@ final Map<String, String> enProfile = {
   //Member List
   TTexts.profileNoMembers: 'No members found',
   TTexts.profileNoMembersSubtitle: 'There are no members in this store.',
+
+  //Exceptions
+  TTexts.userNotFound: 'User information not found',
+  TTexts.userIdNotFound: 'User ID not found for profile update',
 };
