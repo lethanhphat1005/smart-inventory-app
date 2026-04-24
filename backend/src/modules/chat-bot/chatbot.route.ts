@@ -1,15 +1,27 @@
 import { Router } from 'express';
 
-import { chatbotController } from './chatbot.module.js';
+import { chatbotRateLimit } from './chatbot-rate-limit.middleware.js';
+import { chatController } from './chatbot.module.js';
+import { chatPayloadSchema, confirmActionSchema } from './chatbot.validator.js';
 import { asyncWrapper } from '../../common/middlewares/async-wrapper.middleware.js';
+import { validator } from '../../common/middlewares/validate.middleware.js';
 import { authenticate } from '../auth/index.js';
 import { requireStoreContext } from '../stores/index.js';
 
-const chatbotRouter = Router();
+const chatRouter = Router();
 
-chatbotRouter.use(authenticate, requireStoreContext);
+chatRouter.use(authenticate, requireStoreContext);
 
-chatbotRouter.post('/', asyncWrapper(chatbotController.processChat));
-chatbotRouter.post('/confirm', asyncWrapper(chatbotController.confirmAction));
+chatRouter.post(
+  '/',
+  chatbotRateLimit,
+  validator(chatPayloadSchema),
+  asyncWrapper(chatController.processChat),
+);
+chatRouter.post(
+  '/confirm',
+  validator(confirmActionSchema),
+  asyncWrapper(chatController.confirmAction),
+);
 
-export { chatbotRouter };
+export { chatRouter, chatRouter as chatbotRouter };

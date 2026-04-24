@@ -1224,4 +1224,33 @@ class TTexts {
   static const String barcodeCheckingLoader = "barcode_checking_loader";
   static const String barcodeScanErrorTitle = "barcode_scan_error_title";
   static const String barcodeCopied = "barcode_copied";
+
+  // -- Verify OTP
+  static const String verifyOtpTitle = "verify_otp_title";
+  static const String verifyOtpSubtitle = "verify_otp_subtitle";
+  static const String verifyOtpErrorIncomplete = "verify_otp_error_incomplete";
+  static const String verifyOtpVerifying = "verify_otp_verifying";
+  static const String verifyOtpVerifyBtn = "verify_otp_verify_btn";
+  static const String verifyOtpFailedTitle = "verify_otp_failed_title";
+  static const String verifyOtpFailedMessage = "verify_otp_failed_message";
+  static const String verifyOtpNotReceived = "verify_otp_not_received";
+  static const String verifyOtpResendNow = "verify_otp_resend_now";
+  static const String verifyOtpResendLater = "verify_otp_resend_later";
+  static const String verifyOtpResending = "verify_otp_resending";
+  static const String verifyOtpResendSuccessTitle =
+      "verify_otp_resend_success_title";
+  static const String verifyOtpResendSuccessMessage =
+      "verify_otp_resend_success_message";
+  static const String verifyOtpErrorTitle = "verify_otp_error_title";
+  static const String verifyOtpResendFailed = "verify_otp_resend_failed";
+
+  // -- Reset password
+  static const String resetPasswordTitle = "reset_password_title";
+  static const String resetPasswordSubtitle = "reset_password_subtitle";
+  static const String newPasswordLabel = "new_password_label";
+  static const String newPasswordHint = "new_password_hint";
+  static const String updatingPassword = "updating_password";
+  static const String updatePasswordBtn = "update_password_btn";
+  static const String passwordLengthError = "password_length_error";
+  static const String resetPasswordFailedTitle = "reset_password_failed_title";
 }

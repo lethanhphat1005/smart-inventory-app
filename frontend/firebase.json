@@ -1,1 +1,25 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"storixapp-2026","appId":"1:38888872312:android:4801deab2d620c37ba508d","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"storixapp-2026","configurations":{"android":"1:38888872312:android:4801deab2d620c37ba508d","ios":"1:38888872312:ios:4294644e653e7efcba508d","macos":"1:38888872312:ios:ac8a42fb4f0bbf3fba508d","web":"1:38888872312:web:2d760312070c4472ba508d","windows":"1:38888872312:web:c33d8a7ae3a0bb87ba508d"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "storixapp-2026",
+          "appId": "1:38888872312:android:4801deab2d620c37ba508d",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "storixapp-2026",
+          "configurations": {
+            "android": "1:38888872312:android:4801deab2d620c37ba508d",
+            "ios": "1:38888872312:ios:4294644e653e7efcba508d",
+            "macos": "1:38888872312:ios:ac8a42fb4f0bbf3fba508d",
+            "web": "1:38888872312:web:2d760312070c4472ba508d",
+            "windows": "1:38888872312:web:c33d8a7ae3a0bb87ba508d"
+          }
+        }
+      }
+    }
+  }
+}

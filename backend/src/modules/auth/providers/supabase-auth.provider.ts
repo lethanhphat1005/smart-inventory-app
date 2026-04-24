@@ -1,7 +1,7 @@
 import { StatusCodes } from 'http-status-codes';
 
 import { CustomError } from '../../../common/errors/index.js';
-import { SupabaseProvider } from '../../../config/supabaseClient.js';
+import { SupabaseProvider } from '../../../db/supabaseClient.js';
 
 import type { User, SupabaseClient } from '@supabase/supabase-js';
 

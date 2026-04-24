@@ -1,9 +1,26 @@
 import { ChatbotController } from './chatbot.controller.js';
-import { ChatbotService } from './chatbot.service.js';
+import { OpenAIProvider } from './llm/openai.provider.js';
+import { ChatMemoryService } from './services/chat-memory.service.js';
+import { ChatbotService } from './services/chatbot.service.js';
+import { redisClient } from '../../db/redis.js';
 import { inventoryService } from '../inventories/index.js';
 import { transactionService } from '../transactions/index.js';
 
-const chatbotService = new ChatbotService(inventoryService, transactionService);
-const chatbotController = new ChatbotController(chatbotService);
+const chatMemoryService = new ChatMemoryService(redisClient);
+const llmProvider = new OpenAIProvider();
 
-export { chatbotService, chatbotController };
+const chatService = new ChatbotService(
+  inventoryService,
+  transactionService,
+  redisClient,
+  chatMemoryService,
+  llmProvider,
+);
+const chatController = new ChatbotController(chatService);
+
+export {
+  chatService,
+  chatController,
+  chatService as chatbotService,
+  chatController as chatbotController,
+};

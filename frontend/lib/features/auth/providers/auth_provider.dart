@@ -65,7 +65,8 @@ class AuthProvider {
     return await supabase.auth.signUp(
       email: email,
       password: password,
-      emailRedirectTo: 'https://smart-inventory-web-fawn.vercel.app/welcome',
+      emailRedirectTo:
+          'https://smart-inventory-e3laf8xu9-suos-projects-4722ffd7.vercel.app/welcome',
     );
   }
 
@@ -88,9 +89,18 @@ class AuthProvider {
   }
 
   Future<void> sendResetPasswordEmail(String email) async {
-    await supabase.auth.resetPasswordForEmail(
-      email,
-      redirectTo: 'https://smart-inventory-web-fawn.vercel.app/reset-password',
+    await supabase.auth.resetPasswordForEmail(email);
+  }
+
+  Future<AuthResponse> verifyRecoveryOtp({
+    required String email,
+    required String otp,
+  }) async {
+    debugPrint('Đang gửi OTP lên Supabase - Email: [$email] - Mã OTP: [$otp]');
+    return await supabase.auth.verifyOTP(
+      email: email,
+      token: otp,
+      type: OtpType.recovery,
     );
   }
 
