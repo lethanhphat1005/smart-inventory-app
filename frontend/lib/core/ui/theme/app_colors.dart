@@ -25,6 +25,13 @@ class AppColors {
   static const Color gradientOrangeStart = Color(0xFFFF8A00); // 0%
   static const Color gradientOrangeEnd = Color(0xFFFFB057); // 100%
 
+  static const Color lightOrange =
+      Color(0xFFFFE7D1); // Cam siêu nhạt (Background)
+  static const Color lightOrangeGradientEnd =
+      Color(0xFFFFD3A8); // Cam nhạt hơn (Gradient End)
+  static const Color lightGreyBorder =
+      Color.fromARGB(255, 159, 159, 159); // Xám nhạt (Border)
+
   static const Color gradientBlackStart = Color(0xFF000000); // 0%
   static const Color gradientBlackEnd = Color(0xFF666666); // 100%
 

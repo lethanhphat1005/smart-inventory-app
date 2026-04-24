@@ -1,5 +1,3 @@
-// Mở file inventory_dynamic_category_widget.dart và dán đè toàn bộ code này:
-
 import 'package:flutter/material.dart';
 import 'package:frontend/features/inventory/widgets/inventory/inventory_empty_category_widget.dart';
 import 'package:frontend/routes/app_routes.dart';
@@ -8,15 +6,13 @@ import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/features/inventory/controllers/inventory_controller.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/ui/widgets/t_custom_fade_overlay_widget.dart';
+import 'package:iconsax_flutter/iconsax_flutter.dart';
 
-// 1. ĐỔI SANG DÙNG GetView
 class InventoryDynamicCategoryWidget extends GetView<InventoryController> {
   const InventoryDynamicCategoryWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Đã bỏ dòng Get.find() vì GetView đã cung cấp sẵn biến `controller`
-
     final List<Color> avatarColors = [
       Colors.blue,
       Colors.orange,
@@ -65,7 +61,6 @@ class InventoryDynamicCategoryWidget extends GetView<InventoryController> {
           final bool isClickable = index < fullyVisibleCount;
 
           return InkWell(
-            // 2. GỌI HÀM TỪ CONTROLLER THAY VÌ XỬ LÝ LOGIC TRỰC TIẾP TẠI ĐÂY
             onTap: isClickable
                 ? () => controller.onCategorySelected(cat.name)
                 : null,
@@ -118,6 +113,7 @@ class InventoryDynamicCategoryWidget extends GetView<InventoryController> {
         },
       );
 
+      // Nếu có >4 mục (hasMore == true): CHỈ trả về GridView phủ Overlay, ẨN NÚT
       if (hasMore) {
         final int hiddenCount = dynamicCategories.length - fullyVisibleCount;
         return Stack(
@@ -131,7 +127,31 @@ class InventoryDynamicCategoryWidget extends GetView<InventoryController> {
         );
       }
 
-      return gridView;
+      // Nếu có <=4 mục (hasMore == false): TRẢ VỀ GridView + Nút View All ĐỂ TRÁNH BỊ KẸT
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          gridView,
+          const SizedBox(height: 16),
+          OutlinedButton.icon(
+            onPressed: () => Get.toNamed(AppRoutes.productCatalog),
+            icon: const Icon(Iconsax.category_2_copy, size: 18),
+            label: Text(
+              TTexts.seeAllCategories.tr,
+              style: const TextStyle(
+                  fontWeight: FontWeight.w600, fontFamily: 'Poppins'),
+            ),
+            style: OutlinedButton.styleFrom(
+              side: BorderSide(color: AppColors.primary.withOpacity(0.3)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+              foregroundColor: AppColors.primary,
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              backgroundColor: AppColors.primary.withOpacity(0.05),
+            ),
+          )
+        ],
+      );
     });
   }
 }

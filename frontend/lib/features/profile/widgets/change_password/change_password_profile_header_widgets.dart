@@ -19,13 +19,13 @@ class ChangePasswordHeaderWidget extends StatelessWidget {
     const color = AppColors.gradientOrangeStart;
 
     return SizedBox(
-      height: 240,
+      height: AppSizes.p240,
       child: Stack(
         clipBehavior: Clip.none,
         alignment: Alignment.topCenter,
         children: [
           Container(
-            height: 180,
+            height: AppSizes.p180,
             width: double.infinity,
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -47,12 +47,12 @@ class ChangePasswordHeaderWidget extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.only(top: AppSizes.p8),
                 child: SizedBox(
-                  height: 48,
+                  height: AppSizes.p48,
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
                       Positioned(
-                        left: 8,
+                        left: AppSizes.p8,
                         child: IconButton(
                           icon: const Icon(
                             Icons.arrow_back_ios_new,
@@ -68,7 +68,7 @@ class ChangePasswordHeaderWidget extends StatelessWidget {
                         textAlign: TextAlign.center,
                         style: const TextStyle(
                           color: AppColors.whiteText,
-                          fontSize: 22,
+                          fontSize: AppSizes.p22,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -81,28 +81,28 @@ class ChangePasswordHeaderWidget extends StatelessWidget {
 
           // AVATAR
           Positioned(
-            top: 125,
+            top: AppSizes.p125,
             child: Obx(() {
               final name = controller.fullName.value;
               final initial = getInitial(name);
 
               return Container(
-                padding: const EdgeInsets.all(4),
+                padding: const EdgeInsets.all(AppSizes.p4),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: AppColors.white,
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.08),
-                      blurRadius: 15,
-                      offset: const Offset(0, 8),
+                      blurRadius: AppSizes.p15,
+                      offset: const Offset(0, AppSizes.p8),
                     ),
                   ],
                 ),
                 child: Container(
-                  width: 110,
-                  height: 110,
-                  padding: const EdgeInsets.all(4),
+                  width: AppSizes.p110,
+                  height: AppSizes.p110,
+                  padding: const EdgeInsets.all(AppSizes.p4),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     gradient: LinearGradient(
@@ -117,15 +117,15 @@ class ChangePasswordHeaderWidget extends StatelessWidget {
                   child: Container(
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: color.withOpacity(0.08),
+                      color: AppColors.primary.withOpacity(0.08),
                     ),
                     alignment: Alignment.center,
                     child: Text(
                       initial,
                       style: const TextStyle(
-                        fontSize: 38,
+                        fontSize: AppSizes.p38,
                         fontWeight: FontWeight.w900,
-                        color: color,
+                        color: AppColors.primary,
                       ),
                     ),
                   ),

@@ -118,7 +118,8 @@ class SearchResultsListWidget extends GetView<TSearchController> {
                       title: controller.isTransactionSearch
                           ? TTexts.noTransactionsFound.tr
                           : TTexts.noResultsFound.tr,
-                      subtitle: TTexts.errorNotFoundMessage.tr,
+                      subtitle: TTexts.errorNotFoundMessage
+                          .tr, // Giữ nguyên Parameter subtitle của bạn
                     ),
                   )
                 : ListView.separated(
@@ -162,21 +163,18 @@ class SearchResultsListWidget extends GetView<TSearchController> {
 
                         final String displayType = tx.type.isNotEmpty
                             ? '${tx.type[0].toUpperCase()}${tx.type.substring(1).toLowerCase()}'
-                            : 'Unknown';
+                            : TTexts.na.tr;
 
-                        final String itemCountDisplay = tx.itemCount > 0
-                            ? tx.itemCount.toString()
-                            : (tx.items.isNotEmpty
-                                ? tx.items.length.toString()
-                                : '0');
+                        final String itemCountDisplay =
+                            "${tx.itemCount} ${TTexts.items.tr}";
 
                         return GestureDetector(
                           onTap: () => controller.handleItemTap(tx),
                           child: ReportTransactionCardWidget(
-                            transactionId: tx.transactionId ?? 'N/A',
+                            transactionId: tx.transactionId ?? TTexts.na.tr,
                             dateStr: tx.createdAt != null
                                 ? '${tx.createdAt!.day}/${tx.createdAt!.month}/${tx.createdAt!.year}'
-                                : 'N/A',
+                                : TTexts.na.tr,
                             typeDisplay: displayType,
                             typeColor: themeColor,
                             leftBottomLabel: bottomLabel,

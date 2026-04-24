@@ -50,7 +50,6 @@ class ApiClient {
         onError: (DioException e, handler) async {
           final statusCode = e.response?.statusCode;
 
-          //TODO: Bẫy lỗi 401 (Token hết hạn/Sai token) hoặc 403 (Không có quyền/Bị giáng chức)
           if (statusCode == 401 || statusCode == 403) {
             debugPrint('🚨 Token lỗi hoặc bị từ chối quyền. Ép đăng xuất...');
 
@@ -79,7 +78,6 @@ class ApiClient {
   }
 
   // --- Các hàm gọi API cơ bản ---
-
   Future<Response> get(
     String path, {
     Map<String, dynamic>? queryParameters,

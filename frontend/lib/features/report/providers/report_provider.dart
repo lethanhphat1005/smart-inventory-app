@@ -35,4 +35,14 @@ class ReportProvider {
     final data = response.data['data'] ?? response.data;
     return TransactionModel.fromJson(data);
   }
+
+  Future<Map<String, dynamic>?> getPackageDetailSummary(
+      String packageId) async {
+    try {
+      final response = await _apiClient.get('/api/product-packages/$packageId');
+      return response.data['data'] ?? response.data;
+    } catch (e) {
+      return null;
+    }
+  }
 }

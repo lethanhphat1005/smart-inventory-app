@@ -1,2 +1,7 @@
 .vscode
 docs
+.terraform
+*.tfvars
+*.pub
+*.env
+serviceAccountKey.json

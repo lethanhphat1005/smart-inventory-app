@@ -24,7 +24,7 @@ class EditProfileMobileView extends GetView<ProfileEditController> {
               EditProfileFormWidget(),
               SizedBox(height: AppSizes.p32),
               EditProfileSaveButtonWidget(),
-              SizedBox(height: 40),
+              SizedBox(height: AppSizes.p40),
             ],
           ),
         ),

@@ -19,13 +19,13 @@ class EditProfileHeaderWidget extends StatelessWidget {
     const color = AppColors.gradientOrangeStart;
 
     return SizedBox(
-      height: 240,
+      height: AppSizes.p240,
       child: Stack(
         clipBehavior: Clip.none,
         alignment: Alignment.topCenter,
         children: [
           Container(
-            height: 180,
+            height: AppSizes.p180,
             width: double.infinity,
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -37,8 +37,8 @@ class EditProfileHeaderWidget extends StatelessWidget {
                 end: Alignment.bottomRight,
               ),
               borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(AppSizes.p48),
-                bottomRight: Radius.circular(AppSizes.p48),
+                bottomLeft: Radius.circular(AppSizes.radius48),
+                bottomRight: Radius.circular(AppSizes.radius48),
               ),
             ),
             child: SafeArea(
@@ -81,13 +81,13 @@ class EditProfileHeaderWidget extends StatelessWidget {
 
           // AVATAR
           Positioned(
-            top: 125,
+            top: AppSizes.p125,
             child: Obx(() {
               final name = controller.fullName.value;
               final initial = getInitial(name);
 
               return Container(
-                padding: const EdgeInsets.all(4),
+                padding: const EdgeInsets.all(AppSizes.p4),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: AppColors.white,
@@ -100,9 +100,9 @@ class EditProfileHeaderWidget extends StatelessWidget {
                   ],
                 ),
                 child: Container(
-                  width: 110,
-                  height: 110,
-                  padding: const EdgeInsets.all(4),
+                  width: AppSizes.p110,
+                  height: AppSizes.p110,
+                  padding: const EdgeInsets.all(AppSizes.p4),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     gradient: LinearGradient(
@@ -123,9 +123,9 @@ class EditProfileHeaderWidget extends StatelessWidget {
                     child: Text(
                       initial,
                       style: const TextStyle(
-                        fontSize: 38,
+                        fontSize: AppSizes.p38,
                         fontWeight: FontWeight.w900,
-                        color: color,
+                        color: AppColors.primary,
                       ),
                     ),
                   ),

@@ -63,26 +63,35 @@ class ReportTransactionDetailInfoCardWidget extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  _buildAvatar(realAvatarUrl),
-                  const SizedBox(width: 12),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(userName,
-                          style: const TextStyle(
-                              fontFamily: 'Poppins',
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.primaryText)),
-                      Text(displayRole,
-                          style: const TextStyle(
-                              fontSize: 12, color: AppColors.subText)),
-                    ],
-                  )
-                ],
+              Expanded(
+                child: Row(
+                  children: [
+                    _buildAvatar(realAvatarUrl),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(userName,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.primaryText)),
+                          Text(displayRole,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                  fontSize: 12, color: AppColors.subText)),
+                        ],
+                      ),
+                    )
+                  ],
+                ),
               ),
+              const SizedBox(width: 12),
               Container(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 6),

@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:frontend/core/infrastructure/utils/url_helper_utils.dart';
 import 'package:frontend/core/ui/widgets/t_no_image_widget.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/features/inventory/models/inventory_insight_display_model.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
@@ -29,41 +30,58 @@ class SearchSimpleItemWidget extends StatelessWidget {
     final bool isPackage = package != null;
 
     String title = TTexts.unknownProduct.tr;
-    String subtitle = '';
+    Widget? subtitleWidget;
 
-    if (isPackage) {
-      title = package.displayName;
-      subtitle = "${TTexts.barcodeLabel.tr}: ${package.barcodeValue ?? '---'}";
+    if (isCategory) {
+      title = product.name;
+      subtitleWidget = Text(
+        TTexts.categoryNameLabel.tr,
+        style: const TextStyle(fontSize: 12, color: AppColors.subText),
+      );
     } else if (isBaseProduct) {
       title = product.name;
-      subtitle = "${TTexts.brand.tr}: ${product.brand ?? '---'}";
-    } else if (isCategory) {
-      title = product.name;
-      subtitle = TTexts.categoryCatalog.tr;
+      subtitleWidget = Text(
+        product.brand ?? '',
+        style: const TextStyle(fontSize: 12, color: AppColors.subText),
+      );
+    } else if (isPackage) {
+      title = package.displayName;
+      final price = package.sellingPrice;
+      final formattedPrice =
+          NumberFormat.currency(locale: 'en_US', symbol: '\$').format(price);
+
+      subtitleWidget = Text(
+        '${TTexts.salePrice.tr}: $formattedPrice',
+        style: const TextStyle(
+          fontFamily: 'Poppins',
+          fontSize: 12,
+          color: AppColors.subText,
+        ),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      );
     }
 
-    final String? imageUrl =
-        UrlHelperUtils.normalizeImageUrl(product?.imageUrl);
-
+    // --- XỬ LÝ ẢNH ---
     Widget leadingWidget;
-
     if (isCategory) {
       leadingWidget = Container(
         width: 44,
         height: 44,
         decoration: BoxDecoration(
-          color: AppColors.softGrey.withOpacity(0.1),
+          color: AppColors.primary.withOpacity(0.1),
           borderRadius: BorderRadius.circular(8),
         ),
-        child: const Icon(Iconsax.folder_2_copy,
-            color: AppColors.softGrey, size: 22),
+        child: const Icon(Iconsax.category_2_copy,
+            color: AppColors.primary, size: 24),
       );
     } else {
+      final imgUrl = product?.imageUrl ?? '';
       leadingWidget = ClipRRect(
         borderRadius: BorderRadius.circular(8),
-        child: imageUrl != null && imageUrl.isNotEmpty
+        child: imgUrl.isNotEmpty
             ? CachedNetworkImage(
-                imageUrl: imageUrl,
+                imageUrl: UrlHelperUtils.normalizeImageUrl(imgUrl) ?? '',
                 width: 44,
                 height: 44,
                 fit: BoxFit.cover,
@@ -107,15 +125,7 @@ class SearchSimpleItemWidget extends StatelessWidget {
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       ),
-      subtitle: Text(
-        subtitle,
-        style: const TextStyle(
-          fontSize: 12,
-          color: AppColors.subText,
-        ),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-      ),
+      subtitle: subtitleWidget,
     );
   }
 }

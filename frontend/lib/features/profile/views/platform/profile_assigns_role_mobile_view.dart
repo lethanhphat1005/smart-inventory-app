@@ -55,11 +55,12 @@ class AssignsRoleMobileView extends StatelessWidget {
                       Text("${controller.totalCount} ",
                           style: const TextStyle(
                               color: AppColors.primary,
-                              fontSize: 18,
+                              fontSize: AppSizes.p18,
                               fontWeight: FontWeight.bold)),
-                      const Text("results found",
-                          style: TextStyle(
-                              color: AppColors.subText, fontSize: 14)),
+                      Text(TTexts.resultsFound.tr,
+                          style: const TextStyle(
+                              color: AppColors.subText,
+                              fontSize: AppSizes.p14)),
                     ],
                   )),
 
@@ -67,7 +68,7 @@ class AssignsRoleMobileView extends StatelessWidget {
 
               const AssignsRoleListWidget(),
 
-              const SizedBox(height: 40),
+              const SizedBox(height: AppSizes.p40),
             ],
           ),
         ),

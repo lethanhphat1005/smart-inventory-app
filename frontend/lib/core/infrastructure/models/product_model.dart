@@ -54,4 +54,28 @@ class ProductModel {
       'activeStatus': activeStatus,
     };
   }
+
+  ProductModel copyWith({
+    String? productId,
+    String? name,
+    String? imageUrl,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    String? brand,
+    String? storeId,
+    String? categoryId,
+    String? activeStatus,
+  }) {
+    return ProductModel(
+      productId: productId ?? this.productId,
+      name: name ?? this.name,
+      imageUrl: imageUrl ?? this.imageUrl,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      brand: brand ?? this.brand,
+      storeId: storeId ?? this.storeId,
+      categoryId: categoryId ?? this.categoryId,
+      activeStatus: activeStatus ?? this.activeStatus,
+    );
+  }
 }

@@ -101,12 +101,9 @@ class ReportMobileView extends GetView<ReportController> {
                               ? '${tx.type[0].toUpperCase()}${tx.type.substring(1).toLowerCase()}'
                               : TTexts.unknownProduct.tr;
 
-                          final String itemCountDisplay = tx.itemCount > 0
-                              ? tx.itemCount.toString()
-                              : (tx.items.isNotEmpty
-                                  ? tx.items.length.toString()
-                                  : '0');
-
+                          final String itemCountDisplay =
+                              "${tx.itemCount} ${TTexts.items.tr}";
+                              
                           return GestureDetector(
                             onTap: () {
                               Get.toNamed(

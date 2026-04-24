@@ -29,16 +29,30 @@ class TPhoneFormFieldWidget extends StatefulWidget {
 class _TPhoneFormFieldWidgetState extends State<TPhoneFormFieldWidget> {
   final FocusNode _focusNode = FocusNode();
 
+  bool _isValidVietnamPhone(String phone) {
+    if (phone.isEmpty) return true;
+
+    // Bắt buộc đủ 10 số và bắt đầu bằng 0
+    return RegExp(r'^0\d{9}$').hasMatch(phone);
+  }
+
   @override
   void initState() {
     super.initState();
     _focusNode.addListener(() {
       if (mounted) setState(() {});
     });
+
+    widget.controller.addListener(_onTextChanged);
+  }
+
+  void _onTextChanged() {
+    if (mounted) setState(() {});
   }
 
   @override
   void dispose() {
+    widget.controller.removeListener(_onTextChanged);
     _focusNode.dispose();
     super.dispose();
   }
@@ -46,7 +60,7 @@ class _TPhoneFormFieldWidgetState extends State<TPhoneFormFieldWidget> {
   @override
   Widget build(BuildContext context) {
     final bool hasText = widget.controller.text.isNotEmpty;
-    final bool isValid = widget.controller.text.length == 10;
+    final bool isValid = _isValidVietnamPhone(widget.controller.text);
 
     final Color textColor =
         widget.enabled ? AppColors.primaryText : AppColors.subText;
@@ -54,8 +68,12 @@ class _TPhoneFormFieldWidgetState extends State<TPhoneFormFieldWidget> {
     Color borderColor;
     if (!widget.enabled) {
       borderColor = Colors.transparent;
+    } else if (hasText && isValid) {
+      borderColor = AppColors.toastSuccessGradientStart;
+    } else if (hasText && !isValid) {
+      borderColor = AppColors.alertText;
     } else if (_focusNode.hasFocus) {
-      borderColor = isValid ? Colors.green : AppColors.primary;
+      borderColor = AppColors.primary;
     } else {
       borderColor = Colors.grey.shade300;
     }
@@ -160,7 +178,7 @@ class _TPhoneFormFieldWidgetState extends State<TPhoneFormFieldWidget> {
                       icon: const Icon(
                         Icons.cancel,
                         size: AppSizes.p20,
-                        color: Colors.grey,
+                        color: AppColors.lightGreyBorder,
                       ),
                       onPressed: () {
                         widget.controller.clear();
@@ -182,13 +200,13 @@ class _TPhoneFormFieldWidgetState extends State<TPhoneFormFieldWidget> {
         ),
 
         /// THÔNG BÁO LỖI
-        if (widget.enabled && _focusNode.hasFocus && hasText && !isValid)
+        if (widget.enabled && hasText && !isValid)
           Padding(
             padding: const EdgeInsets.only(top: AppSizes.p8, left: AppSizes.p4),
             child: Text(
               TTexts.editPhoneNumberInvalid.tr,
               style: const TextStyle(
-                color: Colors.red,
+                color: AppColors.alertText,
                 fontSize: AppSizes.p12,
                 fontFamily: 'Poppins',
               ),

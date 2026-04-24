@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/ui/widgets/t_search_bar_widget.dart';
 import 'package:frontend/core/ui/widgets/t_app_bar_widget.dart';
-import 'package:frontend/features/search/controllers/search_controller.dart';
 import 'package:frontend/features/transaction/controllers/outbound_transaction_controller.dart';
 import 'package:frontend/features/transaction/widgets/outbound_transaction/outbound_transaction_bottom_bar_widget.dart';
 import 'package:frontend/features/transaction/widgets/outbound_transaction/outbound_transaction_export_type_selector_widget.dart';
@@ -22,27 +21,29 @@ class OutboundTransactionMobileView
   Widget build(BuildContext context) {
     return PopScope(
         canPop: false,
-        onPopInvoked: (didPop) {
+        onPopInvokedWithResult: (didPop, result) {
           if (didPop) return;
           controller.handleExit();
         },
         child: Scaffold(
           backgroundColor: AppColors.background,
           appBar: TAppBarWidget(
-            title: TTexts.outboundTransactionTitle.tr,
-            showBackArrow: true,
-            centerTitle: true,
+            title: TTexts.outboundTransaction.tr,
             onBackPress: controller.handleExit,
           ),
           body: Column(
             children: [
-              Padding(
-                padding: const EdgeInsets.all(AppSizes.p20),
+              Container(
+                color: AppColors.white,
+                padding: const EdgeInsets.fromLTRB(
+                    AppSizes.p20, 8, AppSizes.p20, AppSizes.p16),
                 child: TSearchBarWidget(
                   hintText: TTexts.searchProductToAdd.tr,
-                  onTap: () => Get.toNamed(AppRoutes.search,
-                      arguments: {'target': SearchTarget.inventory}),
-                  onScanTap: () => controller.openScanner(),
+                  onTap: () {
+                    Get.toNamed(AppRoutes.search,
+                        arguments: AppRoutes.outboundTransaction);
+                  },
+                  onScanTap: controller.openScanner,
                 ),
               ),
               Expanded(
@@ -52,24 +53,26 @@ class OutboundTransactionMobileView
                   }
 
                   return ListView(
-                    physics: const BouncingScrollPhysics(),
-                    padding: const EdgeInsets.only(bottom: 100),
                     children: [
-                      ListView.separated(
+                      ListView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: AppSizes.p20),
                         itemCount: controller.cartItems.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: 12),
                         itemBuilder: (context, index) {
                           final item = controller.cartItems[index];
-                          return TransactionCartItemWidget(
-                            item: item,
-                            onIncrease: () => controller.updateQuantity(
-                                index, item.quantity + 1),
-                            onDecrease: () => controller.updateQuantity(
-                                index, item.quantity - 1),
+
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: AppSizes.p20),
+                            child: TransactionCartItemWidget(
+                              item: item,
+                              isOutbound: true,
+                              imageUrl: item.packageInfo?.product?.imageUrl,
+                              onIncrease: () => controller.updateQuantity(
+                                  index, item.quantity + 1),
+                              onDecrease: () => controller.updateQuantity(
+                                  index, item.quantity - 1),
+                            ),
                           );
                         },
                       ),
@@ -90,24 +93,18 @@ class OutboundTransactionMobileView
       children: [
         const Padding(
           padding:
-              EdgeInsets.fromLTRB(AppSizes.p20, AppSizes.p24, AppSizes.p20, 16),
+              EdgeInsets.fromLTRB(AppSizes.p20, AppSizes.p10, AppSizes.p20, 16),
           child: Divider(color: AppColors.divider),
         ),
-
-        // WIDGET CHỌN LÝ DO
         Obx(() => OutboundTransactionExportTypeSelectorWidget(
               reasons: controller.predefinedReasons,
               selectedReason: controller.selectedReason.value,
               onReasonSelected: controller.selectReason,
-              // Truyền biến kiểu int
               otherFinancialEffect: controller.otherFinancialEffect.value,
               onOtherFinancialEffectChanged: (val) =>
                   controller.otherFinancialEffect.value = val,
             )),
-
         const SizedBox(height: 8),
-
-        // WIDGET GHI CHÚ
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSizes.p20),
           child: TTextFormFieldWidget(
@@ -118,7 +115,6 @@ class OutboundTransactionMobileView
             prefixIcon: Icons.edit_note_rounded,
           ),
         ),
-
         const SizedBox(height: 40),
       ],
     );

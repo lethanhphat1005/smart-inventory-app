@@ -27,8 +27,8 @@ class EditProfileUserAddressAutocompleteWidget
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.08),
-              blurRadius: 20,
-              offset: const Offset(0, 10),
+              blurRadius: AppSizes.p20,
+              offset: const Offset(0, AppSizes.p10),
             ),
           ],
         ),

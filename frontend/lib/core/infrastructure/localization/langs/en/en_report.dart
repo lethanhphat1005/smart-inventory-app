@@ -11,7 +11,7 @@ final Map<String, String> enReport = {
   TTexts.reportEmptyTitle: 'No Transactions',
   TTexts.reportEmptySubtitle: 'There are no transactions for this date.',
   TTexts.reportHistory: 'Transactions History',
-  TTexts.reportTransactionsOverview: 'Transactions overview',
+  TTexts.reportTransactionsOverview: 'transactions',
   TTexts.exportFailedTitle: 'Export Failed',
   TTexts.exportFailedMessage:
       'No transactions available on this date to export.',

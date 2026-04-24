@@ -23,6 +23,17 @@ class ReportTransactionDetailItemCardWidget extends StatelessWidget {
     final String? imageUrl =
         UrlHelperUtils.normalizeImageUrl(item.packageInfo?.product?.imageUrl);
 
+    final String rawBarcode = item.packageInfo?.barcodeValue ?? '';
+    final int totalBarcodes = item.packageInfo?.barcodes.length ?? 0;
+
+    String displayBarcode = rawBarcode.isNotEmpty ? rawBarcode : TTexts.na.tr;
+
+    // Nếu sản phẩm có nhiều hơn 1 mã vạch, ta nối thêm chuỗi vào sau
+    if (totalBarcodes > 1) {
+      final int extraCount = totalBarcodes - 1;
+      displayBarcode += ' (+$extraCount ${TTexts.barcode.tr.toLowerCase()})';
+    }
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -118,8 +129,7 @@ class ReportTransactionDetailItemCardWidget extends StatelessWidget {
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis),
                       const SizedBox(height: 4),
-                      Text(
-                          '${TTexts.barcodeLabel.tr}: ${item.packageInfo?.barcodeValue ?? TTexts.na.tr}',
+                      Text('${TTexts.barcodeLabel.tr}: $displayBarcode',
                           style: const TextStyle(
                               fontSize: 11, color: AppColors.subText)),
                       const SizedBox(height: 8),

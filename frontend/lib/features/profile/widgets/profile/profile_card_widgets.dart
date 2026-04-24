@@ -32,23 +32,22 @@ class ProfileStoreCardWidget extends StatelessWidget {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 16,
-                    offset: const Offset(0, 8),
+                    color: AppColors.primaryText.withOpacity(0.05),
+                    blurRadius: AppSizes.p16,
+                    offset: const Offset(0, AppSizes.p8),
                   ),
                 ],
               ),
-
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // CURRENT STORE 
+                  // CURRENT STORE
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
-                        width: 52,
-                        height: 52,
+                        width: AppSizes.p52,
+                        height: AppSizes.p52,
                         decoration: BoxDecoration(
                           color:
                               AppColors.gradientOrangeStart.withOpacity(0.12),
@@ -58,7 +57,7 @@ class ProfileStoreCardWidget extends StatelessWidget {
                         child: const Icon(
                           Iconsax.shop_copy,
                           color: AppColors.primary,
-                          size: 24,
+                          size: AppSizes.p24,
                         ),
                       ),
                       const SizedBox(width: AppSizes.p12),
@@ -69,41 +68,41 @@ class ProfileStoreCardWidget extends StatelessWidget {
                             Text(
                               TTexts.editStoreCurrentStore.tr,
                               style: const TextStyle(
-                                fontSize: 12,
+                                fontSize: AppSizes.p12,
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.gradientOrangeStart,
                               ),
                             ),
-                            const SizedBox(height: 6),
+                            const SizedBox(height: AppSizes.p6),
                             Obx(
                               () => Text(
                                 controller.storeName.value.isEmpty
-                                    ? "Store Name"
+                                    ? TTexts.profileStoreName.tr
                                     : controller.storeName.value,
                                 style: const TextStyle(
                                   fontWeight: FontWeight.w800,
-                                  fontSize: 16,
+                                  fontSize: AppSizes.p16,
                                   color: AppColors.primaryText,
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            const SizedBox(height: 4),
+                            const SizedBox(height: AppSizes.p4),
                           ],
                         ),
                       ),
                       const SizedBox(width: AppSizes.p8),
                       Container(
-                        width: 36,
-                        height: 36,
+                        width: AppSizes.p36,
+                        height: AppSizes.p36,
                         decoration: const BoxDecoration(
                           color: AppColors.background,
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(
                           Iconsax.arrow_right_3_copy,
-                          size: 16,
+                          size: AppSizes.p16,
                           color: AppColors.subText,
                         ),
                       ),
@@ -112,16 +111,16 @@ class ProfileStoreCardWidget extends StatelessWidget {
 
                   const SizedBox(height: AppSizes.p12),
 
-                  /// SWITCH STORE 
+                  /// SWITCH STORE
                   Align(
                     alignment: Alignment.center,
                     child: InkWell(
                       onTap: controller.goToStoreSelect,
                       borderRadius: BorderRadius.circular(AppSizes.radius14),
                       child: Container(
-                        width: double.infinity, 
-                        margin: const EdgeInsets.symmetric(
-                            horizontal: 4),
+                        width: double.infinity,
+                        margin:
+                            const EdgeInsets.symmetric(horizontal: AppSizes.p4),
                         padding: const EdgeInsets.symmetric(
                           vertical: AppSizes.p12,
                         ),
@@ -141,14 +140,14 @@ class ProfileStoreCardWidget extends StatelessWidget {
                             const Icon(
                               Iconsax.refresh_copy,
                               color: AppColors.primary,
-                              size: 16,
+                              size: AppSizes.p16,
                             ),
                             const SizedBox(width: AppSizes.p6),
                             Text(
                               TTexts.profileBtnSwitchStore.tr,
                               style: const TextStyle(
                                 color: AppColors.primary,
-                                fontSize: 13,
+                                fontSize: AppSizes.p13,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
@@ -161,7 +160,6 @@ class ProfileStoreCardWidget extends StatelessWidget {
               ),
             ),
           ),
-          //const SizedBox(height: AppSizes.p4),
         ],
       ),
     );

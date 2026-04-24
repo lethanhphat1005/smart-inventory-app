@@ -39,13 +39,13 @@ class _HomeRevenueChartWidgetState extends State<HomeRevenueChartWidget> {
             : controller.weekChangePercent;
         final compareText =
             isLineChart ? TTexts.homeVsYesterday.tr : TTexts.homeThisWeek.tr;
-
+        final prefix = amount < 0 ? '-' : '';
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildHeader(),
             const SizedBox(height: AppSizes.p12),
-            Text("\$${amount.toStringAsFixed(2)}",
+            Text("$prefix\$${amount.abs().toStringAsFixed(2)}",
                 style: const TextStyle(
                     fontFamily: 'Poppins',
                     fontSize: 32,

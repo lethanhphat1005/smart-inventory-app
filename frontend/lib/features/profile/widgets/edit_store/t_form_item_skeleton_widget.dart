@@ -23,7 +23,7 @@ class _TStoreItemSkeletonState extends State<TStoreItemSkeleton>
       duration: const Duration(milliseconds: 900),
     )..repeat(reverse: true);
 
-    _opacity = Tween<double>(begin: 0.35, end: 0.8).animate(
+    _opacity = Tween<double>(begin: AppSizes.p0_35, end: AppSizes.p0_8).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
   }
@@ -37,7 +37,7 @@ class _TStoreItemSkeletonState extends State<TStoreItemSkeleton>
   Widget _bone({
     required double width,
     required double height,
-    double radius = 12,
+    double radius = AppSizes.p12,
     ShapeBorder? shape,
   }) {
     return FadeTransition(
@@ -60,46 +60,52 @@ class _TStoreItemSkeletonState extends State<TStoreItemSkeleton>
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(
-        vertical: 7,
+        vertical: AppSizes.p7,
         horizontal: AppSizes.p16,
       ),
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(AppSizes.p14),
       decoration: BoxDecoration(
         color: AppColors.white,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(AppSizes.radius24),
         border: Border.all(
           color: AppColors.subText.withOpacity(0.08),
-          width: 1.2,
+          width: AppSizes.p1_2,
         ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.03),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
+            blurRadius: AppSizes.p16,
+            offset: const Offset(0, AppSizes.p6),
           ),
         ],
       ),
       child: Row(
         children: [
           _bone(
-            width: 58,
-            height: 58,
+            width: AppSizes.p58,
+            height: AppSizes.p58,
             shape: const CircleBorder(),
           ),
-          const SizedBox(width: 14),
+          const SizedBox(width: AppSizes.p14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _bone(width: 140, height: 16, radius: 8),
-                const SizedBox(height: 10),
-                _bone(width: 72, height: 13, radius: 8),
+                _bone(
+                    width: AppSizes.p140,
+                    height: AppSizes.p16,
+                    radius: AppSizes.p8),
+                const SizedBox(height: AppSizes.p10),
+                _bone(
+                    width: AppSizes.p72,
+                    height: AppSizes.p13,
+                    radius: AppSizes.p8),
               ],
             ),
           ),
           _bone(
-            width: 32,
-            height: 32,
+            width: AppSizes.p32,
+            height: AppSizes.p32,
             shape: const CircleBorder(),
           ),
         ],

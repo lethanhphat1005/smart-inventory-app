@@ -130,6 +130,28 @@ class _TBarcodeScannerLayoutState extends State<TBarcodeScannerLayout>
               ],
             );
           }),
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 10,
+            right: 20,
+            child: IconButton(
+              icon: const Icon(Icons.keyboard, color: Colors.white),
+              onPressed: () {
+                // Dừng camera để tránh loạn
+                scannerController.pauseScan();
+                Get.defaultDialog(
+                  title: "Test Emulator",
+                  content: TextField(
+                    decoration:
+                        const InputDecoration(hintText: "Nhập mã barcode..."),
+                    onSubmitted: (val) {
+                      Get.back();
+                      if (widget.onScanned != null) widget.onScanned!(val);
+                    },
+                  ),
+                );
+              },
+            ),
+          ),  
         ],
       ),
     );

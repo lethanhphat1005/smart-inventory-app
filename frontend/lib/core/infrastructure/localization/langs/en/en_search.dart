@@ -22,4 +22,10 @@ final Map<String, String> enSearch = {
   TTexts.activeFilters: 'Active Filters:',
   TTexts.userLabel: 'User',
   TTexts.me: 'Me',
+  TTexts.time: "Time",
+  TTexts.allEmployees: "All employees",
+  TTexts.loadingEmployees: "Loading employees...",
+  TTexts.filterNone: "None",
+  TTexts.supplier: "Supplier",
+  TTexts.customer: "Customer",
 };

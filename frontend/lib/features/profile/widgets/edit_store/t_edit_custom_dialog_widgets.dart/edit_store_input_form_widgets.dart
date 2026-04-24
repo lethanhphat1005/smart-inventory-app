@@ -33,7 +33,7 @@ class EditStoreInputFormWidget extends GetView<ProfileEditStoreController> {
           /// ADDRESS
           TTextFormFieldWidget(
             controller: controller.addressController,
-            label: TTexts.editStoreAddressLabel.tr,
+            label: TTexts.profileAddressBottomSheet.tr,
             hintText: TTexts.editStoreAddressHint.tr,
             prefixIcon: Iconsax.location_copy,
             maxLines: 2,

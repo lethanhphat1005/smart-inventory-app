@@ -21,7 +21,7 @@ class ProfileMenuItemWidget extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSizes.p16,
-        vertical: 4,
+        vertical: AppSizes.p4,
       ),
       child: Container(
         decoration: BoxDecoration(
@@ -36,19 +36,19 @@ class ProfileMenuItemWidget extends StatelessWidget {
           leading: Icon(
             icon,
             color: AppColors.primary,
-            size: 22,
+            size: AppSizes.p22,
           ),
           title: Text(
             title.tr,
             style: const TextStyle(
-              fontSize: 15,
+              fontSize: AppSizes.p15,
               fontWeight: FontWeight.w500,
             ),
           ),
           trailing: const Icon(
             Iconsax.arrow_right_3_copy,
-            size: 14,
-            color: AppColors.divider,
+            size: AppSizes.p14,
+            color: AppColors.subText,
           ),
         ),
       ),

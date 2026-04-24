@@ -10,12 +10,14 @@ class TransactionQuantitySelectorWidget extends StatelessWidget {
   final TextEditingController controller;
   final VoidCallback onIncrease;
   final VoidCallback onDecrease;
+  final int? maxQuantity;
 
   const TransactionQuantitySelectorWidget({
     super.key,
     required this.controller,
     required this.onIncrease,
     required this.onDecrease,
+    this.maxQuantity,
   });
 
   @override
@@ -60,18 +62,22 @@ class TransactionQuantitySelectorWidget extends StatelessWidget {
                     controller: controller,
                     keyboardType: TextInputType.number,
                     textAlign: TextAlign.center,
-                    // 🛡️ CHẶN KÝ TỰ BẰNG FORMARTTER: CHỈ CHO NHẬP SỐ
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     onChanged: (value) {
-                      // Cho phép xóa trắng tạm thời để người dùng gõ số mới
                       if (value.isEmpty) return;
 
-                      // 🛡️ CHẶN SỐ 0 HOẶC SỐ ÂM: Ép về 1
                       final qty = int.tryParse(value);
                       if (qty == null || qty < 1) {
                         controller.text = '1';
                         controller.selection = TextSelection.fromPosition(
                             const TextPosition(offset: 1));
+                        return;
+                      }
+
+                      if (maxQuantity != null && qty > maxQuantity!) {
+                        controller.text = maxQuantity.toString();
+                        controller.selection = TextSelection.fromPosition(
+                            TextPosition(offset: controller.text.length));
                       }
                     },
                     style: const TextStyle(
@@ -93,8 +99,16 @@ class TransactionQuantitySelectorWidget extends StatelessWidget {
               const SizedBox(width: 20),
               _buildRawButton(
                 icon: Iconsax.add_copy,
-                onTap: onIncrease,
-                color: AppColors.primary,
+                onTap: () {
+                  final current = int.tryParse(controller.text) ?? 1;
+                  if (maxQuantity != null && current >= maxQuantity!) return;
+                  onIncrease();
+                },
+                // Đổi màu dấu cộng thành xám nếu đã max
+                color: (maxQuantity != null &&
+                        (int.tryParse(controller.text) ?? 1) >= maxQuantity!)
+                    ? AppColors.softGrey
+                    : AppColors.primary,
               ),
             ],
           ),

@@ -15,7 +15,7 @@ class EditStoreHeaderWidget extends StatelessWidget {
         Text(
           TTexts.editStoreTitle.tr,
           style: const TextStyle(
-            fontSize: 28,
+            fontSize: AppSizes.p28,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -23,7 +23,7 @@ class EditStoreHeaderWidget extends StatelessWidget {
         Text(
           TTexts.editStoreSubtitle.tr,
           style: const TextStyle(
-            fontSize: 16,
+            fontSize: AppSizes.p16,
             color: AppColors.subText,
           ),
         ),

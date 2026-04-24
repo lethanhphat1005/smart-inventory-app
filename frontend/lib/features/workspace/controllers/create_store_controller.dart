@@ -1,7 +1,7 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
-import 'package:frontend/core/infrastructure/exceptions/t_exceptions.dart';
 import 'package:frontend/core/infrastructure/utils/full_screen_loader_utils.dart';
 import 'package:frontend/features/workspace/provider/workspace_provider.dart';
 import 'package:get/get.dart';
@@ -14,169 +14,156 @@ import 'package:frontend/core/ui/widgets/t_snackbars_widget.dart';
 import 'package:frontend/core/ui/widgets/t_custom_dialog_widget.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:frontend/core/state/services/store_service.dart';
+import 'package:frontend/core/state/services/user_service.dart'; // Bổ sung import
+import 'package:frontend/features/navigation/controllers/navigation_controller.dart';
 
 class CreateStoreController extends GetxController {
-  // --- CONTROLLERS ---
   final nameController = TextEditingController();
   final addressController = TextEditingController();
   final mapController = MapController();
 
-  // --- STATES ---
   final isLoading = false.obs;
   final isLoadingAddress = false.obs;
 
   final selectedLocation = const LatLng(10.762622, 106.660172).obs;
-  final addressPredictions = <dynamic>[].obs;
+  final currentAddress = "".obs;
+  bool isMapReady = false;
 
-  final _dio = Dio();
-  late final WorkspaceProvider _workspaceProvider;
+  // KHÔI PHỤC: Logic gợi ý địa chỉ
+  final RxList<dynamic> addressPredictions = <dynamic>[].obs;
+  Timer? _debounce;
 
-  // GỌI STORE SERVICE ĐỂ LƯU DATA
-  late final _storeService = Get.find<StoreService>();
+  final WorkspaceProvider _workspaceProvider = WorkspaceProvider();
+  final StoreService _storeService = Get.find<StoreService>();
 
-  @override
-  void onInit() {
-    super.onInit();
-    _workspaceProvider = WorkspaceProvider();
+  // --- LOGIC MAP & GPS ---
+
+  void onMapCreated() {
+    isMapReady = true;
+    mapController.move(selectedLocation.value, 15.0);
   }
 
-  void _safeMoveMap(LatLng location) {
-    try {
-      mapController.move(location, 16.0);
-    } catch (e) {
-      debugPrint("Map not ready yet: $e");
-    }
+  void onMapTap(TapPosition tapPosition, LatLng point) async {
+    selectedLocation.value = point;
+    mapController.move(point, mapController.camera.zoom);
+    await _getAddressFromLatLng(point);
   }
 
-  // --- 1. TÌM KIẾM ĐỊA CHỈ ---
-  Future<void> searchAddress(String query) async {
-    if (query.trim().length < 3) {
-      addressPredictions.clear();
-      return;
-    }
-
-    try {
-      final response = await _dio.get(
-        'https://nominatim.openstreetmap.org/search',
-        queryParameters: {
-          'q': query,
-          'format': 'json',
-          'addressdetails': 1,
-          'limit': 5,
-          'countrycodes': 'vn',
-        },
-        options: Options(headers: {
-          'User-Agent': 'StorixApp/1.0',
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        addressPredictions.assignAll(response.data);
-      }
-    } catch (e) {
-      debugPrint("Search Error: $e");
-    }
-  }
-
-  // --- 2. CHỌN GỢI Ý ĐỊA CHỈ ---
-  void onSuggestionSelected(dynamic place) {
-    final lat = double.parse(place['lat']);
-    final lon = double.parse(place['lon']);
-    final newLocation = LatLng(lat, lon);
-
-    selectedLocation.value = newLocation;
-    addressController.text = place['display_name'] ?? "";
-    addressPredictions.clear();
-
-    _safeMoveMap(newLocation);
-
-    addressController.selection = TextSelection.fromPosition(
-      TextPosition(offset: addressController.text.length),
-    );
-  }
-
-  // --- 3. LẤY VỊ TRÍ GPS ---
   Future<void> getCurrentLocation() async {
     try {
       isLoadingAddress.value = true;
-
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
-        TSnackbarsWidget.error(
-            title: TTexts.gpsOffTitle.tr, message: TTexts.gpsOffMessage.tr);
+        isLoadingAddress.value = false;
         return;
       }
 
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) return;
+        if (permission == LocationPermission.denied) {
+          isLoadingAddress.value = false;
+          return;
+        }
       }
 
       Position position = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.bestForNavigation,
-          timeLimit: Duration(seconds: 15),
-        ),
-      );
+          desiredAccuracy: LocationAccuracy.high);
 
-      final newPos = LatLng(position.latitude, position.longitude);
-      selectedLocation.value = newPos;
-      _safeMoveMap(newPos);
+      final newLatLng = LatLng(position.latitude, position.longitude);
+      selectedLocation.value = newLatLng;
 
-      List<Placemark> placemarks =
-          await placemarkFromCoordinates(position.latitude, position.longitude);
-      if (placemarks.isNotEmpty) {
-        final p = placemarks.first;
-        addressController.text =
-            "${p.street}, ${p.subAdministrativeArea}, ${p.administrativeArea}";
+      if (isMapReady) {
+        mapController.move(newLatLng, 15.0);
       }
+
+      await _getAddressFromLatLng(newLatLng);
     } catch (e) {
-      debugPrint("GPS Error: $e");
-      TSnackbarsWidget.error(
-          title: TTexts.errorTitle.tr, message: TTexts.locationErrorMessage.tr);
+      debugPrint("Error location: $e");
     } finally {
       isLoadingAddress.value = false;
     }
   }
 
-  // --- 4. TẠO WORKSPACE MỚI ---
-  void onTryCreateWorkspace() {
-    final name = nameController.text.trim();
-    if (name.isEmpty) {
-      TSnackbarsWidget.warning(
-          title: TTexts.errorTitle.tr, message: TTexts.storeNameEmptyError.tr);
+  Future<void> _getAddressFromLatLng(LatLng point) async {
+    try {
+      isLoadingAddress.value = true;
+      List<Placemark> placemarks =
+          await placemarkFromCoordinates(point.latitude, point.longitude);
+      if (placemarks.isNotEmpty) {
+        Placemark place = placemarks.first;
+        String address =
+            "${place.street}, ${place.subAdministrativeArea}, ${place.administrativeArea}, ${place.country}";
+        currentAddress.value = address;
+        addressController.text = address;
+      }
+    } catch (e) {
+      currentAddress.value = "Unknown address";
+    } finally {
+      isLoadingAddress.value = false;
+    }
+  }
+
+  // --- LOGIC SEARCH ĐỊA CHỈ ---
+
+  Future<void> searchAddress(String query) async {
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    if (query.isEmpty || query.length < 3) {
+      addressPredictions.clear();
       return;
     }
 
-    Get.dialog(
-      TCustomDialogWidget(
-        title: TTexts.confirmCreateStoreTitle.tr,
-        description: "${TTexts.confirmCreateStoreMessage.tr} '$name'?",
-        icon: const Text('🤔', style: TextStyle(fontSize: 40)),
-        primaryButtonText: TTexts.create.tr,
-        onPrimaryPressed: () {
-          Get.back();
-          _executeCreate(name);
-        },
-        secondaryButtonText: TTexts.cancel.tr,
-        onSecondaryPressed: () => Get.back(),
-      ),
-    );
+    _debounce = Timer(const Duration(milliseconds: 500), () async {
+      try {
+        final response = await Dio().get(
+          'https://nominatim.openstreetmap.org/search',
+          queryParameters: {'q': query, 'format': 'json', 'limit': 5},
+          options: Options(headers: {'User-Agent': 'StorixApp/1.0'}),
+        );
+        addressPredictions.assignAll(response.data);
+      } catch (e) {
+        debugPrint("Autocomplete Error: $e");
+      }
+    });
   }
 
-  Future<void> _executeCreate(String name) async {
+  void onSuggestionSelected(dynamic place) {
+    final String displayName = place['display_name'] ?? "";
+    addressController.text = displayName;
+    currentAddress.value = displayName;
+    addressPredictions.clear();
+
+    final lat = double.tryParse(place['lat'].toString()) ?? 0.0;
+    final lon = double.tryParse(place['lon'].toString()) ?? 0.0;
+    if (lat != 0.0 && lon != 0.0) {
+      final newLatLng = LatLng(lat, lon);
+      selectedLocation.value = newLatLng;
+      if (isMapReady) {
+        mapController.move(newLatLng, 16.0);
+      }
+    }
+    FocusManager.instance.primaryFocus?.unfocus();
+  }
+
+  // --- LOGIC TẠO WORKSPACE ---
+
+  Future<void> onTryCreateWorkspace() async {
+    final name = nameController.text.trim();
+    if (name.isEmpty) {
+      TSnackbarsWidget.warning(
+          title: TTexts.warningTitle.tr, message: TTexts.warningEmptyName.tr);
+      return;
+    }
+
     try {
-      isLoading.value = true;
       FullScreenLoaderUtils.openLoadingDialog(TTexts.creatingWorkspace.tr);
 
       String currentTimezone = 'Asia/Ho_Chi_Minh';
       try {
+        // Fix lỗi TimezoneInfo bằng .toString()
         final dynamic tz = await FlutterTimezone.getLocalTimezone();
         currentTimezone = tz.toString();
-      } catch (e) {
-        debugPrint("Could not get timezone: $e");
-      }
+      } catch (_) {}
 
       final payload = {
         "name": name,
@@ -186,31 +173,50 @@ class CreateStoreController extends GetxController {
         "timezone": currentTimezone,
       };
 
-      // 1. NHẬN KẾT QUẢ TỪ API
       final createdStore = await _workspaceProvider.createStore(payload);
 
-      // 2. NGAY LẬP TỨC LƯU STORE MỚI VÀO BỘ NHỚ
+      // 1. CẬP NHẬT USER PROFILE NGAY LẬP TỨC (ĐỂ NHẬN ROLE OWNER)
+      await Get.find<UserService>().fetchAndSaveProfile();
+
+      // 2. LƯU STORE MỚI VÀO BỘ NHỚ LÀM STORE HIỆN TẠI
       await _storeService.saveSelectedStore(
         createdStore.storeId,
         createdStore.name,
-        createdStore.role,
+        'owner', // Gán cứng owner vì người tạo chắc chắn là owner
         createdStore.inviteCode ?? '',
       );
 
-      FullScreenLoaderUtils.stopLoading();
+      // 3. RESET NAVIGATION VỀ TAB HOME
+      if (Get.isRegistered<NavigationController>()) {
+        Get.find<NavigationController>().selectedIndex.value = 0;
+      }
 
-      // 3. CHUYỂN SANG MÀN SUCCESS (Chỉ cần truyền name để hiển thị UI)
+      FullScreenLoaderUtils.stopLoading();
       Get.offNamed(AppRoutes.workspaceReady,
           arguments: {'storeName': createdStore.name});
     } catch (e) {
       FullScreenLoaderUtils.stopLoading();
-
-      final errorMap = TExceptions.getErrorMessage(e);
-      TSnackbarsWidget.error(
-          title: errorMap['title'] ?? TTexts.errorTitle.tr,
-          message: errorMap['message'] ?? e.toString());
-    } finally {
-      isLoading.value = false;
+      if (e is DioException && e.response?.statusCode == 409) {
+        Get.dialog(TCustomDialogWidget(
+          title: TTexts.errorServerTitle.tr,
+          description: TTexts.warningStoreExists.tr,
+          icon: const Text('🏢', style: TextStyle(fontSize: 40)),
+          primaryButtonText: TTexts.tryAgain.tr,
+          onPrimaryPressed: () => Get.back(),
+        ));
+      } else {
+        TSnackbarsWidget.error(
+            title: TTexts.errorServerTitle.tr, message: e.toString());
+      }
     }
+  }
+
+  @override
+  void onClose() {
+    nameController.dispose();
+    addressController.dispose();
+    mapController.dispose();
+    _debounce?.cancel();
+    super.onClose();
   }
 }

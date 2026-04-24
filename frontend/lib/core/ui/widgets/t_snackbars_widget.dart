@@ -3,17 +3,33 @@ import 'package:get/get.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 
-/// Tiện ích hiển thị các thông báo (Toast/Snackbar) toàn cục
 class TSnackbarsWidget {
+  static DateTime? _lastSnackbarTime;
+  static String? _lastMessage;
+
   static void _showToast({
     required String title,
     required String message,
     required Color bgColor,
-    required Gradient iconGradient, // Thay Color thành Gradient
+    required Gradient iconGradient,
     required IconData icon,
-    String? actionText, // Đưa Action Text lên base
-    VoidCallback? onActionPressed, // Đưa Action Callback lên base
+    String? actionText,
+    VoidCallback? onActionPressed,
   }) {
+    // 1. CƠ CHẾ CHỐNG SPAM
+    final now = DateTime.now();
+    // Nếu tin nhắn giống hệt nhau và xuất hiện cách nhau chưa tới 1.5 giây -> Bỏ qua
+    if (_lastSnackbarTime != null && _lastMessage == message) {
+      if (now.difference(_lastSnackbarTime!).inMilliseconds < 1500) {
+        return;
+      }
+    }
+    _lastSnackbarTime = now;
+    _lastMessage = message;
+
+    // 2. DỌN DẸP HÀNG ĐỢI: Tắt ngay lập tức tất cả snackbar đang có trên màn hình
+    Get.closeAllSnackbars();
+
     // Khởi tạo nút Action nếu được truyền vào
     Widget? actionBtn;
     if (actionText != null && onActionPressed != null) {
@@ -24,7 +40,7 @@ class TSnackbarsWidget {
           minimumSize: Size.zero,
           side: BorderSide(color: Colors.grey.shade300),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          backgroundColor: Colors.white, // Nền trắng để nổi bật trên nền pastel
+          backgroundColor: Colors.white,
         ),
         child: Text(
           actionText,
@@ -32,7 +48,7 @@ class TSnackbarsWidget {
             fontFamily: 'Poppins',
             color: AppColors.primaryText,
             fontSize: 12,
-            fontWeight: FontWeight.w500, // Đậm vừa phải
+            fontWeight: FontWeight.w500,
           ),
         ),
       );
@@ -45,19 +61,16 @@ class TSnackbarsWidget {
       messageText: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 1. Icon Box (Linear Gradient)
           Container(
-            width: 36, // Thu nhỏ lại chút cho cân đối với chữ 14
+            width: 36,
             height: 36,
             decoration: BoxDecoration(
-              gradient: iconGradient, // Áp dụng Gradient từ AppColors
-              borderRadius: BorderRadius.circular(10), // Bo góc Squircle
+              gradient: iconGradient,
+              borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, color: Colors.white, size: 20),
           ),
           const SizedBox(width: 12),
-
-          // 2. Nội dung Text (Title: 14, Message: 12)
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -67,7 +80,7 @@ class TSnackbarsWidget {
                   title,
                   style: const TextStyle(
                     fontFamily: 'Poppins',
-                    fontSize: 14, // CHUẨN YÊU CẦU: Tiêu đề 14
+                    fontSize: 14,
                     fontWeight: FontWeight.w700,
                     color: AppColors.primaryText,
                     height: 1.2,
@@ -76,9 +89,11 @@ class TSnackbarsWidget {
                 const SizedBox(height: 4),
                 Text(
                   message,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontFamily: 'Poppins',
-                    fontSize: 12, // CHUẨN YÊU CẦU: Tiêu đề phụ 12
+                    fontSize: 12,
                     fontWeight: FontWeight.w400,
                     color: AppColors.subText,
                     height: 1.4,
@@ -87,11 +102,7 @@ class TSnackbarsWidget {
               ],
             ),
           ),
-
-          // 3. Nút Action (Dành cho TẤT CẢ các loại Toast)
           if (actionBtn != null) ...[actionBtn, const SizedBox(width: 12)],
-
-          // 4. Nút X (Close)
           IconButton(
             onPressed: () => Get.closeCurrentSnackbar(),
             icon: const Icon(Icons.close, color: Color(0xFF9CA3AF), size: 20),
@@ -100,8 +111,6 @@ class TSnackbarsWidget {
           ),
         ],
       ),
-
-      // -- CẤU HÌNH KHUNG SNACKBAR --
       padding: const EdgeInsets.all(16),
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       backgroundColor: bgColor,
@@ -114,17 +123,12 @@ class TSnackbarsWidget {
           offset: const Offset(0, 4),
         ),
       ],
-      duration: const Duration(seconds: 4),
+      duration: const Duration(seconds: 3), // Chỉnh lại 3s cho nhanh gọn
       isDismissible: true,
       dismissDirection: DismissDirection.horizontal,
     );
   }
 
-  // ==========================================
-  // CÁC HÀM GỌI TOAST CHI TIẾT
-  // ==========================================
-
-  /// 1. Toast Thành công
   static void success({
     required String title,
     required String message,
@@ -149,7 +153,6 @@ class TSnackbarsWidget {
     );
   }
 
-  /// 2. Toast Thông tin
   static void info({
     required String title,
     required String message,
@@ -174,7 +177,6 @@ class TSnackbarsWidget {
     );
   }
 
-  /// 3. Toast Cảnh báo
   static void warning({
     required String title,
     required String message,
@@ -187,7 +189,7 @@ class TSnackbarsWidget {
       actionText: actionText,
       onActionPressed: onActionPressed,
       bgColor: AppColors.toastWarningBg,
-      icon: Icons.priority_high_rounded, // Icon chấm than như hình
+      icon: Icons.priority_high_rounded,
       iconGradient: const LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
@@ -199,7 +201,6 @@ class TSnackbarsWidget {
     );
   }
 
-  /// 4. Toast Lỗi
   static void error({
     required String title,
     required String message,
@@ -224,7 +225,7 @@ class TSnackbarsWidget {
     );
   }
 
-  /// 5. SnackBar Hoàn tác (Undo) dùng Native ScaffoldMessenger để bắt sự kiện Timeout
+  // --- GIỮ NGUYÊN HÀM UNDO SNACKBAR BÊN DƯỚI VÌ NÓ DÙNG SCAFFOLD MESSENGER ---
   static SnackBar undoSnackBar({
     required BuildContext context,
     required String title,
@@ -233,16 +234,16 @@ class TSnackbarsWidget {
     required VoidCallback onUndo,
   }) {
     return SnackBar(
-      backgroundColor: Colors.transparent, // Nền trong suốt
+      backgroundColor: Colors.transparent,
       elevation: 0,
       behavior: SnackBarBehavior.floating,
       padding: EdgeInsets.zero,
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-      duration: const Duration(seconds: 5), // Đếm ngược 5s
+      duration: const Duration(seconds: 5),
       content: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppColors.toastInfoBg, // Nền pastel xanh
+          color: AppColors.toastInfoBg,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
@@ -255,7 +256,6 @@ class TSnackbarsWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Icon
             Container(
               width: 36,
               height: 36,
@@ -274,8 +274,6 @@ class TSnackbarsWidget {
                   const Icon(Iconsax.trash_copy, color: Colors.white, size: 20),
             ),
             const SizedBox(width: 12),
-
-            // Text
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -306,12 +304,9 @@ class TSnackbarsWidget {
               ),
             ),
             const SizedBox(width: 12),
-
-            // Nút Action
             OutlinedButton(
               onPressed: () {
-                onUndo(); // Gọi hàm rollback truyền từ ngoài vào
-                // Tắt snackbar ngay lập tức và báo là do Action
+                onUndo();
                 ScaffoldMessenger.of(context).hideCurrentSnackBar(
                   reason: SnackBarClosedReason.action,
                 );

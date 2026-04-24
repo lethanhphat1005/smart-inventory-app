@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/state/controllers/barcode_action_controller.dart';
 import 'package:frontend/core/ui/layouts/t_barcode_scanner_layout.dart';
 import 'package:frontend/routes/app_routes.dart';
 import 'package:get/get.dart';
@@ -47,9 +48,10 @@ class HomeQuickActionsWidget extends StatelessWidget {
                 ),
                 onTap: () {
                   Get.to(() => TBarcodeScannerLayout(
-                        title: TTexts.homeScanBarcode.tr,
                         onScanned: (code) {
-                          Get.back();
+                          // Gọi controller xử lý logic điều hướng/bottom sheet
+                          BarcodeActionController.instance
+                              .handleScannedBarcode(code);
                         },
                       ));
                 },
@@ -72,20 +74,19 @@ class HomeQuickActionsWidget extends StatelessWidget {
               ],
 
               // 3. THẺ VIEW REPORTS
-              const SizedBox(width: AppSizes.p16),
-              _buildPremiumCard(
-                icon: Iconsax.chart_square_copy,
-                title: TTexts.homeViewReports.tr,
-                subtitle: TTexts.homeViewReportsSub.tr,
-                gradient: const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [Color(0xFF7B61FF), Color(0xFF5835E5)],
-                ),
-                onTap: () {
-                  // TODO: Toi man hinh report
-                },
-              ),
+              // const SizedBox(width: AppSizes.p16),
+              // _buildPremiumCard(
+              //   icon: Iconsax.chart_square_copy,
+              //   title: TTexts.homeViewReports.tr,
+              //   subtitle: TTexts.homeViewReportsSub.tr,
+              //   gradient: const LinearGradient(
+              //     begin: Alignment.topLeft,
+              //     end: Alignment.bottomRight,
+              //     colors: [Color(0xFF7B61FF), Color(0xFF5835E5)],
+              //   ),
+              //   onTap: () {
+              //   },
+              // ),
 
               // 4. THẺ VIEW ADJUSTMENTS (ĐÃ ĐỔI SANG MÀU XANH TEAL TRÁNH TRÙNG MÀU APP)
               const SizedBox(width: AppSizes.p16),

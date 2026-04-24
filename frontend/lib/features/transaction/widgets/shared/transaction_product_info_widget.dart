@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:get/get.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
-import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/features/transaction/controllers/inbound_transaction_item_add_controller.dart';
 import 'package:frontend/features/transaction/controllers/outbound_transaction_item_add_controller.dart';
 
@@ -22,14 +22,12 @@ class TransactionProductInfoWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = _controller;
 
-    // THÊM SIZEDBOX DOUBLE INFINITY ĐỂ ÉP NÓ NẰM CHÍNH GIỮA MÀN HÌNH
     return SizedBox(
       width: double.infinity,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: AppSizes.p20),
         child: Column(
-          crossAxisAlignment:
-              CrossAxisAlignment.center, // Đảm bảo các con nằm giữa
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Obx(() => Text(
                   controller.displayName,
@@ -42,7 +40,7 @@ class TransactionProductInfoWidget extends StatelessWidget {
                 )),
             const SizedBox(height: AppSizes.p8),
             Obx(() => Text(
-                  "${TTexts.barcodeLabel.tr}: ${controller.barcode}",
+                  '${TTexts.barcodeLabel.tr}: ${controller.barcode}',
                   style: const TextStyle(
                       fontSize: 14,
                       color: AppColors.subText,
@@ -55,17 +53,19 @@ class TransactionProductInfoWidget extends StatelessWidget {
                 runSpacing: 8,
                 alignment: WrapAlignment.center,
                 children: [
+                  // 1. CHIP DANH MỤC
                   _buildChip(controller.categoryName),
+                  // 2. CHIP TÌNH TRẠNG KHO
                   _buildChip(
                     '${controller.healthStatusText} (${controller.currentStock})',
                     textColor: controller.healthStatusColor,
                     bgColor: controller.healthStatusColor.withOpacity(0.1),
                     hasBorder: false,
                   ),
+                  // 3. CHIP THƯƠNG HIỆU (Kiểm tra rỗng trước khi hiện)
                   if (controller.brandName != 'No Brand' &&
                       controller.brandName.isNotEmpty)
                     _buildChip(controller.brandName),
-                  if (!controller.isProductActive) _buildChip('Inactive'),
                 ],
               );
             }),

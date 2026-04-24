@@ -61,7 +61,27 @@ class TTexts {
   static const String activeFilters = "active_filters";
   static const String userLabel = "user_label";
   static const String me = "me";
-  static const String resultsFound = "results found";
+  static const String resultsFound = "results_found";
+  static const String updatePriceAndImport = "update_price_and_import";
+  static const String importOnly = "import_only";
+  static const String confirmImportDesc = "confirm_import_desc";
+  static const String sellingPriceChangeDetectedDesc =
+      "selling_price_change_detected_desc";
+  static const String updatePriceAndExport = "update_price_and_export";
+  static const String exportOnly = "export_only";
+  static const String confirmExportDesc = "confirm_export_desc";
+  static const String significantChangeDetected = "significant_change_detected";
+  static const String highQtyFluctuationDesc = "high_qty_fluctuation_desc";
+  static const String priceFluctuationDesc = "price_fluctuation_desc";
+  static const String andMore = "and_more";
+  static const String deleteSearchTitle = "delete_search_title";
+  static const String deleteSearchMessage = "delete_search_message";
+  static const String time = "time";
+  static const String allEmployees = "all_employees";
+  static const String loadingEmployees = "loading_employees";
+  static const String filterNone = "filter_none";
+  static const String supplier = "supplier";
+  static const String customer = "customer";
 
   // -- Network Error Dialog
   static const String netErrorTitle = "net_error_title";
@@ -73,6 +93,10 @@ class TTexts {
   static const String netErrorRetryFailedMessage =
       "net_error_retry_failed_message";
   static const String barCodeScan = "bar_code_scan";
+  static const String errorUiTitle = "error_ui_title";
+  static const String errorUiMessage = "error_ui_message";
+  static const String ignore = "ignore";
+  static const String splashLoadingProfile = "splash_loading_profile";
 
   // -- Error / Restricted Access
   static const String errorTitle = "error_title";
@@ -131,7 +155,7 @@ class TTexts {
   static const String rememberMe = "remember_me";
   static const String forgotPassword = "forgot_password";
   static const String loginBtn = "login_btn";
-  static const String loggingIn = "logging";
+  static const String loggingIn = "logging_in";
   static const String continueWithGoogle = "continue_with_google";
   static const String loginErrorEmptyFieldsTitle =
       "login_error_empty_fields_title";
@@ -221,6 +245,11 @@ class TTexts {
   static const String whatIsWorkspace = "what_is_workspace";
   static const String workspaceDescription = "workspace_description";
   static const String understood = "understood";
+  static const String storeSelectionSuccessTitle =
+      "store_selection_success_title";
+  static const String storeSelectionSuccessMessage =
+      "store_selection_success_message";
+  static const String activeStoreBadge = "active_store_badge";
 
   // -- Create Workspace
   static const String createStoreTitle = "create_store_title";
@@ -247,6 +276,8 @@ class TTexts {
   static const String gpsOffTitle = "gps_off_title";
   static const String gpsOffMessage = "gps_off_message";
   static const String locationErrorMessage = "location_error_message";
+  static const String warningEmptyName = "warning_empty_name";
+  static const String warningStoreExists = "warning_store_exists";
 
   // -- Invite Code & Join Store
   static const String inviteCodeTitle = "invite_code_title";
@@ -345,6 +376,7 @@ class TTexts {
   static const String filtered = 'filtered';
   static const String today = 'today';
   static const String yesterday = 'yesterday';
+  static const String tomorrow = 'tomorrow';
   static const String note = 'note';
   static const String productName = 'product_name';
   static const String overviewInfoTitle = 'overview_info_title';
@@ -412,6 +444,7 @@ class TTexts {
   static const String currentQty = "current_qty";
   static const String errorProductOrPackageIdMissing =
       "error_product_or_package_id_missing";
+  static const String seeAllCategories = "see_all_categories";
 
   // -- Chatbot AI
   static const String chatbotName = "chatbot_name";
@@ -423,6 +456,43 @@ class TTexts {
   static const String chatbotTyping = "chatbot_typing";
   static const String chatbotEmptyInputWarning = "chatbot_empty_input_warning";
   static const String chatbotMockResponse = "chatbot_mock_response";
+
+  static const String chatbotFallbackReply = "chatbot_fallback_reply";
+  static const String chatbotConnectionError = "chatbot_connection_error";
+  static const String chatbotResetTitle = "chatbot_reset_title";
+  static const String chatbotResetMessage = "chatbot_reset_message";
+  static const String chatbotResetBtn = "chatbot_reset_btn";
+  static const String chatbotTransactionSuccess = "chatbot_transaction_success";
+  static const String chatbotTransactionFailed = "chatbot_transaction_failed";
+  static const String chatbotSuggestionTitle = "chatbot_suggestion_title";
+  static const String chatbotSuggestionSub = "chatbot_suggestion_sub";
+  static const String chatbotPromptLowStock = "chatbot_prompt_low_stock";
+  static const String chatbotPromptCheckInfo = "chatbot_prompt_check_info";
+  static const String chatbotPromptImport = "chatbot_prompt_import";
+  static const String chatbotPromptExport = "chatbot_prompt_export";
+  static const String chatbotConfirmImport = "chatbot_confirm_import";
+  static const String chatbotConfirmExport = "chatbot_confirm_export";
+  static const String chatbotResolved = "chatbot_resolved";
+  static const String chatbotActionCancelled = "chatbot_action_cancelled";
+  static const String chatbotOutOfStock = "chatbot_out_of_stock";
+  static const String chatbotLowStockPrefix = "chatbot_low_stock_prefix";
+  static const String chatbotLeftPrefix = "chatbot_left_prefix";
+  static const String chatbotInStockPrefix = "chatbot_in_stock_prefix";
+  static const String chatbotLowStockAlert = "chatbot_low_stock_alert";
+  static const String chatbotLowStockFoundPrefix =
+      "chatbot_low_stock_found_prefix";
+  static const String chatbotLowStockFoundSuffix =
+      "chatbot_low_stock_found_suffix";
+  static const String chatbotViewFullList = "chatbot_view_full_list";
+  static const String chatbotNoImageTitle = "chatbot_no_image_title";
+  static const String chatbotNoImageDesc = "chatbot_no_image_desc";
+  static const String chatbotMenuLowStock = "chatbot_menu_low_stock";
+  static const String chatbotMenuCreateImport = "chatbot_menu_create_import";
+  static const String chatbotMenuCreateExport = "chatbot_menu_create_export";
+  static const String chatbotQuickActionLowStock =
+      "chatbot_quick_action_low_stock";
+  static const String chatbotQuickActionImport = "chatbot_quick_action_import";
+  static const String chatbotQuickActionExport = "chatbot_quick_action_export";
 
   // -- Customize Catalog
   static const String customizeCatalog = "customize_catalog";
@@ -509,6 +579,17 @@ class TTexts {
   static const String categoryDescription = 'category_description';
   static const String noCategoryDescription = 'no_description';
   static const String emptyCategoryMessage = 'empty_category_message';
+  static const String variantLabel = 'variant_label';
+  static const String variantHint = 'variant_hint';
+  static const String enterBarcodeHint = 'enter_barcode_hint';
+  static const String barcodeTooShort = 'barcode_too_short';
+  static const String barcodeDuplicate = 'barcode_duplicate';
+  static const String barcodeAdded = 'barcode_added';
+  static const String invalidPrice = 'invalid_price';
+  static const String barcodeDeletedSuccess = 'barcode_deleted_success';
+  static const String barcodeDeleted = 'barcode_deleted';
+  static const String quantityGreaterThanZero = 'quantity_greater_than_zero';
+  static const String unitPriceLabel = 'unit_price_label';
 
   // --- View All Products
   static const String viewAllProducts = 'view_all_products';
@@ -699,6 +780,12 @@ class TTexts {
   static const String inbound = "inbound";
   static const String outbound = "outbound";
   static const String stockAdjustment = "stockAdjustment";
+  static const String searchingProduct = "searching_product";
+  static const String unconfirmedBarcodeTitle = "unconfirmed_barcode_title";
+  static const String unconfirmedBarcodeMessage = "unconfirmed_barcode_message";
+  static const String barcodeNotFoundMessage = "barcode_not_found_message";
+  static const String errorProcessingBarcode = "error_processing_barcode";
+  static const String tReason = "t_reason";
 
   // --- Inbound ---
   static const String inboundTransaction = "inbound_transaction";
@@ -734,6 +821,8 @@ class TTexts {
   static const String productHasRemainingStock = 'product_has_remaining_stock';
   static const String autoGeneratedClearanceNote =
       'auto_generated_clearance_note';
+  static const String creatingExportTicket = "creating_export_ticket";
+  static const String exportTicketCreated = "export_ticket_created";
 
   // --- Inbound/Outbound Transaction Item Add ---
   static const String loadingAddingToCart = "loading_adding_to_cart";
@@ -980,6 +1069,17 @@ class TTexts {
   static const String itemFoundText = "item_found_text";
   static const String defaultUnit = "default_unit";
   static const String specificNoteHint = "specific_note_hint";
+  static const String profileNoAddress = 'profile_no_address';
+  static const String profileNoPhoneNumber = 'profile_no_phone_number';
+  static const String profileNoEmail = 'profile_no_email';
+  static const String profilePhoneNumberBottomSheet =
+      'profile_phone_number_bottom_sheet';
+  static const String profileEmailBottomSheet = 'profile_email_bottom_sheet';
+  static const String profileAddressBottomSheet =
+      'profile_address_bottom_sheet';
+  static const String profileMembers = 'profile_members';
+  static const String profileListMembers = 'profile_list_members';
+  static const String profileStoreName = 'profile_store_name';
 
   //--Edit profile
   static const String editTitle = 'edit_title';
@@ -1061,6 +1161,10 @@ class TTexts {
   static const String assignsRoleOwner = 'assigns_role_owner';
   static const String assignsRoleSearchHint = 'assigns_role_search_hint';
 
+  //Exceptions
+  static const String userNotFound = "user_not_found";
+  static const String userIdNotFound = "user_id_not_found";
+
   //Member
   static const String profileNoMembers = 'profile_no_members';
   static const String profileNoMembersSubtitle = 'profile_no_members_subtitle';
@@ -1078,6 +1182,66 @@ class TTexts {
   static const String currentStockLabel = "current_stock_label";
   static const String alertThresholdLabel = "alert_threshold_label";
   static const String suggestedImportLabel = "suggested_import_label";
+
+  // -- Export Excel Report
+  static const String exportExcelSystemName = "export_excel_system_name";
+  static const String exportExcelTitle = "export_excel_title";
+  static const String exportExcelDate = "export_excel_date";
+  static const String exportExcelTotalTx = "export_excel_total_tx";
+  static const String exportExcelColNo = "export_excel_col_no";
+  static const String exportExcelColId = "export_excel_col_id";
+  static const String exportExcelColTime = "export_excel_col_time";
+  static const String exportExcelColType = "export_excel_col_type";
+  static const String exportExcelColStatus = "export_excel_col_status";
+  static const String exportExcelColItems = "export_excel_col_items";
+  static const String exportExcelColAmount = "export_excel_col_amount";
+  static const String exportExcelGrandTotal = "export_excel_grand_total";
+  static const String exportPermissionChecking = "export_permission_checking";
+  static const String exportCreatingDoc = "export_creating_doc";
+  static const String exportWritingSummary = "export_writing_summary";
+  static const String exportProcessingTx = "export_processing_tx";
+  static const String exportSavingFile = "export_saving_file";
+  static const String exportComplete = "export_complete";
+  static const String exportFileSaved = "export_file_saved";
+  static const String exportOpenBtn = "export_open_btn";
+  static const String exportCannotOpen = "export_cannot_open";
+  static const String exportNoAppFound = "export_no_app_found";
+  static const String exportPreparing = "export_preparing";
+  static const String exportWritingTxInfo = "export_writing_tx_info";
+  static const String exportReceiptTitle = "export_receipt_title";
+  static const String exportColProductName = "export_col_product_name";
+  static const String exportColBarcode = "export_col_barcode";
+  static const String exportColUnitPrice = "export_col_unit_price";
+  static const String exportColQuantity = "export_col_quantity";
+  static const String exportColTotal = "export_col_total";
+  static const String exportProcessingItems = "export_processing_items";
+  static const String exportSuccessTitle = "export_success_title";
+  static const String exportNoAppFoundDetail = "export_no_app_found_detail";
+  static const String exportExcelStoreName = "export_excel_store_name";
+  static const String exportExcelAddress = "export_excel_address";
+  static const String exportExcelExportedBy = "export_excel_exported_by";
+  static const String exportExcelExportTime = "export_excel_export_time";
+
+  // -- Barcode Scanner Bottom Sheets
+  static const String barcodeSimilarTitle = "barcode_similar_title";
+  static const String barcodeSimilarDesc = "barcode_similar_desc";
+  static const String barcodeLinkingLoader = "barcode_linking_loader";
+  static const String barcodeLinkSuccessMsg = "barcode_link_success_msg";
+  static const String barcodeLinkConflictError = "barcode_link_conflict_error";
+  static const String barcodeCreateNewBtn = "barcode_create_new_btn";
+
+  static const String barcodeNoDataTitle = "barcode_no_data_title";
+  static const String barcodeNoDataDesc = "barcode_no_data_desc";
+  static const String barcodeAddNewBtn = "barcode_add_new_btn";
+
+  static const String barcodePrefillTitle = "barcode_prefill_title";
+  static const String barcodePrefillDesc = "barcode_prefill_desc";
+  static const String barcodeAddToStoreBtn = "barcode_add_to_store_btn";
+  static const String barcodeUnknown = "barcode_unknown";
+
+  static const String barcodeCheckingLoader = "barcode_checking_loader";
+  static const String barcodeScanErrorTitle = "barcode_scan_error_title";
+  static const String barcodeCopied = "barcode_copied";
 
   // -- Verify OTP
   static const String verifyOtpTitle = "verify_otp_title";

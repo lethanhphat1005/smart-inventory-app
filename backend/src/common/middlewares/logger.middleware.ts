@@ -19,6 +19,10 @@ export const pinoLogger: RequestHandler = pinoHttp({
     return 'info';
   },
 
+  autoLogging: {
+    ignore: (req) => req.url === '/api/health',
+  },
+
   serializers: {
     req: (req: Request) => ({
       method: req.method,
