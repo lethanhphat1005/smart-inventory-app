@@ -1,40 +1,55 @@
 lib/
-├── core/                           # Thành phần cốt lõi, dùng chung toàn app
-│   ├── constants/                  # Hằng số hệ thống
-│   │   ├── dimension.dart          # Breakpoints (600, 1440)
-│   │   ├── image_strings.dart      # Đường dẫn assets/images
-│   │   ├── models/                     # 📦 MODELS DÙNG CHUNG TOÀN APP
-│   │   │   └── user_model.dart         # Thông tin người dùng (dùng ở Home, Profile...)        
-│   │   ├── text_strings.dart       # Keys cho Localization (TTexts)
-│   │   └── api_endpoints.dart      # URL API
-│   ├── layouts/                    # CẤU TRÚC (Engine) điều phối Responsive
-│   │   ├── t_responsive_layout.dart # Bộ lọc Mobile/Tablet/Web
-│   │   └── t_size_error_layout.dart # Màn hình chặn thiết bị không hỗ trợ
-│   ├── localization/               # Đa ngôn ngữ (AppTranslations)
-│   ├── network/                    # Cấu hình API Client
-│   ├── theme/                      # UI Design System (Colors, Sizes, Theme)
-│   ├── utils/                      # Hàm tiện ích (Formatters, Validators)
-│   └── widgets/                    # Các thành phần UI nguyên tử (Atomic Components)
-│       ├── buttons/                # TPrimaryButton, TBackButton
-│       └── t_image_widget.dart     # Widget hiển thị ảnh dùng chung
+├── core/                           # THÀNH PHẦN CỐT LÕI (Dùng chung toàn App)
+│   ├── infrastructure/             # Tầng Hạ Tầng (Data & Logic)
+│   │   ├── constants/              # Các hằng số hệ thống (text_strings.dart, api_endpoints.dart)
+│   │   ├── models/                 # Models dùng chung (user_model.dart, transaction_model.dart, product_model.dart)
+│   │   ├── network/                # Cấu hình API Client (Dio/HTTP, Interceptors)
+│   │   └── utils/                  # Các hàm tiện ích (day_formatter_utils.dart, error_handler_utils.dart, url_helper_utils.dart)
+│   │
+│   ├── state/                      # Quản lý Trạng thái & Dữ liệu toàn cục
+│   │   ├── provider/               # Gọi API cho các data Global (user_profile_provider.dart)
+│   │   └── services/               # Dịch vụ chạy ngầm toàn cục (store_service.dart, auth_service.dart)
+│   │
+│   └── ui/                         # Tầng Giao Diện dùng chung (Design System)
+│       ├── layouts/                # Bộ khung điều phối Responsive (t_responsive_layout.dart)
+│       ├── theme/                  # Định nghĩa Theme (app_colors.dart, app_sizes.dart, app_theme.dart)
+│       └── widgets/                # Các thành phần UI nguyên tử (Atomic Components)
+│           ├── buttons/            # Nút bấm chuẩn hóa
+│           ├── dialogs/            # Dialog, BottomSheet chuẩn hóa (t_bottom_sheet_widget.dart)
+│           ├── feedback/           # Snackbar, Loader, Shimmer (t_snackbars_widget.dart, t_animation_loader_widget.dart)
+│           └── t_image_widget.dart # Widget hiển thị ảnh dùng chung
 │
-├── features/                       # Các tính năng (Modules) độc lập
-│   ├── auth/                       # Module Xác thực
-│   │   ├── bindings/               
-│   │   │   ├── login_binding.dart  # Chỉ tiêm LoginController
-│   │   │   └── signup_binding.dart # Chỉ tiêm RegisterController
-│   │   ├── controllers/            # 🧠 CHIA NHỎ CONTROLLER
-│   │   │   ├── login_controller.dart
-│   │   │   ├── register_controller.dart
-│   │   │   └── verify_email_controller.dart
-│   │   ├── models/                 # 📦 MODELS DÙNG RIÊNG CHO AUTH
-│   │   │   ├── login_request_model.dart
-│   │   │   └── register_request_model.dart
-│   │   ├── services/               # 🔌 GIAO TIẾP VỚI BACKEND
-│   │   │   └── auth_service.dart   # Gọi API (POST /login, POST /register)
-│   │   ├── layouts/                # Giao diện chi tiết (đã làm)
-│   │   ├── views/                  # Điều phối màn hình (đã làm)
-│   │   └── widgets/
+├── features/                       # CÁC TÍNH NĂNG ĐỘC LẬP (Feature-Based Modules)
+│   ├── auth/                       # Module Xác thực (Login, Register)
+│   │   ├── bindings/               # Tiêm dependencies (login_binding.dart)
+│   │   ├── controllers/            # Xử lý logic màn hình (login_controller.dart)
+│   │   ├── models/                 # Models dùng riêng cho Auth
+│   │   ├── providers/              # Gọi API Auth
+│   │   └── views/                  # Giao diện Auth
+│   │
+│   ├── home/                       # Module Trang chủ & Tổng quan
+│   │   ├── controllers/            # home_controller.dart, low_stock_controller.dart, adjustment_history_controller.dart
+│   │   ├── models/                 # home_adjustment_model.dart, adjustment_history_model.dart
+│   │   ├── providers/              # Gọi API dashboard, low stock, audit logs
+│   │   ├── widgets/                # UI con (low_stock_overview_widget, home_adjustment_stats_widget)
+│   │   └── views/                  # home_view.dart, low_stock_mobile_view.dart
+│   │
+│   ├── inventory/                  # Module Quản lý Kho hàng
+│   │   ├── controllers/            # inventory_controller.dart, inventory_detail_controller.dart
+│   │   ├── models/                 # inventory_insight_display_model.dart, inventory_history_model.dart
+│   │   ├── providers/              # Gọi API sản phẩm, gói hàng
+│   │   ├── widgets/                # UI con (inventory_detail_history_widget)
+│   │   └── views/                  # inventory_view.dart, inventory_detail_view.dart
+│   │
+│   └── report/                     # Module Báo cáo & Thống kê
+│       ├── controllers/            # report_controller.dart
+│       ├── models/                 # (Nếu có models đặc thù)
+│       ├── providers/              # Gọi API lấy lịch sử giao dịch (report_provider.dart)
+│       ├── widgets/                # UI con (report_transaction_card_widget, report_shimmer_widget)
+│       └── views/                  # report_mobile_view.dart
 │
-├── routes/                         # Quản lý định tuyến (AppPages, AppRoutes)
-└── main.dart                       # Điểm khởi chạy ứng dụng
+├── routes/                         # QUẢN LÝ ĐIỀU HƯỚNG
+│   ├── app_pages.dart              # Khai báo mảng GetPage (Bindings & Views)
+│   └── app_routes.dart             # Khai báo hằng số đường dẫn (AppRoutes.home, AppRoutes.inventoryDetail)
+│
+└── main.dart                       # ĐIỂM KHỞI CHẠY ỨNG DỤNG (Khởi tạo GetX, Services)

@@ -77,6 +77,7 @@ dependencies:
   path: ^1.9.1
   cached_network_image: ^3.4.1
   flutter_markdown: ^0.7.7+1
+  pinput: ^6.0.2
 
 dev_dependencies:
   flutter_test:
@@ -98,6 +99,7 @@ flutter:
     - assets/images/core/
     - assets/images/profile/
     - assets/images/onboarding/
+    - assets/images/chatbot/
     - assets/mock_data/
 
   # Fonts phải nằm lùi vào 2 space bên trong flutter:

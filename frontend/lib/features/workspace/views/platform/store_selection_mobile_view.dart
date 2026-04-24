@@ -94,11 +94,16 @@ class StoreSelectionMobileView extends GetView<StoreSelectionController> {
                             roleColor = AppColors.toastWarningGradientEnd;
                           }
 
+                          final bool isActive =
+                              controller.currentStoreId.isNotEmpty &&
+                                  store.storeId == controller.currentStoreId;
+
                           return StoreSelectionCardWidget(
                             title: store.name,
                             role: roleText,
                             icon: roleIcon,
                             iconColor: roleColor,
+                            isActive: isActive, // Truyền isActive vào Card
                             onTap: () => controller.selectStore(store),
                           );
                         }),

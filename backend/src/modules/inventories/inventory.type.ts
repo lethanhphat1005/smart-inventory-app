@@ -21,6 +21,7 @@ export type Unit = {
 export type ProductPackageSnapshot = {
   productPackageId: string;
   displayName: string | null;
+  variant: string | null;
   importPrice: number | null;
   sellingPrice: number | null;
 };

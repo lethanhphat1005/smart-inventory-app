@@ -39,7 +39,7 @@ class OutboundTransactionBottomBarWidget
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    TTexts.total.tr, // Sửa text cứng
+                    TTexts.total.tr,
                     style: const TextStyle(
                       fontFamily: 'Poppins',
                       fontSize: 16,
@@ -48,7 +48,7 @@ class OutboundTransactionBottomBarWidget
                     ),
                   ),
                   Text(
-                    '${controller.totalItems} ${TTexts.items.tr.toLowerCase()} • \$${controller.totalAmount.toStringAsFixed(2)}', // Sửa text cứng
+                    '${controller.totalItems} ${TTexts.items.tr.toLowerCase()} • \$${controller.totalFunds.toStringAsFixed(2)}',
                     style: TextStyle(
                       fontFamily: 'Poppins',
                       fontSize: 14,

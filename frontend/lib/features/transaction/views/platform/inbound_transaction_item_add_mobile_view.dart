@@ -4,6 +4,9 @@ import 'package:frontend/features/transaction/controllers/inbound_transaction_it
 import 'package:frontend/features/transaction/widgets/shared/transaction_header_widget.dart';
 import 'package:frontend/features/transaction/widgets/shared/transaction_quantity_selector_widget.dart';
 import 'package:frontend/features/transaction/widgets/shared/transaction_product_info_widget.dart';
+// IMPORT SHIMMER VÀ BARCODE MỚI TẠO
+import 'package:frontend/features/transaction/widgets/shared/transaction_item_add_shimmer_widget.dart';
+import 'package:frontend/features/transaction/widgets/shared/transaction_barcode_widget.dart';
 import 'package:frontend/core/ui/widgets/t_primary_button_widget.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
@@ -19,81 +22,92 @@ class InboundTransactionItemAddMobileView
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: CustomScrollView(
-        physics: const BouncingScrollPhysics(),
-        slivers: [
-          TransactionHeaderWidget(
-              imageUrl: controller.initialItem.product?.imageUrl),
-          SliverToBoxAdapter(
-            child: Container(
-              decoration: const BoxDecoration(
-                color: AppColors.background,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-              ),
-              child: Column(
-                children: [
-                  const SizedBox(height: AppSizes.p24),
-                  // DÙNG CHUNG THÔNG TIN CƠ BẢN
-                  const TransactionProductInfoWidget(),
-                  const _Divider(),
+      body: Obx(() {
+        if (controller.isLoadingFreshData.value) {
+          return const TransactionItemAddShimmerWidget();
+        }
 
-                  _buildSectionTitle(TTexts.details.tr),
-
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: AppSizes.p20, vertical: 8),
-                    child: TransactionQuantitySelectorWidget(
-                      controller: controller.quantityController,
-                      onIncrease: controller.incrementQuantity,
-                      onDecrease: controller.decrementQuantity,
+        return CustomScrollView(
+          physics: const BouncingScrollPhysics(),
+          slivers: [
+            TransactionHeaderWidget(
+              imageUrl: controller.productImageUrl.isEmpty
+                  ? null
+                  : controller.productImageUrl,
+            ),
+            SliverToBoxAdapter(
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: AppColors.background,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                ),
+                transform: Matrix4.translationValues(0, -24, 0),
+                child: Column(
+                  children: [
+                    const SizedBox(height: AppSizes.p40),
+                    const TransactionProductInfoWidget(),
+                    const SizedBox(height: AppSizes.p16),
+                    const TransactionBarcodeWidget(),
+                    const SizedBox(height: AppSizes.p8),
+                    const _Divider(),
+                    _buildSectionTitle(TTexts.details.tr),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: AppSizes.p20, vertical: 8),
+                      child: TransactionQuantitySelectorWidget(
+                        controller: controller.quantityController,
+                        onIncrease: controller.incrementQuantity,
+                        onDecrease: controller.decrementQuantity,
+                      ),
                     ),
-                  ),
-
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: AppSizes.p20, vertical: 16),
-                    child: TTextFormFieldWidget(
-                      label: TTexts.importPriceLot.tr, // HIỆN CHỮ IMPORT PRICE
-                      hintText: '0.00',
-                      controller: controller.priceController,
-                      keyboardType:
-                          const TextInputType.numberWithOptions(decimal: true),
-                      prefixIcon: Iconsax.money_send_copy,
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: AppSizes.p20, vertical: 16),
+                      child: TTextFormFieldWidget(
+                        label: TTexts.importPriceLot.tr,
+                        hintText: '0.00',
+                        controller: controller.priceController,
+                        keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true),
+                        prefixIcon: Iconsax.money_send_copy,
+                      ),
                     ),
-                  ),
-
-                  const _Divider(),
-
-                  Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: AppSizes.p20),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(TTexts.subtotal.tr,
-                            style: const TextStyle(
-                                fontFamily: 'Poppins',
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.primaryText)),
-                        Obx(() => Text(
-                            '\$${controller.totalPrice.value.toStringAsFixed(2)}',
-                            style: const TextStyle(
-                                fontFamily: 'Poppins',
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.primary))),
-                      ],
+                    const _Divider(),
+                    Padding(
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: AppSizes.p20),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(TTexts.subtotal.tr,
+                              style: const TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.primaryText)),
+                          Text(
+                              '\$${controller.totalPrice.value.toStringAsFixed(2)}',
+                              style: const TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.primary)),
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 40),
-                ],
+                    const SizedBox(height: 40),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
-      ),
-      bottomNavigationBar: _buildBottomButton(),
+          ],
+        );
+      }),
+
+      // ẨN NÚT BOTTOM KHI ĐANG LOADING
+      bottomNavigationBar: Obx(() => controller.isLoadingFreshData.value
+          ? const SizedBox.shrink()
+          : _buildBottomButton()),
     );
   }
 

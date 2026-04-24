@@ -87,6 +87,7 @@ final Map<String, String> enHome = {
   TTexts.filtered: "Filtered:",
   TTexts.today: "Today",
   TTexts.yesterday: "Yesterday",
+  TTexts.tomorrow: 'tomorrow',
   TTexts.note: "Note",
   TTexts.productName: "Product Name",
 

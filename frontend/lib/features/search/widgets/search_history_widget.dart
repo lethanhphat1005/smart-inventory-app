@@ -36,15 +36,20 @@ class SearchHistoryWidget extends GetView<TSearchController> {
               spacing: 8,
               runSpacing: 0,
               children: controller.recentSearches
-                  .map((text) => ActionChip(
-                        label: Text(text, style: const TextStyle(fontSize: 13)),
-                        backgroundColor: AppColors.surface,
-                        side: BorderSide(
-                            color: AppColors.softGrey.withOpacity(0.1)),
-                        onPressed: () {
-                          controller.textController.text = text;
-                          controller.onSearchChanged(text);
-                        },
+                  .map((text) => GestureDetector(
+                        onLongPress: () =>
+                            controller.confirmRemoveRecentSearch(text),
+                        child: ActionChip(
+                          label:
+                              Text(text, style: const TextStyle(fontSize: 13)),
+                          backgroundColor: AppColors.surface,
+                          side: BorderSide(
+                              color: AppColors.softGrey.withOpacity(0.1)),
+                          onPressed: () {
+                            controller.textController.text = text;
+                            controller.onSearchChanged(text);
+                          },
+                        ),
                       ))
                   .toList(),
             ),

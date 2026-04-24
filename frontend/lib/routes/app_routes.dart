@@ -20,7 +20,7 @@ class AppRoutes {
   static const home = '/home';
   static const adjustmentHistory = '/adjustment_history';
   static const lowStock = '/low-stock';
-  
+
   static const inventory = '/inventory';
   static const inventorySight = '/inventory_insight';
   static const inventoryDetail = '/inventory_detail';
@@ -50,5 +50,9 @@ class AppRoutes {
   static const editStore = '/edit_store';
   static const assignsRole = '/assign_role';
 
-  static const reorderSuggestion = '/reorder-suggestion';
+  static const reorderSuggestion = '/reorder_suggestion';
+
+  static const resetPassword = '/reset_password';
+  static const verifyOTP = '/verify_otp';
+
 }

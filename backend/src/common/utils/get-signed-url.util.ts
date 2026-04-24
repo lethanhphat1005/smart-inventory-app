@@ -1,6 +1,6 @@
 import { StatusCodes } from 'http-status-codes';
 
-import { SupabaseProvider } from '../../config/supabaseClient.js';
+import { SupabaseProvider } from '../../db/supabaseClient.js';
 import { CustomError } from '../errors/index.js';
 
 export class StorageService {

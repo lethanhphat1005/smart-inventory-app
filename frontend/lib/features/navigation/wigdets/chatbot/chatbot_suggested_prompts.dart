@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/infrastructure/constants/text_strings.dart';
+import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
+import 'package:get/get.dart';
 
 class ChatbotSuggestedPrompts extends StatelessWidget {
   final Function(String text, bool autoSend) onAction;
@@ -11,25 +14,29 @@ class ChatbotSuggestedPrompts extends StatelessWidget {
     final prompts = [
       {
         "icon": Iconsax.warning_2,
-        "color": Colors.orange,
-        "text": "Sản phẩm nào sắp hết hàng?",
-        "autoSend": true, // Gửi luôn vì không cần tham số
+        "text": TTexts.chatbotPromptLowStock.tr,
+        "autoSend": true,
       },
       {
         "icon": Iconsax.box_search,
-        "color": Colors.blue,
-        "text": "Kiểm tra thông tin: ", // Bỏ hardcode Monopoly
-        "autoSend": false, // Điền vào ô text và đợi
+        "text": TTexts.chatbotPromptCheckInfo.tr,
+        "autoSend": false,
       },
       {
         "icon": Iconsax.import_1,
-        "color": Colors.green,
-        "text": "Nhập kho: ", // Cung cấp cú pháp
+        "text": TTexts.chatbotPromptImport.tr,
+        "autoSend": false,
+      },
+      {
+        "icon": Iconsax.export_1,
+        "text": TTexts.chatbotPromptExport.tr,
         "autoSend": false,
       },
     ];
+
     return Center(
       child: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Column(
@@ -39,25 +46,37 @@ class ChatbotSuggestedPrompts extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.1),
+                  gradient: LinearGradient(
+                    colors: [
+                      AppColors.primary.withOpacity(0.15),
+                      Colors.pinkAccent.withOpacity(0.15),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(Iconsax.magic_star,
-                    color: Colors.blue, size: 32),
+                    color: AppColors.primary, size: 36),
               ),
-              const SizedBox(height: 16),
-              const Text(
-                "Bạn cần trợ giúp gì?",
-                style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87),
+              const SizedBox(height: 20),
+              Text(
+                TTexts.chatbotSuggestionTitle.tr,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.primaryText,
+                  fontFamily: 'Poppins',
+                ),
               ),
               const SizedBox(height: 8),
-              const Text(
-                "Chọn một gợi ý bên dưới hoặc gõ yêu cầu của bạn.",
+              Text(
+                TTexts.chatbotSuggestionSub.tr,
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 14, color: Colors.black54),
+                style: TextStyle(
+                    fontSize: 14,
+                    color: AppColors.subText.withOpacity(0.8),
+                    fontFamily: 'Poppins'),
               ),
               const SizedBox(height: 32),
               Wrap(
@@ -68,19 +87,19 @@ class ChatbotSuggestedPrompts extends StatelessWidget {
                   return InkWell(
                     onTap: () => onAction(
                         prompt['text'] as String, prompt['autoSend'] as bool),
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(24),
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 12),
+                          horizontal: 18, vertical: 12),
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: Colors.grey.shade300),
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(color: Colors.grey.shade200),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.03),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
+                            color: Colors.black.withOpacity(0.02),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
                           )
                         ],
                       ),
@@ -88,14 +107,15 @@ class ChatbotSuggestedPrompts extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(prompt['icon'] as IconData,
-                              size: 18, color: prompt['color'] as Color),
+                              size: 16, color: AppColors.subText),
                           const SizedBox(width: 8),
                           Text(
                             prompt['text'] as String,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 13.5,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.grey.shade800,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.primaryText,
+                              fontFamily: 'Poppins',
                             ),
                           ),
                         ],

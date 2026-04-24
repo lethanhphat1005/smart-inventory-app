@@ -66,7 +66,7 @@ class StockAdjustmentBottomBarWidget
                 child: TPrimaryButtonWidget(
                   text: TTexts.saveAll.tr,
                   backgroundColor: controller.canSave
-                      ? AppColors.secondPrimary
+                      ? AppColors.primary
                       : AppColors.softGrey.withOpacity(0.5),
                   onPressed: controller.canSave
                       ? controller.handleSaveAdjustment
