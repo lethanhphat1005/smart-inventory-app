@@ -39,7 +39,7 @@ class ProfileEditStoreController extends GetxController {
   final storeAddress = ''.obs;
   final memberCount = 0.obs;
 
-  // BỔ SUNG: role của current user trong store hiện tại
+  // Role của current user trong store hiện tại
   final currentUserStoreRole = ''.obs;
 
   // Members states
@@ -53,6 +53,19 @@ class ProfileEditStoreController extends GetxController {
 
   final _dio = Dio();
 
+  static const String notUpdatedYetText = "Not updated yet";
+
+  String _displayOrNotUpdated(String? value) {
+    final text = value?.trim() ?? "";
+    if (text.isEmpty) return notUpdatedYetText;
+    return text;
+  }
+
+  String _cleanDisplayValue(String value) {
+    final text = value.trim();
+    return text == notUpdatedYetText ? "" : text;
+  }
+
   @override
   void onInit() {
     super.onInit();
@@ -65,9 +78,13 @@ class ProfileEditStoreController extends GetxController {
   void _initializeFields() {
     nameController.text = _storeService.currentStoreName.value;
 
-    if (_storeService.currentStoreAddress.value.isNotEmpty) {
-      addressController.text = _storeService.currentStoreAddress.value;
-      storeAddress.value = _storeService.currentStoreAddress.value;
+    final address = _storeService.currentStoreAddress.value.trim();
+    storeAddress.value = address;
+
+    if (isEditing.value) {
+      addressController.text = address;
+    } else {
+      addressController.text = _displayOrNotUpdated(address);
     }
   }
 
@@ -78,14 +95,17 @@ class ProfileEditStoreController extends GetxController {
       if (storeId.isEmpty) return;
 
       final store = await _storeProvider.getStoreDetail(storeId);
-      final fetchedAddress = (store['address'] ?? '').toString();
+      final fetchedAddress = (store['address'] ?? '').toString().trim();
 
       storeAddress.value = fetchedAddress;
 
-      if (fetchedAddress.isNotEmpty) {
+      if (isEditing.value) {
         addressController.text = fetchedAddress;
-        await _storeService.saveStoreAddress(fetchedAddress);
+      } else {
+        addressController.text = _displayOrNotUpdated(fetchedAddress);
       }
+
+      await _storeService.saveStoreAddress(fetchedAddress);
     } catch (e) {
       debugPrint("Load store extra data error: $e");
     }
@@ -123,7 +143,7 @@ class ProfileEditStoreController extends GetxController {
       filteredMembers.assignAll(mappedMembers);
       memberCount.value = mappedMembers.length;
 
-      // BỔ SUNG: xác định role current user
+      // Xác định role current user
       currentUserStoreRole.value = '';
 
       if (currentUser != null) {
@@ -218,6 +238,16 @@ class ProfileEditStoreController extends GetxController {
     if (currentUserStoreRole.value != 'owner') return;
 
     isEditing.value = !isEditing.value;
+
+    final address = storeAddress.value.trim();
+
+    if (isEditing.value) {
+      addressController.text = address;
+    } else {
+      addressController.text = _displayOrNotUpdated(address);
+    }
+
+    addressPredictions.clear();
   }
 
   void _safeMoveMap(LatLng location) {
@@ -232,7 +262,9 @@ class ProfileEditStoreController extends GetxController {
   Future<void> searchAddress(String query) async {
     if (!isEditing.value) return;
 
-    if (query.trim().length < 3) {
+    final cleanQuery = _cleanDisplayValue(query);
+
+    if (cleanQuery.length < 3) {
       addressPredictions.clear();
       return;
     }
@@ -241,7 +273,7 @@ class ProfileEditStoreController extends GetxController {
       final response = await _dio.get(
         'https://nominatim.openstreetmap.org/search',
         queryParameters: {
-          'q': query,
+          'q': cleanQuery,
           'format': 'json',
           'addressdetails': 1,
           'limit': 5,
@@ -333,11 +365,11 @@ class ProfileEditStoreController extends GetxController {
 
   // Getter lấy dữ liệu hiện tại trong form
   String get currentName => nameController.text.trim();
-  String get currentAddress => addressController.text.trim();
+  String get currentAddress => _cleanDisplayValue(addressController.text);
 
   // Kiểm tra đã nhập đủ dữ liệu bắt buộc chưa
   bool get hasAllRequiredFields {
-    return currentName.isNotEmpty && currentAddress.isNotEmpty;
+    return currentName.isNotEmpty;
   }
 
   // Kiểm tra xem có thay đổi dữ liệu hay không
@@ -366,7 +398,7 @@ class ProfileEditStoreController extends GetxController {
 
       if (!editStoreFormKey.currentState!.validate()) return;
 
-      if (!hasAllRequiredFields) {
+      if (currentName.isEmpty) {
         TSnackbarsWidget.warning(
           title: TTexts.errorTitle.tr,
           message: TTexts.fillAllFields.tr,
@@ -376,6 +408,8 @@ class ProfileEditStoreController extends GetxController {
 
       if (!hasChanged) {
         isEditing.value = false;
+        addressController.text = _displayOrNotUpdated(storeAddress.value);
+        addressPredictions.clear();
         return;
       }
 
@@ -404,6 +438,9 @@ class ProfileEditStoreController extends GetxController {
       await loadMembers();
 
       isEditing.value = false;
+      addressController.text = _displayOrNotUpdated(currentAddress);
+      addressPredictions.clear();
+
       Get.back();
 
       Future.delayed(const Duration(milliseconds: 100), () {
