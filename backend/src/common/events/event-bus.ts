@@ -9,8 +9,7 @@ export const eventBus = new AppEventBus();
 // Định nghĩa sẵn các tên sự kiện (Constants) để tái sử dụng,
 // tránh gõ sai chính tả
 export const appEvents = {
-// --- Internal System Events ---
-  INVENTORY_CHANGED: 'INVENTORY_CHANGED',
+  // --- Internal System Events ---
   BATCH_INVENTORY_CHANGED: 'BATCH_INVENTORY_CHANGED',
   LARGE_ORDER_CREATED: 'LARGE_ORDER_CREATED',
   INVENTORY_DISCREPANCY: 'INVENTORY_DISCREPANCY',

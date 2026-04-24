@@ -4,7 +4,7 @@ class TTexts {
 
   // -- Global Texts
   static const String appName = "app_name";
-  static const String group21 = "group_21";
+  static const String fourMonkeysStudio = "group_21";
   static const String tryAgain = "try_again";
   static const String successTitle = "success_title";
   static const String weak = "weak";

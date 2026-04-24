@@ -51,10 +51,12 @@ export class NotificationService {
 
     if (
       [
-        'DISCREPANCY_ALERT',
         'LOW_STOCK',
         'BATCH_LOW_STOCK',
         'REORDER_SUGGESTION',
+        'ROLE_UPDATED',
+        'INVENTORY_DISCREPANCY',
+        'BATCH_REORDER_SUGGESTION',
       ].includes(type)
     ) {
       fcmPriority = 'high';

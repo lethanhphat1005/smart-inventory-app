@@ -2,7 +2,7 @@ import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 
 final Map<String, String> enCore = {
   TTexts.appName: 'Smart Inventory',
-  TTexts.group21: "Group 21",
+  TTexts.fourMonkeysStudio: "Four Monkeys Studio",
 
   // -- Global Errors
   TTexts.errorTitle: 'Error',
@@ -64,12 +64,12 @@ final Map<String, String> enCore = {
   TTexts.splashLoadingServices: 'Loading core services...',
   TTexts.splashLoadingUser: 'Verifying user data...',
 
-  // -- Network Error Dialog 
+  // -- Network Error Dialog
   TTexts.netErrorTitle: 'No Internet Connection',
   TTexts.netErrorDescription:
       'This app requires an active internet connection to sync inventory data. Please check your network and try again.',
-  TTexts.netErrorReloadBtn: 'Reload', 
-  TTexts.netErrorCheckWifiBtn: 'Check WiFi Settings', 
+  TTexts.netErrorReloadBtn: 'Reload',
+  TTexts.netErrorCheckWifiBtn: 'Check WiFi Settings',
   TTexts.netChecking: 'Checking connection...',
   TTexts.netErrorWaiting: 'Waiting for network...',
   TTexts.netErrorRetryFailedMessage:
