@@ -2,7 +2,7 @@ name: frontend
 description: "Smart Retail Store Assistant (Storix) is a mobile-first inventory platform for small and medium retail stores."
 publish_to: "none"
 
-version: 1.0.0+1
+version: 1.0.0+3
 
 environment:
   sdk: ^3.3.4
