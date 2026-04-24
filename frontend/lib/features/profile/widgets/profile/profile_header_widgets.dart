@@ -26,7 +26,7 @@ class ProfileHeaderWidget extends StatelessWidget {
         children: [
           // header background
           Container(
-            height: 140,
+            height: AppSizes.p140,
             width: double.infinity,
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -58,22 +58,22 @@ class ProfileHeaderWidget extends StatelessWidget {
               final initial = getInitial(name);
 
               return Container(
-                padding: const EdgeInsets.all(4),
+                padding: const EdgeInsets.all(AppSizes.p4),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: AppColors.white,
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.08),
-                      blurRadius: 15,
-                      offset: const Offset(0, 8),
+                      blurRadius: AppSizes.p15,
+                      offset: const Offset(0, AppSizes.p8),
                     ),
                   ],
                 ),
                 child: Container(
-                  width: 110,
-                  height: 110,
-                  padding: const EdgeInsets.all(4),
+                  width: AppSizes.p110,
+                  height: AppSizes.p110,
+                  padding: const EdgeInsets.all(AppSizes.p4),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     gradient: LinearGradient(
@@ -94,9 +94,9 @@ class ProfileHeaderWidget extends StatelessWidget {
                     child: Text(
                       initial,
                       style: const TextStyle(
-                        fontSize: 38,
+                        fontSize: AppSizes.p38,
                         fontWeight: FontWeight.w900,
-                        color: color,
+                        color: AppColors.primary,
                       ),
                     ),
                   ),

@@ -36,15 +36,48 @@ class ProfileEditController extends GetxController {
   final _dio = Dio();
   final addressPredictions = <dynamic>[].obs;
 
+  static const String notUpdatedYetText = "Not updated yet";
+
+  String _displayOrNotUpdated(String? value) {
+    final text = value?.trim() ?? "";
+    if (text.isEmpty) return notUpdatedYetText;
+    return text;
+  }
+
+  String _cleanDisplayValue(String value) {
+    final text = value.trim();
+    return text == notUpdatedYetText ? "" : text;
+  }
+
+  // ===== FIX PHONE =====
+  String _normalizePhone(String value) {
+    String phone = _cleanDisplayValue(value);
+
+    // Loại bỏ ký tự không phải số
+    phone = phone.replaceAll(RegExp(r'[^0-9]'), '');
+
+    return phone;
+  }
+
+  bool _isValidVietnamPhone(String phone) {
+    // Cho phép rỗng
+    if (phone.isEmpty) return true;
+
+    // Bắt buộc đủ 10 số và bắt đầu bằng 0
+    return RegExp(r'^0\d{9}$').hasMatch(phone);
+  }
+  // ===== END FIX PHONE =====
+
   Future<void> submit() async {
     if (!editProfileFormKey.currentState!.validate()) return;
 
-    final phone = phoneController.text.trim();
+    final phone = currentPhoneValue;
 
-    if (phone.isEmpty) {
+    // Cho phép rỗng nhưng nếu nhập thì phải đúng
+    if (!_isValidVietnamPhone(phone)) {
       TSnackbarsWidget.warning(
         title: TTexts.warningTitle.tr,
-        message: TTexts.editPhoneNumberEmpty.tr,
+        message: TTexts.editPhoneNumberInvalid.tr,
       );
       return;
     }
@@ -71,8 +104,15 @@ class ProfileEditController extends GetxController {
     if (user != null) {
       nameController.text = user.fullName;
       emailController.text = user.email;
-      addressController.text = user.address ?? "";
-      phoneController.text = user.phoneNumber ?? "";
+
+      if (isEditing.value) {
+        addressController.text = user.address ?? "";
+        phoneController.text = user.phoneNumber ?? "";
+      } else {
+        addressController.text = _displayOrNotUpdated(user.address);
+        phoneController.text = _displayOrNotUpdated(user.phoneNumber);
+      }
+
       completePhoneNumber.value = user.phoneNumber ?? "";
     }
   }
@@ -85,8 +125,15 @@ class ProfileEditController extends GetxController {
 
       nameController.text = profile.fullName;
       emailController.text = profile.email;
-      addressController.text = profile.address ?? "";
-      phoneController.text = profile.phoneNumber ?? "";
+
+      if (isEditing.value) {
+        addressController.text = profile.address ?? "";
+        phoneController.text = profile.phoneNumber ?? "";
+      } else {
+        addressController.text = _displayOrNotUpdated(profile.address);
+        phoneController.text = _displayOrNotUpdated(profile.phoneNumber);
+      }
+
       completePhoneNumber.value = profile.phoneNumber ?? "";
 
       final currentUser = userService.currentUser.value;
@@ -96,8 +143,8 @@ class ProfileEditController extends GetxController {
           authUserId: profile.authUserId,
           fullName: profile.fullName,
           email: profile.email,
-          phoneNumber: profile.phoneNumber,
-          address: profile.address,
+          phoneNumber: profile.phoneNumber ?? "",
+          address: profile.address ?? "",
           activeStatus: profile.activeStatus,
           createdAt: profile.createdAt,
           updatedAt: profile.updatedAt,
@@ -116,34 +163,36 @@ class ProfileEditController extends GetxController {
 
     isEditing.value = !isEditing.value;
 
+    _initializeUserData();
+
     if (!isEditing.value) {
-      _initializeUserData();
       fetchMyProfile();
       addressPredictions.clear();
     }
   }
 
   String get currentPhoneValue {
-    return completePhoneNumber.value.isNotEmpty
-        ? completePhoneNumber.value
-        : phoneController.text.trim();
+    return _normalizePhone(phoneController.text);
+  }
+
+  String get currentAddressValue {
+    return _cleanDisplayValue(addressController.text);
   }
 
   bool get hasAllRequiredFields {
     final name = nameController.text.trim();
     final email = emailController.text.trim();
-    final phone = currentPhoneValue;
-    final address = addressController.text.trim();
 
-    return name.isNotEmpty &&
-        email.isNotEmpty &&
-        phone.isNotEmpty &&
-        address.isNotEmpty;
+    return name.isNotEmpty && email.isNotEmpty;
   }
 
   bool get isPhoneValid {
     final phone = currentPhoneValue;
-    return phone.length == 10 && phone.startsWith('0');
+
+    // Cho phép rỗng
+    if (phone.isEmpty) return true;
+
+    return _isValidVietnamPhone(phone);
   }
 
   bool get hasChangedProfileData {
@@ -153,11 +202,11 @@ class ProfileEditController extends GetxController {
     final name = nameController.text.trim();
     final email = emailController.text.trim();
     final phone = currentPhoneValue;
-    final address = addressController.text.trim();
+    final address = currentAddressValue;
 
     final originalName = currentUser.fullName.trim();
     final originalEmail = currentUser.email.trim();
-    final originalPhone = (currentUser.phoneNumber ?? '').trim();
+    final originalPhone = _normalizePhone(currentUser.phoneNumber ?? '');
     final originalAddress = (currentUser.address ?? '').trim();
 
     return name != originalName ||
@@ -174,7 +223,9 @@ class ProfileEditController extends GetxController {
   Future<void> searchAddress(String query) async {
     if (!isEditing.value) return;
 
-    if (query.trim().length < 3) {
+    final cleanQuery = _cleanDisplayValue(query);
+
+    if (cleanQuery.length < 3) {
       addressPredictions.clear();
       return;
     }
@@ -183,7 +234,7 @@ class ProfileEditController extends GetxController {
       final response = await _dio.get(
         'https://nominatim.openstreetmap.org/search',
         queryParameters: {
-          'q': query,
+          'q': cleanQuery,
           'format': 'json',
           'addressdetails': 1,
           'limit': 5,
@@ -199,6 +250,10 @@ class ProfileEditController extends GetxController {
       }
     } catch (e) {
       debugPrint("Search Error: $e");
+      TSnackbarsWidget.error(
+        title: TTexts.errorTitle.tr,
+        message: TTexts.locationErrorMessage.tr,
+      );
     }
   }
 
@@ -283,10 +338,10 @@ class ProfileEditController extends GetxController {
     final name = nameController.text.trim();
     final email = emailController.text.trim();
     final phone = currentPhoneValue;
-    final address = addressController.text.trim();
+    final address = currentAddressValue;
 
     // 1. Validate form
-    if (name.isEmpty || email.isEmpty || phone.isEmpty || address.isEmpty) {
+    if (name.isEmpty || email.isEmpty) {
       TSnackbarsWidget.warning(
         title: TTexts.editErrorEmptyFieldsTitle.tr,
         message: TTexts.fillAllFields.tr,
@@ -295,7 +350,7 @@ class ProfileEditController extends GetxController {
     }
 
     /// validate phone basic
-    if (phone.length != 10 || !phone.startsWith('0')) {
+    if (!_isValidVietnamPhone(phone)) {
       TSnackbarsWidget.warning(
         title: TTexts.warningTitle.tr,
         message: TTexts.editPhoneNumberInvalid.tr,
@@ -303,9 +358,9 @@ class ProfileEditController extends GetxController {
       return;
     }
 
-    // không thay đổi gì thì thoát mode edit
     if (!hasChangedProfileData) {
       isEditing.value = false;
+      _initializeUserData();
       addressPredictions.clear();
       return;
     }
@@ -318,13 +373,13 @@ class ProfileEditController extends GetxController {
       final currentUser = userService.currentUser.value;
 
       if (currentUser == null) {
-        throw Exception('Không tìm thấy thông tin người dùng');
+        throw Exception(TTexts.userNotFound.tr);
       }
 
       final String userId = currentUser.userId;
 
       if (userId.isEmpty) {
-        throw Exception('Không tìm thấy user_id để cập nhật hồ sơ');
+        throw Exception(TTexts.userIdNotFound.tr);
       }
 
       await userProfileProvider.updateProfile(
@@ -343,15 +398,10 @@ class ProfileEditController extends GetxController {
         address: address,
       );
 
-      nameController.text = name;
-      emailController.text = email;
-      phoneController.text = phone;
-      addressController.text = address;
-      completePhoneNumber.value = phone;
-
-      // 3. Success
       FullScreenLoaderUtils.stopLoading();
       isEditing.value = false;
+      addressPredictions.clear();
+      _initializeUserData();
 
       TSnackbarsWidget.success(
         title: TTexts.successTitle.tr,
@@ -360,23 +410,20 @@ class ProfileEditController extends GetxController {
     } on DioError catch (e) {
       FullScreenLoaderUtils.stopLoading();
 
+      debugPrint("API ERROR: ${e.response?.data}");
+      debugPrint("STATUS: ${e.response?.statusCode}");
+
       String errorMessage = TTexts.profileUpdateError.tr;
 
-      if (e.response != null && e.response?.data != null) {
-        final data = e.response!.data;
-        if (data is Map<String, dynamic> && data['message'] != null) {
-          errorMessage = data['message'];
-        }
+      if (e.response?.data is Map && e.response?.data['message'] != null) {
+        errorMessage = e.response?.data['message'];
       }
 
       TSnackbarsWidget.error(
         title: TTexts.errorTitle.tr,
         message: errorMessage,
       );
-    }
-
-    // 4. Error Handling
-    on TimeoutException catch (_) {
+    } on TimeoutException catch (_) {
       FullScreenLoaderUtils.stopLoading();
       TSnackbarsWidget.error(
         title: TTexts.errorTimeoutTitle.tr,

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/infrastructure/models/store_member_model.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:frontend/core/ui/widgets/t_bottom_sheet_widget.dart';
+import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 
 class TUserInfoBottomSheetWidgets extends StatelessWidget {
@@ -19,7 +22,7 @@ class TUserInfoBottomSheetWidgets extends StatelessWidget {
     );
   }
 
-  // ===== COLOR =====
+  // COLOR
   Color get roleColor {
     switch (member.role.toLowerCase()) {
       case 'owner':
@@ -36,19 +39,21 @@ class TUserInfoBottomSheetWidgets extends StatelessWidget {
   Color get roleBg => roleColor.withOpacity(0.12);
 
   String get displayName =>
-      member.name.trim().isEmpty ? 'Unknown User' : member.name.trim();
+      member.name.trim().isEmpty ? TTexts.unknownUser.tr : member.name.trim();
 
   String get displayPhone => member.phone.trim().isEmpty
-      ? 'Chưa có số điện thoại'
+      ? TTexts.profileNoPhoneNumber.tr
       : member.phone.trim();
 
-  String get displayAddress =>
-      member.address.trim().isEmpty ? 'Chưa có địa chỉ' : member.address.trim();
+  String get displayAddress => member.address.trim().isEmpty
+      ? TTexts.profileNoAddress.tr
+      : member.address.trim();
 
-  String get displayEmail =>
-      member.email.trim().isEmpty ? 'Chưa có email' : member.email.trim();
+  String get displayEmail => member.email.trim().isEmpty
+      ? TTexts.profileNoEmail.tr
+      : member.email.trim();
 
-  // ================= UI =================
+  // ui
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -72,33 +77,33 @@ class TUserInfoBottomSheetWidgets extends StatelessWidget {
           child: Text(
             displayName[0].toUpperCase(),
             style: TextStyle(
-              fontSize: 28,
+              fontSize: AppSizes.p28,
               fontWeight: FontWeight.w900,
               color: roleColor,
             ),
           ),
         ),
 
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSizes.p16),
 
         // name
         Text(
           displayName,
           textAlign: TextAlign.center,
           style: const TextStyle(
-            fontSize: 20,
+            fontSize: AppSizes.p20,
             fontWeight: FontWeight.w800,
             color: AppColors.primaryText,
           ),
         ),
 
-        const SizedBox(height: 6),
+        const SizedBox(height: AppSizes.p6),
 
         // role chips
         Container(
           padding: const EdgeInsets.symmetric(
-            horizontal: 12,
-            vertical: 6,
+            horizontal: AppSizes.p12,
+            vertical: AppSizes.p6,
           ),
           decoration: BoxDecoration(
             color: roleBg,
@@ -107,7 +112,7 @@ class TUserInfoBottomSheetWidgets extends StatelessWidget {
           child: Text(
             member.role.toUpperCase(),
             style: TextStyle(
-              fontSize: 12,
+              fontSize: AppSizes.p12,
               fontWeight: FontWeight.w700,
               color: roleColor,
               letterSpacing: 0.5,
@@ -115,31 +120,34 @@ class TUserInfoBottomSheetWidgets extends StatelessWidget {
           ),
         ),
 
-        const SizedBox(height: 24),
+        const SizedBox(height: AppSizes.p24),
 
         // ===== INFO =====
-        _infoTile(Iconsax.call_copy, "Số điện thoại", displayPhone),
-        const SizedBox(height: 12),
+        _infoTile(Iconsax.call_copy, TTexts.profilePhoneNumberBottomSheet.tr,
+            displayPhone),
+        const SizedBox(height: AppSizes.p12),
 
-        _infoTile(Iconsax.sms_copy, "Email", displayEmail),
-        const SizedBox(height: 12),
+        _infoTile(
+            Iconsax.sms_copy, TTexts.profileEmailBottomSheet.tr, displayEmail),
+        const SizedBox(height: AppSizes.p12),
 
-        _infoTile(Iconsax.location_copy, "Địa chỉ", displayAddress),
+        _infoTile(Iconsax.location_copy, TTexts.profileAddressBottomSheet.tr,
+            displayAddress),
       ],
     );
   }
 
   Widget _infoTile(IconData icon, String label, String value) {
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(AppSizes.p14),
       decoration: BoxDecoration(
         color: AppColors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(AppSizes.p20),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.03),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+            blurRadius: AppSizes.p12,
+            offset: const Offset(0, AppSizes.p4),
           ),
         ],
       ),
@@ -147,20 +155,20 @@ class TUserInfoBottomSheetWidgets extends StatelessWidget {
         children: [
           // icon box
           Container(
-            width: 40,
-            height: 40,
+            width: AppSizes.p40,
+            height: AppSizes.p40,
             decoration: BoxDecoration(
               color: roleBg,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(AppSizes.p12),
             ),
             child: Icon(
               icon,
-              size: 18,
+              size: AppSizes.p18,
               color: roleColor,
             ),
           ),
 
-          const SizedBox(width: 12),
+          const SizedBox(width: AppSizes.p12),
 
           Expanded(
             child: Column(
@@ -169,15 +177,15 @@ class TUserInfoBottomSheetWidgets extends StatelessWidget {
                 Text(
                   label,
                   style: const TextStyle(
-                    fontSize: 12,
+                    fontSize: AppSizes.p12,
                     color: AppColors.subText,
                   ),
                 ),
-                const SizedBox(height: 3),
+                const SizedBox(height: AppSizes.p3),
                 Text(
                   value,
                   style: const TextStyle(
-                    fontSize: 14,
+                    fontSize: AppSizes.p14,
                     fontWeight: FontWeight.w700,
                     color: AppColors.primaryText,
                   ),

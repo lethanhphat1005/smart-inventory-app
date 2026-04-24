@@ -25,7 +25,7 @@ class ChangePasswordMobileView
             ChangePasswordFormWidget(),
             SizedBox(height: AppSizes.p32),
             ChangePasswordButtonWidget(),
-            SizedBox(height: 40),
+            SizedBox(height: AppSizes.p40),
             TBottomNavSpacerWidget(),
           ],
         ),

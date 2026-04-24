@@ -61,7 +61,7 @@ class TTexts {
   static const String activeFilters = "active_filters";
   static const String userLabel = "user_label";
   static const String me = "me";
-  static const String resultsFound = "results found";
+  static const String resultsFound = "results_found";
   static const String updatePriceAndImport = "update_price_and_import";
   static const String importOnly = "import_only";
   static const String confirmImportDesc = "confirm_import_desc";
@@ -155,7 +155,7 @@ class TTexts {
   static const String rememberMe = "remember_me";
   static const String forgotPassword = "forgot_password";
   static const String loginBtn = "login_btn";
-  static const String loggingIn = "logging";
+  static const String loggingIn = "logging_in";
   static const String continueWithGoogle = "continue_with_google";
   static const String loginErrorEmptyFieldsTitle =
       "login_error_empty_fields_title";
@@ -245,8 +245,10 @@ class TTexts {
   static const String whatIsWorkspace = "what_is_workspace";
   static const String workspaceDescription = "workspace_description";
   static const String understood = "understood";
-  static const String storeSelectionSuccessTitle = "store_selection_success_title";
-  static const String storeSelectionSuccessMessage = "store_selection_success_message";
+  static const String storeSelectionSuccessTitle =
+      "store_selection_success_title";
+  static const String storeSelectionSuccessMessage =
+      "store_selection_success_message";
   static const String activeStoreBadge = "active_store_badge";
 
   // -- Create Workspace
@@ -487,7 +489,8 @@ class TTexts {
   static const String chatbotMenuLowStock = "chatbot_menu_low_stock";
   static const String chatbotMenuCreateImport = "chatbot_menu_create_import";
   static const String chatbotMenuCreateExport = "chatbot_menu_create_export";
-  static const String chatbotQuickActionLowStock = "chatbot_quick_action_low_stock";
+  static const String chatbotQuickActionLowStock =
+      "chatbot_quick_action_low_stock";
   static const String chatbotQuickActionImport = "chatbot_quick_action_import";
   static const String chatbotQuickActionExport = "chatbot_quick_action_export";
 
@@ -1066,6 +1069,17 @@ class TTexts {
   static const String itemFoundText = "item_found_text";
   static const String defaultUnit = "default_unit";
   static const String specificNoteHint = "specific_note_hint";
+  static const String profileNoAddress = 'profile_no_address';
+  static const String profileNoPhoneNumber = 'profile_no_phone_number';
+  static const String profileNoEmail = 'profile_no_email';
+  static const String profilePhoneNumberBottomSheet =
+      'profile_phone_number_bottom_sheet';
+  static const String profileEmailBottomSheet = 'profile_email_bottom_sheet';
+  static const String profileAddressBottomSheet =
+      'profile_address_bottom_sheet';
+  static const String profileMembers = 'profile_members';
+  static const String profileListMembers = 'profile_list_members';
+  static const String profileStoreName = 'profile_store_name';
 
   //--Edit profile
   static const String editTitle = 'edit_title';
@@ -1146,6 +1160,10 @@ class TTexts {
   static const String assignsRoleAll = 'assigns_role_all';
   static const String assignsRoleOwner = 'assigns_role_owner';
   static const String assignsRoleSearchHint = 'assigns_role_search_hint';
+
+  //Exceptions
+  static const String userNotFound = "user_not_found";
+  static const String userIdNotFound = "user_id_not_found";
 
   //Member
   static const String profileNoMembers = 'profile_no_members';

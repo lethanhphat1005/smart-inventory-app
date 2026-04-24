@@ -9,6 +9,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/infrastructure/utils/full_screen_loader_utils.dart';
 import 'package:frontend/core/state/services/store_service.dart';
+import 'package:frontend/core/state/services/user_service.dart';
 import 'package:frontend/core/ui/widgets/t_snackbars_widget.dart';
 import 'package:frontend/features/profile/providers/store_provider.dart';
 import 'package:frontend/features/profile/providers/store_member_provider.dart';
@@ -18,6 +19,7 @@ class ProfileEditStoreController extends GetxController {
 
   // Services & Providers
   final _storeService = Get.find<StoreService>();
+  final _userService = Get.find<UserService>();
   final _storeProvider = StoreProvider();
   final _storeMemberProvider = StoreMemberProvider();
 
@@ -37,6 +39,9 @@ class ProfileEditStoreController extends GetxController {
   final storeAddress = ''.obs;
   final memberCount = 0.obs;
 
+  // Role của current user trong store hiện tại
+  final currentUserStoreRole = ''.obs;
+
   // Members states
   final isLoadingMembers = false.obs;
   final hasLoadedMembers = false.obs;
@@ -47,6 +52,19 @@ class ProfileEditStoreController extends GetxController {
   final addressPredictions = <dynamic>[].obs;
 
   final _dio = Dio();
+
+  static const String notUpdatedYetText = "Not updated yet";
+
+  String _displayOrNotUpdated(String? value) {
+    final text = value?.trim() ?? "";
+    if (text.isEmpty) return notUpdatedYetText;
+    return text;
+  }
+
+  String _cleanDisplayValue(String value) {
+    final text = value.trim();
+    return text == notUpdatedYetText ? "" : text;
+  }
 
   @override
   void onInit() {
@@ -60,9 +78,13 @@ class ProfileEditStoreController extends GetxController {
   void _initializeFields() {
     nameController.text = _storeService.currentStoreName.value;
 
-    if (_storeService.currentStoreAddress.value.isNotEmpty) {
-      addressController.text = _storeService.currentStoreAddress.value;
-      storeAddress.value = _storeService.currentStoreAddress.value;
+    final address = _storeService.currentStoreAddress.value.trim();
+    storeAddress.value = address;
+
+    if (isEditing.value) {
+      addressController.text = address;
+    } else {
+      addressController.text = _displayOrNotUpdated(address);
     }
   }
 
@@ -73,14 +95,17 @@ class ProfileEditStoreController extends GetxController {
       if (storeId.isEmpty) return;
 
       final store = await _storeProvider.getStoreDetail(storeId);
-      final fetchedAddress = (store['address'] ?? '').toString();
+      final fetchedAddress = (store['address'] ?? '').toString().trim();
 
       storeAddress.value = fetchedAddress;
 
-      if (fetchedAddress.isNotEmpty) {
+      if (isEditing.value) {
         addressController.text = fetchedAddress;
-        await _storeService.saveStoreAddress(fetchedAddress);
+      } else {
+        addressController.text = _displayOrNotUpdated(fetchedAddress);
       }
+
+      await _storeService.saveStoreAddress(fetchedAddress);
     } catch (e) {
       debugPrint("Load store extra data error: $e");
     }
@@ -96,6 +121,7 @@ class ProfileEditStoreController extends GetxController {
         members.clear();
         filteredMembers.clear();
         memberCount.value = 0;
+        currentUserStoreRole.value = '';
         hasLoadedMembers.value = true;
         return;
       }
@@ -105,6 +131,7 @@ class ProfileEditStoreController extends GetxController {
       }
 
       final data = await _storeMemberProvider.getStoreMembers(storeId);
+      final currentUser = _userService.currentUser.value;
 
       final mappedMembers = data.map<StoreMemberModel>((item) {
         return StoreMemberModel.fromJson(
@@ -115,6 +142,30 @@ class ProfileEditStoreController extends GetxController {
       members.assignAll(mappedMembers);
       filteredMembers.assignAll(mappedMembers);
       memberCount.value = mappedMembers.length;
+
+      // Xác định role current user
+      currentUserStoreRole.value = '';
+
+      if (currentUser != null) {
+        StoreMemberModel? currentMember;
+
+        try {
+          currentMember = mappedMembers.firstWhere(
+            (member) => member.userId == currentUser.userId,
+          );
+        } catch (_) {}
+
+        if (currentMember == null) {
+          try {
+            currentMember = mappedMembers.firstWhere(
+              (member) => member.userId == currentUser.authUserId,
+            );
+          } catch (_) {}
+        }
+
+        currentUserStoreRole.value =
+            currentMember?.role.toString().trim().toLowerCase() ?? '';
+      }
     } catch (e) {
       debugPrint("Lỗi load members: $e");
 
@@ -122,6 +173,8 @@ class ProfileEditStoreController extends GetxController {
         filteredMembers.clear();
         memberCount.value = 0;
       }
+
+      currentUserStoreRole.value = '';
     } finally {
       isLoadingMembers.value = false;
       hasLoadedMembers.value = true;
@@ -150,7 +203,7 @@ class ProfileEditStoreController extends GetxController {
     memberCount.value = members.length;
   }
 
-  /// Update role local
+  // Update role local
   void updateMemberRole({
     required String userId,
     required String newRole,
@@ -168,12 +221,33 @@ class ProfileEditStoreController extends GetxController {
 
     members.refresh();
     filteredMembers.refresh();
+
+    // Nếu current user đổi role thì update lại
+    final currentUser = _userService.currentUser.value;
+    if (currentUser != null &&
+        (userId == currentUser.userId || userId == currentUser.authUserId)) {
+      currentUserStoreRole.value = newRole.trim().toLowerCase();
+    }
   }
 
   /// Bật/tắt mode chỉnh sửa
   void toggleEditing() {
     if (isLoading.value) return;
+
+    // Chỉ owner mới được edit
+    if (currentUserStoreRole.value != 'owner') return;
+
     isEditing.value = !isEditing.value;
+
+    final address = storeAddress.value.trim();
+
+    if (isEditing.value) {
+      addressController.text = address;
+    } else {
+      addressController.text = _displayOrNotUpdated(address);
+    }
+
+    addressPredictions.clear();
   }
 
   void _safeMoveMap(LatLng location) {
@@ -184,11 +258,13 @@ class ProfileEditStoreController extends GetxController {
     }
   }
 
-  // --- 1. TÌM KIẾM ĐỊA CHỈ ---
+  /// Tìm kiếm địa chỉ dựa trên query
   Future<void> searchAddress(String query) async {
     if (!isEditing.value) return;
 
-    if (query.trim().length < 3) {
+    final cleanQuery = _cleanDisplayValue(query);
+
+    if (cleanQuery.length < 3) {
       addressPredictions.clear();
       return;
     }
@@ -197,7 +273,7 @@ class ProfileEditStoreController extends GetxController {
       final response = await _dio.get(
         'https://nominatim.openstreetmap.org/search',
         queryParameters: {
-          'q': query,
+          'q': cleanQuery,
           'format': 'json',
           'addressdetails': 1,
           'limit': 5,
@@ -216,7 +292,7 @@ class ProfileEditStoreController extends GetxController {
     }
   }
 
-  // --- 2. CHỌN GỢI Ý ĐỊA CHỈ ---
+  // Khi user chọn một địa chỉ gợi ý, cập nhật vị trí và địa chỉ vào form
   void onSuggestionSelected(dynamic place) {
     final lat = double.parse(place['lat']);
     final lon = double.parse(place['lon']);
@@ -233,7 +309,7 @@ class ProfileEditStoreController extends GetxController {
     );
   }
 
-  // --- 3. LẤY VỊ TRÍ GPS ---
+  // Lấy vị trí hiện tại của user và cập nhật vào form
   Future<void> getCurrentLocation() async {
     if (!isEditing.value) return;
 
@@ -287,16 +363,16 @@ class ProfileEditStoreController extends GetxController {
     }
   }
 
-  /// Getter lấy dữ liệu hiện tại trong form
+  // Getter lấy dữ liệu hiện tại trong form
   String get currentName => nameController.text.trim();
-  String get currentAddress => addressController.text.trim();
+  String get currentAddress => _cleanDisplayValue(addressController.text);
 
-  /// Kiểm tra đã nhập đủ dữ liệu bắt buộc chưa
+  // Kiểm tra đã nhập đủ dữ liệu bắt buộc chưa
   bool get hasAllRequiredFields {
-    return currentName.isNotEmpty && currentAddress.isNotEmpty;
+    return currentName.isNotEmpty;
   }
 
-  /// Kiểm tra xem có thay đổi dữ liệu hay không
+  // Kiểm tra xem có thay đổi dữ liệu hay không
   bool get hasChanged {
     final originalName = _storeService.currentStoreName.value.trim();
     final originalAddress = _storeService.currentStoreAddress.value.trim();
@@ -308,16 +384,21 @@ class ProfileEditStoreController extends GetxController {
     return hasAllRequiredFields && hasChanged;
   }
 
+  // Logic cập nhật thông tin cửa hàng
   Future<void> updateStore() async {
     await updateStoreDetails();
   }
 
-  /// Logic cập nhật thông tin cửa hàng
   Future<void> updateStoreDetails() async {
     try {
+      // Chỉ owner mới được edit
+      if (currentUserStoreRole.value != 'owner') {
+        return;
+      }
+
       if (!editStoreFormKey.currentState!.validate()) return;
 
-      if (!hasAllRequiredFields) {
+      if (currentName.isEmpty) {
         TSnackbarsWidget.warning(
           title: TTexts.errorTitle.tr,
           message: TTexts.fillAllFields.tr,
@@ -327,6 +408,8 @@ class ProfileEditStoreController extends GetxController {
 
       if (!hasChanged) {
         isEditing.value = false;
+        addressController.text = _displayOrNotUpdated(storeAddress.value);
+        addressPredictions.clear();
         return;
       }
 
@@ -355,6 +438,9 @@ class ProfileEditStoreController extends GetxController {
       await loadMembers();
 
       isEditing.value = false;
+      addressController.text = _displayOrNotUpdated(currentAddress);
+      addressPredictions.clear();
+
       Get.back();
 
       Future.delayed(const Duration(milliseconds: 100), () {

@@ -25,7 +25,8 @@ class ProfileLogoutButtonWidget extends StatelessWidget {
                 title: TTexts.profileDialogTitleLogout.tr,
                 description: TTexts.profileDialogDescriptionLogout.tr,
 
-                icon: const Text('🚪', style: TextStyle(fontSize: 40)),
+                icon:
+                    const Text('🚪', style: TextStyle(fontSize: AppSizes.p40)),
                 // Nút Logout
                 primaryButtonText: TTexts.profileDialogBtnLogout.tr,
                 onPrimaryPressed: () {
@@ -45,7 +46,7 @@ class ProfileLogoutButtonWidget extends StatelessWidget {
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.gradientOrangeStart,
             foregroundColor: AppColors.whiteText,
-            padding: const EdgeInsets.symmetric(vertical: 16),
+            padding: const EdgeInsets.symmetric(vertical: AppSizes.p16),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(AppSizes.radius16),
             ),
@@ -53,13 +54,13 @@ class ProfileLogoutButtonWidget extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Iconsax.logout_1_copy, size: 20),
+              const Icon(Iconsax.logout_1_copy, size: AppSizes.p20),
               const SizedBox(width: AppSizes.p8),
               Text(
                 TTexts.profileBtnLogout.tr,
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
-                  fontSize: 16,
+                  fontSize: AppSizes.p16,
                 ),
               ),
             ],

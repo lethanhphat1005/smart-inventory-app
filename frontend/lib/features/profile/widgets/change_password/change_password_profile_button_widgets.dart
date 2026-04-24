@@ -32,7 +32,8 @@ class ChangePasswordButtonWidget
                       TCustomDialogWidget(
                         title: TTexts.changePasswordConfirm.tr,
                         description: TTexts.changePasswordDialogDescription.tr,
-                        icon: const Text('🔐', style: TextStyle(fontSize: 40)),
+                        icon: const Text('🔐',
+                            style: TextStyle(fontSize: AppSizes.p40)),
                         primaryButtonText: TTexts.confirm.tr,
                         onPrimaryPressed: () {
                           Get.back();
@@ -55,8 +56,8 @@ class ChangePasswordButtonWidget
             ),
             child: controller.isLoading.value
                 ? const SizedBox(
-                    height: 20,
-                    width: 20,
+                    height: AppSizes.p20,
+                    width: AppSizes.p20,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
                       color: Colors.white,
@@ -66,7 +67,7 @@ class ChangePasswordButtonWidget
                     TTexts.changePasswordConfirm.tr,
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                      fontSize: AppSizes.p16,
                       color: Colors.white,
                     ),
                   ),
