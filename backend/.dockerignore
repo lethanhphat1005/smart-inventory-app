@@ -1,0 +1,10 @@
+serviceAccountKey.json
+.env
+.git
+.gitignore
+Dockerfile
+docker-compose.yml
+.prettierrc
+.prettierignore
+*.md
+.vscode

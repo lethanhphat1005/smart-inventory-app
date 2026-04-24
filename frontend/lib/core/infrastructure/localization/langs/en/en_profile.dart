@@ -108,6 +108,9 @@ final Map<String, String> enProfile = {
   TTexts.assignsRoleStaff: 'Staff',
 
   //Member List
+  TTexts.memberRemovedSuccess: 'Member removed from store successfully',
+  TTexts.deleteMemberTitle: 'Delete Member',
+  TTexts.deleteMemberMessage: 'Are you sure you want to remove',
   TTexts.profileNoMembers: 'No members found',
   TTexts.profileNoMembersSubtitle: 'There are no members in this store.',
 

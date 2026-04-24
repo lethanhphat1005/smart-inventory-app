@@ -17,23 +17,6 @@ export class SmartAlertService {
 
   private initEventListeners() {
     eventBus.on(
-      appEvents.INVENTORY_CHANGED,
-      (payload: {
-        inventoryId: string;
-        storeId: string;
-        oldQuantity?: number;
-        newQuantity?: number;
-      }) => {
-        this.checkLowStockRule(
-          payload.inventoryId,
-          payload.storeId,
-          payload.newQuantity,
-          payload.oldQuantity,
-        ).catch((err) => console.error('Lỗi khi check rules:', err));
-      },
-    );
-
-    eventBus.on(
       appEvents.BATCH_INVENTORY_CHANGED,
       (payload: {
         storeId: string;
@@ -441,7 +424,7 @@ export class SmartAlertService {
     totalPrice: number;
     itemCount: number;
   }) {
-    if (payload.totalPrice < 50) {
+    if (payload.totalPrice < 500) {
       return;
     }
 

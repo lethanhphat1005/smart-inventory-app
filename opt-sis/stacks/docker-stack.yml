@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  sis-backend:
+    image: peterhoward/storix-backend:latest
+    env_file:
+      - /opt/sis/env/backend.env
+    secrets:
+      - source: firebase_service_account
+        target: serviceAccountKey.json
+    networks:
+      - sis-network
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'wget',
+          '--no-verbose',
+          '--tries=1',
+          '--spider',
+          'http://localhost:3000/api/health',
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  sis-nginx:
+    image: nginx:stable-alpine
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - /opt/sis/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - sis-network
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+networks:
+  sis-network:
+    driver: overlay

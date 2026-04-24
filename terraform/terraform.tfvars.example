@@ -1,0 +1,3 @@
+public_key = "ssh-public-key"
+sns_email = "youremail@example.com"
+allowed_ssh_cidrs = ["your_ip/32"]
