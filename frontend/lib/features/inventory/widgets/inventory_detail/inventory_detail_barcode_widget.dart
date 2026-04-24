@@ -11,70 +11,139 @@ class InventoryDetailBarcodeWidget extends GetView<InventoryDetailController> {
 
   @override
   Widget build(BuildContext context) {
-    final type = controller.barcodeType.toUpperCase();
-    final isQR = type.contains('QR');
+    return Obx(() {
+      final barcodes = controller.barcodes;
+      final hasMultipleBarcodes = barcodes.length > 1;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSizes.p20),
-      child: Container(
-        padding: const EdgeInsets.all(AppSizes.p16),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(AppSizes.radius16),
-          border: Border.all(color: AppColors.divider.withOpacity(0.5)),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppSizes.p20),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(AppSizes.radius16),
+            onTap: hasMultipleBarcodes
+                ? () => controller.showBarcodeListBottomSheet()
+                : null, // Chỉ cho bấm khi có nhiều mã vạch
+            child: Container(
+              padding: const EdgeInsets.all(AppSizes.p16),
               decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: AppColors.divider)),
-              child: isQR
-                  ? _buildMockQRCode()
-                  : _buildMockLinearBarcode(controller.barcode),
-            ),
-            const SizedBox(width: AppSizes.p16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                color: hasMultipleBarcodes
+                    ? AppColors.primary.withOpacity(0.02)
+                    : AppColors.surface,
+                borderRadius: BorderRadius.circular(AppSizes.radius16),
+                border: Border.all(
+                  color: hasMultipleBarcodes
+                      ? AppColors.primary.withOpacity(0.2)
+                      : AppColors.divider.withOpacity(0.5),
+                ),
+              ),
+              child: Row(
                 children: [
-                  Row(
-                    children: [
-                      Icon(
-                          isQR
-                              ? Iconsax.scan_barcode_copy
-                              : Iconsax.barcode_copy,
-                          size: 14,
-                          color: AppColors.subText),
-                      const SizedBox(width: 4),
-                      Text("${TTexts.barcodeType.tr}: $type",
-                          style: const TextStyle(
-                              fontSize: 12,
-                              color: AppColors.subText,
-                              fontWeight: FontWeight.w600)),
-                    ],
+                  // 1. ICON BÊN TRÁI (MOCK LINEAR BARCODE)
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                            color: hasMultipleBarcodes
+                                ? AppColors.primary.withOpacity(0.2)
+                                : AppColors.divider)),
+                    child: _buildMockLinearBarcode(controller.barcode),
                   ),
-                  const SizedBox(height: 6),
-                  Text(controller.barcode,
-                      style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 2.0,
-                          fontFamily: 'Poppins',
-                          color: AppColors.primaryText)),
+                  const SizedBox(width: AppSizes.p16),
+
+                  // 2. THÔNG TIN MÃ VẠCH Ở GIỮA
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(Iconsax.barcode_copy,
+                                size: 14, color: AppColors.subText),
+                            const SizedBox(width: 4),
+                            Text(
+                              TTexts.barcodeLabel.tr,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: AppColors.subText,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            // Mã vạch chính
+                            Flexible(
+                              child: Text(
+                                controller.barcode,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 2.0,
+                                  fontFamily: 'Poppins',
+                                  color: AppColors.primaryText,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            // Badge hiển thị (+X) nếu có nhiều mã
+                            if (hasMultipleBarcodes) ...[
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(4),
+                                  border: Border.all(
+                                      color:
+                                          AppColors.primary.withOpacity(0.2)),
+                                ),
+                                child: Text(
+                                  '+${barcodes.length - 1}',
+                                  style: const TextStyle(
+                                    fontFamily: 'Poppins',
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.primary,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // 3. MŨI TÊN CHỈ BÁO BẤM ĐƯỢC
+                  if (hasMultipleBarcodes)
+                    const Padding(
+                      padding: EdgeInsets.only(left: 8.0),
+                      child: Icon(
+                        Iconsax.arrow_right_3_copy,
+                        size: 20,
+                        color: AppColors.primary,
+                      ),
+                    ),
                 ],
               ),
             ),
-          ],
+          ),
         ),
-      ),
-    );
+      );
+    });
   }
 
-  // Thuật toán vẽ vạch đen trắng ngẫu nhiên dựa trên chuỗi SKU
   Widget _buildMockLinearBarcode(String value) {
+    if (value.isEmpty || value == TTexts.na.tr) {
+      return const SizedBox(
+          height: 40, width: 60, child: Icon(Iconsax.barcode_copy));
+    }
     return SizedBox(
       height: 40,
       child: Row(
@@ -83,62 +152,10 @@ class InventoryDetailBarcodeWidget extends GetView<InventoryDetailController> {
           int widthMultiplier = (char.codeUnitAt(0) % 3) + 1;
           return Container(
             width: widthMultiplier * 1.5,
-            color: Colors.black,
+            color: AppColors.primaryText.withOpacity(0.8),
             margin: const EdgeInsets.only(right: 1.5),
           );
         }).toList(),
-      ),
-    );
-  }
-
-  // Thuật toán vẽ mã QR cơ bản
-  Widget _buildMockQRCode() {
-    return SizedBox(
-      width: 40,
-      height: 40,
-      child: Stack(
-        children: [
-          Container(color: Colors.black),
-          Positioned(
-              top: 4,
-              left: 4,
-              child: Container(
-                  width: 12,
-                  height: 12,
-                  color: Colors.white,
-                  child: Center(
-                      child: Container(
-                          width: 6, height: 6, color: Colors.black)))),
-          Positioned(
-              top: 4,
-              right: 4,
-              child: Container(
-                  width: 12,
-                  height: 12,
-                  color: Colors.white,
-                  child: Center(
-                      child: Container(
-                          width: 6, height: 6, color: Colors.black)))),
-          Positioned(
-              bottom: 4,
-              left: 4,
-              child: Container(
-                  width: 12,
-                  height: 12,
-                  color: Colors.white,
-                  child: Center(
-                      child: Container(
-                          width: 6, height: 6, color: Colors.black)))),
-          Positioned(
-              bottom: 4,
-              right: 4,
-              child: Container(
-                  width: 16,
-                  height: 16,
-                  color: Colors.white,
-                  child: const Icon(Icons.qr_code,
-                      size: 16, color: Colors.black))),
-        ],
       ),
     );
   }

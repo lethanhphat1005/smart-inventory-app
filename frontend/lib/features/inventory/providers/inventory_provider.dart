@@ -96,15 +96,15 @@ class InventoryProvider {
     return response.data['data'] ?? response.data;
   }
 
-Future<Map<String, dynamic>> createProductPackage(
-      String productId, Map<String, dynamic> packageData, Map<String, dynamic> inventoryData) async {
-    final response = await _apiClient.post(
-      '/api/products/$productId/packages', 
-      data: {
-        'package': packageData,
-        'inventory': inventoryData,
-      }
-    );
+  Future<Map<String, dynamic>> createProductPackage(
+      String productId,
+      Map<String, dynamic> packageData,
+      Map<String, dynamic> inventoryData) async {
+    final response =
+        await _apiClient.post('/api/products/$productId/packages', data: {
+      'package': packageData,
+      'inventory': inventoryData,
+    });
     return response.data['data'] ?? response.data;
   }
 
@@ -210,5 +210,51 @@ Future<Map<String, dynamic>> createProductPackage(
     final listData = await _apiClient.getList('/api/audit-logs',
         queryParameters: queryParams ?? {'limit': 100});
     return listData;
+  }
+
+  // ==========================================
+  // BARCODES
+  // ==========================================
+
+  /// Quét mã vạch (Bước 1)
+  Future<Map<String, dynamic>> scanBarcode(String barcode) async {
+    final response = await _apiClient.post(
+      '/api/barcodes/scan',
+      data: {'barcode': barcode},
+    );
+    return response.data['data'] ?? response.data;
+  }
+
+  /// Xác nhận gán mã vạch vào package có sẵn (Bước 2 - Nếu cần)
+  Future<Map<String, dynamic>> confirmBarcodeMapping({
+    required String barcode,
+    required String productPackageId,
+  }) async {
+    final response = await _apiClient.post(
+      '/api/barcodes/confirm',
+      data: {
+        'barcode': barcode,
+        'productPackageId': productPackageId,
+      },
+    );
+    return response.data['data'] ?? response.data;
+  }
+
+  /// Xóa (Gỡ) mã vạch khỏi Product Package
+  Future<void> deletePackageBarcode(
+      String productPackageId, String barcode) async {
+    await _apiClient.delete(
+      '/api/product-packages/$productPackageId/barcodes/$barcode',
+    );
+  }
+  
+  // ==========================================
+  // INVENTORY DETAIL FETCH
+  // ==========================================
+  Future<InventoryModel> getInventoryById(String inventoryId) async {
+    // Gọi API lấy chi tiết inventory kèm theo Product và Package đầy đủ
+    final response = await _apiClient.get('/api/inventories/$inventoryId');
+    final data = response.data['data'] ?? response.data;
+    return InventoryModel.fromJson(data);
   }
 }

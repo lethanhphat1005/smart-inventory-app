@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/features/inventory/widgets/shared/inventory_product_package_unit_dropdown_widget.dart';
+import 'package:frontend/features/inventory/widgets/shared/inventory_product_barcode_item_widget.dart';
 import 'package:get/get.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
@@ -14,38 +15,13 @@ class InventoryProductPackageFormFieldsWidget
 
   @override
   Widget build(BuildContext context) {
-    // KHAI BÁO BIẾN Ở ĐÂY, KHÔNG CẦN DÙNG OBX CHO BIẾN TĨNH
-    final isEditMode = controller.packageToEdit != null;
-
     return Form(
       key: controller.packageFormKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 1. CHỌN ĐƠN VỊ (BỊ KHÓA NẾU LÀ EDIT MODE)
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              IgnorePointer(
-                ignoring: isEditMode,
-                child: Opacity(
-                  opacity: isEditMode ? 0.6 : 1.0,
-                  child: const InventoryProductPackageUnitDropdownWidget(),
-                ),
-              ),
-              if (isEditMode)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8.0, left: 4.0),
-                  child: Text(
-                    TTexts.unitLockedMessage.tr,
-                    style: const TextStyle(
-                        fontSize: 12,
-                        color: AppColors.alertText,
-                        fontStyle: FontStyle.italic),
-                  ),
-                ),
-            ],
-          ),
+          // 1. CHỌN ĐƠN VỊ
+          const InventoryProductPackageUnitDropdownWidget(),
           const SizedBox(height: 24),
 
           // 2. TÊN HIỂN THỊ PREVIEW
@@ -58,65 +34,35 @@ class InventoryProductPackageFormFieldsWidget
           ),
           const SizedBox(height: 16),
 
-          // 3. SUFFIX NAME (Phần cho phép User sửa)
+          // 3. VARIANT (PHÂN LOẠI)
           TTextFormFieldWidget(
-            label: TTexts.displayNameSuffixLabel.tr,
-            hintText: TTexts.displayNameSuffixHint.tr,
+            label: TTexts.variantLabel.tr,
+            hintText: TTexts.variantHint.tr,
             controller: controller.packageVariantNameController,
           ),
-
-          // THANH GỢI Ý CHIPS (Đoạn này giữ nguyên Obx vì selectedUnitId là Rx)
-          Obx(() {
-            final suggestions = controller.variantNameSuggestions;
-            if (suggestions.isEmpty) return const SizedBox.shrink();
-
-            return Padding(
-              padding: const EdgeInsets.only(top: 12.0),
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                physics: const BouncingScrollPhysics(),
-                child: Row(
-                  children: suggestions
-                      .map((suggestion) => Padding(
-                            padding: const EdgeInsets.only(right: 8.0),
-                            child: ActionChip(
-                              label: Text(suggestion,
-                                  style: const TextStyle(
-                                      fontSize: 12, fontFamily: 'Poppins')),
-                              backgroundColor: AppColors.surface,
-                              side: BorderSide(
-                                  color: AppColors.primary.withOpacity(0.3)),
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8)),
-                              onPressed: () => controller
-                                  .selectVariantSuggestion(suggestion),
-                            ),
-                          ))
-                      .toList(),
-                ),
-              ),
-            );
-          }),
           const SizedBox(height: 24),
 
           // 4. GIÁ NHẬP & GIÁ BÁN
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
                 child: TTextFormFieldWidget(
-                  label: TTexts.importPriceLabel.tr,
-                  hintText: '0.0',
-                  keyboardType: TextInputType.number,
+                  label: TTexts.importCost.tr,
+                  hintText: '0',
+                  isRequired: true,
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
                   controller: controller.importPriceController,
                 ),
               ),
               const SizedBox(width: 16),
               Expanded(
                 child: TTextFormFieldWidget(
-                  label: TTexts.sellingPriceLabel.tr,
-                  hintText: '0.0',
-                  keyboardType: TextInputType.number,
+                  label: TTexts.salePrice.tr,
+                  hintText: '0',
+                  isRequired: true,
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
                   controller: controller.salePriceController,
                 ),
               ),
@@ -124,7 +70,7 @@ class InventoryProductPackageFormFieldsWidget
           ),
           const SizedBox(height: 24),
 
-          // 5. NGƯỠNG CẢNH BÁO TỒN KHO (>0 hoặc Null)
+          // 5. THRESHOLD (NGƯỠNG CẢNH BÁO) - ĐÃ TRẢ LẠI NHƯ CŨ
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -169,12 +115,16 @@ class InventoryProductPackageFormFieldsWidget
           ),
           const SizedBox(height: 24),
 
-          // 6. BARCODE
+          // 6. BARCODE INPUT
           TTextFormFieldWidget(
             label: TTexts.barcodeLabel.tr,
-            hintText: TTexts.scanOrTypeBarcode.tr,
-            controller: controller.barcodeController,
-            isRequired: true,
+            hintText: TTexts.enterBarcodeHint.tr,
+            controller: controller.barcodeInputController,
+            onFieldSubmitted: (val) {
+              if (val.isNotEmpty) {
+                controller.addBarcode(val);
+              }
+            },
             suffixIcon: IconButton(
               icon: const Icon(Iconsax.scan_barcode_copy,
                   color: AppColors.primary),
@@ -182,13 +132,43 @@ class InventoryProductPackageFormFieldsWidget
                 Get.to(() => TBarcodeScannerLayout(
                       title: TTexts.homeScanBarcode.tr,
                       onScanned: (code) {
-                        controller.barcodeController.text = code;
+                        controller.addBarcode(code);
                         Get.back();
                       },
                     ));
               },
             ),
           ),
+          const SizedBox(height: 12),
+
+          // 7. DANH SÁCH MÃ VẠCH (LIST VIEW)
+          Obx(() {
+            if (controller.packageBarcodes.isEmpty) {
+              return const SizedBox.shrink();
+            }
+
+            return ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: controller.packageBarcodes.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 8),
+              itemBuilder: (context, index) {
+                final code = controller.packageBarcodes[index];
+
+                return Obx(() {
+                  final isMarkedDeleted =
+                      controller.pendingDeleteBarcodes.contains(code);
+
+                  return InventoryProductBarcodeItemWidget(
+                    barcode: code,
+                    isDeleted: isMarkedDeleted,
+                    onRemove: () => controller.removeOrMarkBarcode(code),
+                    onUndo: () => controller.undoMarkBarcode(code),
+                  );
+                });
+              },
+            );
+          }),
         ],
       ),
     );

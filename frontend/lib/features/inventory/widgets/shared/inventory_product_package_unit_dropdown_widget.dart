@@ -137,7 +137,6 @@ class _InventoryProductPackageUnitDropdownWidgetState
                                   onTap: () {
                                     controller.selectedUnitId.value =
                                         unit.unitId;
-                                    // CHỈ CẦN GÁN TEXT LÀ XONG, LISTENER SẼ LÀM VIỆC CÒN LẠI
                                     controller.unitNameController.text =
                                         unit.name;
                                     _closeDropdown();
@@ -183,36 +182,26 @@ class _InventoryProductPackageUnitDropdownWidgetState
   Widget build(BuildContext context) {
     final controller = Get.find<ProductFormController>();
 
-    // Kiểm tra xem có đang ở trạng thái Edit hay không
-    final isEditMode = controller.packageToEdit != null;
-
     return CompositedTransformTarget(
       link: _layerLink,
       child: GestureDetector(
-        // Khóa luôn sự kiện mở dropdown nếu đang ở chế độ Edit
-        onTap: isEditMode ? null : _toggleDropdown,
+        onTap: _toggleDropdown,
         child: AbsorbPointer(
           child: TTextFormFieldWidget(
             label: TTexts.unitLabel.tr,
             hintText: TTexts.selectUnit.tr,
             controller: controller.unitNameController,
             readOnly: true,
-            // Thay đổi icon dựa vào trạng thái Edit
-            suffixIcon: isEditMode
-                ? const Icon(
-                    Iconsax.lock_1_copy,
-                    size: 20,
-                    color: AppColors.subText,
-                  )
-                : AnimatedRotation(
-                    turns: _isOpen ? 0.5 : 0.0,
-                    duration: const Duration(milliseconds: 200),
-                    child: const Icon(
-                      Iconsax.arrow_down_1_copy,
-                      size: 20,
-                      color: AppColors.primaryText,
-                    ),
-                  ),
+            // Luôn hiển thị icon mũi tên xoay
+            suffixIcon: AnimatedRotation(
+              turns: _isOpen ? 0.5 : 0.0,
+              duration: const Duration(milliseconds: 200),
+              child: const Icon(
+                Iconsax.arrow_down_1_copy,
+                size: 20,
+                color: AppColors.primaryText,
+              ),
+            ),
           ),
         ),
       ),

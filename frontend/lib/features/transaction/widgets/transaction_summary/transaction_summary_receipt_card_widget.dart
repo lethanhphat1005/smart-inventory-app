@@ -12,6 +12,28 @@ class TransactionSummaryReceiptCardWidget
 
   @override
   Widget build(BuildContext context) {
+    // ==============================================================
+    // REPORT CARD INFO
+    // ==============================================================
+    String finalItemsDisplay = controller.itemsDisplay;
+    Color finalItemsColor = controller.itemsColor;
+    String finalMoneyDisplay = controller.moneyDisplay;
+    Color finalMoneyColor = controller.moneyColor;
+
+    if (controller.isOutbound) {
+      // Outbound (Xuất): items (-) Đỏ, Tiền (+) Xanh
+      finalItemsDisplay = '- ${controller.itemsDisplay}';
+      finalItemsColor = AppColors.stockOut;
+      finalMoneyDisplay = '+ ${controller.moneyDisplay}';
+      finalMoneyColor = AppColors.stockIn;
+    } else if (controller.isInbound) {
+      // Inbound (Nhập): items (+) Xanh, Tiền (-) Đỏ
+      finalItemsDisplay = '+ ${controller.itemsDisplay}';
+      finalItemsColor = AppColors.stockIn;
+      finalMoneyDisplay = '- ${controller.moneyDisplay}';
+      finalMoneyColor = AppColors.stockOut;
+    }
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -37,7 +59,7 @@ class TransactionSummaryReceiptCardWidget
           ),
           const SizedBox(height: 20),
 
-          // 2. NGÀY GIỜ VÀ LOẠI GIAO DỊCH (GỘP CHUNG)
+          // 2. NGÀY GIỜ VÀ LOẠI GIAO DỊCH
           _buildRow(
             TTexts.transactionDate.tr,
             controller.dateStr,
@@ -63,33 +85,28 @@ class TransactionSummaryReceiptCardWidget
           ),
           const SizedBox(height: 20),
 
-          // 3. THỐNG KÊ ITEM VÀ TỔNG TIỀN (GỘP CHUNG)
+          // 3. THỐNG KÊ ITEM VÀ TỔNG TIỀN
           _buildRow(
-            // ĐÃ FIX: Hiển thị Modified Products thay cho thẻ chung
-            controller.isAdjustment
-                ? TTexts.modifiedProducts.tr
-                : TTexts.totalItemsTransaction.tr,
+            controller.bottomLabel,
             '',
             customLeftWidget: Row(
               children: [
-                Text(controller.itemsDisplay,
+                Text(finalItemsDisplay,
                     style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
-                        color: controller.itemsColor)),
-
-                // ĐÃ FIX: CHỈ HIỂN THỊ TIỀN NẾU KHÔNG PHẢI LÀ KIỂM KHO
+                        color: finalItemsColor)),
                 if (!controller.isAdjustment) ...[
                   const Text(" / ",
                       style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w400,
                           color: AppColors.subText)),
-                  Text(controller.moneyDisplay,
+                  Text(finalMoneyDisplay,
                       style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
-                          color: controller.moneyColor)),
+                          color: finalMoneyColor)),
                 ],
               ],
             ),
@@ -114,7 +131,8 @@ class TransactionSummaryReceiptCardWidget
                   style: const TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w500,
-                      color: AppColors.subText)),
+                      color: AppColors.subText,
+                      fontFamily: 'Poppins')),
               const SizedBox(height: 4),
               customLeftWidget ??
                   Text(
@@ -122,7 +140,8 @@ class TransactionSummaryReceiptCardWidget
                     style: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w400,
-                        color: AppColors.primaryText),
+                        color: AppColors.primaryText,
+                        fontFamily: 'Poppins'),
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
                   ),

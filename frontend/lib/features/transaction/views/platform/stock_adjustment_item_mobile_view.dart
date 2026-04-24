@@ -45,12 +45,11 @@ class StockAdjustmentItemMobileView
                 color: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: AppSizes.p24),
                 child: Center(
-                  child: Obx(() => TransactionQuantitySelectorWidget(
-                        controller: TextEditingController(
-                            text: controller.tempActualQty.value.toString()),
-                        onDecrease: controller.decrementActualQty,
-                        onIncrease: controller.incrementActualQty,
-                      )),
+                  child: TransactionQuantitySelectorWidget(
+                    controller: controller.actualQtyController,
+                    onDecrease: controller.decrementActualQty,
+                    onIncrease: controller.incrementActualQty,
+                  ),
                 ),
               ),
 

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/widgets/t_no_image_widget.dart';
 import 'package:frontend/features/transaction/controllers/stock_adjustment_controller.dart';
 import 'package:frontend/features/transaction/models/adjustment_item_model.dart';
 import 'package:get/get.dart';
-import 'package:iconsax_flutter/iconsax_flutter.dart';
 
 class StockAdjustmentItemCardWidget extends GetView<StockAdjustmentController> {
   final AdjustmentItemRx item;
@@ -34,6 +35,10 @@ class StockAdjustmentItemCardWidget extends GetView<StockAdjustmentController> {
       const Gradient mismatchedGradient =
           LinearGradient(colors: [Color(0xFFE88B76), Color(0xFFCA5048)]);
 
+      final imageUrl = controller.fetchedImages[item.packageId] ??
+          item.packageInfo?.product?.imageUrl ??
+          '';
+
       return Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
@@ -62,9 +67,21 @@ class StockAdjustmentItemCardWidget extends GetView<StockAdjustmentController> {
                   height: 48,
                   decoration: BoxDecoration(
                       color: AppColors.surface,
-                      borderRadius: BorderRadius.circular(8)),
-                  child:
-                      const Icon(Iconsax.box_1_copy, color: AppColors.subText),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: AppColors.divider)),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: imageUrl.isNotEmpty
+                        ? CachedNetworkImage(
+                            imageUrl: imageUrl,
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) =>
+                                const TNoImageWidget(),
+                            errorWidget: (context, url, error) =>
+                                const TNoImageWidget(),
+                          )
+                        : const TNoImageWidget(),
+                  ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -154,7 +171,7 @@ class StockAdjustmentItemCardWidget extends GetView<StockAdjustmentController> {
               Text(
                 item.note.value.isNotEmpty
                     ? item.note.value
-                    : "Reason: ${item.selectedReason.value.tr}",
+                    : "${TTexts.reason.tr}: ${item.selectedReason.value.tr}",
                 style:
                     const TextStyle(fontSize: 12, color: AppColors.primaryText),
               ),

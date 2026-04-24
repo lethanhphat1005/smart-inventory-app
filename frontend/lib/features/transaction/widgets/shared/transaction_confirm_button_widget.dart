@@ -47,7 +47,7 @@ class TransactionConfirmButtonWidget extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Đã đổi thành "Add to Transaction • 1 Item" và xóa đường kẻ dọc
+              // "Add to Transaction • 1 Item"
               Text(
                 '${TTexts.addToTransaction.tr} • $qtyStr',
                 style: const TextStyle(

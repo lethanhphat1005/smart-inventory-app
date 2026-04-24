@@ -20,6 +20,9 @@ class TImages {
 
   //Profile Images
   static const profileImages = ProfileImages();
+
+  // ChatBot Images
+  static const chatbotImages = ChatbotImages();
 }
 
 // ==========================================
@@ -34,6 +37,8 @@ class AppLogos {
   final String appLogoWhite = 'assets/logos/app-icon-white.png';
 
   final String appLogoWhiteCS = 'assets/logos/app-icon-white-cs.png';
+
+  final String appLogoGradient = 'assets/logos/app-icon-gradient.png';
 
   final String googleLogo = 'assets/logos/google-logo.png';
 
@@ -90,4 +95,11 @@ class ProfileImages {
 
   final String profileImageUser =
       'assets/images/profile/profile_image_user.png';
+}
+
+class ChatbotImages {
+  const ChatbotImages();
+
+  final String chatbotBackground =
+      'assets/images/chatbot/chatbot_background.jpg';
 }

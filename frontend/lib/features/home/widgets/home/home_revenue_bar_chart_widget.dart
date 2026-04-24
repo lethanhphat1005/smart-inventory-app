@@ -73,10 +73,32 @@ class _HomeRevenueBarChartWidgetState extends State<HomeRevenueBarChartWidget> {
                 showTitles: true,
                 reservedSize: 45,
                 interval: limits['interval'],
-                getTitlesWidget: (v, m) => Text(
-                  '${v.toStringAsFixed(1)}k\$',
-                  style: const TextStyle(fontSize: 10),
-                ),
+                getTitlesWidget: (value, meta) {
+                  double realValue = value * 1000;
+                  double absVal = realValue.abs();
+
+                  String label;
+                  if (absVal >= 1000000) {
+                    label = '${(realValue / 1000000).toStringAsFixed(1)}M\$';
+                  } else if (absVal >= 1000) {
+                    label =
+                        '${(realValue / 1000).toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '')}k\$';
+                  } else {
+                    label = '${realValue.toInt()}\$';
+                  }
+
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: Text(
+                      label,
+                      style: const TextStyle(
+                        color: AppColors.subText,
+                        fontSize: 10,
+                        fontFamily: 'Poppins',
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
             bottomTitles: AxisTitles(
@@ -90,7 +112,7 @@ class _HomeRevenueBarChartWidgetState extends State<HomeRevenueBarChartWidget> {
 
           borderData: FlBorderData(show: false),
 
-          // 🔥 DATA ANIMATION
+          // Data animation
           barGroups: _displayData.asMap().entries.map((e) {
             final isNeg = e.value < 0;
 
@@ -108,7 +130,7 @@ class _HomeRevenueBarChartWidgetState extends State<HomeRevenueBarChartWidget> {
           }).toList(),
         ),
 
-        // 🔥 KEY ANIMATION
+        // Key animation
         duration: const Duration(milliseconds: 900),
         curve: Curves.easeOutCubic,
       );

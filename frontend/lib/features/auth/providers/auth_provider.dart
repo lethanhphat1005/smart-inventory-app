@@ -11,6 +11,7 @@ class AuthProvider {
 
   final supabase = Supabase.instance.client;
 
+  // TODO: Bỏ vô env
   final String _serverClientId =
       '119247404487-9d27bve8fsfl6loh8468dg21l4io4otq.apps.googleusercontent.com';
 
@@ -66,6 +67,14 @@ class AuthProvider {
       password: password,
       emailRedirectTo:
           'https://smart-inventory-e3laf8xu9-suos-projects-4722ffd7.vercel.app/welcome',
+    );
+  }
+
+  Future<void> sendVerificationEmail(String email) async {
+    await supabase.auth.resend(
+      type: OtpType.signup,
+      email: email,
+      emailRedirectTo: 'https://smart-inventory-web-fawn.vercel.app/welcome',
     );
   }
 

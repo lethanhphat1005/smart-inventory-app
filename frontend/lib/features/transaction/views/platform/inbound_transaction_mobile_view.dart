@@ -3,12 +3,10 @@ import 'package:frontend/core/ui/widgets/t_search_bar_widget.dart';
 import 'package:frontend/core/ui/widgets/t_app_bar_widget.dart';
 import 'package:frontend/features/transaction/controllers/inbound_transaction_controller.dart';
 import 'package:frontend/features/transaction/widgets/inbound_transaction/inbound_transaction_bottom_bar_widget.dart';
-// SỬ DỤNG CHUNG WIDGET CART VỚI OUTBOUND
 import 'package:frontend/features/transaction/widgets/shared/transaction_cart_item_widget.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/features/transaction/widgets/shared/transaction_empty_widget.dart';
 import 'package:frontend/routes/app_routes.dart';
-import 'package:frontend/features/search/controllers/search_controller.dart';
 import 'package:frontend/core/ui/widgets/t_text_form_field_widget.dart';
 import 'package:get/get.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
@@ -23,7 +21,7 @@ class InboundTransactionMobileView
   Widget build(BuildContext context) {
     return PopScope(
         canPop: false,
-        onPopInvoked: (didPop) {
+        onPopInvokedWithResult: (didPop, result) {
           if (didPop) return;
           controller.handleExit();
         },
@@ -31,43 +29,44 @@ class InboundTransactionMobileView
           backgroundColor: AppColors.background,
           appBar: TAppBarWidget(
             title: TTexts.inboundTransaction.tr,
-            showBackArrow: true,
-            centerTitle: true,
             onBackPress: controller.handleExit,
           ),
           body: Column(
             children: [
-              Padding(
-                padding: const EdgeInsets.all(AppSizes.p20),
+              Container(
+                color: AppColors.white,
+                padding: const EdgeInsets.fromLTRB(
+                    AppSizes.p20, 8, AppSizes.p20, AppSizes.p16),
                 child: TSearchBarWidget(
                   hintText: TTexts.searchProductToAdd.tr,
-                  onTap: () => Get.toNamed(AppRoutes.search,
-                      arguments: {'target': SearchTarget.inventory}),
-                  onScanTap: () => controller.openScanner(),
+                  onTap: () {
+                    Get.toNamed(AppRoutes.search,
+                        arguments: AppRoutes.inboundTransaction);
+                  },
+                  onScanTap: controller.openScanner,
                 ),
               ),
               Expanded(
                 child: Obx(() {
                   if (controller.cartItems.isEmpty) {
+                    // ĐÃ SỬA: Xóa params để tránh lỗi báo đỏ Widget
                     return const TransactionEmptyWidget();
                   }
 
                   return ListView(
-                    physics: const BouncingScrollPhysics(),
-                    padding: const EdgeInsets.only(bottom: 100),
+                    padding: const EdgeInsets.all(AppSizes.p20),
                     children: [
-                      ListView.separated(
+                      ListView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: AppSizes.p20),
                         itemCount: controller.cartItems.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: 12),
                         itemBuilder: (context, index) {
                           final item = controller.cartItems[index];
-                          // SỬ DỤNG WIDGET CHUNG CỦA TRANSACTIONS
+
                           return TransactionCartItemWidget(
                             item: item,
+                            isOutbound: false,
+                            imageUrl: item.packageInfo?.product?.imageUrl,
                             onIncrease: () => controller.updateQuantity(
                                 index, item.quantity + 1),
                             onDecrease: () => controller.updateQuantity(
@@ -75,8 +74,6 @@ class InboundTransactionMobileView
                           );
                         },
                       ),
-
-                      // THÊM PHẦN GHI CHÚ
                       _buildNoteSection(),
                     ],
                   );
@@ -93,19 +90,16 @@ class InboundTransactionMobileView
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Padding(
-          padding:
-              EdgeInsets.fromLTRB(AppSizes.p20, AppSizes.p24, AppSizes.p20, 16),
+          padding: EdgeInsets.fromLTRB(0, AppSizes.p24, 0, 16),
           child: Divider(color: AppColors.divider),
         ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSizes.p20),
-          child: TTextFormFieldWidget(
-            label: TTexts.noteLabel.tr,
-            controller: controller.noteController,
-            hintText: TTexts.noteHint.tr,
-            maxLines: 3,
-            prefixIcon: Iconsax.document_text_copy,
-          ),
+        
+        TTextFormFieldWidget(
+          label: TTexts.noteLabel.tr,
+          controller: controller.noteController,
+          hintText: TTexts.noteHint.tr,
+          maxLines: 3,
+          prefixIcon: Iconsax.document_text_copy,
         ),
         const SizedBox(height: 40),
       ],

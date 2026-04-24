@@ -6,6 +6,7 @@ import 'package:frontend/core/ui/widgets/t_bottom_sheet_widget.dart';
 import 'package:frontend/core/ui/widgets/t_snackbars_widget.dart';
 import 'package:frontend/features/report/controllers/report_controller.dart';
 import 'package:frontend/features/report/widgets/report/report_export_bottom_sheet_widget.dart';
+import 'package:frontend/routes/app_routes.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:intl/intl.dart';
@@ -30,22 +31,71 @@ class ReportHistoryHeaderWidget extends StatelessWidget {
                 Text(
                   TTexts.reportHistory.tr,
                   style: const TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 22,
-                      color: AppColors.primaryText,
-                      fontWeight: FontWeight.bold),
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primaryText),
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  TTexts.reportTransactionsOverview.tr,
-                  style: const TextStyle(
-                      fontSize: 14,
-                      color: AppColors.subText,
-                      fontWeight: FontWeight.w400),
-                ),
+                Obx(() {
+                  final count = reportCtrl.filteredTransactions.length;
+
+                  final now = DateTime.now();
+                  final selectedDate = reportCtrl.selectedDay.value;
+
+                  // Đưa cả 2 về cùng thời điểm 00:00:00 để so sánh chuẩn số ngày
+                  final today = DateTime(now.year, now.month, now.day);
+                  final selected = DateTime(
+                      selectedDate.year, selectedDate.month, selectedDate.day);
+
+                  final difference = selected.difference(today).inDays;
+
+                  String timeLabel;
+                  if (difference == 0) {
+                    timeLabel = TTexts.today.tr.toLowerCase();
+                  } else if (difference == 1) {
+                    timeLabel = TTexts.tomorrow.tr.toLowerCase();
+                  } else if (difference == -1) {
+                    timeLabel = TTexts.yesterday.tr.toLowerCase();
+                  } else {
+                    // Mặc định hiển thị dạng 25 Apr 2026
+                    timeLabel = DateFormat('dd MMM yyyy').format(selectedDate);
+                  }
+
+                  return Text(
+                    "$count ${TTexts.reportTransactionsOverview.tr} $timeLabel",
+                    style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.subText),
+                  );
+                }),
               ],
             ),
           ),
+
+          // --- NÚT SEARCH TRANSACTION ---
+          InkWell(
+            onTap: () =>
+                Get.toNamed(AppRoutes.search, arguments: 'transaction'),
+            borderRadius: BorderRadius.circular(15),
+            child: Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(15),
+                border: Border.all(
+                  color: AppColors.softGrey.withOpacity(0.2),
+                ),
+              ),
+              child: const Icon(Iconsax.search_normal_copy,
+                  color: AppColors.primaryText, size: 22),
+            ),
+          ),
+
+          const SizedBox(width: AppSizes.p12),
+
+          // --- NÚT EXPORT ---
           InkWell(
             onTap: () {
               final currentList = reportCtrl.filteredTransactions;

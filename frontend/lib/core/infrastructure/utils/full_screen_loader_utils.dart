@@ -1,16 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart'; // Thư viện để xài UI chuẩn iOS
+import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 
-/// Lớp tiện ích gộp chung UI và Logic Loading
 class FullScreenLoaderUtils {
-  /// Mở hộp thoại Loading
+  // BIẾN KHÓA: Theo dõi xem loading có đang mở hay không
+  static bool _isLoaderShowing = false;
+
   static void openLoadingDialog(String text) {
+    // NẾU ĐANG CÓ LOADING RỒI THÌ BỎ QUA, KHÔNG MỞ THÊM ĐỂ CHỐNG KẸT
+    if (_isLoaderShowing) return;
+
+    _isLoaderShowing = true;
+
     Get.dialog(
       PopScope(
-        canPop: false, // Chặn nút Back của Android
+        canPop: false,
         child: Center(
           child: Container(
             padding: const EdgeInsets.symmetric(
@@ -29,15 +35,13 @@ class FullScreenLoaderUtils {
               ],
             ),
             child: Column(
-              mainAxisSize: MainAxisSize.min, // Tự động co bóp theo nội dung
+              mainAxisSize: MainAxisSize.min,
               children: [
-                // Vòng xoay cánh hoa chuẩn iOS (Mượt và sang hơn rất nhiều)
                 const CupertinoActivityIndicator(
                   radius: 18,
-                  color: AppColors.primary, // Đổi sang màu cam/chủ đạo của App
+                  color: AppColors.primary,
                 ),
                 const SizedBox(height: AppSizes.p16),
-                // Chữ hiển thị
                 Text(
                   text,
                   style: const TextStyle(
@@ -45,8 +49,7 @@ class FullScreenLoaderUtils {
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                     color: AppColors.primaryText,
-                    decoration:
-                        TextDecoration.none, // Bắt buộc khi dùng Get.dialog
+                    decoration: TextDecoration.none,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -55,23 +58,27 @@ class FullScreenLoaderUtils {
           ),
         ),
       ),
-      // 2 DÒNG NÀY LÀ CHÌA KHÓA GIẢI QUYẾT LỖI STATUS BAR KHÔNG BỊ MỜ
       barrierDismissible: false,
-      barrierColor: Colors.black.withOpacity(
-        0.6,
-      ), // Màu nền mờ phủ toàn màn hình
-      useSafeArea: false, // Ép phủ lên cả Status Bar và Bottom Navigation
-    );
+      barrierColor: Colors.black.withOpacity(0.6),
+      useSafeArea: false,
+    ).then((_) {
+      // Đảm bảo khi dialog bị tắt (dù bằng code hay lỗi) thì khóa cũng được mở
+      _isLoaderShowing = false;
+    });
   }
 
-  /// Đóng hộp thoại Loading
   static void stopLoading() {
-    if (Get.isDialogOpen ?? false) {
-      Get.back();
+    if (_isLoaderShowing) {
+      if (Get.isDialogOpen ?? false) {
+        Get.back();
+      }
+      _isLoaderShowing = false; // Mở khóa
     } else {
-      Future.delayed(const Duration(milliseconds: 500), () {
-        if (Get.isDialogOpen ?? false) {
+      // Đề phòng trường hợp gọi stop quá nhanh khi dialog chưa kịp render xong
+      Future.delayed(const Duration(milliseconds: 200), () {
+        if (_isLoaderShowing && (Get.isDialogOpen ?? false)) {
           Get.back();
+          _isLoaderShowing = false;
         }
       });
     }
