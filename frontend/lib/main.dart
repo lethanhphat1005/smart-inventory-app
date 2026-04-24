@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/app_constants.dart';
 import 'package:frontend/core/infrastructure/localization/app_translations.dart';
@@ -53,8 +52,8 @@ void main() async {
 
   runApp(
     DevicePreview(
-      enabled: !kReleaseMode,
-      // enabled: false,
+      // enabled: !kReleaseMode,
+      enabled: false,
       builder: (context) => const App(),
     ),
   );
@@ -80,26 +79,26 @@ class App extends StatelessWidget {
       debugShowCheckedModeBanner: false,
 
       // Cấu hình Device Preview kết hợp tự động tắt bàn phím khi chạm ngoài màn hình
-      builder: (context, child) {
-        final devicePreviewChild = DevicePreview.appBuilder(
-          context,
-          child,
-        );
-        return GestureDetector(
-          onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-          behavior: HitTestBehavior.opaque,
-          child: devicePreviewChild,
-        );
-      },
-
-      // Cấu hình Release kết hợp tự động tắt bàn phím khi chạm ngoài màn hình
       // builder: (context, child) {
+      //   final devicePreviewChild = DevicePreview.appBuilder(
+      //     context,
+      //     child,
+      //   );
       //   return GestureDetector(
       //     onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       //     behavior: HitTestBehavior.opaque,
-      //     child: child!,
+      //     child: devicePreviewChild,
       //   );
       // },
+
+      // Cấu hình Release kết hợp tự động tắt bàn phím khi chạm ngoài màn hình
+      builder: (context, child) {
+        return GestureDetector(
+          onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+          behavior: HitTestBehavior.opaque,
+          child: child!,
+        );
+      },
 
       theme: AppTheme.lightTheme,
       themeMode: ThemeMode.light,
