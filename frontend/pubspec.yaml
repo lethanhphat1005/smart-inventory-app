@@ -1,5 +1,5 @@
 name: frontend
-description: "A new Flutter project."
+description: "Smart Retail Store Assistant (Storix) is a mobile-first inventory platform for small and medium retail stores."
 publish_to: "none"
 
 version: 1.0.0+1
@@ -101,6 +101,7 @@ flutter:
     - assets/images/onboarding/
     - assets/images/chatbot/
     - assets/mock_data/
+    - .env
 
   # Fonts phải nằm lùi vào 2 space bên trong flutter:
   fonts:

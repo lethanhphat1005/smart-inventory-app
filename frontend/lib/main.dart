@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:frontend/core/infrastructure/constants/app_constants.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/infrastructure/localization/app_translations.dart';
@@ -41,17 +42,20 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   HttpOverrides.global = MyHttpOverrides();
 
-  // 1. Khởi tạo GetStorage TRƯỚC KHI init các Service phụ thuộc
+  // Khởi tạo GetStorage TRƯỚC KHI init các Service phụ thuộc
   await GetStorage.init();
 
-  // 2. Khởi tạo Firebase và Notification Service (Cập nhật theo code của bạn)
+  // Đọc file .env
+  await dotenv.load(fileName: ".env");
+
+  // Khởi tạo Firebase và Notification Service (Cập nhật theo code của bạn)
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   await NotificationService.initialize();
 
-  // 3. Khởi tạo Supabase
+  // Khởi tạo Supabase
   await Supabase.initialize(
     url: AppConstants.supabaseUrl,
     anonKey: AppConstants.supabaseAnonKey,
