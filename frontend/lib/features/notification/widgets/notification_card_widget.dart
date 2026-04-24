@@ -152,10 +152,7 @@ class NotificationCardWidget extends StatelessWidget {
       };
     }
 
-    // NẾU CHƯA ĐỌC: Phân rã theo cấp độ ưu tiên (Priority Hierarchy)
     switch (type) {
-      // CẤP 1 - URGENT (Khẩn cấp / Lỗi: Màu Đỏ Pastel)
-      case 'DISCREPANCY_ALERT':
       case 'LOW_STOCK':
         return {
           // Lệch kho dùng icon Warning, Hết hàng dùng icon Box Remove
@@ -166,12 +163,10 @@ class NotificationCardWidget extends StatelessWidget {
           'bg': AppColors.toastErrorBg,
         };
 
-      // CẤP 2 - WARNING / ACTION (Cảnh báo / Gợi ý: Màu Vàng Cam Pastel)
       case 'REORDER_SUGGESTION':
       case 'ROLE_UPDATED':
       case 'SYSTEM':
         return {
-          // Gợi ý dùng bóng đèn (idea), role/system dùng icon info
           'icon': type == 'REORDER_SUGGESTION'
               ? Iconsax.lamp_on_copy
               : Iconsax.info_circle_copy,
@@ -179,27 +174,23 @@ class NotificationCardWidget extends StatelessWidget {
           'bg': AppColors.toastWarningBg,
         };
 
-      // CẤP 3 - SUCCESS / TRANSACTION (Giao dịch thành công: Màu Xanh Pastel)
       case 'ORDER_CREATED':
       case 'IMPORT':
       case 'EXPORT':
         return {
-          // Import/Tạo đơn dùng icon thêm hộp, Export dùng icon hộp có dấu tick
           'icon':
               type == 'EXPORT' ? Iconsax.box_tick_copy : Iconsax.box_add_copy,
           'color': AppColors.toastSuccessGradientEnd,
           'bg': AppColors.toastSuccessBg,
         };
 
-      // CẤP 4 - BATCH / DEFAULT (Thông báo gộp / Chung: Màu Primary Brand)
       case 'BATCH_LOW_STOCK':
       default:
         return {
-          // Batch (nhiều sản phẩm) dùng icon xếp lớp (layer)
           'icon': type == 'BATCH_LOW_STOCK'
               ? Iconsax.layer_copy
               : Iconsax.notification_1_copy,
-          'color': AppColors.primary, // Cam đặc trưng của App
+          'color': AppColors.primary,
           'bg': AppColors.primary.withOpacity(0.1),
         };
     }

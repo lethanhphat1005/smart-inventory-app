@@ -84,17 +84,27 @@ class NotificationService {
       },
     );
 
-    const AndroidNotificationChannel channel = AndroidNotificationChannel(
+    const AndroidNotificationChannel highChannel = AndroidNotificationChannel(
       'high_importance_channel', // Khớp 100% với BE Node.js
-      'High Importance Notifications',
-      description: 'Dùng cho các thông báo quan trọng.',
-      importance: Importance.max,
+      'Cảnh báo quan trọng',
+      description:
+          'Dùng cho các cảnh báo khẩn cấp như sắp hết hàng, đổi quyền.',
+      importance: Importance.max, // Sẽ nảy popup (Heads-up)
     );
 
-    await _localNotificationsPlugin
-        .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
-        ?.createNotificationChannel(channel);
+    const AndroidNotificationChannel normalChannel = AndroidNotificationChannel(
+      'normal_channel',
+      'Thông báo thông thường',
+      description: 'Dùng cho các thông báo hệ thống bình thường.',
+      importance: Importance.low,
+    );
+
+    final androidImplementation =
+        _localNotificationsPlugin.resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>();
+
+    await androidImplementation?.createNotificationChannel(highChannel);
+    await androidImplementation?.createNotificationChannel(normalChannel);
 
     // 3. LẮNG NGHE KHI APP ĐANG MỞ (Foreground) -> Hiển thị popup nổi
     FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
@@ -103,21 +113,34 @@ class NotificationService {
       final type = message.data['type'];
 
       if (notification != null && android != null) {
+        final isHighPriority = android.channelId == 'high_importance_channel' ||
+            [
+              'LOW_STOCK',
+              'BATCH_LOW_STOCK',
+              'REORDER_SUGGESTION',
+              'ROLE_UPDATED',
+              'INVENTORY_DISCREPANCY',
+              'BATCH_REORDER_SUGGESTION',
+            ].contains(type);
+
+        final selectedChannel = isHighPriority ? highChannel : normalChannel;
+
         _localNotificationsPlugin.show(
           id: notification.hashCode,
           title: notification.title,
           body: notification.body,
           notificationDetails: NotificationDetails(
             android: AndroidNotificationDetails(
-              channel.id,
-              channel.name,
-              channelDescription: channel.description,
+              selectedChannel.id,
+              selectedChannel.name,
+              channelDescription: selectedChannel.description,
               icon: '@drawable/ic_notification',
               color: const Color(0x00ff7a03),
               largeIcon:
                   const DrawableResourceAndroidBitmap('@mipmap/ic_launcher'),
-              importance: Importance.max,
-              priority: Priority.high,
+              importance: selectedChannel.importance,
+              priority:
+                  isHighPriority ? Priority.high : Priority.defaultPriority,
             ),
           ),
           payload: jsonEncode(message.data),

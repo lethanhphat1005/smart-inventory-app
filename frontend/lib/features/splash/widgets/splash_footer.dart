@@ -24,7 +24,7 @@ class SplashFooter extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            TTexts.group21.tr,
+            TTexts.fourMonkeysStudio.tr,
             style: TextStyle(
               color: AppColors.primaryText.withOpacity(0.5),
               fontWeight: FontWeight.w500,
