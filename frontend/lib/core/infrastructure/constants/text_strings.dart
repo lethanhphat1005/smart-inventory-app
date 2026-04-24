@@ -1080,7 +1080,9 @@ class TTexts {
   static const String profileMembers = 'profile_members';
   static const String profileListMembers = 'profile_list_members';
   static const String profileStoreName = 'profile_store_name';
-
+  static const String memberRemovedSuccess = 'member_removed_success';
+  static const String deleteMemberTitle = 'delete_member_title';
+  static const String deleteMemberMessage = 'delete_member_message';
   //--Edit profile
   static const String editTitle = 'edit_title';
   static const String editLoading = 'edit_loading';

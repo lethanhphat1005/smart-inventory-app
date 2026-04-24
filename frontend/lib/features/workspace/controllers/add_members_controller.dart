@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/ui/widgets/t_snackbars_widget.dart';
 import 'package:frontend/core/infrastructure/utils/full_screen_loader_utils.dart';
+import 'package:frontend/features/profile/providers/store_member_provider.dart';
 import 'package:frontend/core/infrastructure/models/store_member_model.dart';
 import 'package:frontend/core/state/services/store_service.dart';
 import 'package:frontend/core/state/services/user_service.dart';
@@ -18,6 +19,7 @@ class AddMembersController extends GetxController with TErrorHandler {
   final RxList<StoreMemberModel> members = <StoreMemberModel>[].obs;
   final RxBool isLoadingMembers = false.obs;
 
+  late final StoreMemberProvider _storeMemberProvider = StoreMemberProvider();
   late final WorkspaceProvider _workspaceProvider;
   late final StoreService _storeService = Get.find<StoreService>();
   late final UserService _userService = Get.find<UserService>();
@@ -55,6 +57,26 @@ class AddMembersController extends GetxController with TErrorHandler {
       _fetchMembers(),
     ]);
     isInitialLoading.value = false;
+  }
+
+  Future<void> removeMemberFromStore(String userId) async {
+    try {
+      FullScreenLoaderUtils.openLoadingDialog(TTexts.loadingTitle.tr);
+
+      await _storeMemberProvider.removeStoreMember(userId);
+
+      members.removeWhere((member) => member.userId == userId);
+
+      FullScreenLoaderUtils.stopLoading();
+
+      TSnackbarsWidget.success(
+        title: TTexts.successTitle.tr,
+        message: TTexts.memberRemovedSuccess.tr,
+      );
+    } catch (e) {
+      FullScreenLoaderUtils.stopLoading();
+      handleError(e);
+    }
   }
 
   Future<void> _fetchMembers() async {
