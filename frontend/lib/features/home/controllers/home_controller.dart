@@ -290,8 +290,8 @@ class HomeController extends GetxController with TErrorHandler {
       spots.add(FlSpot(i.toDouble(), buckets[i]!));
     }
 
-    if (spots.isEmpty) {
-      spots.addAll([const FlSpot(0, 0), const FlSpot(2, 0)]);
+    if (spots.length < 2) {
+      spots.add(FlSpot(2, buckets[2]!));
     }
     return spots;
   }

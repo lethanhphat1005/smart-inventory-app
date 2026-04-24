@@ -36,6 +36,7 @@ class AddMembersListWidget extends GetView<AddMembersController> {
 
       return ListView.separated(
         shrinkWrap: true,
+        padding: const EdgeInsets.only(bottom: 100),
         physics: const NeverScrollableScrollPhysics(),
         itemCount: controller.members.length,
         separatorBuilder: (_, __) => const SizedBox(height: 12),

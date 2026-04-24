@@ -9,8 +9,9 @@ class SplashFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
     return Positioned(
-      bottom: AppSizes.p32,
+      bottom: bottomPadding > 0 ? bottomPadding + AppSizes.p16 : AppSizes.p32,
       left: 0,
       right: 0,
       child: Column(

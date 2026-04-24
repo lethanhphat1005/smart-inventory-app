@@ -33,93 +33,97 @@ class OnboardingStandardLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSizes.p24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: AppSizes.p32),
+    // Đo kích thước tai thỏ (top) và 3 nút (bottom)
+    final topPadding = MediaQuery.of(context).padding.top;
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
 
-            // 1. Hình ảnh với hiệu ứng Hào quang (Aura)
-            Expanded(
-              flex: 3,
-              child: Center(
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    // Hiệu ứng Aura mờ phía sau
-                    Container(
-                      width: 280,
-                      height: 280,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.primary.withOpacity(0.4),
-                            blurRadius: 100,
-                            spreadRadius: 10,
-                          ),
-                        ],
-                      ),
+    // Bỏ SafeArea, dùng Padding tổng
+    return Padding(
+      padding: EdgeInsets.only(
+        left: AppSizes.p24,
+        right: AppSizes.p24,
+        top: topPadding > 0 ? topPadding : AppSizes.p24,
+        bottom: bottomPadding +
+            AppSizes.p24, // Tự động đẩy cụm nút lên trên 3 nút hệ thống
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: AppSizes.p16),
+
+          // 1. Hình ảnh với hiệu ứng Hào quang (Aura)
+          Expanded(
+            flex: 3,
+            child: Center(
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Container(
+                    width: 280,
+                    height: 280,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primary.withOpacity(0.4),
+                          blurRadius: 100,
+                          spreadRadius: 10,
+                        ),
+                      ],
                     ),
-
-                    // Hình ảnh sản phẩm/nhân vật
-                    TImageWidget(
-                      image: image, // Biến image truyền từ PageView qua
-                      fit: BoxFit.contain,
-                    ),
-                  ],
-                ),
+                  ),
+                  TImageWidget(
+                    image: image,
+                    fit: BoxFit.contain,
+                  ),
+                ],
               ),
             ),
+          ),
 
-            const SizedBox(height: AppSizes.p32),
+          const SizedBox(height: AppSizes.p32),
 
-            // 2. Tiêu đề
-            Text(
-              title,
-              style: const TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 28,
-                fontWeight: FontWeight.w700,
-                color: AppColors.primaryText,
-                height: 1.3,
+          // 2. Tiêu đề
+          Text(
+            title,
+            style: const TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 28,
+              fontWeight: FontWeight.w700,
+              color: AppColors.primaryText,
+              height: 1.3,
+            ),
+          ),
+          const SizedBox(height: AppSizes.p16),
+
+          // 3. Mô tả
+          Text(
+            subtitle,
+            style: const TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 16,
+              fontWeight: FontWeight.w400,
+              color: AppColors.subText,
+              height: 1.5,
+            ),
+          ),
+          const Spacer(),
+
+          // 4. Cụm nút bấm điều hướng
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              OnboardingSkipButtonWidget(onTap: onSkip),
+              OnboardingNextButtonWidget(
+                onTap: onNext,
+                progress: progress,
+                startingAngle: startingAngle,
+                icon: nextIcon,
               ),
-            ),
-
-            const SizedBox(height: AppSizes.p16),
-
-            // 3. Mô tả
-            Text(
-              subtitle,
-              style: const TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 16,
-                fontWeight: FontWeight.w400,
-                color: AppColors.subText,
-                height: 1.5,
-              ),
-            ),
-
-            const Spacer(),
-
-            // 4. Cụm nút bấm điều hướng
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                OnboardingSkipButtonWidget(onTap: onSkip),
-                OnboardingNextButtonWidget(
-                  onTap: onNext,
-                  progress: progress,
-                  startingAngle: startingAngle,
-                  icon: nextIcon,
-                ),
-              ],
-            ),
-          ],
-        ),
+            ],
+          ),
+        ],
       ),
     );
   }
