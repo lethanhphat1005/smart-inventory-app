@@ -1,4 +1,3 @@
-// lib/features/navigation/views/navigation_mobile_view.dart
 import 'package:flutter/material.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/features/inventory/views/inventory_view.dart';
