@@ -127,13 +127,20 @@ class InventoryProductPackageFormFieldsWidget
             },
             suffixIcon: IconButton(
               icon: const Icon(Iconsax.scan_barcode_copy,
-                  color: AppColors.primary),
+                  size: 24, color: AppColors.primary),
               onPressed: () {
+                FocusScope.of(context).unfocus();
+
                 Get.to(() => TBarcodeScannerLayout(
                       title: TTexts.homeScanBarcode.tr,
                       onScanned: (code) {
-                        controller.addBarcode(code);
+                        // Đóng màn hình camera trước tiên
                         Get.back();
+
+                        // Đợi màn hình thu về rồi mới add code
+                        Future.delayed(const Duration(milliseconds: 300), () {
+                          controller.addBarcode(code);
+                        });
                       },
                     ));
               },
