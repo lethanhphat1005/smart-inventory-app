@@ -448,6 +448,42 @@ class TTexts {
   static const String chatbotEmptyInputWarning = "chatbot_empty_input_warning";
   static const String chatbotMockResponse = "chatbot_mock_response";
 
+  static const String chatbotFallbackReply = "chatbot_fallback_reply";
+  static const String chatbotConnectionError = "chatbot_connection_error";
+  static const String chatbotResetTitle = "chatbot_reset_title";
+  static const String chatbotResetMessage = "chatbot_reset_message";
+  static const String chatbotResetBtn = "chatbot_reset_btn";
+  static const String chatbotTransactionSuccess = "chatbot_transaction_success";
+  static const String chatbotTransactionFailed = "chatbot_transaction_failed";
+  static const String chatbotSuggestionTitle = "chatbot_suggestion_title";
+  static const String chatbotSuggestionSub = "chatbot_suggestion_sub";
+  static const String chatbotPromptLowStock = "chatbot_prompt_low_stock";
+  static const String chatbotPromptCheckInfo = "chatbot_prompt_check_info";
+  static const String chatbotPromptImport = "chatbot_prompt_import";
+  static const String chatbotPromptExport = "chatbot_prompt_export";
+  static const String chatbotConfirmImport = "chatbot_confirm_import";
+  static const String chatbotConfirmExport = "chatbot_confirm_export";
+  static const String chatbotResolved = "chatbot_resolved";
+  static const String chatbotActionCancelled = "chatbot_action_cancelled";
+  static const String chatbotOutOfStock = "chatbot_out_of_stock";
+  static const String chatbotLowStockPrefix = "chatbot_low_stock_prefix";
+  static const String chatbotLeftPrefix = "chatbot_left_prefix";
+  static const String chatbotInStockPrefix = "chatbot_in_stock_prefix";
+  static const String chatbotLowStockAlert = "chatbot_low_stock_alert";
+  static const String chatbotLowStockFoundPrefix =
+      "chatbot_low_stock_found_prefix";
+  static const String chatbotLowStockFoundSuffix =
+      "chatbot_low_stock_found_suffix";
+  static const String chatbotViewFullList = "chatbot_view_full_list";
+  static const String chatbotNoImageTitle = "chatbot_no_image_title";
+  static const String chatbotNoImageDesc = "chatbot_no_image_desc";
+  static const String chatbotMenuLowStock = "chatbot_menu_low_stock";
+  static const String chatbotMenuCreateImport = "chatbot_menu_create_import";
+  static const String chatbotMenuCreateExport = "chatbot_menu_create_export";
+  static const String chatbotQuickActionLowStock = "chatbot_quick_action_low_stock";
+  static const String chatbotQuickActionImport = "chatbot_quick_action_import";
+  static const String chatbotQuickActionExport = "chatbot_quick_action_export";
+
   // -- Customize Catalog
   static const String customizeCatalog = "customize_catalog";
   static const String pinnedOnHome = "pinned_on_home";
@@ -1161,23 +1197,23 @@ class TTexts {
   static const String exportExcelExportedBy = "export_excel_exported_by";
   static const String exportExcelExportTime = "export_excel_export_time";
 
-  // -- Barcode Scanner Bottom Sheets 
+  // -- Barcode Scanner Bottom Sheets
   static const String barcodeSimilarTitle = "barcode_similar_title";
   static const String barcodeSimilarDesc = "barcode_similar_desc";
   static const String barcodeLinkingLoader = "barcode_linking_loader";
   static const String barcodeLinkSuccessMsg = "barcode_link_success_msg";
   static const String barcodeLinkConflictError = "barcode_link_conflict_error";
   static const String barcodeCreateNewBtn = "barcode_create_new_btn";
-  
+
   static const String barcodeNoDataTitle = "barcode_no_data_title";
   static const String barcodeNoDataDesc = "barcode_no_data_desc";
   static const String barcodeAddNewBtn = "barcode_add_new_btn";
-  
+
   static const String barcodePrefillTitle = "barcode_prefill_title";
   static const String barcodePrefillDesc = "barcode_prefill_desc";
   static const String barcodeAddToStoreBtn = "barcode_add_to_store_btn";
   static const String barcodeUnknown = "barcode_unknown";
-  
+
   static const String barcodeCheckingLoader = "barcode_checking_loader";
   static const String barcodeScanErrorTitle = "barcode_scan_error_title";
   static const String barcodeCopied = "barcode_copied";

@@ -20,7 +20,6 @@ class ChatbotMessage extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
         decoration: BoxDecoration(
-          // GRADIENT CŨ NHƯNG ĐƯỢC LÀM NHẠT VÀ THANH LỊCH HƠN
           gradient: isUser
               ? const LinearGradient(
                   colors: [
@@ -32,10 +31,7 @@ class ChatbotMessage extends StatelessWidget {
                   end: Alignment.bottomRight,
                 )
               : null,
-
-          // MÀU XÁM TRUNG TÍNH (NỔI BẬT HƠN TRÊN NỀN TRẮNG)
           color: isUser ? null : const Color.fromARGB(255, 251, 251, 251),
-
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(20),
             topRight: const Radius.circular(20),

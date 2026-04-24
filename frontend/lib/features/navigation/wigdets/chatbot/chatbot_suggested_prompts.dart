@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
+import 'package:get/get.dart';
 
 class ChatbotSuggestedPrompts extends StatelessWidget {
   final Function(String text, bool autoSend) onAction;
@@ -12,22 +14,22 @@ class ChatbotSuggestedPrompts extends StatelessWidget {
     final prompts = [
       {
         "icon": Iconsax.warning_2,
-        "text": "What items are running low?",
+        "text": TTexts.chatbotPromptLowStock.tr,
         "autoSend": true,
       },
       {
         "icon": Iconsax.box_search,
-        "text": "Check info",
+        "text": TTexts.chatbotPromptCheckInfo.tr,
         "autoSend": false,
       },
       {
         "icon": Iconsax.import_1,
-        "text": "Create import",
+        "text": TTexts.chatbotPromptImport.tr,
         "autoSend": false,
       },
       {
         "icon": Iconsax.export_1,
-        "text": "Create export",
+        "text": TTexts.chatbotPromptExport.tr,
         "autoSend": false,
       },
     ];
@@ -41,7 +43,6 @@ class ChatbotSuggestedPrompts extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Logo/Icon AI tinh tế
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -56,12 +57,12 @@ class ChatbotSuggestedPrompts extends StatelessWidget {
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(Iconsax.magic_star,
-                    color: AppColors.secondPrimary, size: 36),
+                    color: AppColors.primary, size: 36),
               ),
               const SizedBox(height: 20),
-              const Text(
-                "How can I help you?",
-                style: TextStyle(
+              Text(
+                TTexts.chatbotSuggestionTitle.tr,
+                style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w600,
                   color: AppColors.primaryText,
@@ -70,7 +71,7 @@ class ChatbotSuggestedPrompts extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                "Choose a suggestion or type your request below.",
+                TTexts.chatbotSuggestionSub.tr,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                     fontSize: 14,
@@ -78,8 +79,6 @@ class ChatbotSuggestedPrompts extends StatelessWidget {
                     fontFamily: 'Poppins'),
               ),
               const SizedBox(height: 32),
-
-              // Khay thẻ gợi ý bo tròn mượt mà
               Wrap(
                 spacing: 12,
                 runSpacing: 12,

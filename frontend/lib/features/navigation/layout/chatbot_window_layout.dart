@@ -7,11 +7,12 @@ import 'package:frontend/features/navigation/wigdets/chatbot/chatbot_card_action
 import 'package:frontend/features/navigation/wigdets/chatbot/chatbot_card_choose_product.dart';
 import 'package:frontend/features/navigation/wigdets/chatbot/chatbot_card_low_stock.dart';
 import 'package:frontend/features/navigation/wigdets/chatbot/chatbot_card_product_info.dart';
+import 'package:frontend/features/navigation/wigdets/chatbot/chatbot_header_widget.dart';
+import 'package:frontend/features/navigation/wigdets/chatbot/chatbot_input_area_widget.dart';
 import 'package:frontend/features/navigation/wigdets/chatbot/chatbot_message_widget.dart';
 import 'package:frontend/features/navigation/wigdets/chatbot/chatbot_suggested_prompts.dart';
 import 'package:frontend/features/navigation/wigdets/chatbot/chatbot_typing_indicator.dart';
-import 'package:frontend/features/navigation/wigdets/chatbot/chatbot_header_widget.dart';
-import 'package:frontend/features/navigation/wigdets/chatbot/chatbot_input_area_widget.dart';
+
 import 'package:get/get.dart';
 
 class ChatbotWindowLayout extends StatelessWidget {
@@ -47,15 +48,11 @@ class ChatbotWindowLayout extends StatelessWidget {
               Flexible(
                 child: Container(
                   decoration: BoxDecoration(
-                    color: AppColors.surface, // Màu fallback nếu ảnh lỗi
+                    color: AppColors.surface,
                     image: DecorationImage(
-                      // Nếu bạn đã gắn vào TImages thì dùng:
-                      // Ở đây mình dùng đường dẫn trực tiếp theo string bạn gửi
                       image:
                           AssetImage(TImages.chatbotImages.chatbotBackground),
                       fit: BoxFit.cover,
-                      // Phủ một lớp màu trắng mờ 70% lên ảnh để bong bóng chat nổi bật hơn
-                      // (Nếu ảnh của bạn đã là dạng mờ mờ mờ rồi thì có thể xóa dòng colorFilter này đi)
                       colorFilter: const ColorFilter.mode(
                         Colors.white70,
                         BlendMode.lighten,
@@ -99,7 +96,7 @@ class ChatbotWindowLayout extends StatelessWidget {
                 ),
               ),
 
-              // 3. INPUT AREA & ACTION MENU TÍCH HỢP
+              // 3. INPUT AREA & ACTION MENU
               const ChatbotInputAreaWidget(),
             ],
           ),

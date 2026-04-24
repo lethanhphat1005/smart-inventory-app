@@ -82,17 +82,4 @@ final Map<String, String> enCore = {
 
   TTexts.unknownProduct: 'Unknown Product',
   TTexts.na: 'N/A',
-
-  // -- Chatbot AI
-  TTexts.chatbotName: 'AI Assistant',
-  TTexts.chatbotOnline: 'Online',
-  TTexts.chatbotInputHint: 'Type a message...',
-  TTexts.chatbotWelcomeMsg:
-      'Hello! I am your AI assistant. How can I help you manage your inventory today?',
-  TTexts.chatbotErrorTitle: 'Chat Error',
-  TTexts.chatbotErrorMsg:
-      'Failed to send message. Please check your connection and try again.',
-  TTexts.chatbotTyping: 'AI is typing...',
-  TTexts.chatbotEmptyInputWarning: 'Please enter a message.',
-  TTexts.chatbotMockResponse: 'API integration is in progress. You said:',
 };

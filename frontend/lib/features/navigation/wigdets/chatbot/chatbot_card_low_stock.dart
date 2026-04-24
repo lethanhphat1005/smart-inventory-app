@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/features/navigation/models/chat_message_model.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/features/navigation/wigdets/chatbot/chatbot_message_widget.dart';
@@ -37,13 +38,12 @@ class ChatCardLowStock extends StatelessWidget {
             child: ChatbotMessage(
               message: ChatMessage(
                 text:
-                    "I found $totalCount items that are running low on stock. Please swipe to check the cards below:",
+                    "${TTexts.chatbotLowStockFoundPrefix.tr} $totalCount ${TTexts.chatbotLowStockFoundSuffix.tr}",
                 isUser: false,
               ),
             ),
           ),
           const SizedBox(height: 12),
-
           SizedBox(
             height: 320,
             child: ListView.separated(
@@ -57,18 +57,16 @@ class ChatCardLowStock extends StatelessWidget {
               },
             ),
           ),
-
-          // TEXT "XEM TẤT CẢ" ĐÃ CHỈNH NHƯ TEXT BÌNH THƯỜNG THEO Ý BẠN
           const SizedBox(height: 12),
           Align(
             alignment: Alignment.centerLeft,
             child: GestureDetector(
               onTap: () => Get.toNamed(AppRoutes.lowStock),
-              child: const Padding(
-                padding: EdgeInsets.only(left: 12),
+              child: Padding(
+                padding: const EdgeInsets.only(left: 12),
                 child: Text(
-                  "View full list ->",
-                  style: TextStyle(
+                  TTexts.chatbotViewFullList.tr,
+                  style: const TextStyle(
                     fontSize: 13,
                     color: AppColors.subText,
                     fontWeight: FontWeight.w500,

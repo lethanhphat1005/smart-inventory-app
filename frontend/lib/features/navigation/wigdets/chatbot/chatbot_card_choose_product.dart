@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/features/navigation/controllers/chatbot_ui_controller.dart';
 import 'package:frontend/features/navigation/models/chat_message_model.dart';
@@ -28,31 +29,24 @@ class ChatCardChooseProduct extends StatelessWidget {
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 24,
-              offset: const Offset(0, 8),
-            )
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 24,
+                offset: const Offset(0, 8))
           ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Tiêu đề
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-              child: Text(
-                message.text,
-                style: const TextStyle(
-                  fontSize: 14.5,
-                  color: AppColors.primaryText,
-                  fontWeight: FontWeight.w500,
-                  fontFamily: 'Poppins',
-                ),
-              ),
+              child: Text(message.text,
+                  style: const TextStyle(
+                      fontSize: 14.5,
+                      color: AppColors.primaryText,
+                      fontWeight: FontWeight.w500,
+                      fontFamily: 'Poppins')),
             ),
-
-            // Danh sách Option
             ListView.separated(
               padding: const EdgeInsets.only(bottom: 8),
               shrinkWrap: true,
@@ -66,11 +60,10 @@ class ChatCardChooseProduct extends StatelessWidget {
 
                 final displayName = pkg['displayName'] ??
                     pkg['product']?['name'] ??
-                    'Unknown product';
+                    TTexts.unknownProduct.tr;
                 final quantity = item['quantity'] ?? pkg['quantity'] ?? 0;
                 final unit = pkg['unit']?['name'] ?? '';
 
-                // Lấy threshold từ backend
                 final threshold = int.tryParse(
                         item['reorder_threshold']?.toString() ??
                             item['reorderThreshold']?.toString() ??
@@ -78,19 +71,21 @@ class ChatCardChooseProduct extends StatelessWidget {
                             '10') ??
                     10;
 
-                // LOGIC 3 MÀU
                 Color stockColor;
                 String stockText;
 
                 if (quantity == 0) {
-                  stockColor = AppColors.stockOut; // Đỏ
-                  stockText = "Out of stock";
+                  stockColor = AppColors.stockOut;
+                  stockText = TTexts.chatbotOutOfStock.tr;
                 } else if (quantity <= threshold) {
-                  stockColor = AppColors.primary; // Cam gốc cảnh báo
-                  stockText = "Low: $quantity $unit".trim();
+                  stockColor = AppColors.primary;
+                  stockText =
+                      "${TTexts.chatbotLowStockPrefix.tr} $quantity $unit"
+                          .trim();
                 } else {
-                  stockColor = AppColors.stockIn; // Xanh lá
-                  stockText = "Left: $quantity $unit".trim();
+                  stockColor = AppColors.stockIn;
+                  stockText =
+                      "${TTexts.chatbotLeftPrefix.tr} $quantity $unit".trim();
                 }
 
                 return InkWell(
@@ -118,14 +113,12 @@ class ChatCardChooseProduct extends StatelessWidget {
                         horizontal: 16, vertical: 12),
                     child: Row(
                       children: [
-                        // Icon Box thay vì hình vuông nhạt
                         Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFF8F9FA),
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.grey.shade200),
-                          ),
+                              color: const Color(0xFFF8F9FA),
+                              shape: BoxShape.circle,
+                              border: Border.all(color: Colors.grey.shade200)),
                           child: Icon(Iconsax.box,
                               size: 18,
                               color: message.isResolved
@@ -137,38 +130,30 @@ class ChatCardChooseProduct extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                displayName,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: message.isResolved
-                                      ? Colors.grey
-                                      : AppColors.primaryText,
-                                  fontWeight: FontWeight.w500,
-                                  fontFamily: 'Poppins',
-                                ),
-                              ),
+                              Text(displayName,
+                                  style: TextStyle(
+                                      fontSize: 14,
+                                      color: message.isResolved
+                                          ? Colors.grey
+                                          : AppColors.primaryText,
+                                      fontWeight: FontWeight.w500,
+                                      fontFamily: 'Poppins')),
                               const SizedBox(height: 4),
-                              Text(
-                                stockText,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: message.isResolved
-                                      ? Colors.grey
-                                      : stockColor,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
+                              Text(stockText,
+                                  style: TextStyle(
+                                      fontSize: 12,
+                                      color: message.isResolved
+                                          ? Colors.grey
+                                          : stockColor,
+                                      fontWeight: FontWeight.w500)),
                             ],
                           ),
                         ),
-                        Icon(
-                          Iconsax.arrow_right_3,
-                          size: 16,
-                          color: message.isResolved
-                              ? Colors.grey.shade300
-                              : AppColors.primary,
-                        )
+                        Icon(Iconsax.arrow_right_3,
+                            size: 16,
+                            color: message.isResolved
+                                ? Colors.grey.shade300
+                                : AppColors.primary)
                       ],
                     ),
                   ),

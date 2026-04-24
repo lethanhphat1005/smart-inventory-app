@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:frontend/core/infrastructure/constants/text_strings.dart'; // Đã thêm
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:frontend/features/navigation/controllers/chatbot_ui_controller.dart';
@@ -34,19 +35,15 @@ class _ChatbotInputActionMenuWidgetState
       reverseDuration: const Duration(milliseconds: 200),
     );
 
-    // Animation cho Menu nảy lên
     _menuAnimation = CurvedAnimation(
       parent: _animationController,
       curve: Curves.easeOutBack,
       reverseCurve: Curves.easeInCubic,
     );
 
-    // Animation biến dấu (+) thành dấu (X) bằng cách xoay 135 độ (0.375 vòng)
     _iconRotationAnimation = Tween<double>(begin: 0.0, end: 0.375).animate(
       CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeInOutBack, // Xoay có độ nảy nhẹ
-      ),
+          parent: _animationController, curve: Curves.easeInOutBack),
     );
   }
 
@@ -94,17 +91,12 @@ class _ChatbotInputActionMenuWidgetState
     }
   }
 
-  // --- HELPER LÀM ICON GRADIENT ---
   Widget _buildGradientIcon(IconData icon, double size) {
     return ShaderMask(
       blendMode: BlendMode.srcIn,
       shaderCallback: (Rect bounds) {
         return const LinearGradient(
-          colors: [
-            Color(0xFFB374B0), // Softened Purple
-            Color(0xFFF08D9B), // Softened Pink
-            Color(0xFFF8A875), // Softened Orange
-          ],
+          colors: [Color(0xFFB374B0), Color(0xFFF08D9B), Color(0xFFF8A875)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ).createShader(bounds);
@@ -117,7 +109,6 @@ class _ChatbotInputActionMenuWidgetState
     return OverlayEntry(
       builder: (context) => Stack(
         children: [
-          // Lớp nền mờ chìm để đóng menu khi bấm ra ngoài
           GestureDetector(
             onTap: _closeMenu,
             behavior: HitTestBehavior.translucent,
@@ -152,7 +143,6 @@ class _ChatbotInputActionMenuWidgetState
   Widget _buildGlassmorphismCard() {
     return Stack(
       children: [
-        // 1. LỚP LÕI TRONG SUỐT GLASSMORPHISM (Giữ nguyên xám trắng)
         ClipRRect(
           borderRadius: BorderRadius.circular(AppSizes.radius20),
           child: BackdropFilter(
@@ -160,15 +150,13 @@ class _ChatbotInputActionMenuWidgetState
             child: Container(
               padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
-                color: Colors.white
-                    .withOpacity(0.85), // Trắng đục mờ chuẩn Glassmorphism
+                color: Colors.white.withOpacity(0.85),
                 borderRadius: BorderRadius.circular(AppSizes.radius20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.06),
-                    blurRadius: 15,
-                    offset: const Offset(0, 8),
-                  )
+                      color: Colors.black.withOpacity(0.06),
+                      blurRadius: 15,
+                      offset: const Offset(0, 8))
                 ],
               ),
               child: Column(
@@ -176,23 +164,22 @@ class _ChatbotInputActionMenuWidgetState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildMenuItem(
-                      text: "Low stock items",
+                      text: TTexts.chatbotMenuLowStock.tr,
                       onTap: () =>
-                          _handleAction("What items are running low?", true)),
+                          _handleAction(TTexts.chatbotPromptLowStock.tr, true)),
                   _buildMenuItem(
-                      text: "Create Import",
-                      onTap: () => _handleAction("Create import: ", false)),
+                      text: TTexts.chatbotMenuCreateImport.tr,
+                      onTap: () =>
+                          _handleAction(TTexts.chatbotPromptImport.tr, false)),
                   _buildMenuItem(
-                      text: "Create Export",
-                      onTap: () => _handleAction("Create export: ", false)),
+                      text: TTexts.chatbotMenuCreateExport.tr,
+                      onTap: () =>
+                          _handleAction(TTexts.chatbotPromptExport.tr, false)),
                 ],
               ),
             ),
           ),
         ),
-
-        // 2. LỚP VIỀN GRADIENT PHỦ LÊN (Bằng kỹ thuật ShaderMask)
-        // Kỹ thuật này giúp viền có Gradient mà nền kính bên trong vẫn giữ nguyên
         Positioned.fill(
           child: IgnorePointer(
             child: ShaderMask(
@@ -202,7 +189,7 @@ class _ChatbotInputActionMenuWidgetState
                   colors: [
                     Color(0xFFB374B0),
                     Color(0xFFF08D9B),
-                    Color(0xFFF8A875),
+                    Color(0xFFF8A875)
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
@@ -224,21 +211,17 @@ class _ChatbotInputActionMenuWidgetState
   Widget _buildMenuItem({required String text, required VoidCallback onTap}) {
     return InkWell(
       onTap: onTap,
-      splashColor:
-          const Color(0xFFF08D9B).withOpacity(0.15), // Splash màu hồng nhẹ
+      splashColor: const Color(0xFFF08D9B).withOpacity(0.15),
       highlightColor: Colors.transparent,
       borderRadius: BorderRadius.circular(AppSizes.radius16),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-        child: Text(
-          text,
-          style: const TextStyle(
-            color: AppColors.primaryText,
-            fontSize: 13.5,
-            fontWeight: FontWeight.w600,
-            fontFamily: 'Poppins',
-          ),
-        ),
+        child: Text(text,
+            style: const TextStyle(
+                color: AppColors.primaryText,
+                fontSize: 13.5,
+                fontWeight: FontWeight.w600,
+                fontFamily: 'Poppins')),
       ),
     );
   }
@@ -254,14 +237,10 @@ class _ChatbotInputActionMenuWidgetState
           width: 48,
           margin: const EdgeInsets.only(bottom: 2),
           decoration: const BoxDecoration(
-            color: Colors.transparent,
-            shape: BoxShape.circle,
-          ),
- 
+              color: Colors.transparent, shape: BoxShape.circle),
           child: RotationTransition(
             turns: _iconRotationAnimation,
-            child: _buildGradientIcon(
-                Iconsax.add, 28), // Dấu + mặc định (xoay đi sẽ thành dấu X)
+            child: _buildGradientIcon(Iconsax.add, 28),
           ),
         ),
       ),

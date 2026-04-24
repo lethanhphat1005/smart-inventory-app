@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/infrastructure/constants/text_strings.dart'; // Đã thêm
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/features/navigation/controllers/chatbot_ui_controller.dart';
 import 'package:get/get.dart';
@@ -12,16 +13,24 @@ class ChatbotQuickActionsWidget extends StatelessWidget {
 
     final actions = [
       {
-        "label": "Low stock",
-        "template": "What items are running low?",
+        "label": TTexts.chatbotQuickActionLowStock.tr,
+        "template": TTexts.chatbotPromptLowStock.tr,
         "autoSend": true
       },
-      {"label": "Import", "template": "Create import: ", "autoSend": false},
-      {"label": "Export", "template": "Create export: ", "autoSend": false},
+      {
+        "label": TTexts.chatbotQuickActionImport.tr,
+        "template": TTexts.chatbotPromptImport.tr,
+        "autoSend": false
+      },
+      {
+        "label": TTexts.chatbotQuickActionExport.tr,
+        "template": TTexts.chatbotPromptExport.tr,
+        "autoSend": false
+      },
     ];
 
     return Container(
-      height: 52, // Tăng nhẹ chiều cao để nút dễ bấm
+      height: 52,
       width: double.infinity,
       color: Colors.white,
       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -54,19 +63,17 @@ class ChatbotQuickActionsWidget extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.08), // Nền cam siêu nhạt
+                color: AppColors.primary.withOpacity(0.08),
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                    color: AppColors.primary.withOpacity(0.3)), // Viền cam
+                border: Border.all(color: AppColors.primary.withOpacity(0.3)),
               ),
               child: Text(
                 action["label"] as String,
                 style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.primary, // Chữ cam
-                  fontFamily: 'Poppins',
-                ),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.primary,
+                    fontFamily: 'Poppins'),
               ),
             ),
           );

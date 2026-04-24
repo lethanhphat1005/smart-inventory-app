@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:frontend/core/infrastructure/constants/text_strings.dart'; 
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/features/navigation/controllers/chatbot_ui_controller.dart';
 import 'package:frontend/features/navigation/models/chat_message_model.dart';
@@ -17,10 +18,11 @@ class ChatCardActionConfirm extends StatelessWidget {
     final isImport =
         message.intent == 'confirm_import' || message.intent == 'create_import';
 
-    // Import dùng xanh (stockIn), Export dùng Cam (primary)
     final actionColor = isImport ? AppColors.stockIn : AppColors.stockOut;
     final actionIcon = isImport ? Iconsax.import_1 : Iconsax.export_1;
-    final title = isImport ? "Confirm Import" : "Confirm Export"; 
+    final title = isImport
+        ? TTexts.chatbotConfirmImport.tr
+        : TTexts.chatbotConfirmExport.tr;
 
     if (message.isResolved) {
       return Padding(
@@ -31,7 +33,7 @@ class ChatCardActionConfirm extends StatelessWidget {
             Icon(Iconsax.tick_circle, color: Colors.grey.shade400, size: 16),
             const SizedBox(width: 6),
             Text(
-              "$title (Resolved)", // Tiếng Anh
+              "$title ${TTexts.chatbotResolved.tr}",
               style: TextStyle(
                   fontSize: 12,
                   color: Colors.grey.shade500,
@@ -54,61 +56,48 @@ class ChatCardActionConfirm extends StatelessWidget {
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 24,
-              offset: const Offset(0, 8),
-            )
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 24,
+                offset: const Offset(0, 8))
           ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // --- TITLE ---
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: actionColor.withOpacity(0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(actionIcon, color: actionColor, size: 18),
-                ),
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                        color: actionColor.withOpacity(0.1),
+                        shape: BoxShape.circle),
+                    child: Icon(actionIcon, color: actionColor, size: 18)),
                 const SizedBox(width: 10),
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 15,
-                    color: actionColor,
-                    fontWeight: FontWeight.w600,
-                    fontFamily: 'Poppins',
-                  ),
-                ),
+                Text(title,
+                    style: TextStyle(
+                        fontSize: 15,
+                        color: actionColor,
+                        fontWeight: FontWeight.w600,
+                        fontFamily: 'Poppins')),
               ],
             ),
             const SizedBox(height: 12),
-
-            // --- MARKDOWN BODY ---
             MarkdownBody(
               data: message.text,
               styleSheet: MarkdownStyleSheet(
                 p: const TextStyle(
-                  fontSize: 14,
-                  color: AppColors.primaryText,
-                  height: 1.5,
-                  fontFamily: 'Poppins',
-                ),
+                    fontSize: 14,
+                    color: AppColors.primaryText,
+                    height: 1.5,
+                    fontFamily: 'Poppins'),
                 strong: const TextStyle(
-                  fontSize: 14,
-                  color: AppColors.primaryText,
-                  fontWeight: FontWeight.w600,
-                  fontFamily: 'Poppins',
-                ),
+                    fontSize: 14,
+                    color: AppColors.primaryText,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'Poppins'),
               ),
             ),
             const SizedBox(height: 16),
-
-            // --- ACTION BUTTONS ---
             Row(
               children: [
                 Expanded(
@@ -117,18 +106,17 @@ class ChatCardActionConfirm extends StatelessWidget {
                       message.isResolved = true;
                       controller.messages.refresh();
                       controller.messages.add(ChatMessage(
-                          text: "Action cancelled.",
-                          isUser: false)); // Tiếng Anh
+                          text: TTexts.chatbotActionCancelled.tr,
+                          isUser: false)); // Đã gắn .tr
                     },
                     style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      side: BorderSide(color: Colors.grey.shade300),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16)),
-                      foregroundColor: Colors.grey.shade700,
-                    ),
-                    child: const Text("Cancel",
-                        style: TextStyle(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        side: BorderSide(color: Colors.grey.shade300),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16)),
+                        foregroundColor: Colors.grey.shade700),
+                    child: Text(TTexts.cancel.tr,
+                        style: const TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
                             fontFamily: 'Poppins')),
@@ -139,14 +127,13 @@ class ChatCardActionConfirm extends StatelessWidget {
                   child: ElevatedButton(
                     onPressed: () => controller.confirmTransaction(message),
                     style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      backgroundColor: actionColor,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16)),
-                    ),
-                    child: const Text("Confirm",
-                        style: TextStyle(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        backgroundColor: actionColor,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16))),
+                    child: Text(TTexts.confirm.tr,
+                        style: const TextStyle(
                             fontSize: 13,
                             color: Colors.white,
                             fontWeight: FontWeight.w600,
