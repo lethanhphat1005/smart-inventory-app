@@ -9,6 +9,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/infrastructure/utils/full_screen_loader_utils.dart';
 import 'package:frontend/core/state/services/store_service.dart';
+import 'package:frontend/core/state/services/user_service.dart';
 import 'package:frontend/core/ui/widgets/t_snackbars_widget.dart';
 import 'package:frontend/features/profile/providers/store_provider.dart';
 import 'package:frontend/features/profile/providers/store_member_provider.dart';
@@ -18,6 +19,7 @@ class ProfileEditStoreController extends GetxController {
 
   // Services & Providers
   final _storeService = Get.find<StoreService>();
+  final _userService = Get.find<UserService>();
   final _storeProvider = StoreProvider();
   final _storeMemberProvider = StoreMemberProvider();
 
@@ -36,6 +38,9 @@ class ProfileEditStoreController extends GetxController {
 
   final storeAddress = ''.obs;
   final memberCount = 0.obs;
+
+  // BỔ SUNG: role của current user trong store hiện tại
+  final currentUserStoreRole = ''.obs;
 
   // Members states
   final isLoadingMembers = false.obs;
@@ -96,6 +101,7 @@ class ProfileEditStoreController extends GetxController {
         members.clear();
         filteredMembers.clear();
         memberCount.value = 0;
+        currentUserStoreRole.value = '';
         hasLoadedMembers.value = true;
         return;
       }
@@ -105,6 +111,7 @@ class ProfileEditStoreController extends GetxController {
       }
 
       final data = await _storeMemberProvider.getStoreMembers(storeId);
+      final currentUser = _userService.currentUser.value;
 
       final mappedMembers = data.map<StoreMemberModel>((item) {
         return StoreMemberModel.fromJson(
@@ -115,6 +122,30 @@ class ProfileEditStoreController extends GetxController {
       members.assignAll(mappedMembers);
       filteredMembers.assignAll(mappedMembers);
       memberCount.value = mappedMembers.length;
+
+      // BỔ SUNG: xác định role current user
+      currentUserStoreRole.value = '';
+
+      if (currentUser != null) {
+        StoreMemberModel? currentMember;
+
+        try {
+          currentMember = mappedMembers.firstWhere(
+            (member) => member.userId == currentUser.userId,
+          );
+        } catch (_) {}
+
+        if (currentMember == null) {
+          try {
+            currentMember = mappedMembers.firstWhere(
+              (member) => member.userId == currentUser.authUserId,
+            );
+          } catch (_) {}
+        }
+
+        currentUserStoreRole.value =
+            currentMember?.role.toString().trim().toLowerCase() ?? '';
+      }
     } catch (e) {
       debugPrint("Lỗi load members: $e");
 
@@ -122,6 +153,8 @@ class ProfileEditStoreController extends GetxController {
         filteredMembers.clear();
         memberCount.value = 0;
       }
+
+      currentUserStoreRole.value = '';
     } finally {
       isLoadingMembers.value = false;
       hasLoadedMembers.value = true;
@@ -150,7 +183,7 @@ class ProfileEditStoreController extends GetxController {
     memberCount.value = members.length;
   }
 
-  /// Update role local
+  // Update role local
   void updateMemberRole({
     required String userId,
     required String newRole,
@@ -168,11 +201,22 @@ class ProfileEditStoreController extends GetxController {
 
     members.refresh();
     filteredMembers.refresh();
+
+    // Nếu current user đổi role thì update lại
+    final currentUser = _userService.currentUser.value;
+    if (currentUser != null &&
+        (userId == currentUser.userId || userId == currentUser.authUserId)) {
+      currentUserStoreRole.value = newRole.trim().toLowerCase();
+    }
   }
 
   /// Bật/tắt mode chỉnh sửa
   void toggleEditing() {
     if (isLoading.value) return;
+
+    // Chỉ owner mới được edit
+    if (currentUserStoreRole.value != 'owner') return;
+
     isEditing.value = !isEditing.value;
   }
 
@@ -184,7 +228,7 @@ class ProfileEditStoreController extends GetxController {
     }
   }
 
-  // --- 1. TÌM KIẾM ĐỊA CHỈ ---
+  /// Tìm kiếm địa chỉ dựa trên query
   Future<void> searchAddress(String query) async {
     if (!isEditing.value) return;
 
@@ -216,7 +260,7 @@ class ProfileEditStoreController extends GetxController {
     }
   }
 
-  // --- 2. CHỌN GỢI Ý ĐỊA CHỈ ---
+  // Khi user chọn một địa chỉ gợi ý, cập nhật vị trí và địa chỉ vào form
   void onSuggestionSelected(dynamic place) {
     final lat = double.parse(place['lat']);
     final lon = double.parse(place['lon']);
@@ -233,7 +277,7 @@ class ProfileEditStoreController extends GetxController {
     );
   }
 
-  // --- 3. LẤY VỊ TRÍ GPS ---
+  // Lấy vị trí hiện tại của user và cập nhật vào form
   Future<void> getCurrentLocation() async {
     if (!isEditing.value) return;
 
@@ -287,16 +331,16 @@ class ProfileEditStoreController extends GetxController {
     }
   }
 
-  /// Getter lấy dữ liệu hiện tại trong form
+  // Getter lấy dữ liệu hiện tại trong form
   String get currentName => nameController.text.trim();
   String get currentAddress => addressController.text.trim();
 
-  /// Kiểm tra đã nhập đủ dữ liệu bắt buộc chưa
+  // Kiểm tra đã nhập đủ dữ liệu bắt buộc chưa
   bool get hasAllRequiredFields {
     return currentName.isNotEmpty && currentAddress.isNotEmpty;
   }
 
-  /// Kiểm tra xem có thay đổi dữ liệu hay không
+  // Kiểm tra xem có thay đổi dữ liệu hay không
   bool get hasChanged {
     final originalName = _storeService.currentStoreName.value.trim();
     final originalAddress = _storeService.currentStoreAddress.value.trim();
@@ -308,13 +352,18 @@ class ProfileEditStoreController extends GetxController {
     return hasAllRequiredFields && hasChanged;
   }
 
+  // Logic cập nhật thông tin cửa hàng
   Future<void> updateStore() async {
     await updateStoreDetails();
   }
 
-  /// Logic cập nhật thông tin cửa hàng
   Future<void> updateStoreDetails() async {
     try {
+      // Chỉ owner mới được edit
+      if (currentUserStoreRole.value != 'owner') {
+        return;
+      }
+
       if (!editStoreFormKey.currentState!.validate()) return;
 
       if (!hasAllRequiredFields) {
