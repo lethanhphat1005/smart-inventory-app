@@ -13,6 +13,8 @@ final Map<String, String> enInventory = {
   TTexts.productCatalog: 'Product Catalog',
   TTexts.chartTooltipIn: 'In',
   TTexts.chartTooltipOut: 'Out',
+  TTexts.initialQuantityLabel: "Initial Quantity",
+  TTexts.initialQuantityHint: "0",
 
   // -- Inventory Header & Health
   TTexts.stockValue: 'Stock Value',
