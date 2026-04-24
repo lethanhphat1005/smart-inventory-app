@@ -109,7 +109,8 @@ void main() async {
 
   runApp(
     DevicePreview(
-      enabled: !kReleaseMode,
+      enabled: false,
+      // enabled: !kReleaseMode,
       builder: (context) => const App(),
     ),
   );
@@ -124,26 +125,26 @@ class App extends StatelessWidget {
       title: 'Storix',
       debugShowCheckedModeBanner: false,
 
-      builder: (context, child) {
-        final devicePreviewChild = DevicePreview.appBuilder(
-          context,
-          child,
-        );
-        return GestureDetector(
-          onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-          behavior: HitTestBehavior.opaque,
-          child: devicePreviewChild,
-        );
-      },
-
-      // Cấu hình Release kết hợp tự động tắt bàn phím khi chạm ngoài màn hình
       // builder: (context, child) {
+      //   final devicePreviewChild = DevicePreview.appBuilder(
+      //     context,
+      //     child,
+      //   );
       //   return GestureDetector(
       //     onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       //     behavior: HitTestBehavior.opaque,
-      //     child: child!,
+      //     child: devicePreviewChild,
       //   );
       // },
+
+      // Cấu hình Release kết hợp tự động tắt bàn phím khi chạm ngoài màn hình
+      builder: (context, child) {
+        return GestureDetector(
+          onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+          behavior: HitTestBehavior.opaque,
+          child: child!,
+        );
+      },
 
       theme: AppTheme.lightTheme,
       themeMode: ThemeMode.light,
