@@ -17,4 +17,12 @@ class StoreMemberProvider {
       rethrow;
     }
   }
+
+  Future<void> removeStoreMember(String userId) async {
+    try {
+      await _apiClient.delete('/api/store-members/$userId');
+    } catch (e) {
+      rethrow;
+    }
+  }
 }
