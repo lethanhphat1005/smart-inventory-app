@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/utils/full_screen_loader_utils.dart';
 import 'package:frontend/core/state/services/auth_service.dart';
@@ -12,8 +11,6 @@ import 'package:frontend/core/ui/widgets/t_snackbars_widget.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/routes/app_routes.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../models/login_request_model.dart';
-
 import 'package:frontend/core/state/services/store_service.dart';
 
 class LoginController extends GetxController {
@@ -31,6 +28,7 @@ class LoginController extends GetxController {
       isPasswordHidden.value = !isPasswordHidden.value;
   void toggleRememberMe(bool? value) => rememberMe.value = value ?? false;
 
+  /// Logic Đăng nhập thường
   Future<void> login() async {
     final email = emailController.text.trim();
     final password = passwordController.text;
@@ -47,28 +45,16 @@ class LoginController extends GetxController {
     FullScreenLoaderUtils.openLoadingDialog(TTexts.loggingIn.tr);
 
     try {
-      final request = LoginRequestModel(email: email, password: password);
-
-      // THÊM TIMEOUT 15 GIÂY CHO API CALL
       final res = await authProvider
-          .login(
-            email: request.email,
-            password: request.password,
-          )
+          .login(email: email, password: password)
           .timeout(const Duration(seconds: 15));
-
       final user = res.user;
 
-      if (user == null) {
-        throw Exception("Unknown error occurred");
-      }
+      if (user == null) throw Exception("Unknown error occurred");
 
-      // KIỂM TRA XÁC THỰC EMAIL
       if (user.emailConfirmedAt == null) {
         await Supabase.instance.client.auth.signOut();
-
-        FullScreenLoaderUtils
-            .stopLoading(); // Phải tắt loading trước khi hiện cảnh báo
+        FullScreenLoaderUtils.stopLoading();
         TSnackbarsWidget.warning(
           title: TTexts.loginWarningUnverifiedTitle.tr,
           message: TTexts.loginWarningUnverifiedMessage.tr,
@@ -76,83 +62,32 @@ class LoginController extends GetxController {
         return;
       }
 
-      // TẠO PROFILE (Nếu đây là lần đầu)
+      // 1. Tạo Profile & Nạp RAM (Các bước bắt buộc phải chờ để có data UI)
       await UserProfileProvider().createUserProfile();
+      await Get.find<UserService>().fetchAndSaveProfile();
 
-      // LOGIN THÀNH CÔNG -> ĐĂNG KÝ FCM TOKEN
-      await NotificationService.registerTokenWithBackend();
-
-      debugPrint(
-          "Token: ${Supabase.instance.client.auth.currentSession!.accessToken}");
-
-      // NẠP DỮ LIỆU USER VÀO RAM (UserService)
-      final isProfileLoaded =
-          await Get.find<UserService>().fetchAndSaveProfile();
-      if (!isProfileLoaded) {
-        debugPrint("Cảnh báo: Không thể tải profile vào RAM lúc đăng nhập");
-      }
-
-      // LƯU KÉT SẮT
-      await Get.find<AuthService>().saveUserLogin(
-        email,
-        password,
-        rememberMe.value,
-      );
-      final storeService = Get.find<StoreService>();
-      await storeService.clearWorkspaceData();
+      // 2. Chạy song song các tác vụ background (Tối ưu tốc độ)
+      _runBackgroundTasks(email, password, rememberMe.value);
 
       FullScreenLoaderUtils.stopLoading();
-
       TSnackbarsWidget.success(
         title: TTexts.loginSuccessTitle.tr,
-        message: TTexts.loginSuccessMessage.trParams({
-          'name': email.split('@')[0],
-        }),
+        message:
+            TTexts.loginSuccessMessage.trParams({'name': email.split('@')[0]}),
       );
 
       Get.offAllNamed(AppRoutes.storeSelection);
-    } on AuthException catch (e) {
-      FullScreenLoaderUtils.stopLoading();
-
-      if (e.message.contains('Invalid login credentials') ||
-          e.code == 'invalid_credentials') {
-        TSnackbarsWidget.error(
-          title: TTexts.loginErrorInvalidCredentialsTitle.tr,
-          message: TTexts.loginErrorInvalidCredentialsMessage.tr,
-        );
-      } else {
-        TSnackbarsWidget.error(
-          title: TTexts.loginFailedTitle.tr,
-          message: e.message,
-        );
-      }
-    } on TimeoutException catch (_) {
-      FullScreenLoaderUtils.stopLoading();
-      TSnackbarsWidget.error(
-        title: TTexts.errorTimeoutTitle.tr,
-        message: TTexts.errorTimeoutMessage.tr,
-      );
-    } on SocketException catch (_) {
-      FullScreenLoaderUtils.stopLoading();
-      TSnackbarsWidget.error(
-        title: TTexts.netErrorTitle.tr,
-        message: TTexts.netErrorDescription.tr,
-      );
     } catch (e) {
-      FullScreenLoaderUtils.stopLoading();
-      TSnackbarsWidget.error(
-        title: TTexts.errorTitle.tr,
-        message: e.toString(),
-      );
+      _handleLoginError(e);
     } finally {
       isLoading.value = false;
     }
   }
 
+  /// Logic Đăng nhập Google
   Future<void> loginWithGoogle() async {
     try {
       FullScreenLoaderUtils.openLoadingDialog(TTexts.loggingIn.tr);
-
       final response = await authProvider.signInWithGoogle();
 
       if (response == null || response.user == null) {
@@ -161,49 +96,53 @@ class LoginController extends GetxController {
       }
 
       final user = response.user!;
-
       final String displayName = user.userMetadata?['full_name'] ??
           user.email?.split('@')[0] ??
           'User';
 
+      // 1. Đồng bộ dữ liệu Profile & Nạp RAM
       await UserProfileProvider().createUserProfile(fullName: displayName);
+      await Get.find<UserService>().fetchAndSaveProfile();
 
-      await Get.find<AuthService>().saveUserLogin(
-        user.email ?? "",
-        "google_dummy_password",
-        true,
-      );
-
-      await NotificationService.registerTokenWithBackend();
-
-      final isProfileLoaded =
-          await Get.find<UserService>().fetchAndSaveProfile();
-      if (!isProfileLoaded) {
-        debugPrint(
-            "Cảnh báo: Không thể tải profile vào RAM lúc đăng nhập Google");
-      }
-
-      final storeService = Get.find<StoreService>();
-      await storeService.clearWorkspaceData();
+      // 2. Chạy song song các tác vụ background
+      _runBackgroundTasks(user.email ?? "", "google_dummy_password", true);
 
       FullScreenLoaderUtils.stopLoading();
-
       TSnackbarsWidget.success(
         title: TTexts.loginSuccessTitle.tr,
-        message: TTexts.loginSuccessMessage.trParams({
-          'name': displayName,
-        }),
+        message: TTexts.loginSuccessMessage.trParams({'name': displayName}),
       );
 
       Get.offAllNamed(AppRoutes.storeSelection);
     } catch (e) {
       FullScreenLoaderUtils.stopLoading();
-      debugPrint('❌ Google Auth Error: $e');
-
       TSnackbarsWidget.error(
-        title: TTexts.loginFailedTitle.tr,
-        message: e.toString().replaceAll('Exception: ', ''),
-      );
+          title: TTexts.loginFailedTitle.tr, message: e.toString());
+    }
+  }
+
+  /// Tác vụ chạy song song không block UI
+  void _runBackgroundTasks(String email, String password, bool remember) {
+    Future.wait([
+      NotificationService.registerTokenWithBackend(),
+      Get.find<AuthService>().saveUserLogin(email, password, remember),
+      Get.find<StoreService>().clearWorkspaceData(),
+      // ignore: invalid_return_type_for_catch_error
+    ]).catchError((e) => debugPrint("Background Tasks Error: $e"));
+  }
+
+  void _handleLoginError(dynamic e) {
+    FullScreenLoaderUtils.stopLoading();
+    if (e is AuthException) {
+      TSnackbarsWidget.error(
+          title: TTexts.loginFailedTitle.tr, message: e.message);
+    } else if (e is TimeoutException) {
+      TSnackbarsWidget.error(
+          title: TTexts.errorTimeoutTitle.tr,
+          message: TTexts.errorTimeoutMessage.tr);
+    } else {
+      TSnackbarsWidget.error(
+          title: TTexts.errorTitle.tr, message: e.toString());
     }
   }
 }
