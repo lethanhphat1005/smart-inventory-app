@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:frontend/core/infrastructure/constants/app_constants.dart';
 import 'package:frontend/core/infrastructure/network/app_client.dart';
 import 'package:frontend/core/state/services/notification_service.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -11,33 +12,25 @@ class AuthProvider {
 
   final supabase = Supabase.instance.client;
 
-  // TODO: Bỏ vô env
-  final String _serverClientId =
-      '119247404487-9d27bve8fsfl6loh8468dg21l4io4otq.apps.googleusercontent.com';
+  final String _serverClientId = AppConstants.serverClientId;
 
-  /// Hàm đăng nhập Google chuẩn cho google_sign_in v7.0.0+
   Future<AuthResponse?> signInWithGoogle() async {
     try {
-      // 1. KHỞI TẠO (Bắt buộc phải gọi initialize trong v7+)
       await GoogleSignIn.instance.initialize(
         serverClientId: _serverClientId,
       );
 
-      // 2. MỞ POPUP (Dùng authenticate thay vì signIn)
       final GoogleSignInAccount googleUser =
           await GoogleSignIn.instance.authenticate();
 
-      // 3. LẤY THÔNG TIN XÁC THỰC
       final GoogleSignInAuthentication googleAuth = googleUser.authentication;
 
-      // 4. LẤY ID TOKEN (Không cần accessToken nữa)
       final String? idToken = googleAuth.idToken;
 
       if (idToken == null) {
         throw 'Không tìm thấy ID Token từ Google.';
       }
 
-      // 5. GỬI LÊN SUPABASE (Supabase không bắt buộc accessToken)
       return await supabase.auth.signInWithIdToken(
         provider: OAuthProvider.google,
         idToken: idToken,
