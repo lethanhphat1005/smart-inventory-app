@@ -1,6 +1,11 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:frontend/core/state/provider/user_profile_provider.dart';
+import 'package:frontend/core/state/services/auth_service.dart';
+import 'package:frontend/core/state/services/notification_service.dart';
+import 'package:frontend/core/state/services/store_service.dart';
+import 'package:frontend/core/state/services/user_service.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart'; // Import Supabase để bắt AuthException
 
@@ -48,7 +53,6 @@ class RegisterController extends GetxController {
   }
 
   // --- HÀM XỬ LÝ LOGIC API ---
-
   Future<void> register() async {
     final email = emailController.text.trim();
     final password = passwordController.text;
@@ -152,48 +156,67 @@ class RegisterController extends GetxController {
     }
   }
 
-  /// Đăng ký/Đăng nhập bằng Google
+  // Đăng ký/Đăng nhập bằng Google
   Future<void> registerWithGoogle() async {
     try {
-      FullScreenLoaderUtils.openLoadingDialog(TTexts.loggingIn.tr);
+      FullScreenLoaderUtils.openLoadingDialog(TTexts.registering.tr);
 
-      // Nhận về AuthResponse thay vì GoogleSignInAccount
       final response = await authProvider.signInWithGoogle();
 
       if (response == null || response.user == null) {
         FullScreenLoaderUtils.stopLoading();
-        // Bỏ qua cảnh báo tắt popup để tránh spam UI, hoặc bật lại nếu bạn muốn
         return;
       }
 
       final user = response.user!;
 
-      debugPrint("=== GOOGLE REGISTER SUCCESS ===");
-      debugPrint("Email: ${user.email}");
-      debugPrint("ID: ${user.id}");
+      if (user.identities != null && user.identities!.isEmpty) {
+        FullScreenLoaderUtils.stopLoading();
+        TSnackbarsWidget.error(
+          title: TTexts.registerFailedTitle.tr,
+          message: TTexts.registerErrorEmailExistsMessage.tr,
+        );
+        return;
+      }
+
+      final String displayName = user.userMetadata?['full_name'] ??
+          user.email?.split('@')[0] ??
+          'User';
+
+      // 1. TẠO PROFILE TRONG DATABASE
+      await UserProfileProvider().createUserProfile(fullName: displayName);
+
+      // 2. LƯU KÉT SẮT CỤC BỘ
+      await Get.find<AuthService>().saveUserLogin(
+        user.email ?? "",
+        "google_dummy_password",
+        true,
+      );
+
+      // 3. ĐĂNG KÝ FCM TOKEN
+      await NotificationService.registerTokenWithBackend();
+
+      // 4. NẠP DỮ LIỆU USER VÀO RAM
+      final isProfileLoaded =
+          await Get.find<UserService>().fetchAndSaveProfile();
+      if (!isProfileLoaded) {
+        debugPrint(
+            "Cảnh báo: Không thể tải profile vào RAM lúc đăng ký Google");
+      }
+
+      // 5. XÓA DATA CŨ STORE
+      final storeService = Get.find<StoreService>();
+      await storeService.clearWorkspaceData();
 
       FullScreenLoaderUtils.stopLoading();
 
-      if (response.user != null) {
-        // THÊM ĐOẠN NÀY: Kiểm tra nếu identities rỗng nghĩa là email đã tồn tại
-        if (response.user!.identities != null &&
-            response.user!.identities!.isEmpty) {
-          TSnackbarsWidget.error(
-            title: TTexts.registerFailedTitle.tr,
-            message: TTexts.registerErrorEmailExistsMessage.tr,
-          );
-          return;
-        }
+      TSnackbarsWidget.success(
+        title: TTexts.registerSuccessTitle.tr,
+        message: TTexts.registerGoogleSuccessMessage.tr,
+      );
 
-        // Hiện thông báo thành công và chuyển trang như cũ
-        TSnackbarsWidget.success(
-          title: TTexts.registerSuccessTitle.tr,
-          message: TTexts.registerGoogleSuccessMessage.tr,
-        );
-        Get.toNamed(
-          AppRoutes.login,
-        );
-      }
+      // 6. CHUYỂN THẲNG VÀO APP CHỨ KHÔNG QUAY LẠI LOGIN
+      Get.offAllNamed(AppRoutes.storeSelection);
     } catch (e) {
       FullScreenLoaderUtils.stopLoading();
       TSnackbarsWidget.error(

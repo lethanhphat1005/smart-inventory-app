@@ -14,7 +14,6 @@ import 'package:frontend/routes/app_routes.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/login_request_model.dart';
 
-// QUAN TRỌNG: Import thêm StoreService
 import 'package:frontend/core/state/services/store_service.dart';
 
 class LoginController extends GetxController {
@@ -102,7 +101,6 @@ class LoginController extends GetxController {
       final storeService = Get.find<StoreService>();
       await storeService.clearWorkspaceData();
 
-      // TẮT LOADING KHI THÀNH CÔNG
       FullScreenLoaderUtils.stopLoading();
 
       TSnackbarsWidget.success(
@@ -170,19 +168,20 @@ class LoginController extends GetxController {
 
       await UserProfileProvider().createUserProfile(fullName: displayName);
 
-      debugPrint("=== THÔNG TIN SUPABASE TRẢ VỀ TỪ GOOGLE ===");
-      debugPrint("Email: ${user.email}");
-      debugPrint("Name: $displayName");
-      debugPrint("=========================================");
-
       await Get.find<AuthService>().saveUserLogin(
         user.email ?? "",
         "google_dummy_password",
         true,
       );
 
-      //  ĐĂNG NHẬP GOOGLE THÀNH CÔNG -> ĐĂNG KÝ FCM TOKEN
       await NotificationService.registerTokenWithBackend();
+
+      final isProfileLoaded =
+          await Get.find<UserService>().fetchAndSaveProfile();
+      if (!isProfileLoaded) {
+        debugPrint(
+            "Cảnh báo: Không thể tải profile vào RAM lúc đăng nhập Google");
+      }
 
       final storeService = Get.find<StoreService>();
       await storeService.clearWorkspaceData();
