@@ -62,7 +62,7 @@ class TAppBarWidget extends StatelessWidget implements PreferredSizeWidget {
                   ? Text(title!,
                       style: const TextStyle(
                           color: AppColors.primaryText,
-                          fontSize: 18,
+                          fontSize: 16,
                           fontWeight: FontWeight.bold,
                           fontFamily: 'Poppins'))
                   : null),

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
+import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 
 class CategoryDetailAddProductWidget extends StatelessWidget {
@@ -55,27 +57,27 @@ class CategoryDetailAddProductWidget extends StatelessWidget {
                 const SizedBox(width: AppSizes.p16),
 
                 // Chữ
-                const Expanded(
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Add New Product', // Thay bằng TTexts.addNewProduct.tr nếu đã khai báo
-                        style: TextStyle(
+                        TTexts.addNewProduct.tr,
+                        style: const TextStyle(
                           fontFamily: 'Poppins',
-                          fontSize: 14,
+                          fontSize: 12,
                           fontWeight: FontWeight.bold,
                           color: AppColors.primaryText,
                         ),
                       ),
-                      SizedBox(height: 2),
+                      const SizedBox(height: 2),
                       Text(
-                        'Add a new product item to this category.', // TTexts.addNewProductSub.tr
+                        TTexts.addNewProductDesc.tr,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontFamily: 'Poppins',
-                          fontSize: 11,
+                          fontSize: 10,
                           height: 1.3,
                           color: AppColors.subText,
                         ),

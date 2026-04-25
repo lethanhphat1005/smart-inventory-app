@@ -85,8 +85,7 @@ class TTextFormFieldWidget extends StatelessWidget {
           onFieldSubmitted: onFieldSubmitted,
           style: TextStyle(
             fontFamily: 'Poppins',
-            fontSize: 14,
-            // ĐÃ FIX: Trả về chữ thường và màu xám (subText) khi readOnly
+            fontSize: 12,
             fontWeight: FontWeight.w500,
             color: readOnly ? AppColors.subText : AppColors.primaryText,
           ),

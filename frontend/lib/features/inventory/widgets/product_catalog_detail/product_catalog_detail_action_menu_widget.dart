@@ -151,7 +151,7 @@ class _GlassmorphismDropdownMenuState extends State<_GlassmorphismDropdownMenu>
             mainAxisSize: MainAxisSize.min,
             children: [
               // Nút sửa sản phẩm
-             _buildMenuItem(
+              _buildMenuItem(
                 icon: Iconsax.edit_2_copy,
                 text: TTexts.editProduct.tr,
                 onTap: () {
@@ -201,7 +201,7 @@ class _GlassmorphismDropdownMenuState extends State<_GlassmorphismDropdownMenu>
               text,
               style: TextStyle(
                 color: color ?? AppColors.primaryText,
-                fontSize: 14,
+                fontSize: 12,
                 fontWeight: FontWeight.w600,
               ),
             ),

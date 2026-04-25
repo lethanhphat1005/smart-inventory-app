@@ -57,7 +57,7 @@ class HomeMobileScreen extends GetView<HomeController> {
                             TTexts.homeDailyOverview.tr,
                             style: const TextStyle(
                                 fontFamily: 'Poppins',
-                                fontSize: 18,
+                                fontSize: 16,
                                 fontWeight: FontWeight.bold,
                                 color: AppColors.primaryText),
                           ),

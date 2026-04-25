@@ -21,7 +21,7 @@ class InventoryInsightOverviewWidget
           Text(TTexts.insightsOverview.tr,
               style: const TextStyle(
                   fontSize: 14,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w500,
                   color: AppColors.subText)),
           const SizedBox(height: AppSizes.p12),
           Row(

@@ -29,7 +29,7 @@ class CategoryDetailMobileView extends GetView<CategoryDetailController> {
               controller.rxCategory.value.name,
               style: const TextStyle(
                 color: AppColors.primaryText,
-                fontSize: 18,
+                fontSize: 16,
                 fontWeight: FontWeight.bold,
                 fontFamily: 'Poppins',
               ),
@@ -52,14 +52,13 @@ class CategoryDetailMobileView extends GetView<CategoryDetailController> {
                   horizontal: AppSizes.p20, vertical: AppSizes.p8),
               sliver: SliverToBoxAdapter(
                 child: Obx(() => Column(
-                      // <--- BỌC OBX Ở ĐÂY
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           controller.rxCategory.value.name,
                           style: const TextStyle(
                               fontFamily: 'Poppins',
-                              fontSize: 24,
+                              fontSize: 18,
                               fontWeight: FontWeight.bold,
                               color: AppColors.primaryText),
                         ),
@@ -73,7 +72,7 @@ class CategoryDetailMobileView extends GetView<CategoryDetailController> {
                               : TTexts.noCategoryDescription.tr,
                           style: const TextStyle(
                               fontFamily: 'Poppins',
-                              fontSize: 14,
+                              fontSize: 12,
                               height: 1.5,
                               color: AppColors.subText),
                         ),

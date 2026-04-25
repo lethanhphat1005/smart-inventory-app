@@ -15,9 +15,9 @@ class InventoryHealthWidget extends GetView<InventoryController> {
         Text(
           TTexts.stockHealth.tr,
           style: const TextStyle(
-              fontSize: 13,
+              fontSize: 12,
               color: AppColors.subText,
-              fontWeight: FontWeight.w600),
+              fontWeight: FontWeight.w500),
         ),
         const SizedBox(height: 16),
         Obx(() {

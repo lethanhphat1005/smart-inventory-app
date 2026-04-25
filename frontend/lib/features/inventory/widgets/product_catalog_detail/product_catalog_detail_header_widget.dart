@@ -44,7 +44,6 @@ class ProductCatalogDetailHeaderWidget
               padding: EdgeInsets.only(
                   top: MediaQuery.of(context).padding.top + kToolbarHeight,
                   bottom: AppSizes.p24),
-              // ĐÃ BỌC BẰNG OBX ĐỂ ĐỔI ẢNH TỨC THÌ
               child: Obx(() {
                 final imageUrl = controller.rxImageUrl.value;
                 return Stack(

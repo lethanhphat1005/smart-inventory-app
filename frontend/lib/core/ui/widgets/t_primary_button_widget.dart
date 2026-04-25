@@ -12,9 +12,9 @@ class TPrimaryButtonWidget extends StatelessWidget {
     this.backgroundColor = AppColors.primary,
     this.textColor = AppColors.white,
     this.width = double.infinity,
-    this.height = 52.0,
+    this.height = 50.0,
     this.borderRadius = AppSizes.radius12,
-    this.fontSize = 14.0,
+    this.fontSize = 12.0,
     this.isOutlined = false,
     this.borderColor,
   });

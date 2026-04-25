@@ -51,14 +51,13 @@ class InventoryEmptyCategoryWidget extends GetView<InventoryController> {
             TTexts.emptyCategoryMessage.tr,
             textAlign: TextAlign.center,
             style: const TextStyle(
-              fontSize: 13,
+              fontSize: 12,
               color: AppColors.subText,
               height: 1.4,
             ),
           ),
           const SizedBox(height: AppSizes.p24),
           ElevatedButton.icon(
-            // GỌI TRỰC TIẾP HÀM TỪ CONTROLLER, SIÊU NGẮN GỌN!
             onPressed: controller.goToAddCategory,
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,

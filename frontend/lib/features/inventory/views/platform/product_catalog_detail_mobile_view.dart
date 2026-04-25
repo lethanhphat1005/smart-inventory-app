@@ -43,7 +43,7 @@ class ProductCatalogDetailMobileView
                           controller.rxName.value,
                           style: const TextStyle(
                               fontFamily: 'Poppins',
-                              fontSize: 22,
+                              fontSize: 20,
                               fontWeight: FontWeight.bold,
                               color: AppColors.primaryText),
                         ),
@@ -52,7 +52,7 @@ class ProductCatalogDetailMobileView
                           '${TTexts.brand.tr}: ${controller.rxBrand.value.isNotEmpty ? controller.rxBrand.value : TTexts.na.tr}',
                           style: const TextStyle(
                               fontFamily: 'Poppins',
-                              fontSize: 14,
+                              fontSize: 12,
                               color: AppColors.subText),
                         ),
                         const SizedBox(height: 16),
@@ -73,7 +73,7 @@ class ProductCatalogDetailMobileView
                     Text(TTexts.packagesOrVariants.tr,
                         style: const TextStyle(
                             fontFamily: 'Poppins',
-                            fontSize: 17,
+                            fontSize: 16,
                             fontWeight: FontWeight.bold)),
 
                     // NÚT ADD ĐÃ ĐƯỢC THAY BẰNG GRADIENT PILL BUTTON
@@ -113,7 +113,7 @@ class ProductCatalogDetailMobileView
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 13,
+                                  fontSize: 12,
                                 ),
                               ),
                             ],

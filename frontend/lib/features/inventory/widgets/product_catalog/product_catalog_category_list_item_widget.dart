@@ -90,7 +90,7 @@ class ProductCatalogCategoryListItemWidget extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                             fontFamily: 'Poppins',
-                            fontSize: 15,
+                            fontSize: 12,
                             fontWeight: FontWeight.bold,
                             color: AppColors.primaryText),
                       ),
@@ -104,7 +104,7 @@ class ProductCatalogCategoryListItemWidget extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                             fontFamily: 'Poppins',
-                            fontSize: 12,
+                            fontSize: 10,
                             height: 1.3,
                             color: AppColors.subText),
                       ),

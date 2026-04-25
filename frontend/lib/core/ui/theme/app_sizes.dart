@@ -66,7 +66,7 @@ class AppSizes {
 
   // --- KÍCH THƯỚC BOTTOM NAVIGATION ---
   /// Chiều cao tiêu chuẩn của Bottom Navigation Bar
-  static const double bottomNavHeight = 80.0;
+  static const double bottomNavHeight = 70.0;
 
   /// Khoảng cách an toàn dội thêm một chút padding (80 + 24)
   /// Dùng cái này ở cuối các danh sách cuộn để nội dung không bị che

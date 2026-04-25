@@ -4,8 +4,8 @@ import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/features/inventory/controllers/customize_catalog_controller.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
-// Bổ sung import Widget Empty State
 import 'package:frontend/core/ui/widgets/t_empty_state_widget.dart';
+import 'package:frontend/core/ui/widgets/t_app_bar_widget.dart';
 
 class CustomCatalogMobileView extends GetView<CustomizeCatalogController> {
   const CustomCatalogMobileView({super.key});
@@ -13,30 +13,29 @@ class CustomCatalogMobileView extends GetView<CustomizeCatalogController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.surface,
-      appBar: AppBar(
-        title: Text(
-          TTexts.customizeCatalog.tr,
-          style: const TextStyle(
-              fontFamily: 'Poppins', fontWeight: FontWeight.bold, fontSize: 18),
-        ),
-        backgroundColor: AppColors.white,
-        elevation: 0,
+      backgroundColor: AppColors.background,
+      extendBodyBehindAppBar: true,
+      appBar: TAppBarWidget(
+        title: TTexts.customizeCatalog.tr,
         actions: [
           TextButton(
             onPressed: controller.saveOrder,
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+            ),
             child: Text(
               TTexts.save.tr,
               style: const TextStyle(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16),
+                color: AppColors.primary,
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+                fontFamily: 'Poppins',
+              ),
             ),
           )
         ],
       ),
       body: Obx(() {
-        // KIỂM TRA: NẾU KHÔNG CÓ DANH MỤC NÀO -> HIỆN EMPTY STATE
         if (controller.currentOrder.isEmpty) {
           return TEmptyStateWidget(
             icon: Iconsax.folder_open_copy,
@@ -45,9 +44,13 @@ class CustomCatalogMobileView extends GetView<CustomizeCatalogController> {
           );
         }
 
-        // NẾU CÓ DỮ LIỆU -> HIỆN DANH SÁCH KÉO THẢ NHƯ BÌNH THƯỜNG
         return ReorderableListView.builder(
-          padding: const EdgeInsets.all(20),
+          padding: EdgeInsets.only(
+            top: MediaQuery.of(context).padding.top + kToolbarHeight + 20,
+            left: 20,
+            right: 20,
+            bottom: 20,
+          ),
           physics: const BouncingScrollPhysics(),
           itemCount: controller.currentOrder.length,
           onReorder: controller.reorder,
@@ -90,14 +93,16 @@ class CustomCatalogMobileView extends GetView<CustomizeCatalogController> {
                   title: Text(
                     catName,
                     style: const TextStyle(
-                        fontWeight: FontWeight.bold, fontFamily: 'Poppins'),
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Poppins'),
                   ),
                   subtitle: Text(
                     isTop4
                         ? TTexts.pinnedOnHome.tr
                         : TTexts.tapAndHoldToDrag.tr,
                     style: const TextStyle(
-                        fontSize: 11, color: AppColors.softGrey),
+                        fontSize: 10, color: AppColors.softGrey),
                   ),
                 ),
               ),

@@ -31,12 +31,12 @@ class ProductCatalogSearchBarWidget extends GetView<ProductCatalogController> {
         cursorColor: AppColors.primary, // Vẫn giữ con trỏ màu cam
         style: const TextStyle(
           fontFamily: 'Poppins',
-          fontSize: 14,
+          fontSize: 12,
           color: AppColors.primaryText,
         ),
         decoration: InputDecoration(
           hintText: TTexts.searchCategories.tr,
-          hintStyle: const TextStyle(color: AppColors.subText, fontSize: 14),
+          hintStyle: const TextStyle(color: AppColors.subText, fontSize: 12),
           prefixIcon: const Icon(Iconsax.search_normal_1_copy,
               color: AppColors.softGrey, size: 20),
 

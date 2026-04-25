@@ -18,7 +18,7 @@ class HomeTransactionListWidget extends GetView<HomeController> {
           TTexts.homeTodaysTransactions.tr,
           style: const TextStyle(
               fontFamily: 'Poppins',
-              fontSize: 16,
+              fontSize: 14,
               fontWeight: FontWeight.bold,
               color: AppColors.primaryText),
         ),

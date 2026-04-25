@@ -44,14 +44,14 @@ class AllProductsCategoryChipWidget extends GetView<AllProductsController> {
                           ? AppColors.primaryText
                           : AppColors.softGrey.withOpacity(0.2),
                     ),
-                    boxShadow: isSelected
-                        ? [
-                            BoxShadow(
-                                color: AppColors.primaryText.withOpacity(0.2),
-                                blurRadius: 8,
-                                offset: const Offset(0, 4))
-                          ]
-                        : [],
+                    // boxShadow: isSelected
+                    //     ? [
+                    //         BoxShadow(
+                    //             color: AppColors.primaryText.withOpacity(0.2),
+                    //             blurRadius: 8,
+                    //             offset: const Offset(0, 4))
+                    //       ]
+                    //     : [],
                   ),
                   alignment: Alignment.center,
                   child: Text(
@@ -60,7 +60,7 @@ class AllProductsCategoryChipWidget extends GetView<AllProductsController> {
                       color: isSelected ? Colors.white : AppColors.subText,
                       fontWeight:
                           isSelected ? FontWeight.bold : FontWeight.w500,
-                      fontSize: 13,
+                      fontSize: 12,
                     ),
                   ),
                 );

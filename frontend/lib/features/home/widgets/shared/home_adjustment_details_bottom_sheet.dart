@@ -161,7 +161,7 @@ class HomeAdjustmentDetailsBottomSheet extends StatelessWidget {
         Text(
           label,
           style: const TextStyle(
-            fontSize: 14,
+            fontSize: 12,
             color: AppColors.subText,
             fontWeight: FontWeight.w500,
           ),
@@ -172,9 +172,9 @@ class HomeAdjustmentDetailsBottomSheet extends StatelessWidget {
             value,
             textAlign: TextAlign.right,
             style: TextStyle(
-              fontSize: 14,
+              fontSize: 12,
               height: 1.4,
-              fontWeight: isHighlight ? FontWeight.bold : FontWeight.w600,
+              fontWeight: isHighlight ? FontWeight.w500 : FontWeight.w400,
               color: isHighlight
                   ? AppColors.primaryText
                   : AppColors.primaryText.withOpacity(0.9),

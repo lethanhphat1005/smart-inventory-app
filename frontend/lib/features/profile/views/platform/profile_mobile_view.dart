@@ -17,20 +17,24 @@ class ProfileMobileView extends GetView<ProfileController> {
   Widget build(BuildContext context) {
     return const Scaffold(
       backgroundColor: AppColors.background,
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            ProfileHeaderWidget(),
-            ProfileInfoWidget(),
-            SizedBox(height: AppSizes.p24),
-            ProfileStoreCardWidget(),
-            SizedBox(height: AppSizes.p20),
-            ProfileMenuWidget(),
-            SizedBox(height: AppSizes.p32),
-            ProfileLogoutButtonWidget(),
-            SizedBox(height: 40),
-            TBottomNavSpacerWidget()
-          ],
+      body: SafeArea(
+        top: false,
+        bottom: true,
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              ProfileHeaderWidget(),
+              ProfileInfoWidget(),
+              SizedBox(height: AppSizes.p24),
+              ProfileStoreCardWidget(),
+              SizedBox(height: AppSizes.p20),
+              ProfileMenuWidget(),
+              SizedBox(height: AppSizes.p32),
+              ProfileLogoutButtonWidget(),
+              SizedBox(height: 40),
+              TBottomNavSpacerWidget()
+            ],
+          ),
         ),
       ),
     );

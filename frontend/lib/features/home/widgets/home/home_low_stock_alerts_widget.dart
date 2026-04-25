@@ -41,7 +41,7 @@ class HomeLowStockAlertsWidget extends GetView<HomeController> {
                         TTexts.homeLowStockAlerts.tr,
                         style: const TextStyle(
                             fontFamily: 'Poppins',
-                            fontSize: 16,
+                            fontSize: 14,
                             fontWeight: FontWeight.bold,
                             color: AppColors.primaryText),
                       ),
@@ -58,7 +58,7 @@ class HomeLowStockAlertsWidget extends GetView<HomeController> {
                               fontFamily: 'Poppins',
                               color: AppColors.toastErrorGradientEnd,
                               fontWeight: FontWeight.bold,
-                              fontSize: 12),
+                              fontSize: 10),
                         ),
                       ),
                     ],
@@ -90,7 +90,7 @@ class HomeLowStockAlertsWidget extends GetView<HomeController> {
                 ],
               ),
             ),
-            if (items.length > 3)
+            if (items.length > 5)
               TCustomFadeOverlayWidget(
                 text: TTexts.homeTapToViewAll.tr,
                 onTap: () {
@@ -138,13 +138,13 @@ class HomeLowStockAlertsWidget extends GetView<HomeController> {
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                         fontFamily: 'Poppins',
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 12,
                         color: AppColors.primaryText)),
                 Text(category,
                     style: const TextStyle(
                         fontFamily: 'Poppins',
-                        fontSize: 12,
+                        fontSize: 10,
                         color: AppColors.subText)),
               ],
             ),
@@ -163,7 +163,7 @@ class HomeLowStockAlertsWidget extends GetView<HomeController> {
                       fontFamily: 'Poppins',
                       color: AppColors.toastErrorGradientEnd,
                       fontWeight: FontWeight.w500,
-                      fontSize: 12)),
+                      fontSize: 10)),
             ],
           ),
         ],

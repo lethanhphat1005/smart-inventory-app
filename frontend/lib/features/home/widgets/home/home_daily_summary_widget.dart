@@ -29,7 +29,7 @@ class HomeDailySummaryWidget extends GetView<HomeController> {
                 TTexts.homeInventoryOverview.tr,
                 style: const TextStyle(
                   fontFamily: 'Poppins',
-                  fontSize: 16,
+                  fontSize: 14,
                   fontWeight: FontWeight.bold,
                   color: AppColors.primaryText,
                 ),
