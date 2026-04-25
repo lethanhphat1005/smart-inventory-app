@@ -48,7 +48,7 @@ class TEmptyStateWidget extends StatelessWidget {
               textAlign: TextAlign.center,
               style: const TextStyle(
                 fontFamily: 'Poppins',
-                fontSize: 18,
+                fontSize: 16,
                 fontWeight: FontWeight.w600,
                 color: AppColors.primaryText,
               ),
@@ -61,7 +61,7 @@ class TEmptyStateWidget extends StatelessWidget {
               textAlign: TextAlign.center,
               style: const TextStyle(
                 fontFamily: 'Poppins',
-                fontSize: 14,
+                fontSize: 12,
                 height: 1.5, // Giúp văn bản đa dòng thoáng hơn
                 color: AppColors.subText,
               ),

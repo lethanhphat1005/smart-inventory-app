@@ -30,13 +30,9 @@ class SearchMobileView extends GetView<TSearchController> {
 
                   // TÁCH LUỒNG RÕ RÀNG Ở ĐÂY
                   Expanded(
-                    child: Obx(() {
-                      if (controller.isTransactionSearch) {
-                        return const SearchTransactionHeaderWidget(); // Header cho Transaction
-                      } else {
-                        return const SearchInputFieldWidget(); // Thanh nhập liệu cho Product
-                      }
-                    }),
+                    child: controller.isTransactionSearch
+                        ? const SearchTransactionHeaderWidget()
+                        : const SearchInputFieldWidget(),
                   ),
                 ],
               ),

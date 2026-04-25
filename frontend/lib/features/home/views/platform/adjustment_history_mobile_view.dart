@@ -122,10 +122,9 @@ class AdjustmentHistoryMobileView extends GetView<AdjustmentHistoryController> {
                           ),
                           ...dailyLogs.map((log) => AdjustmentHistoryItemWidget(
                                 model: log,
-                                onTap: () =>
-                                    controller.openDetails(log),
+                                onTap: () => controller.openDetails(log),
                               )),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: AppSizes.bottomNavHeight),
                         ],
                       );
                     },

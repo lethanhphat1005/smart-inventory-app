@@ -35,38 +35,45 @@ class JoinStoreInputFieldWidget extends GetView<JoinStoreController> {
               ),
             ],
           ),
-          child: TextFormField(
-            controller: controller.inviteCodeController,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                letterSpacing: 4.0,
-                color: AppColors.primaryText),
-            decoration: InputDecoration(
-              hintText: TTexts.enterInviteCodeHint.tr,
-              hintStyle: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.normal,
-                  color: AppColors.softGrey.withOpacity(0.5),
-                  letterSpacing: 2.0),
-              counterText: "",
-              filled: true,
-              fillColor: Colors.transparent,
-              contentPadding:
-                  const EdgeInsets.symmetric(vertical: AppSizes.p24),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppSizes.radius16),
-                borderSide: BorderSide.none,
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppSizes.radius16),
-                borderSide: BorderSide.none,
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppSizes.radius16),
-                borderSide:
-                    const BorderSide(color: AppColors.primary, width: 2),
+          child: TextSelectionTheme(
+            data: TextSelectionThemeData(
+              cursorColor: AppColors.primary,
+              selectionColor: AppColors.primary.withOpacity(0.3),
+              selectionHandleColor: AppColors.primary,
+            ),
+            child: TextFormField(
+              controller: controller.inviteCodeController,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: 4.0,
+                  color: AppColors.primaryText),
+              decoration: InputDecoration(
+                hintText: TTexts.enterInviteCodeHint.tr,
+                hintStyle: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.normal,
+                    color: AppColors.softGrey.withOpacity(0.5),
+                    letterSpacing: 2.0),
+                counterText: "",
+                filled: true,
+                fillColor: Colors.transparent,
+                contentPadding:
+                    const EdgeInsets.symmetric(vertical: AppSizes.p24),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppSizes.radius16),
+                  borderSide: BorderSide.none,
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppSizes.radius16),
+                  borderSide: BorderSide.none,
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppSizes.radius16),
+                  borderSide:
+                      const BorderSide(color: AppColors.primary, width: 2),
+                ),
               ),
             ),
           ),

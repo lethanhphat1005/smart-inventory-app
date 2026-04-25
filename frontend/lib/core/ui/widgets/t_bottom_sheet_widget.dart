@@ -15,14 +15,14 @@ class TBottomSheetWidget extends StatelessWidget {
     this.padding,
   });
 
-  static void show({
+  static Future<dynamic> show({
     String? title,
     required Widget child,
     EdgeInsetsGeometry? padding,
     bool isScrollControlled = true,
     bool isDismissible = true,
   }) {
-    Get.bottomSheet(
+    return Get.bottomSheet(
       TBottomSheetWidget(
         title: title,
         padding: padding,

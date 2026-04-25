@@ -73,54 +73,61 @@ class TTextFormFieldWidget extends StatelessWidget {
           ),
         ),
         const SizedBox(height: AppSizes.p8),
-        TextFormField(
-          controller: controller,
-          obscureText: isObscure,
-          keyboardType: keyboardType,
-          onChanged: onChanged,
-          validator: validator,
-          maxLines: isObscure ? 1 : maxLines,
-          readOnly: readOnly,
-          cursorColor: AppColors.primary,
-          onFieldSubmitted: onFieldSubmitted,
-          style: TextStyle(
-            fontFamily: 'Poppins',
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-            color: readOnly ? AppColors.subText : AppColors.primaryText,
+        TextSelectionTheme(
+          data: TextSelectionThemeData(
+            cursorColor: AppColors.primary,
+            selectionColor: AppColors.primary.withOpacity(0.3),
+            selectionHandleColor: AppColors.primary,
           ),
-          decoration: InputDecoration(
-            hintText: hintText,
-            hintStyle: const TextStyle(
-              color: AppColors.softGrey,
-              fontWeight: FontWeight.w400,
+          child: TextFormField(
+            controller: controller,
+            obscureText: isObscure,
+            keyboardType: keyboardType,
+            onChanged: onChanged,
+            validator: validator,
+            maxLines: isObscure ? 1 : maxLines,
+            readOnly: readOnly,
+            cursorColor: AppColors.primary,
+            onFieldSubmitted: onFieldSubmitted,
+            style: TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: readOnly ? AppColors.subText : AppColors.primaryText,
             ),
-            filled: readOnly,
-            fillColor: Colors.grey.withOpacity(0.05),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: AppSizes.p16,
-              vertical: AppSizes.p16,
+            decoration: InputDecoration(
+              hintText: hintText,
+              hintStyle: const TextStyle(
+                color: AppColors.softGrey,
+                fontWeight: FontWeight.w400,
+              ),
+              filled: readOnly,
+              fillColor: Colors.grey.withOpacity(0.05),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: AppSizes.p16,
+                vertical: AppSizes.p16,
+              ),
+              enabledBorder: borderStyle,
+              focusedBorder: readOnly
+                  ? borderStyle
+                  : OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppSizes.radius8),
+                      borderSide: const BorderSide(color: AppColors.primary),
+                    ),
+              errorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppSizes.radius8),
+                borderSide: const BorderSide(color: AppColors.toastErrorBg),
+              ),
+              focusedErrorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppSizes.radius8),
+                borderSide:
+                    const BorderSide(color: AppColors.toastErrorBg, width: 1.5),
+              ),
+              prefixIcon: prefixIcon != null
+                  ? Icon(prefixIcon, color: AppColors.softGrey, size: 20)
+                  : null,
+              suffixIcon: suffixIcon ?? _buildClearButton(),
             ),
-            enabledBorder: borderStyle,
-            focusedBorder: readOnly
-                ? borderStyle
-                : OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppSizes.radius8),
-                    borderSide: const BorderSide(color: AppColors.primary),
-                  ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppSizes.radius8),
-              borderSide: const BorderSide(color: AppColors.toastErrorBg),
-            ),
-            focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppSizes.radius8),
-              borderSide:
-                  const BorderSide(color: AppColors.toastErrorBg, width: 1.5),
-            ),
-            prefixIcon: prefixIcon != null
-                ? Icon(prefixIcon, color: AppColors.softGrey, size: 20)
-                : null,
-            suffixIcon: suffixIcon ?? _buildClearButton(),
           ),
         ),
       ],

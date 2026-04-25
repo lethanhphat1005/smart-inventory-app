@@ -207,6 +207,7 @@ class _TBarcodeScannerLayoutState extends State<TBarcodeScannerLayout>
     const double borderRadius = 40.0;
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: Colors.black,
       body: Stack(
         children: [
