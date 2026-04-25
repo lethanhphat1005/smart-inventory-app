@@ -34,8 +34,7 @@ class InventoryFlowChartWidget extends GetView<InventoryController> {
                   style: const TextStyle(
                       fontFamily: 'Poppins',
                       fontWeight: FontWeight.bold,
-                      fontSize: 16)),
-              // Nút Detail được tạm ẩn theo yêu cầu
+                      fontSize: 14)),
             ],
           ),
           const SizedBox(height: 4),
@@ -117,7 +116,7 @@ class InventoryFlowChartWidget extends GetView<InventoryController> {
               getTooltipItem: (group, groupIndex, rod, rodIndex) {
                 final inVal = currentInbound[groupIndex].toInt();
                 final outVal = currentOutbound[groupIndex].toInt();
-                
+
                 return BarTooltipItem(
                   '${TTexts.chartTooltipIn.tr}: $inVal\n${TTexts.chartTooltipOut.tr}: $outVal',
                   const TextStyle(

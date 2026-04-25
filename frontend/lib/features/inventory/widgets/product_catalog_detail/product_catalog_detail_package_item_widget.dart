@@ -82,7 +82,7 @@ class ProductCatalogDetailPackageItemWidget
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
                     fontFamily: 'Poppins',
-                    fontSize: 15,
+                    fontSize: 14,
                     fontWeight: FontWeight.bold,
                     color: AppColors.primaryText),
               ),
@@ -96,9 +96,8 @@ class ProductCatalogDetailPackageItemWidget
                   onTap: hasMultipleBarcodes
                       ? () {
                           TBottomSheetWidget.show(
-                            child:
-                                InventoryBarcodeListBottomSheetWidget(
-                                    package: package),
+                            child: InventoryBarcodeListBottomSheetWidget(
+                                package: package),
                           );
                         }
                       : null,

@@ -24,7 +24,7 @@ class HomeQuickActionsWidget extends StatelessWidget {
           TTexts.homeQuickActions.tr,
           style: const TextStyle(
             fontFamily: 'Poppins',
-            fontSize: 20,
+            fontSize: 16,
             fontWeight: FontWeight.bold,
             color: AppColors.primaryText,
           ),

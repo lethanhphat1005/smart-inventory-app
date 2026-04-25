@@ -127,6 +127,9 @@ class _GlassmorphismDropdownMenuState extends State<_GlassmorphismDropdownMenu>
   Widget _buildGlassmorphismCard() {
     final controller = Get.find<CategoryDetailController>();
 
+    // LẤY TRẠNG THÁI DEFAULT CỦA CATEGORY
+    final isDefault = controller.rxCategory.value.isDefault;
+
     return ClipRRect(
       borderRadius: BorderRadius.circular(AppSizes.radius20),
       child: BackdropFilter(
@@ -149,29 +152,43 @@ class _GlassmorphismDropdownMenuState extends State<_GlassmorphismDropdownMenu>
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Nút sửa Category
-              _buildMenuItem(
-                icon: Iconsax.edit_2_copy,
-                text: TTexts.editCategory.tr,
-                onTap: () {
-                  _closeMenu();
-                  controller.editCategory();
-                },
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: Divider(height: 1, color: Colors.white.withOpacity(0.2)),
-              ),
-              // Nút xoá Category
-              _buildMenuItem(
-                icon: Iconsax.trash_copy,
-                text: TTexts.deleteCategory.tr,
-                color: AppColors.alertText,
-                onTap: () {
-                  _closeMenu();
-                  controller.deleteCategory();
-                },
-              ),
+              // CHỈ HIỆN NÚT "SỬA" NẾU KHÔNG PHẢI DANH MỤC MẶC ĐỊNH
+              if (!isDefault) ...[
+                _buildMenuItem(
+                  icon: Iconsax.edit_2_copy,
+                  text: TTexts.editCategory.tr,
+                  onTap: () {
+                    _closeMenu();
+                    controller.editCategory();
+                  },
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child:
+                      Divider(height: 1, color: Colors.white.withOpacity(0.2)),
+                ),
+              ],
+
+              // NẾU LÀ DEFAULT -> HIỆN NÚT ẨN, NẾU CUSTOM -> HIỆN NÚT XÓA
+              if (isDefault)
+                _buildMenuItem(
+                  icon: Iconsax.eye_slash_copy,
+                  text: TTexts.hideCategory.tr,
+                  onTap: () {
+                    _closeMenu();
+                    controller.hideCategory();
+                  },
+                )
+              else
+                _buildMenuItem(
+                  icon: Iconsax.trash_copy,
+                  text: TTexts.deleteCategory.tr,
+                  color: AppColors.alertText,
+                  onTap: () {
+                    _closeMenu();
+                    controller.deleteCategory();
+                  },
+                ),
             ],
           ),
         ),
@@ -200,7 +217,7 @@ class _GlassmorphismDropdownMenuState extends State<_GlassmorphismDropdownMenu>
               text,
               style: TextStyle(
                 color: color ?? AppColors.primaryText,
-                fontSize: 14,
+                fontSize: 12,
                 fontWeight: FontWeight.w600,
               ),
             ),

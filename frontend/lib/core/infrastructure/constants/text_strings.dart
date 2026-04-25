@@ -447,6 +447,12 @@ class TTexts {
   static const String seeAllCategories = "see_all_categories";
   static const String initialQuantityLabel = "initial_quantity_label";
   static const String initialQuantityHint = "initial_quantity_hint";
+  static const String hideCategory = 'hide_category';
+  static const String hideCategoryTitle = 'hide_category_title';
+  static const String hideCategoryConfirm = 'hide_category_confirm';
+  static const String hide = 'hide';
+  static const String hideCategorySuccessMessage = 'hide_category_success_message';
+  static const String addNewProductDesc = "add_new_product_desc";
 
   // -- Chatbot AI
   static const String chatbotName = "chatbot_name";

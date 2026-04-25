@@ -46,7 +46,7 @@ class TAnimationLoaderWidget extends StatelessWidget {
               text,
               style: const TextStyle(
                 fontFamily: 'Poppins',
-                fontSize: 14,
+                fontSize: 12,
                 fontWeight: FontWeight.w500,
                 color: AppColors.primaryText,
                 decoration: TextDecoration.none,

@@ -125,7 +125,7 @@ class _DetailContent extends StatelessWidget {
                 child: Text(
                   TTexts.inventoryStatus.tr,
                   style: const TextStyle(
-                    fontSize: 16,
+                    fontSize: 14,
                     fontWeight: FontWeight.bold,
                     color: AppColors.primaryText,
                   ),
@@ -172,7 +172,7 @@ class _DetailContent extends StatelessWidget {
       child: Text(
         title,
         style: const TextStyle(
-          fontSize: 16,
+          fontSize: 14,
           fontWeight: FontWeight.bold,
           color: AppColors.primaryText,
         ),

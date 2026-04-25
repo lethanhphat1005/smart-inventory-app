@@ -63,8 +63,8 @@ class InventoryCategoryDetailProductItemWidget extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                             fontFamily: 'Poppins',
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
                             color: AppColors.primaryText),
                       ),
                       const SizedBox(height: 4),
@@ -72,7 +72,7 @@ class InventoryCategoryDetailProductItemWidget extends StatelessWidget {
                         'Brand: ${product.brand ?? "N/A"}',
                         style: const TextStyle(
                             fontFamily: 'Poppins',
-                            fontSize: 12,
+                            fontSize: 10,
                             color: AppColors.subText),
                       ),
                     ],

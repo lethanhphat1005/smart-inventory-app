@@ -37,7 +37,7 @@ class HomeAdjustmentStatsWidget extends GetView<HomeController> {
                     TTexts.recentAdjustments.tr,
                     style: const TextStyle(
                         fontFamily: 'Poppins',
-                        fontSize: 16,
+                        fontSize: 14,
                         fontWeight: FontWeight.bold,
                         color: AppColors.primaryText),
                   ),
@@ -100,23 +100,24 @@ class HomeAdjustmentStatsWidget extends GetView<HomeController> {
                                       overflow: TextOverflow.ellipsis,
                                       style: const TextStyle(
                                           fontFamily: 'Poppins',
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w600,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w500,
                                           color: AppColors.primaryText),
                                     ),
                                     const SizedBox(height: 4),
                                     Row(
                                       children: [
                                         const Icon(Icons.access_time_rounded,
-                                            size: 14,
+                                            size: 13,
                                             color: AppColors.softGrey),
                                         const SizedBox(width: 4),
                                         Text(
                                           timeStr,
                                           style: const TextStyle(
                                               fontFamily: 'Poppins',
-                                              fontSize: 13,
-                                              color: AppColors.softGrey),
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.w400,
+                                              color: AppColors.subText),
                                         ),
                                         const SizedBox(width: 12),
                                         // Hiển thị Qty: 23 -> 21
@@ -124,8 +125,8 @@ class HomeAdjustmentStatsWidget extends GetView<HomeController> {
                                             "${TTexts.qty.tr}: ${item.oldQuantity} → ${item.newQuantity}",
                                             style: const TextStyle(
                                                 fontFamily: 'Poppins',
-                                                fontSize: 13,
-                                                fontWeight: FontWeight.w500,
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.w400,
                                                 color: AppColors.subText)),
                                       ],
                                     ),
@@ -138,7 +139,7 @@ class HomeAdjustmentStatsWidget extends GetView<HomeController> {
                                 diffStr,
                                 style: TextStyle(
                                   fontFamily: 'Poppins',
-                                  fontSize: 16,
+                                  fontSize: 12,
                                   fontWeight: FontWeight.w500,
                                   color: item.isPositive
                                       ? AppColors.stockIn

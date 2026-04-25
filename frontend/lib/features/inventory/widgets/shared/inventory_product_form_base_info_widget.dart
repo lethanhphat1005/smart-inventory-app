@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
-import 'package:frontend/core/ui/theme/app_colors.dart';
+// import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/core/ui/widgets/t_text_form_field_widget.dart';
 import 'package:frontend/features/inventory/controllers/product_form_controller.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
@@ -22,19 +22,20 @@ class InventoryProductFormBaseInfoWidget
           // Ô CHỌN DANH MỤC
           GestureDetector(
             onTap: () {
-              if (!controller.isCategoryLocked) {
-                controller.openCategoryPicker();
-              }
+              // if (!controller.isCategoryLocked) {
+              controller.openCategoryPicker();
+              // }
             },
             child: AbsorbPointer(
               child: Obx(() => TTextFormFieldWidget(
                     label: TTexts.selectCategory.tr,
                     hintText: controller.selectedCategory.value?.name ??
                         TTexts.tapToSelect.tr,
-                    suffixIcon: controller.isCategoryLocked
-                        ? const Icon(Iconsax.lock_1_copy,
-                            size: 18, color: AppColors.softGrey)
-                        : const Icon(Iconsax.arrow_down_1_copy, size: 20),
+                    suffixIcon: const Icon(Iconsax.arrow_down_1_copy, size: 20),
+                    // suffixIcon: controller.isCategoryLocked
+                    //     ? const Icon(Iconsax.lock_1_copy,
+                    //         size: 18, color: AppColors.softGrey)
+                    //     : const Icon(Iconsax.arrow_down_1_copy, size: 20),
                     controller: TextEditingController(
                         text: controller.selectedCategory.value?.name ?? ''),
                   )),

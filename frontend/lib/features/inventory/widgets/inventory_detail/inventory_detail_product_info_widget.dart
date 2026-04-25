@@ -26,9 +26,9 @@ class InventoryDetailProductInfoWidget
             const SizedBox(height: AppSizes.p8),
             Text("${TTexts.barcodeLabel.tr}: ${controller.barcode}",
                 style: const TextStyle(
-                    fontSize: 14,
+                    fontSize: 12,
                     color: AppColors.subText,
-                    fontWeight: FontWeight.w500)),
+                    fontWeight: FontWeight.w400)),
             const SizedBox(height: AppSizes.p12),
             Wrap(
               spacing: 8,

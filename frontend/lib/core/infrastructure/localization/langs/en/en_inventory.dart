@@ -15,6 +15,12 @@ final Map<String, String> enInventory = {
   TTexts.chartTooltipOut: 'Out',
   TTexts.initialQuantityLabel: "Initial Quantity",
   TTexts.initialQuantityHint: "0",
+  TTexts.hideCategory: 'Hide Category',
+  TTexts.hideCategoryTitle: 'Hide Category',
+  TTexts.hideCategoryConfirm: 'Are you sure you want to hide this default category? It will no longer appear in your store.',
+  TTexts.hide: 'Hide',
+  TTexts.hideCategorySuccessMessage: 'Category hidden successfully.',
+  TTexts.addNewProductDesc: 'Add a new product item to this category.',
 
   // -- Inventory Header & Health
   TTexts.stockValue: 'Stock Value',

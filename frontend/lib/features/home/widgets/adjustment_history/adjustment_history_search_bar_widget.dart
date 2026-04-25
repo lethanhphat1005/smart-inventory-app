@@ -68,7 +68,7 @@ class AdjustmentHistorySearchBarWidget extends StatelessWidget {
             left: 0,
             top: 0,
             bottom: 0,
-            right: 60, 
+            right: 60,
             child: Container(
               decoration: BoxDecoration(
                 color: AppColors.background,
@@ -87,12 +87,12 @@ class AdjustmentHistorySearchBarWidget extends StatelessWidget {
                       onChanged: onChanged,
                       style: const TextStyle(
                           color: AppColors.primaryText,
-                          fontSize: 14,
+                          fontSize: 12,
                           fontFamily: 'Poppins'),
                       decoration: InputDecoration(
                         hintText: hintText,
                         hintStyle: const TextStyle(
-                            color: AppColors.softGrey, fontSize: 14),
+                            color: AppColors.softGrey, fontSize: 12),
                         border: InputBorder.none,
                         enabledBorder: InputBorder.none,
                         focusedBorder: InputBorder.none,

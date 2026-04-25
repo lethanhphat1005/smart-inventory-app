@@ -89,8 +89,8 @@ class LowStockItemWidget extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       fontFamily: 'Poppins',
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
                       color: AppColors.primaryText,
                     ),
                   ),
@@ -100,13 +100,13 @@ class LowStockItemWidget extends StatelessWidget {
                       Text(
                         TTexts.stockLeft.tr,
                         style: const TextStyle(
-                            fontSize: 13, color: AppColors.subText),
+                            fontSize: 12, color: AppColors.subText),
                       ),
                       Text(
                         "$qty",
                         style: TextStyle(
                           fontFamily: 'Poppins',
-                          fontSize: 14,
+                          fontSize: 12,
                           fontWeight: FontWeight.bold,
                           color: statusColor,
                         ),

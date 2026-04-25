@@ -85,7 +85,7 @@ class TSearchBarWidget extends StatelessWidget {
                       child: Text(
                         hintText,
                         style: const TextStyle(
-                            color: AppColors.softGrey, fontSize: 14),
+                            color: AppColors.softGrey, fontSize: 12),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),

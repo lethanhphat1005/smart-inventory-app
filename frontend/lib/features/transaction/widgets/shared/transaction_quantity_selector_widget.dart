@@ -58,40 +58,47 @@ class TransactionQuantitySelectorWidget extends StatelessWidget {
                     borderRadius: BorderRadius.circular(AppSizes.radius8),
                     color: Colors.white,
                   ),
-                  child: TextFormField(
-                    controller: controller,
-                    keyboardType: TextInputType.number,
-                    textAlign: TextAlign.center,
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    onChanged: (value) {
-                      if (value.isEmpty) return;
-
-                      final qty = int.tryParse(value);
-                      if (qty == null || qty < 1) {
-                        controller.text = '1';
-                        controller.selection = TextSelection.fromPosition(
-                            const TextPosition(offset: 1));
-                        return;
-                      }
-
-                      if (maxQuantity != null && qty > maxQuantity!) {
-                        controller.text = maxQuantity.toString();
-                        controller.selection = TextSelection.fromPosition(
-                            TextPosition(offset: controller.text.length));
-                      }
-                    },
-                    style: const TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.primaryText,
+                  child: TextSelectionTheme(
+                    data: TextSelectionThemeData(
+                      cursorColor: AppColors.primary,
+                      selectionColor: AppColors.primary.withOpacity(0.3),
+                      selectionHandleColor: AppColors.primary,
                     ),
-                    decoration: const InputDecoration(
-                      isDense: true,
-                      contentPadding: EdgeInsets.symmetric(vertical: 8),
-                      border: InputBorder.none,
-                      enabledBorder: InputBorder.none,
-                      focusedBorder: InputBorder.none,
+                    child: TextFormField(
+                      controller: controller,
+                      keyboardType: TextInputType.number,
+                      textAlign: TextAlign.center,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      onChanged: (value) {
+                        if (value.isEmpty) return;
+
+                        final qty = int.tryParse(value);
+                        if (qty == null || qty < 1) {
+                          controller.text = '1';
+                          controller.selection = TextSelection.fromPosition(
+                              const TextPosition(offset: 1));
+                          return;
+                        }
+
+                        if (maxQuantity != null && qty > maxQuantity!) {
+                          controller.text = maxQuantity.toString();
+                          controller.selection = TextSelection.fromPosition(
+                              TextPosition(offset: controller.text.length));
+                        }
+                      },
+                      style: const TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.primaryText,
+                      ),
+                      decoration: const InputDecoration(
+                        isDense: true,
+                        contentPadding: EdgeInsets.symmetric(vertical: 8),
+                        border: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                      ),
                     ),
                   ),
                 ),

@@ -8,7 +8,7 @@ import 'package:frontend/core/ui/widgets/t_refresh_indicator_widget.dart';
 import 'package:frontend/features/home/controllers/low_stock_controller.dart';
 import 'package:frontend/features/home/widgets/low_stock/low_stock_item_widget.dart';
 import 'package:frontend/features/home/widgets/low_stock/low_stock_overview_widget.dart';
-import 'package:frontend/features/home/widgets/low_stock/low_stock_shimmer_widget.dart'; // ĐÃ THÊM IMPORT SHIMMER
+import 'package:frontend/features/home/widgets/low_stock/low_stock_shimmer_widget.dart';
 import 'package:frontend/routes/app_routes.dart';
 import 'package:get/get.dart';
 
@@ -42,9 +42,7 @@ class LowStockMobileView extends GetView<LowStockController> {
           // 1. LUÔN HIỂN THỊ THẺ OVERVIEW VỚI TRẠNG THÁI CHỌN
           flattenedList.add({
             'type': 'HEADER_CARDS',
-            'outCount': outOfStockData.length,
-            'lowCount': lowStockData.length,
-            'filter': controller.activeFilter.value
+            'filter': controller.activeFilter.value,
           });
 
           // 2. LOGIC LỌC DANH SÁCH THEO STATE
@@ -88,8 +86,6 @@ class LowStockMobileView extends GetView<LowStockController> {
 
                 if (item is Map && item['type'] == 'HEADER_CARDS') {
                   return LowStockOverviewWidget(
-                    outCount: item['outCount'],
-                    lowCount: item['lowCount'],
                     activeFilter: item['filter'],
                     onToggle: (f) => controller.toggleFilter(f),
                   );

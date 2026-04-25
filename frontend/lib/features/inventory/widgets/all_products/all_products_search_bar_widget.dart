@@ -29,10 +29,10 @@ class AllProductsSearchBarWidget extends GetView<AllProductsController> {
         onChanged: (value) => controller.searchQuery.value = value,
         cursorColor: AppColors.primary,
         style: const TextStyle(
-            fontFamily: 'Poppins', fontSize: 14, color: AppColors.primaryText),
+            fontFamily: 'Poppins', fontSize: 12, color: AppColors.primaryText),
         decoration: InputDecoration(
           hintText: TTexts.searchItemsPackages.tr,
-          hintStyle: const TextStyle(color: AppColors.subText, fontSize: 14),
+          hintStyle: const TextStyle(color: AppColors.subText, fontSize: 12),
           prefixIcon: const Icon(Iconsax.search_normal_1_copy,
               color: AppColors.softGrey, size: 20),
           border: InputBorder.none,

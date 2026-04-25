@@ -17,15 +17,34 @@ class InventoryDetailRelatedPackagesWidget
 
       if (related.isEmpty) {
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSizes.p20),
-          child: Text(TTexts.noRelatedPackages.tr,
-              style: const TextStyle(
-                  color: AppColors.subText,
-                  fontSize: 13,
-                  fontStyle: FontStyle.italic)),
+          padding: const EdgeInsets.symmetric(
+              vertical: 32.0, horizontal: AppSizes.p20),
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Iconsax.box_search_copy,
+                  color: AppColors.subText.withOpacity(0.5),
+                  size: 30,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  TTexts.noRelatedPackages.tr,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontFamily: 'Poppins',
+                    color: AppColors.subText,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              ],
+            ),
+          ),
         );
       }
-
       return ListView.separated(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
@@ -71,14 +90,14 @@ class InventoryDetailRelatedPackagesWidget
               ),
               title: Text(name,
                   style: const TextStyle(
-                      fontSize: 14, fontWeight: FontWeight.w600)),
+                      fontSize: 12, fontWeight: FontWeight.w500)),
               subtitle: Text.rich(
                 TextSpan(
                   children: [
                     TextSpan(
                       text: "${TTexts.barcodeLabel.tr}: $barcode",
                       style: const TextStyle(
-                          color: AppColors.subText, fontSize: 12),
+                          color: AppColors.subText, fontSize: 10),
                     ),
                     if (hasMultipleBarcodes)
                       TextSpan(
@@ -98,7 +117,7 @@ class InventoryDetailRelatedPackagesWidget
               ),
               trailing: Text("$stock ${TTexts.left.tr}",
                   style: const TextStyle(
-                      fontSize: 14, fontWeight: FontWeight.bold)),
+                      fontSize: 12, fontWeight: FontWeight.w500)),
             ),
           );
         },

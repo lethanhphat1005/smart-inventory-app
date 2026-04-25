@@ -97,7 +97,7 @@ class SearchResultsListWidget extends GetView<TSearchController> {
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
             child: Text(
-              '$listLength ${TTexts.resultsFound.tr}',
+              '${(controller.isTransactionSearch && controller.hasMore.value) ? '$listLength+' : listLength} ${TTexts.resultsFound.tr}',
               style: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,

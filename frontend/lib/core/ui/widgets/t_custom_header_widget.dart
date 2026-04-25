@@ -53,7 +53,7 @@ class TCustomHeaderWidget extends StatelessWidget {
             title,
             style: TextStyle(
               fontFamily: 'Poppins',
-              fontSize: 18,
+              fontSize: 16,
               fontWeight: FontWeight.w600,
               color: textColor,
             ),

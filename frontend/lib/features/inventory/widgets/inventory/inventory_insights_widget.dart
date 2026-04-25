@@ -32,7 +32,7 @@ class InventoryInsightsWidget extends StatelessWidget {
                   style: const TextStyle(
                       fontFamily: 'Poppins',
                       fontWeight: FontWeight.bold,
-                      fontSize: 16)),
+                      fontSize: 14)),
               InkWell(
                 onTap: () => Get.toNamed(AppRoutes.inventorySight),
                 child: Row(
@@ -40,10 +40,10 @@ class InventoryInsightsWidget extends StatelessWidget {
                     Text(TTexts.details.tr,
                         style: const TextStyle(
                             color: AppColors.primary,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600)),
+                            fontSize: 10,
+                            fontWeight: FontWeight.w500)),
                     const Icon(Icons.chevron_right_rounded,
-                        color: AppColors.primary, size: 18),
+                        color: AppColors.primary, size: 14),
                   ],
                 ),
               )

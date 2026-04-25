@@ -16,7 +16,6 @@ class InventoryDistributionWidget extends GetView<InventoryController> {
         return Center(
             child: Padding(
                 padding: const EdgeInsets.all(20),
-                // SỬA Ở ĐÂY
                 child: Text(TTexts.noDataAvailable.tr,
                     style: const TextStyle(color: AppColors.softGrey))));
       }
@@ -26,9 +25,9 @@ class InventoryDistributionWidget extends GetView<InventoryController> {
         children: [
           Text(TTexts.topCategoriesByVolume.tr,
               style: const TextStyle(
-                  fontSize: 13,
+                  fontSize: 12,
                   color: AppColors.subText,
-                  fontWeight: FontWeight.w600)),
+                  fontWeight: FontWeight.w500)),
           const SizedBox(height: 16),
           ...distributionData.map((item) {
             final double percentage = item.max > 0 ? item.value / item.max : 0;
@@ -39,10 +38,10 @@ class InventoryDistributionWidget extends GetView<InventoryController> {
               child: Row(
                 children: [
                   SizedBox(
-                      width: 75,
+                      width: 80,
                       child: Text(item.name,
                           style: const TextStyle(
-                              fontSize: 13, fontWeight: FontWeight.w500),
+                              fontSize: 12, fontWeight: FontWeight.w500),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis)),
                   const SizedBox(width: 8),
@@ -78,7 +77,7 @@ class InventoryDistributionWidget extends GetView<InventoryController> {
                   ),
                   const SizedBox(width: 12),
                   SizedBox(
-                      width: 40,
+                      width: 30,
                       child: Text("${item.value}",
                           style: const TextStyle(
                               fontSize: 12,

@@ -60,21 +60,22 @@ class AdjustmentHistoryItemWidget extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                         fontFamily: 'Poppins',
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
                         color: AppColors.primaryText),
                   ),
                   const SizedBox(height: 4),
                   Row(
                     children: [
                       const Icon(Icons.access_time_rounded,
-                          size: 14, color: AppColors.softGrey),
+                          size: 12, color: AppColors.softGrey),
                       const SizedBox(width: 4),
                       Text(timeStr,
                           style: const TextStyle(
                               fontFamily: 'Poppins',
-                              fontSize: 13,
-                              color: AppColors.softGrey)),
+                              fontSize: 10,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.subText)),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
@@ -83,7 +84,7 @@ class AdjustmentHistoryItemWidget extends StatelessWidget {
                             "${TTexts.qty.tr}: ${model.oldQuantity} → ${model.newQuantity}",
                             style: const TextStyle(
                                 fontFamily: 'Poppins',
-                                fontSize: 13,
+                                fontSize: 10,
                                 fontWeight: FontWeight.w500,
                                 color: AppColors.subText)),
                       ),
@@ -97,7 +98,7 @@ class AdjustmentHistoryItemWidget extends StatelessWidget {
               diffStr,
               style: TextStyle(
                 fontFamily: 'Poppins',
-                fontSize: 16,
+                fontSize: 12,
                 fontWeight: FontWeight.w500,
                 color:
                     model.isPositive ? AppColors.stockIn : AppColors.stockOut,

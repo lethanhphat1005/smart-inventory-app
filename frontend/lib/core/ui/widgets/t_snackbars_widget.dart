@@ -80,7 +80,7 @@ class TSnackbarsWidget {
                   title,
                   style: const TextStyle(
                     fontFamily: 'Poppins',
-                    fontSize: 14,
+                    fontSize: 12,
                     fontWeight: FontWeight.w700,
                     color: AppColors.primaryText,
                     height: 1.2,
@@ -93,7 +93,7 @@ class TSnackbarsWidget {
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontFamily: 'Poppins',
-                    fontSize: 12,
+                    fontSize: 10,
                     fontWeight: FontWeight.w400,
                     color: AppColors.subText,
                     height: 1.4,

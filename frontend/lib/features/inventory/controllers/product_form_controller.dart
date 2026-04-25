@@ -975,7 +975,7 @@ class ProductFormController extends GetxController with TErrorHandler {
   }
 
   void openCategoryPicker() {
-    if (isCategoryLocked) return;
+    // if (isCategoryLocked) return;
 
     TBottomSheetWidget.show(
       title: TTexts.selectCategory.tr,

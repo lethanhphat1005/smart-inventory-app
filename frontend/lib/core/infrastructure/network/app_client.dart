@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/app_constants.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/ui/widgets/t_snackbars_widget.dart';
@@ -50,27 +49,36 @@ class ApiClient {
         onError: (DioException e, handler) async {
           final statusCode = e.response?.statusCode;
 
+          // Xử lý lỗi xác thực (401) hoặc quyền truy cập (403)
           if (statusCode == 401 || statusCode == 403) {
-            debugPrint('🚨 Token lỗi hoặc bị từ chối quyền. Ép đăng xuất...');
-
-            // 1. Clear session của Supabase
-            // Gọi xóa token ở server TRƯỚC KHI Supabase sign out
-
+            // 1. Thực hiện dọn dẹp session ngầm
             await supabase.auth.signOut();
+
             // Đăng xuất Google để lần sau hiện lại popup chọn tài khoản
             await GoogleSignIn.instance.signOut();
-
-            // 2. Xoá StoreID hoặc data local
             GetStorage().remove('STORE_ID');
 
-            // 3. Điều hướng về màn Login
-            Get.offAllNamed(AppRoutes.login);
-            TSnackbarsWidget.warning(
-                title: TTexts.systemSnackbarTitle.tr,
-                message: TTexts.systemSnackbarTitle.tr);
+            // 2. Kiểm tra xem user có đang ở màn hình "Công khai" hay không
+            // Chúng ta không muốn hiện thông báo lỗi login khi họ còn chưa kịp login (như lúc đang xem Onboarding)
+            final currentRoute = Get.currentRoute;
+            final isPublicRoute = currentRoute == AppRoutes.login ||
+                currentRoute == AppRoutes.onboarding ||
+                currentRoute == AppRoutes.splash;
+
+            if (!isPublicRoute) {
+              // Chỉ chuyển hướng và hiện thông báo nếu họ đang ở TRONG app mà bị mất quyền
+              Get.offAllNamed(AppRoutes.login);
+
+              TSnackbarsWidget.warning(
+                  title:
+                      TTexts.systemSnackbarTitle.tr, // Kết quả: "System Notice"
+                  message: TTexts.systemSnackbar403Error
+                      .tr // Kết quả: "Your session has expired..."
+                  );
+            }
           }
 
-          // Trả lỗi về cho UI xử lý tiếp (nếu cần show snackbar báo lỗi)
+          // Trả lỗi về để các controller khác có thể bắt nếu cần
           return handler.next(e);
         },
       ),

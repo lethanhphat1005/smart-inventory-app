@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/core/infrastructure/constants/text_strings.dart'; // ĐÃ IMPORT TTEXTS
+import 'package:frontend/core/infrastructure/constants/text_strings.dart'; 
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
-import 'package:get/get.dart'; // ĐÃ IMPORT GET ĐỂ DÙNG .tr
+import 'package:get/get.dart'; 
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 
 class ProductCatalogAddCategoryWidget extends StatelessWidget {
@@ -65,7 +65,7 @@ class ProductCatalogAddCategoryWidget extends StatelessWidget {
                         TTexts.addNewCategory.tr,
                         style: const TextStyle(
                           fontFamily: 'Poppins',
-                          fontSize: 14,
+                          fontSize: 12,
                           fontWeight: FontWeight.bold,
                           color: AppColors.primaryText,
                         ),
@@ -77,7 +77,7 @@ class ProductCatalogAddCategoryWidget extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           fontFamily: 'Poppins',
-                          fontSize: 11,
+                          fontSize: 10,
                           height: 1.3,
                           color: AppColors.subText,
                         ),

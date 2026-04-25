@@ -478,14 +478,14 @@ class HomeController extends GetxController with TErrorHandler {
               onPressed: () => Get.back(),
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                side: BorderSide(color: AppColors.softGrey.withOpacity(0.3)),
+                side: BorderSide(color: AppColors.primary.withOpacity(0.3)),
+                backgroundColor: AppColors.primary,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12)),
               ),
               child: Text(TTexts.goBack.tr,
                   style: const TextStyle(
-                      color: AppColors.primaryText,
-                      fontWeight: FontWeight.w600)),
+                      color: AppColors.white, fontWeight: FontWeight.w600)),
             ),
           ),
           const SizedBox(height: 16),

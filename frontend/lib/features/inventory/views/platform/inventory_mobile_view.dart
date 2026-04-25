@@ -82,7 +82,7 @@ class InventoryMobileView extends GetView<InventoryController> {
                               TTexts.productCatalog.tr,
                               style: const TextStyle(
                                   fontFamily: 'Poppins',
-                                  fontSize: 18,
+                                  fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                   color: AppColors.primaryText),
                             ),

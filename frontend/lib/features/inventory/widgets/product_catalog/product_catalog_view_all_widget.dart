@@ -65,7 +65,7 @@ class ProductCatalogViewAllWidget extends StatelessWidget {
                         TTexts.viewAllProducts.tr,
                         style: const TextStyle(
                           fontFamily: 'Poppins',
-                          fontSize: 14,
+                          fontSize: 12,
                           fontWeight: FontWeight.bold,
                           color: AppColors.highlightAction,
                         ),
@@ -77,7 +77,7 @@ class ProductCatalogViewAllWidget extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           fontFamily: 'Poppins',
-                          fontSize: 11,
+                          fontSize: 10,
                           height: 1.3,
                           color: AppColors.subText,
                         ),

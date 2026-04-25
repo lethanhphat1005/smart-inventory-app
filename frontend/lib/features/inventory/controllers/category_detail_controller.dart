@@ -87,6 +87,53 @@ class CategoryDetailController extends GetxController with TErrorHandler {
     }
   }
 
+  // ==========================================
+  // ẨN DEFAULT CATEGORY
+  // ==========================================
+  Future<void> hideCategory() async {
+    Get.dialog(
+      TCustomDialogWidget(
+        title: TTexts.hideCategoryTitle.tr,
+        description: TTexts.hideCategoryConfirm.tr,
+        icon: const Text('👁️‍🗨️', style: TextStyle(fontSize: 40)),
+        primaryButtonText: TTexts.hide.tr,
+        secondaryButtonText: TTexts.cancel.tr,
+        onSecondaryPressed: () => Get.back(),
+        onPrimaryPressed: () async {
+          Get.back();
+          try {
+            FullScreenLoaderUtils.openLoadingDialog(TTexts.loading.tr);
+
+            // Gọi API ẩn category từ provider
+            await _provider.hideDefaultCategory(rxCategory.value.categoryId);
+
+            FullScreenLoaderUtils.stopLoading();
+
+            // Refresh lại danh sách Catalog
+            if (Get.isRegistered<ProductCatalogController>()) {
+              Get.find<ProductCatalogController>().fetchCategories();
+            }
+
+            if (Get.isRegistered<InventoryController>()) {
+              Get.find<InventoryController>().fetchDashboardData();
+            }
+
+            // Văng người dùng về trang Product Catalog
+            Get.back();
+
+            TSnackbarsWidget.success(
+                title: TTexts.successTitle.tr,
+                message: TTexts.hideCategorySuccessMessage.tr);
+          } catch (e) {
+            FullScreenLoaderUtils.stopLoading();
+            handleError(e);
+          }
+        },
+      ),
+      barrierDismissible: true,
+    );
+  }
+
   void goToProductDetail(ProductModel product) {
     try {
       Get.toNamed(AppRoutes.productCatalogDetail, arguments: product)

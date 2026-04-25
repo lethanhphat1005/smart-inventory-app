@@ -8,6 +8,7 @@ import 'package:frontend/core/infrastructure/utils/full_screen_loader_utils.dart
 import 'package:frontend/core/ui/widgets/t_snackbars_widget.dart';
 import 'package:frontend/features/inventory/providers/inventory_provider.dart';
 import 'package:frontend/routes/app_routes.dart';
+import 'package:frontend/core/state/controllers/barcode_scanner_controller.dart';
 
 class BarcodeActionController extends GetxController {
   static BarcodeActionController get instance =>
@@ -28,14 +29,12 @@ class BarcodeActionController extends GetxController {
 
       if (resolutionType == 'exact_match') {
         // ==============================================================
-        // LUỒNG MỚI: ĐIỀU HƯỚNG THẲNG KHÔNG CẦN QUA BƯỚC PHỤ
+        //  ĐIỀU HƯỚNG THẲNG KHÔNG CẦN QUA BƯỚC PHỤ (ĐÃ HOÀN THÀNH)
         // ==============================================================
         if (isFromForm) {
           // (Sau này code xử lý điền form tại đây)
         } else {
-          Get.back(); // Đóng camera/màn hình Scanner ngay lập tức
-
-          // Nhảy vọt thẳng vào trang Chi tiết sản phẩm
+          Get.back(); // Đóng camera ngay lập tức
           Get.toNamed(AppRoutes.inventoryDetail, arguments: {
             'packageId': result['productPackage']['productPackageId'],
             'package': result['productPackage'],
@@ -66,6 +65,11 @@ class BarcodeActionController extends GetxController {
         title: TTexts.barcodeScanErrorTitle.tr,
         message: e.toString(),
       );
+
+      // Nếu API lỗi thì nhả khóa cho quét lại
+      if (Get.isRegistered<BarcodeScannerController>()) {
+        BarcodeScannerController.instance.resumeScan();
+      }
     }
   }
 }

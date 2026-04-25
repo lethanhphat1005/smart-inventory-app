@@ -24,7 +24,7 @@ class NavigationCustomBottomNavigationWidget
       child: Container(
         padding: EdgeInsets.only(bottom: bottomPadding),
         child: SizedBox(
-          height: 120,
+          height: 100,
           child: Stack(
             alignment: Alignment.bottomCenter,
             children: [
@@ -40,7 +40,7 @@ class NavigationCustomBottomNavigationWidget
                     BoxShadow(
                       color: Colors.black.withOpacity(0.04),
                       blurRadius: AppSizes.radius20,
-                      offset: const Offset(0, -6),
+                      offset: const Offset(0, -4),
                     ),
                   ],
                 ),
@@ -52,21 +52,17 @@ class NavigationCustomBottomNavigationWidget
                     children: [
                       if (!isRestricted)
                         _buildNavItem(index: 0, icon: Iconsax.home_2_copy),
-
                       _buildNavItem(index: 1, icon: Iconsax.box_copy),
-
-                      const SizedBox(width: 70), // Khoảng trống cho nút +
-
+                      const SizedBox(width: 56),
                       if (!isRestricted)
                         _buildNavItem(index: 3, icon: Iconsax.chart_21_copy),
-
                       _buildNavItem(index: 4, icon: Iconsax.user_copy),
                     ],
                   );
                 }),
               ),
               Positioned(
-                bottom: 40,
+                bottom: 30,
                 child: GestureDetector(
                   onTap: () {
                     TBottomSheetWidget.show(
@@ -80,8 +76,8 @@ class NavigationCustomBottomNavigationWidget
                       scale: isSelected ? 1.15 : 1.0,
                       duration: const Duration(milliseconds: 200),
                       child: Container(
-                        width: 64,
-                        height: 64,
+                        width: 56,
+                        height: 56,
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
                             begin: Alignment.topLeft,
@@ -94,12 +90,12 @@ class NavigationCustomBottomNavigationWidget
                           shape: BoxShape.circle,
                           border: Border.all(
                             color: AppColors.surface,
-                            width: 6,
+                            width: 5, // Viền mỏng lại (Từ 6 xuống 5)
                           ),
                           boxShadow: [
                             BoxShadow(
                               color: AppColors.primary.withOpacity(0.3),
-                              blurRadius: 10,
+                              blurRadius: 8, // Thu nhỏ vùng đổ bóng
                               offset: const Offset(0, 4),
                             ),
                           ],
@@ -107,8 +103,8 @@ class NavigationCustomBottomNavigationWidget
                         child: Center(
                           child: Image.asset(
                             TImages.iconImages.plusIcon,
-                            width: 26,
-                            height: 26,
+                            width: 22, // Thu nhỏ icon bên trong từ 26 xuống 22
+                            height: 22,
                             color: AppColors.white,
                           ),
                         ),
@@ -136,8 +132,8 @@ class NavigationCustomBottomNavigationWidget
           duration: const Duration(milliseconds: 200),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 250),
-            width: 50,
-            height: 50,
+            width: 44,
+            height: 44,
             decoration: BoxDecoration(
               color: isSelected ? AppColors.primaryText : Colors.transparent,
               shape: BoxShape.circle,
@@ -145,7 +141,7 @@ class NavigationCustomBottomNavigationWidget
             child: Icon(
               icon,
               color: isSelected ? AppColors.primary : AppColors.softGrey,
-              size: 24,
+              size: 22,
             ),
           ),
         );

@@ -239,13 +239,14 @@ class TSearchController extends GetxController with TErrorHandler {
   // ĐÃ CẬP NHẬT: TÌM KIẾM TRANSACTION CÓ PHÂN TRANG API (REAL PAGINATION)
   // ====================================================================
   Future<void> _executeTransactionSearch() async {
-    final bool hasNoFilters = filterType.value == 'None' &&
+    final bool hasNoFilters = filterType.value == TTexts.filterNone &&
         filterDateRange.value == null &&
         filterUserId.value.isEmpty;
 
     if (hasNoFilters) {
-      searchTransactionResults.clear();
-      return;
+      searchTransactionResults.clear(); 
+      hasMore.value = false; 
+      return; 
     }
 
     isSearching.value = true;
@@ -309,7 +310,14 @@ class TSearchController extends GetxController with TErrorHandler {
         'sortOrder': 'desc',
       };
 
-      if (filterType.value != 'None') queryParams['type'] = filterType.value;
+      if (filterType.value != TTexts.filterNone) {
+        if (filterType.value == TTexts.filterInbound) {
+          queryParams['type'] = 'import';
+        }
+        if (filterType.value == TTexts.filterOutbound) {
+          queryParams['type'] = 'export';
+        }
+      }
       if (filterDateRange.value != null) {
         queryParams['startDate'] =
             DayFormatterUtils.formatApiDate(filterDateRange.value!.start);

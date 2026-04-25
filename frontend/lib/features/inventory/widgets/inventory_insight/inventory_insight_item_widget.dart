@@ -89,13 +89,13 @@ class InventoryInsightItemWidget extends GetView<InventoryInsightController> {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 15,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 12,
                               color: AppColors.primaryText)),
                       const SizedBox(height: AppSizes.p4),
                       Text("${TTexts.brand.tr}: $brand",
                           style: const TextStyle(
-                              color: AppColors.subText, fontSize: 12),
+                              color: AppColors.subText, fontSize: 10),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis),
                     ],
@@ -106,8 +106,8 @@ class InventoryInsightItemWidget extends GetView<InventoryInsightController> {
                   children: [
                     Text("\$${price.toStringAsFixed(2)}",
                         style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            fontSize: 12,
                             fontFamily: 'Poppins',
                             color: AppColors.primaryText)),
                     const SizedBox(height: AppSizes.p8),
@@ -121,8 +121,8 @@ class InventoryInsightItemWidget extends GetView<InventoryInsightController> {
                       child: Text(statusText,
                           style: TextStyle(
                               color: statusColor,
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold)),
+                              fontSize: 8,
+                              fontWeight: FontWeight.w500)),
                     ),
                   ],
                 )

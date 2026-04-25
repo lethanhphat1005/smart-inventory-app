@@ -84,7 +84,7 @@ class InventoryDynamicCategoryWidget extends GetView<InventoryController> {
                     child: Text(firstLetter,
                         style: TextStyle(
                             color: bgColor,
-                            fontSize: 18,
+                            fontSize: 16,
                             fontWeight: FontWeight.bold,
                             fontFamily: 'Poppins')),
                   ),
@@ -98,11 +98,13 @@ class InventoryDynamicCategoryWidget extends GetView<InventoryController> {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 13)),
+                                fontWeight: FontWeight.bold, fontSize: 10)),
                         const SizedBox(height: 2),
                         Text("$count ${TTexts.items.tr}",
                             style: const TextStyle(
-                                color: AppColors.softGrey, fontSize: 11)),
+                                color: AppColors.softGrey,
+                                fontWeight: FontWeight.w400,
+                                fontSize: 8)),
                       ],
                     ),
                   ),

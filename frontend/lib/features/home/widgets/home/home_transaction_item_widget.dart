@@ -50,8 +50,8 @@ class HomeTransactionItemWidget extends StatelessWidget {
                 Text(title,
                     style: const TextStyle(
                         fontFamily: 'Poppins',
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
                         color: AppColors.primaryText)),
                 const SizedBox(height: 2),
                 Row(
@@ -59,7 +59,7 @@ class HomeTransactionItemWidget extends StatelessWidget {
                     Text(formattedTime,
                         style: const TextStyle(
                             fontFamily: 'Poppins',
-                            fontSize: 13,
+                            fontSize: 10,
                             color: AppColors.softGrey)),
                     if (qtyInfo != null) ...[
                       const SizedBox(width: 12),
@@ -67,7 +67,7 @@ class HomeTransactionItemWidget extends StatelessWidget {
                           style: const TextStyle(
                               fontFamily: 'Poppins',
                               fontSize: 13,
-                              fontWeight: FontWeight.w500,
+                              fontWeight: FontWeight.w400,
                               color: AppColors.subText)),
                     ],
                   ],
@@ -78,7 +78,7 @@ class HomeTransactionItemWidget extends StatelessWidget {
           Text(amount,
               style: TextStyle(
                   fontFamily: 'Poppins',
-                  fontSize: 16,
+                  fontSize: 10,
                   fontWeight: FontWeight.w500,
                   color: isPositive ? AppColors.stockIn : AppColors.stockOut)),
         ],
