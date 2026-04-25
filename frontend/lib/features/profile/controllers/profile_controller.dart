@@ -182,7 +182,8 @@ class ProfileController extends GetxController {
 
   void goToStoreSelect() {
     if (userService.currentUser.value == null) {
-      Get.toNamed(AppRoutes.createStore);
+      TSnackbarsWidget.error(
+          title: TTexts.errorTitle, message: TTexts.systemError);
     } else {
       Get.toNamed(AppRoutes.storeSelection);
     }
