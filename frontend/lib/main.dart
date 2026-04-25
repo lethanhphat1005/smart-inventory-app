@@ -138,10 +138,15 @@ class App extends StatelessWidget {
 
       // Cấu hình Release kết hợp tự động tắt bàn phím khi chạm ngoài màn hình
       builder: (context, child) {
-        return GestureDetector(
-          onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-          behavior: HitTestBehavior.opaque,
-          child: child!,
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            textScaler: const TextScaler.linear(1.0),
+          ),
+          child: GestureDetector(
+            onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+            behavior: HitTestBehavior.opaque,
+            child: child!,
+          ),
         );
       },
 
