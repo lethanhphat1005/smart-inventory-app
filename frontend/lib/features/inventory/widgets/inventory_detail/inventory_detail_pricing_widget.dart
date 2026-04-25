@@ -32,11 +32,11 @@ class InventoryDetailPricingWidget extends GetView<InventoryDetailController> {
     return Column(
       children: [
         Text(title,
-            style: const TextStyle(fontSize: 12, color: AppColors.subText)),
+            style: const TextStyle(fontSize: 10, color: AppColors.subText)),
         const SizedBox(height: 4),
         Text("\$${price.toStringAsFixed(2)}",
             style: TextStyle(
-                fontSize: 18,
+                fontSize: 12,
                 fontWeight: FontWeight.bold,
                 color: color,
                 fontFamily: 'Poppins')),
@@ -51,14 +51,14 @@ class InventoryDetailPricingWidget extends GetView<InventoryDetailController> {
     return Column(
       children: [
         Text(TTexts.profitMargin.tr,
-            style: const TextStyle(fontSize: 12, color: AppColors.subText)),
+            style: const TextStyle(fontSize: 10, color: AppColors.subText)),
         const SizedBox(height: 4),
         Text(
             margin > 0
                 ? "+${margin.toStringAsFixed(1)}%"
                 : "${margin.toStringAsFixed(1)}%",
             style: TextStyle(
-                fontSize: 16,
+                fontSize: 12,
                 fontWeight: FontWeight.bold,
                 color: color,
                 fontFamily: 'Poppins')),

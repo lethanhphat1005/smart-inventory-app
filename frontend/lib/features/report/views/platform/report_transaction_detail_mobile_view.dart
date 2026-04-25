@@ -90,12 +90,12 @@ class ReportTransactionDetailView
                   ),
                 ),
               ),
-              const SliverToBoxAdapter(child: SizedBox(height: 120)),
+              const SliverToBoxAdapter(child: SizedBox(height: 40)),
             ],
           );
         }),
       ),
-      bottomSheet: Obx(() {
+      bottomNavigationBar: Obx(() {
         if (controller.isLoading.value ||
             controller.transaction.value == null) {
           return const SizedBox.shrink();
@@ -111,58 +111,64 @@ class ReportTransactionDetailView
             NumberFormat.currency(locale: 'en_US', symbol: '\$')
                 .format(tx.totalPrice);
 
-        return Container(
-          padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 20,
-                  offset: const Offset(0, -5))
-            ],
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(TTexts.totalItems.tr,
-                      style: const TextStyle(
-                          fontSize: 12,
-                          color: AppColors.subText,
-                          fontWeight: FontWeight.w500)),
-                  const SizedBox(height: 4),
-                  Text('$totalQty',
-                      style: const TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.primaryText)),
-                ],
-              ),
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(TTexts.totalAmount.tr,
-                      style: const TextStyle(
-                          fontSize: 12,
-                          color: AppColors.subText,
-                          fontWeight: FontWeight.w500)),
-                  const SizedBox(height: 4),
-                  Text(moneyFormatted,
-                      style: const TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 22,
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.bold)),
-                ],
-              ),
-            ],
+        // BỌC SAFE AREA Ở ĐÂY ĐỂ TRÁNH BỊ LÚN VÀO THANH ĐIỀU HƯỚNG
+        return SafeArea(
+          bottom: true,
+          child: Container(
+            // Giảm padding bottom từ 32 xuống 16 hoặc 20 vì SafeArea đã tự đẩy lên rồi
+            padding: const EdgeInsets.fromLTRB(24, 20, 24, 16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 20,
+                    offset: const Offset(0, -5))
+              ],
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(24)),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(TTexts.totalItems.tr,
+                        style: const TextStyle(
+                            fontSize: 12,
+                            color: AppColors.subText,
+                            fontWeight: FontWeight.w500)),
+                    const SizedBox(height: 4),
+                    Text('$totalQty',
+                        style: const TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primaryText)),
+                  ],
+                ),
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(TTexts.totalAmount.tr,
+                        style: const TextStyle(
+                            fontSize: 12,
+                            color: AppColors.subText,
+                            fontWeight: FontWeight.w500)),
+                    const SizedBox(height: 4),
+                    Text(moneyFormatted,
+                        style: const TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 22,
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.bold)),
+                  ],
+                ),
+              ],
+            ),
           ),
         );
       }),

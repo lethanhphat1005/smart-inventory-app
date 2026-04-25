@@ -52,8 +52,8 @@ class InventoryDetailHealthWidget extends GetView<InventoryDetailController> {
           child: Text(controller.statusText.toUpperCase(),
               style: TextStyle(
                   color: healthColor,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 10,
                   letterSpacing: 0.5)),
         ),
       ],

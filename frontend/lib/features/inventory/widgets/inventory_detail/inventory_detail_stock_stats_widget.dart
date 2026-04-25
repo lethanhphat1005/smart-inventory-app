@@ -31,7 +31,7 @@ class _InventoryDetailStockStatsWidgetState
           children: [
             Text(TTexts.stockMovement.tr,
                 style: const TextStyle(
-                    fontSize: 16,
+                    fontSize: 14,
                     fontWeight: FontWeight.bold,
                     color: AppColors.primaryText)),
             Container(
@@ -135,7 +135,7 @@ class _InventoryDetailStockStatsWidgetState
               Expanded(
                   child: Text(title,
                       style: TextStyle(
-                          fontSize: 13,
+                          fontSize: 10,
                           color: color,
                           fontWeight: FontWeight.w600),
                       maxLines: 1,

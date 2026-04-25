@@ -87,11 +87,11 @@ class TEditableSearchBarWidget extends StatelessWidget {
                       controller: controller,
                       onChanged: onChanged,
                       style: const TextStyle(
-                          color: AppColors.primaryText, fontSize: 14),
+                          color: AppColors.primaryText, fontSize: 12),
                       decoration: InputDecoration(
                         hintText: hintText,
                         hintStyle: const TextStyle(
-                            color: AppColors.softGrey, fontSize: 14),
+                            color: AppColors.softGrey, fontSize: 12),
                         border: InputBorder.none,
                         enabledBorder: InputBorder.none,
                         focusedBorder: InputBorder.none,

@@ -20,11 +20,31 @@ class InventoryDetailHistoryWidget extends GetView<InventoryDetailController> {
         children: [
           if (history.isEmpty)
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: AppSizes.p16),
+              padding: const EdgeInsets.symmetric(
+                  vertical: 32.0, horizontal: AppSizes.p20),
               child: Center(
-                child: Text(TTexts.noHistoryAvailable.tr,
-                    style: const TextStyle(
-                        color: AppColors.subText, fontStyle: FontStyle.italic)),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Iconsax.clock_copy,
+                      color: AppColors.subText.withOpacity(0.5),
+                      size: 30,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      TTexts.noHistoryAvailable.tr,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontFamily: 'Poppins',
+                        color: AppColors.subText,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             )
           else
@@ -117,14 +137,13 @@ class InventoryDetailHistoryWidget extends GetView<InventoryDetailController> {
                 size: 18),
           ),
           title: Text(item.note,
-              style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: isAdjust ? FontWeight.bold : FontWeight.w600)),
+              style:
+                  const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
           subtitle: Text(item.date,
-              style: const TextStyle(fontSize: 12, color: AppColors.subText)),
+              style: const TextStyle(fontSize: 10, color: AppColors.subText)),
           trailing: Text(displayQty,
               style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 12,
                   fontWeight: FontWeight.bold,
                   color: displayColor,
                   fontFamily: 'Poppins')),

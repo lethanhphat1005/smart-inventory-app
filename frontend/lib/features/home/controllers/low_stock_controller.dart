@@ -14,7 +14,7 @@ class LowStockController extends GetxController with TErrorHandler {
 
   int _currentPage = 1;
   final int _limit = 20;
-  bool _hasMoreData = true;
+  final RxBool hasMoreData = true.obs;
 
   @override
   void onInit() {
@@ -25,7 +25,7 @@ class LowStockController extends GetxController with TErrorHandler {
   Future<void> fetchLowStock({bool isRefresh = false}) async {
     if (isRefresh) {
       _currentPage = 1;
-      _hasMoreData = true;
+      hasMoreData.value = true;
       lowStockItems.clear();
       isLoading.value = true;
     } else if (_currentPage == 1) {
@@ -41,7 +41,7 @@ class LowStockController extends GetxController with TErrorHandler {
       );
 
       if (items.isEmpty || items.length < _limit) {
-        _hasMoreData = false;
+        hasMoreData.value = true;
       }
 
       if (isRefresh || _currentPage == 1) {
@@ -67,7 +67,7 @@ class LowStockController extends GetxController with TErrorHandler {
   }
 
   void onLoadMore() {
-    if (_hasMoreData && !isLoadMore.value && !isLoading.value) {
+    if (hasMoreData.value && !isLoadMore.value && !isLoading.value) {
       fetchLowStock();
     }
   }

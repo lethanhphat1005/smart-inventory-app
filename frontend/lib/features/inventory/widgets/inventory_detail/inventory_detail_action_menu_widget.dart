@@ -187,7 +187,7 @@ class _GlassmorphismDropdownMenuState extends State<_GlassmorphismDropdownMenu>
               text,
               style: TextStyle(
                 color: color ?? AppColors.primaryText,
-                fontSize: 14,
+                fontSize: 12,
                 fontWeight: FontWeight.w600,
               ),
             ),

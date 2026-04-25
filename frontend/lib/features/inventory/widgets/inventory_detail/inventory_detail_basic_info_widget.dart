@@ -25,7 +25,7 @@ class InventoryDetailBasicInfoWidget
           title: TTexts.thresholdTitle.tr,
           value: thresholdStr,
           icon: Iconsax.warning_2_copy,
-          color: AppColors.secondPrimary,
+          color: AppColors.primary,
         ),
         const SizedBox(height: AppSizes.p12),
         // THẺ 2: TOTAL STOCK
@@ -69,15 +69,15 @@ class InventoryDetailBasicInfoWidget
                     style: const TextStyle(
                         fontSize: 12,
                         color: AppColors.subText,
-                        fontWeight: FontWeight.w600)),
+                        fontWeight: FontWeight.w400)),
                 const SizedBox(height: 2),
                 FittedBox(
                   fit: BoxFit.scaleDown,
                   alignment: Alignment.centerLeft,
                   child: Text(value,
                       style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
                           color: AppColors.primaryText,
                           fontFamily: 'Poppins')),
                 ),

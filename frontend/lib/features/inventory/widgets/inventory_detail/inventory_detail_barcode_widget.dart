@@ -68,7 +68,7 @@ class InventoryDetailBarcodeWidget extends GetView<InventoryDetailController> {
                               style: const TextStyle(
                                 fontSize: 12,
                                 color: AppColors.subText,
-                                fontWeight: FontWeight.w600,
+                                fontWeight: FontWeight.w400,
                               ),
                             ),
                           ],
@@ -81,7 +81,7 @@ class InventoryDetailBarcodeWidget extends GetView<InventoryDetailController> {
                               child: Text(
                                 controller.barcode,
                                 style: const TextStyle(
-                                  fontSize: 16,
+                                  fontSize: 14,
                                   fontWeight: FontWeight.bold,
                                   letterSpacing: 2.0,
                                   fontFamily: 'Poppins',
