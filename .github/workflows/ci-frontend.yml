@@ -2,44 +2,16 @@ name: CI workflow for frontend
 
 on:
   push:
-    branches:
-      - main
-    paths:
-      - 'frontend/**'
+    branches: [main]
+    paths: ["frontend/**"]
   pull_request:
-    branches:
-      - main
-    paths:
-      - 'frontend/**'
+    branches: [main]
+    paths: ["frontend/**"]
   workflow_dispatch:
 
 jobs:
-  analyze:
-    name: Static Code Analysis
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./frontend
-
-    steps:
-      - name: Checkout source
-        uses: actions/checkout@v4
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: "3.35.4"
-          channel: "stable"
-          cache: true # Bật cache để chạy nhanh hơn
-
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Analyze code
-        run: flutter analyze
-
-  test:
-    name: Run Unit Tests
+  analyze_and_test:
+    name: Analyze and Test Frontend
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -56,8 +28,18 @@ jobs:
           channel: "stable"
           cache: true
 
+      - name: Create .env file
+        run: |
+          echo "API_BASE_URL=${{ secrets.API_BASE_URL }}" >> .env
+          echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> .env
+          echo "SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}" >> .env
+          echo "SERVER_CLIENT_ID=${{ secrets.SERVER_CLIENT_ID }}" >> .env
+
       - name: Install dependencies
         run: flutter pub get
+
+      - name: Analyze code
+        run: flutter analyze
 
       - name: Run tests
         run: flutter test
