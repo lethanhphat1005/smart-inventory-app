@@ -3,7 +3,10 @@ set -euxo pipefail
 
 STACK_NAME='sis'
 STACK_FILE='/opt/sis/stacks/docker-stack.yml'
-BACKEND_IMAGE='peterhoward/storix-backend:latest'
+
+IMAGE_NAME='peterhoward/storix-backend'
+IMAGE_TAG="${1:-latest}"
+BACKEND_IMAGE="${IMAGE_NAME}:${IMAGE_TAG}"
 DOCKER_HUB_ENV='/opt/sis/env/docker-hub.env'
 
 if [ ! -f "${DOCKER_HUB_ENV}" ]; then
