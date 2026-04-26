@@ -42,7 +42,7 @@ class VerifyEmailResendEmailButton extends GetView<VerifyEmailController> {
                       TTexts.resendEmail.tr,
                       style: TextStyle(
                         fontFamily: 'Poppins',
-                        fontSize: 14,
+                        fontSize: 12,
                         fontWeight: FontWeight.w600,
                         color: isTimerZero
                             ? AppColors.primaryText

@@ -27,6 +27,8 @@ class ProductCatalogDetailController extends GetxController with TErrorHandler {
   final RxString rxName = ''.obs;
   final RxString rxBrand = ''.obs;
   final RxString rxImageUrl = ''.obs;
+  final RxString rxCategoryId = ''.obs;
+  final RxString rxCategoryName = ''.obs;
 
   final RxBool isLoadingPackages = true.obs;
   final RxList<ProductPackageModel> packages = <ProductPackageModel>[].obs;
@@ -52,6 +54,8 @@ class ProductCatalogDetailController extends GetxController with TErrorHandler {
       rxName.value = product.name;
       rxBrand.value = product.brand ?? '';
       rxImageUrl.value = product.imageUrl ?? '';
+      rxCategoryId.value = product.categoryId;
+      rxCategoryName.value = product.categoryName ?? TTexts.uncategorized.tr;
       fetchPackages();
     } else {
       handleError(TTexts.productDataMissing.tr);
@@ -103,6 +107,9 @@ class ProductCatalogDetailController extends GetxController with TErrorHandler {
 
       rxName.value = updatedProduct.name;
       rxBrand.value = updatedProduct.brand ?? '';
+      rxCategoryId.value = updatedProduct.categoryId;
+      rxCategoryName.value =
+          updatedProduct.categoryName ?? TTexts.uncategorized.tr;
 
       if (updatedProduct.imageUrl != null &&
           updatedProduct.imageUrl!.isNotEmpty) {
@@ -126,10 +133,17 @@ class ProductCatalogDetailController extends GetxController with TErrorHandler {
     }
   }
 
-  void updateLocalInfo({String? name, String? brand, String? imageUrl}) {
+  void updateLocalInfo(
+      {String? name,
+      String? brand,
+      String? imageUrl,
+      String? categoryId,
+      String? categoryName}) {
     if (name != null) rxName.value = name;
     if (brand != null) rxBrand.value = brand;
     if (imageUrl != null) rxImageUrl.value = imageUrl;
+    if (categoryId != null) rxCategoryId.value = categoryId;
+    if (categoryName != null) rxCategoryName.value = categoryName;
   }
 
   void updateLocalPackage(ProductPackageModel updatedPkg) {

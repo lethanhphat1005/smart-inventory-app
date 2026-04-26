@@ -92,6 +92,7 @@ class ProductCatalogController extends GetxController with TErrorHandler {
     // Tạo bản sao từ danh sách cục bộ để tránh lỗi mutate
     List<CategoryModel> list = categories.toList();
 
+    // 1. Lọc theo search query (nếu có)
     if (query.isNotEmpty) {
       list = list.where((cat) {
         final name = cat.name.toLowerCase();
@@ -100,25 +101,14 @@ class ProductCatalogController extends GetxController with TErrorHandler {
       }).toList();
     }
 
-    // TÁCH NHÓM MẶC ĐỊNH VÀ NHÓM THƯỜNG
-    List<CategoryModel> defaultCats = list.where((c) => c.isDefault).toList();
-    List<CategoryModel> normalCats = list.where((c) => !c.isDefault).toList();
-
-    // Sắp xếp A-Z cho từng cụm
-    defaultCats.sort(
-        (a, b) => (a.name).toLowerCase().compareTo((b.name).toLowerCase()));
-    normalCats.sort(
+    // 2. Sắp xếp toàn bộ từ A-Z không phân biệt default
+    list.sort(
         (a, b) => (a.name).toLowerCase().compareTo((b.name).toLowerCase()));
 
     Map<String, List<CategoryModel>> grouped = {};
 
-    // ĐẨY NHÓM MẶC ĐỊNH LÊN ĐẦU VỚI KEY LÀ ⭐
-    if (defaultCats.isNotEmpty) {
-      grouped['⭐'] = defaultCats;
-    }
-
-    // Xử lý nhóm chữ cái cho các danh mục còn lại
-    for (var cat in normalCats) {
+    // 3. Nhóm theo chữ cái đầu
+    for (var cat in list) {
       final String firstLetter =
           (cat.name.isNotEmpty) ? cat.name[0].toUpperCase() : '#';
 

@@ -52,7 +52,7 @@ class VerifyOTPButtonWidget extends StatelessWidget {
                   TTexts.goToGmail.tr,
                   style: const TextStyle(
                     fontFamily: 'Poppins',
-                    fontSize: 14,
+                    fontSize: 12,
                     fontWeight: FontWeight.w600,
                     color: Colors.black,
                   ),

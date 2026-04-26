@@ -54,7 +54,7 @@ class TransactionBottomSheetWidget extends StatelessWidget {
           text: TTexts.inbound.tr,
           height: 56,
           customIcon: _buildLayerIcon(isPlus: true),
-          fontSize: 16,
+          fontSize: 14,
           onPressed: () {
             Get.back();
             Get.toNamed(AppRoutes.inboundTransaction);
@@ -65,7 +65,7 @@ class TransactionBottomSheetWidget extends StatelessWidget {
           text: TTexts.outbound.tr,
           height: 56,
           customIcon: _buildLayerIcon(isMinus: true),
-          fontSize: 16,
+          fontSize: 14,
           onPressed: () {
             Get.back();
             Get.toNamed(AppRoutes.outboundTransaction);
@@ -76,7 +76,7 @@ class TransactionBottomSheetWidget extends StatelessWidget {
           text: TTexts.stockAdjustment.tr,
           height: 56,
           icon: Iconsax.layer_copy,
-          fontSize: 16,
+          fontSize: 14,
           onPressed: () {
             Get.back(); // 1. Đóng Bottom Sheet hiện tại
             // 2. Mở Hộp thoại xác nhận
@@ -99,7 +99,7 @@ class TransactionBottomSheetWidget extends StatelessWidget {
         TPrimaryButtonWidget(
           text: TTexts.exit.tr,
           height: 56,
-          fontSize: 16,
+          fontSize: 14,
           backgroundColor: AppColors.softGrey.withOpacity(0.15),
           textColor: AppColors.primaryText,
           onPressed: () => Get.back(),

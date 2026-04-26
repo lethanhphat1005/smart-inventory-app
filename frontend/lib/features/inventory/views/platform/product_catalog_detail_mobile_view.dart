@@ -39,24 +39,42 @@ class ProductCatalogDetailMobileView
                 child: Obx(() => Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // TÊN SẢN PHẨM
                         Text(
                           controller.rxName.value,
                           style: const TextStyle(
                               fontFamily: 'Poppins',
-                              fontSize: 20,
+                              fontSize: 22,
                               fontWeight: FontWeight.bold,
                               color: AppColors.primaryText),
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          '${TTexts.brand.tr}: ${controller.rxBrand.value.isNotEmpty ? controller.rxBrand.value : TTexts.na.tr}',
-                          style: const TextStyle(
-                              fontFamily: 'Poppins',
-                              fontSize: 12,
-                              color: AppColors.subText),
+                        const SizedBox(height: 12),
+
+                        // HÀNG INFO CHIPS ĐỒNG BỘ
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            // Chip Danh mục
+                            _buildInfoChip(
+                              icon: Iconsax.category_2_copy,
+                              label: controller.rxCategoryName.value,
+                              color: AppColors.primary,
+                            ),
+
+                            // Chip Thương hiệu
+                            _buildInfoChip(
+                              icon: Iconsax.verify_copy,
+                              label: controller.rxBrand.value.isNotEmpty
+                                  ? controller.rxBrand.value
+                                  : TTexts.na.tr,
+                              color: AppColors.softGrey,
+                            ),
+                          ],
                         ),
+
                         const SizedBox(height: 16),
-                        const Divider(color: AppColors.divider),
+                        const Divider(color: AppColors.divider, thickness: 0.5),
                       ],
                     )),
               ),
@@ -162,6 +180,34 @@ class ProductCatalogDetailMobileView
             const SliverToBoxAdapter(child: SizedBox(height: 60)),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildInfoChip(
+      {required IconData icon, required String label, required Color color}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.06),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withOpacity(0.15), width: 0.8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: color),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: color == AppColors.softGrey ? AppColors.subText : color,
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -31,6 +31,7 @@ class TTexts {
   static const String loading = "loading";
   static const String saving = "saving";
   static const String deleting = "deleting";
+  static const String defaultCategory = "default_category";
 
   // -- Search
   static const String searchHint = "search_hint";
@@ -771,6 +772,8 @@ class TTexts {
   static const String stockQuantityLabel = 'stock_quantity_label';
   static const String inventoryThreshold = 'inventory_threshold';
   static const String sellingPrice = 'selling_price';
+  static const String deleteProductImageTitle = "deleteProductImageTitle";
+  static const String deleteProductImageMessage = "deleteProductImageMessage";
 
   // Empty State
   static const String homeQuickActions = "home_quick_actions";

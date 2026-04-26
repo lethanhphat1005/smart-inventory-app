@@ -17,7 +17,8 @@ final Map<String, String> enInventory = {
   TTexts.initialQuantityHint: "0",
   TTexts.hideCategory: 'Hide Category',
   TTexts.hideCategoryTitle: 'Hide Category',
-  TTexts.hideCategoryConfirm: 'Are you sure you want to hide this default category? It will no longer appear in your store.',
+  TTexts.hideCategoryConfirm:
+      'Are you sure you want to hide this default category? It will no longer appear in your store.',
   TTexts.hide: 'Hide',
   TTexts.hideCategorySuccessMessage: 'Category hidden successfully.',
   TTexts.addNewProductDesc: 'Add a new product item to this category.',
@@ -118,6 +119,9 @@ final Map<String, String> enInventory = {
   TTexts.stockAdjustmentOrCheck: 'Stock Take / Adjustment',
   TTexts.currentQty: 'Current Qty',
   TTexts.errorProductOrPackageIdMissing: 'Product ID or Package ID is missing.',
+  TTexts.deleteProductImageTitle: "Delete Product Image",
+  TTexts.deleteProductImageMessage:
+      "Are you sure you want to delete the current image and leave this product without an image?",
 
   // --- Transaction Bottom Sheet ở trang Detail ---
   TTexts.addToTransaction: 'Add to Transaction',
