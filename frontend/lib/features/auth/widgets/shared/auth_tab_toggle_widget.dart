@@ -65,10 +65,9 @@ class AuthTabToggleWidget extends StatelessWidget {
                       style: TextStyle(
                         fontFamily: 'Poppins',
                         fontWeight: isLogin ? FontWeight.w600 : FontWeight.w500,
-                        color: isLogin
-                            ? AppColors.primaryText
-                            : AppColors.subText,
-                        fontSize: 14,
+                        color:
+                            isLogin ? AppColors.primaryText : AppColors.subText,
+                        fontSize: 12,
                       ),
                     ),
                   ),
@@ -91,13 +90,12 @@ class AuthTabToggleWidget extends StatelessWidget {
                       TTexts.signupTab.tr,
                       style: TextStyle(
                         fontFamily: 'Poppins',
-                        fontWeight: !isLogin
-                            ? FontWeight.w600
-                            : FontWeight.w500,
+                        fontWeight:
+                            !isLogin ? FontWeight.w600 : FontWeight.w500,
                         color: !isLogin
                             ? AppColors.primaryText
                             : AppColors.subText,
-                        fontSize: 14,
+                        fontSize: 12,
                       ),
                     ),
                   ),

@@ -32,7 +32,6 @@ class ProductCatalogCategoryListItemWidget extends StatelessWidget {
     final String firstLetter = name.isNotEmpty ? name[0].toUpperCase() : "?";
     final Color bgColor = avatarColors[index % avatarColors.length];
 
-    // 1. Container ngoài cùng chỉ giữ Shadow và Margin
     return Container(
       margin: const EdgeInsets.only(bottom: AppSizes.p12),
       decoration: BoxDecoration(
@@ -47,76 +46,107 @@ class ProductCatalogCategoryListItemWidget extends StatelessWidget {
           ),
         ],
       ),
-      // 2. Material bọc trong để giới hạn hiệu ứng InkWell không bị tràn góc
-      child: Material(
-        color: Colors.transparent,
+      child: ClipRRect(
         borderRadius: BorderRadius.circular(AppSizes.radius12),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: onTap,
-          splashColor: AppColors.primary.withOpacity(0.1),
-          highlightColor: AppColors.primary.withOpacity(0.05),
-          // 3. Padding chuyển vào trong cùng
-          child: Padding(
-            padding: const EdgeInsets.all(AppSizes.p16),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Container(
-                  width: 50,
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: bgColor.withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  alignment: Alignment.center,
-                  child: Text(
-                    firstLetter,
-                    style: TextStyle(
-                        color: bgColor,
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Poppins'),
-                  ),
-                ),
-                const SizedBox(width: AppSizes.p16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+        child: Stack(
+          children: [
+            // 1. Nội dung chính
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: onTap,
+                splashColor: AppColors.primary.withOpacity(0.1),
+                highlightColor: AppColors.primary.withOpacity(0.05),
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSizes.p16),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text(
-                        name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.primaryText),
+                      Container(
+                        width: 50,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          color: bgColor.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          firstLetter,
+                          style: TextStyle(
+                              color: bgColor,
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Poppins'),
+                        ),
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        (category.description != null &&
-                                category.description!.isNotEmpty)
-                            ? category.description!
-                            : TTexts.noCategoryDescription.tr,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: 10,
-                            height: 1.3,
-                            color: AppColors.subText),
+                      const SizedBox(width: AppSizes.p16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.primaryText),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              (category.description != null &&
+                                      category.description!.isNotEmpty)
+                                  ? category.description!
+                                  : TTexts.noCategoryDescription.tr,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontSize: 10,
+                                  height: 1.3,
+                                  color: AppColors.subText),
+                            ),
+                          ],
+                        ),
                       ),
+                      const SizedBox(width: AppSizes.p8),
+                      const Icon(Icons.chevron_right_rounded,
+                          color: AppColors.softGrey, size: 24),
                     ],
                   ),
                 ),
-                const SizedBox(width: AppSizes.p8),
-                const Icon(Icons.chevron_right_rounded,
-                    color: AppColors.softGrey, size: 24),
-              ],
+              ),
             ),
-          ),
+
+            // 2. Tag vuông ở góc trái phía trên
+            if (category.isDefault)
+              Positioned(
+                top: 0,
+                left: 0,
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
+                  decoration: const BoxDecoration(
+                    color: AppColors.primary,
+                    borderRadius: BorderRadius.only(
+                      bottomRight: Radius.circular(8),
+                    ),
+                  ),
+                  child: Text(
+                    TTexts.defaultCategory.tr.toUpperCase(),
+                    style: const TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 7,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
     );

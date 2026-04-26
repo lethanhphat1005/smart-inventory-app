@@ -42,6 +42,7 @@ class ProductFormController extends GetxController with TErrorHandler {
   final ImagePicker _picker = ImagePicker();
   final Rx<File?> selectedImage = Rx<File?>(null);
   final RxString existingImageUrl = ''.obs;
+  String originalImageUrl = '';
 
   final TextEditingController nameController = TextEditingController();
   final TextEditingController brandController = TextEditingController();
@@ -206,6 +207,8 @@ class ProductFormController extends GetxController with TErrorHandler {
         final freshBrand = args['freshBrand'];
 
         existingImageUrl.value = freshImageUrl ?? productToEdit!.imageUrl ?? '';
+        originalImageUrl = existingImageUrl.value;
+
         nameController.text = freshName ?? productToEdit!.name;
         brandController.text = freshBrand ?? productToEdit!.brand ?? '';
       }
@@ -404,11 +407,44 @@ class ProductFormController extends GetxController with TErrorHandler {
   }
 
   void saveProductImage() {
-    if (selectedImage.value == null) {
+    bool isImageEmptyNow =
+        selectedImage.value == null && existingImageUrl.value.isEmpty;
+    bool hadImageBefore = originalImageUrl.isNotEmpty;
+
+    // TRƯỜNG HỢP 1: CÓ ẢNH RỒI XÓA ĐI TRỐNG TRƠN -> BẬT DIALOG HỎI XÁC NHẬN
+    if (isImageEmptyNow && hadImageBefore) {
+      Get.dialog(TCustomDialogWidget(
+        title: TTexts.deleteProductImageTitle.tr, 
+        description: TTexts.deleteProductImageMessage.tr,
+        icon: const Text('🗑️', style: TextStyle(fontSize: 40)),
+        primaryButtonText: TTexts.delete.tr,
+        secondaryButtonText: TTexts.cancel.tr,
+        onSecondaryPressed: () => Get.back(),
+        onPrimaryPressed: () {
+          Get.back();
+          Future.delayed(const Duration(milliseconds: 200), () {
+            // Gọi hàm thực thi với cờ isNullify = true
+            _executeSaveProductImage(isNullify: true);
+          });
+        },
+      ));
+      return;
+    }
+
+    // TRƯỜNG HỢP 2: TRỐNG TỪ ĐẦU, VÀ VẪN CHƯA CHỌN ẢNH -> CẢNH BÁO
+    if (isImageEmptyNow && !hadImageBefore) {
       TSnackbarsWidget.warning(
           title: TTexts.warningTitle.tr, message: TTexts.requirePhoto.tr);
       return;
     }
+
+    // TRƯỜNG HỢP 3: CÓ ẢNH CŨ NHƯNG KHÔNG THAY ĐỔI GÌ -> ĐÓNG FORM
+    if (selectedImage.value == null && existingImageUrl.value.isNotEmpty) {
+      Get.back();
+      return;
+    }
+
+    // TRƯỜNG HỢP 4: THÊM ẢNH MỚI HOẶC ĐỔI ẢNH BÌNH THƯỜNG
     Get.dialog(TCustomDialogWidget(
       title: TTexts.confirmUpdateTitle.tr,
       description: TTexts.confirmUpdateMessage.tr,
@@ -419,7 +455,8 @@ class ProductFormController extends GetxController with TErrorHandler {
       onPrimaryPressed: () {
         Get.back();
         Future.delayed(const Duration(milliseconds: 200), () {
-          _executeSaveProductImage();
+          // Gọi hàm thực thi với cờ isNullify = false
+          _executeSaveProductImage(isNullify: false);
         });
       },
     ));
@@ -741,20 +778,33 @@ class ProductFormController extends GetxController with TErrorHandler {
     }
   }
 
-  Future<void> _executeSaveProductImage() async {
+  // Thêm tham số isNullify
+  Future<void> _executeSaveProductImage({required bool isNullify}) async {
     if (isSaving.value) return;
     try {
       isSaving.value = true;
       FullScreenLoaderUtils.openLoadingDialog(TTexts.saving.tr);
 
-      final newImageUrl = await _supabaseStorageService.uploadImage(
-          imageFile: selectedImage.value!, folderPath: 'products');
-      if (newImageUrl == null) throw Exception("Upload failed");
+      String? newImageUrl;
 
-      await _provider
-          .updateProduct(productToEdit!.productId, {'imageUrl': newImageUrl});
+      if (isNullify) {
+        // Nếu chọn xóa ảnh: Gọi thẳng API cập nhật thành null
+        await _provider
+            .updateProduct(productToEdit!.productId, {'imageUrl': null});
+        newImageUrl = ''; // Set chuỗi rỗng để UI detail bên kia clear ảnh
+      } else {
+        // Nếu có chọn ảnh mới: Upload lên Supabase như bình thường
+        newImageUrl = await _supabaseStorageService.uploadImage(
+            imageFile: selectedImage.value!, folderPath: 'products');
+
+        if (newImageUrl == null) throw Exception("Upload failed");
+
+        await _provider
+            .updateProduct(productToEdit!.productId, {'imageUrl': newImageUrl});
+      }
 
       FullScreenLoaderUtils.stopLoading();
+
       _triggerRefreshAndClose(TTexts.imageUpdatedSuccess.tr,
           newImageUrl: newImageUrl);
     } catch (e) {

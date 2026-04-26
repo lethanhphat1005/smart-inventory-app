@@ -9,6 +9,7 @@ class ProductModel {
   final String? brand;
   final String storeId;
   final String categoryId;
+  final String? categoryName;
   final String activeStatus;
 
   ProductModel({
@@ -20,6 +21,7 @@ class ProductModel {
     this.brand,
     required this.storeId,
     required this.categoryId,
+    this.categoryName, // ĐÃ THÊM
     required this.activeStatus,
   });
 
@@ -37,6 +39,7 @@ class ProductModel {
       brand: json['brand'],
       storeId: json['storeId'] ?? json['store']?['storeId'] ?? '',
       categoryId: json['categoryId'] ?? json['category']?['categoryId'] ?? '',
+      categoryName: json['category']?['name'],
       activeStatus: json['activeStatus'] ?? 'active',
     );
   }
@@ -64,6 +67,7 @@ class ProductModel {
     String? brand,
     String? storeId,
     String? categoryId,
+    String? categoryName,
     String? activeStatus,
   }) {
     return ProductModel(
@@ -75,6 +79,7 @@ class ProductModel {
       brand: brand ?? this.brand,
       storeId: storeId ?? this.storeId,
       categoryId: categoryId ?? this.categoryId,
+      categoryName: categoryName ?? this.categoryName,
       activeStatus: activeStatus ?? this.activeStatus,
     );
   }

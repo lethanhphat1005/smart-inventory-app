@@ -32,17 +32,25 @@ class RegisterController extends GetxController {
   void toggleConfirmPasswordVisibility() =>
       isConfirmPasswordHidden.value = !isConfirmPasswordHidden.value;
 
-  /// Đăng ký Email thường (Giữ nguyên luồng Verify Email)
+  /// Đăng ký Email thường 
   Future<void> register() async {
     final email = emailController.text.trim();
     final password = passwordController.text;
+    final confirmPassword = confirmPasswordController.text;
 
-    if (email.isEmpty ||
-        password.isEmpty ||
-        confirmPasswordController.text.isEmpty) {
+    // 1. Kiểm tra rỗng
+    if (email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
       TSnackbarsWidget.warning(
           title: TTexts.registerErrorEmptyFieldsTitle.tr,
           message: TTexts.registerErrorEmptyFieldsMessage.tr);
+      return;
+    }
+
+    // 2. Kiểm tra mật khẩu xác nhận
+    if (password != confirmPassword) {
+      TSnackbarsWidget.warning(
+          title: TTexts.registerErrorPasswordMismatchTitle.tr,
+          message: TTexts.registerErrorPasswordMismatchMessage.tr);
       return;
     }
 
@@ -53,8 +61,20 @@ class RegisterController extends GetxController {
       final response = await authProvider
           .register(email: email, password: password)
           .timeout(const Duration(seconds: 15));
+
       FullScreenLoaderUtils.stopLoading();
 
+      // 3. Email đã tồn tại
+      if (response.user != null &&
+          response.user!.identities != null &&
+          response.user!.identities!.isEmpty) {
+        TSnackbarsWidget.error(
+            title: TTexts.registerErrorUserExistsTitle.tr,
+            message: TTexts.registerErrorEmailExistsMessage.tr);
+        return;
+      }
+
+      // 4. Thành công
       if (response.user != null) {
         TSnackbarsWidget.success(
             title: TTexts.registerSuccessTitle.tr,
@@ -118,7 +138,7 @@ class RegisterController extends GetxController {
     FullScreenLoaderUtils.stopLoading();
     if (e is AuthException) {
       TSnackbarsWidget.error(
-          title: TTexts.loginFailedTitle.tr, message: e.message);
+          title: TTexts.registerFailedTitle.tr, message: e.message);
     } else if (e is TimeoutException) {
       TSnackbarsWidget.error(
           title: TTexts.errorTimeoutTitle.tr,

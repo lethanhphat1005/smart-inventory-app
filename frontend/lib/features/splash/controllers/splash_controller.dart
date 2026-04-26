@@ -57,6 +57,10 @@ class SplashController extends GetxController {
     } catch (e) {
       debugPrint('🚨 Tiến trình Splash bị chặn: $e');
 
+      if (!NetworkController.instance.isConnected.value) {
+        return;
+      }
+
       // NẾU BẮT ĐƯỢC LỖI SERVER SẬP -> HIỆN DIALOG LIVE BẮT THỬ LẠI
       if (e.toString().contains('SERVER_CONNECTION_ERROR')) {
         _showServerDownDialog();
@@ -77,11 +81,11 @@ class SplashController extends GetxController {
     bool hasInternet = await networkManager.checkInternetDirectly();
 
     if (!hasInternet) {
-      // Ép hiện Dialog bắt ép người dùng kết nối mạng
+      networkManager.isConnected.value = false;
+
       networkManager.showNoInternetDialog();
 
-      // Vòng lặp này sẽ "đóng băng" Splash Screen, không cho chạy Tác vụ 2, 3, 4
-      // cho đến khi NetworkManager báo là đã có mạng (isConnected = true)
+      // Lúc này vòng lặp mới thực sự "giam" app lại cho đến khi có mạng
       while (!networkManager.isConnected.value) {
         await Future.delayed(const Duration(seconds: 1));
       }
