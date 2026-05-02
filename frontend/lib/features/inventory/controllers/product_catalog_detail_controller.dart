@@ -220,6 +220,8 @@ class ProductCatalogDetailController extends GetxController with TErrorHandler {
                 }).toList();
 
                 // Đẩy sang Outbound
+                Get.until((route) => route.settings.name == AppRoutes.main);
+
                 Get.toNamed(AppRoutes.outboundTransaction,
                     arguments: {'autoAddItems': itemsToAdd});
               }));
@@ -266,7 +268,12 @@ class ProductCatalogDetailController extends GetxController with TErrorHandler {
               Get.find<InventoryInsightController>().refreshData();
             }
 
-            Get.back();
+            Get.until((route) {
+              final routeName = route.settings.name;
+              return routeName == AppRoutes.main ||
+                  routeName == AppRoutes.categoryDetail ||
+                  routeName == AppRoutes.productCatalog;
+            });
             Future.delayed(const Duration(milliseconds: 300), () {
               TSnackbarsWidget.success(
                   title: TTexts.successTitle.tr,
@@ -337,6 +344,7 @@ class ProductCatalogDetailController extends GetxController with TErrorHandler {
             onSecondaryPressed: () => Get.back(),
             onPrimaryPressed: () {
               Get.back();
+              Get.until((route) => route.settings.name == AppRoutes.main);
               Get.toNamed(AppRoutes.outboundTransaction, arguments: {
                 'autoAddItems': [
                   {
@@ -387,6 +395,8 @@ class ProductCatalogDetailController extends GetxController with TErrorHandler {
       FullScreenLoaderUtils.stopLoading();
 
       packages.removeWhere((p) => p.productPackageId == packageId);
+      packages.refresh();
+
       TSnackbarsWidget.success(
           title: TTexts.successTitle.tr,
           message: TTexts.packageDeletedSuccess.tr);
