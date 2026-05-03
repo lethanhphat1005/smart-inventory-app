@@ -152,12 +152,27 @@ class CategoryDetailController extends GetxController with TErrorHandler {
   }
 
   // ==========================================
-  // HÀM MỚI: ACTIONS CHO CATEGORY
+  // ACTIONS CHO CATEGORY
   // ==========================================
   void editCategory() {
     try {
       // Chuyển sang form dùng chung và truyền category sang để bật Edit Mode
-      Get.toNamed(AppRoutes.categoryForm, arguments: rxCategory.value);
+      Get.toNamed(AppRoutes.categoryForm, arguments: rxCategory.value)
+          ?.then((_) {
+        // Khi đóng form Edit quay lại, tự chọc gọi lại API để load lại Tên và Mô tả mới!
+        // Lưu ý: Vì API ko trả thẳng 1 category mà trả về danh sách, ta cần chọc vào Catalog để lấy danh sách mới rồi tìm lại thằng hiện tại
+        if (Get.isRegistered<ProductCatalogController>()) {
+          final catalogCtrl = Get.find<ProductCatalogController>();
+          catalogCtrl.fetchCategories().then((_) {
+            // Sau khi load xong danh sách tổng, bốc lấy cục data mới đắp vào rxCategory hiện tại
+            final updatedCat = catalogCtrl.categories.firstWhereOrNull(
+                (c) => c.categoryId == rxCategory.value.categoryId);
+            if (updatedCat != null) {
+              rxCategory.value = updatedCat;
+            }
+          });
+        }
+      });
     } catch (e) {
       handleError(e);
     }

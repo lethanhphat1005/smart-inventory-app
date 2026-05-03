@@ -126,7 +126,9 @@ class ProductCatalogController extends GetxController with TErrorHandler {
   // ==========================================
   void addNewCategory() {
     try {
-      Get.toNamed(AppRoutes.categoryForm);
+      Get.toNamed(AppRoutes.categoryForm)?.then((_) {
+        fetchCategories();
+      });
     } catch (e) {
       handleError(e);
     }
@@ -137,7 +139,9 @@ class ProductCatalogController extends GetxController with TErrorHandler {
       Get.toNamed(
         AppRoutes.categoryDetail,
         arguments: category,
-      );
+      )?.then((_) {
+        fetchCategories();
+      });
     } catch (e) {
       handleError(e);
     }
