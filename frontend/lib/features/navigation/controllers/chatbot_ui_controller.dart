@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/infrastructure/utils/error_handler_utils.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/features/home/controllers/home_controller.dart';
+import 'package:frontend/features/inventory/controllers/inventory_controller.dart';
 import 'package:frontend/features/navigation/providers/chatbot_provider.dart';
+import 'package:frontend/features/report/controllers/report_controller.dart';
 import 'package:get/get.dart';
 import 'package:frontend/features/navigation/models/chat_message_model.dart';
 import 'package:frontend/core/infrastructure/network/app_client.dart';
@@ -136,6 +139,21 @@ class ChatbotUiController extends GetxController with TErrorHandler {
 
       messages.add(ChatMessage(
           text: TTexts.chatbotTransactionSuccess.tr, isUser: false));
+
+      // 1. Cập nhật Dashboard
+      if (Get.isRegistered<HomeController>()) {
+        Get.find<HomeController>().loadAllHomeData();
+      }
+
+      // 2. Cập nhật trang Inventory 
+      if (Get.isRegistered<InventoryController>()) {
+        Get.find<InventoryController>().fetchDashboardData(isRefresh: true);
+      }
+
+      // 3. Cập nhật trang Báo cáo 
+      if (Get.isRegistered<ReportController>()) {
+        Get.find<ReportController>().fetchTransactions(isRefresh: true);
+      }
     } catch (e) {
       handleError(e);
 
