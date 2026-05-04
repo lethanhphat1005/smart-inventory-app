@@ -13,34 +13,38 @@ class EditStoreMobileView extends GetView<ProfileEditStoreController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      extendBodyBehindAppBar: true,
-      appBar: const TBlurAppBarWidget(),
-      body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        child: Padding(
-          padding: EdgeInsets.only(
-            top: MediaQuery.of(context).padding.top +
-                kToolbarHeight +
-                AppSizes.p16,
-            left: AppSizes.p24,
-            right: AppSizes.p24,
-            bottom: AppSizes.p48,
+    return PopScope(
+        onPopInvoked: (didPop) {
+          controller.resetFormState();
+        },
+        child: Scaffold(
+          backgroundColor: AppColors.background,
+          extendBodyBehindAppBar: true,
+          appBar: const TBlurAppBarWidget(),
+          body: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            child: Padding(
+              padding: EdgeInsets.only(
+                top: MediaQuery.of(context).padding.top +
+                    kToolbarHeight +
+                    AppSizes.p16,
+                left: AppSizes.p24,
+                right: AppSizes.p24,
+                bottom: AppSizes.p48,
+              ),
+              child: const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  EditStoreHeaderWidget(),
+                  SizedBox(height: AppSizes.p24),
+                  EditStoreCardWidgets(),
+                  SizedBox(height: AppSizes.p24),
+                  // AssignsRoleMembersView(),
+                  EditStoreListWidgets(),
+                ],
+              ),
+            ),
           ),
-          child: const Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              EditStoreHeaderWidget(),
-              SizedBox(height: AppSizes.p24),
-              EditStoreCardWidgets(),
-              SizedBox(height: AppSizes.p24),
-              // AssignsRoleMembersView(),
-              EditStoreListWidgets(),
-            ],
-          ),
-        ),
-      ),
-    );
+        ));
   }
 }

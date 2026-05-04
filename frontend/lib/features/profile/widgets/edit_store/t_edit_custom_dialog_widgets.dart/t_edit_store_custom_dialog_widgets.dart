@@ -76,7 +76,12 @@ class TEditStoreCustomDialogWidgets
                     Transform.translate(
                       offset: const Offset(0, -8),
                       child: IconButton(
-                        onPressed: () => Get.back(),
+                        onPressed: () {
+                          Get.back();
+                          Future.delayed(const Duration(milliseconds: 300), () {
+                            controller.resetFormState();
+                          });
+                        },
                         icon: const Icon(Icons.close, color: AppColors.subText),
                         iconSize: AppSizes.p32,
                       ),
