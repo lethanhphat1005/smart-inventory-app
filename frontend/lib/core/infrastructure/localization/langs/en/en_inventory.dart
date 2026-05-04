@@ -66,7 +66,7 @@ final Map<String, String> enInventory = {
   // -- Inventory Detail
   TTexts.inventoryDetails: 'Inventory Details',
   TTexts.quantityInStock: 'Quantity in Stock',
-  TTexts.reorderThreshold: 'Reorder Threshold',
+  TTexts.reorderThreshold: 'Reorder Suggestion',
   TTexts.importPrice: 'Import Price',
   TTexts.adjustStock: 'Adjust Stock',
   TTexts.totalInStock: 'Total in Stock',

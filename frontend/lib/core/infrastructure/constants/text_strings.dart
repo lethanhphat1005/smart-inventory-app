@@ -360,8 +360,8 @@ class TTexts {
   static const String homeScanBarcodeSub = "home_scan_barcode_sub";
   static const String homeAddProduct = "home_add_product";
   static const String homeAddProductSub = "home_add_product_sub";
-  static const String homeViewReports = "home_view_reports";
-  static const String homeViewReportsSub = "home_view_reports_sub";
+  static const String homeReorderThreshold = "home_reorder_threshold";
+  static const String homeReorderThresholdSub = "home_reorder_threshold_sub";
   static const String surplus = 'surplus';
   static const String shrinkage = 'shrinkage';
   static const String dailyStockHealth = 'daily_stock_health';
@@ -452,7 +452,8 @@ class TTexts {
   static const String hideCategoryTitle = 'hide_category_title';
   static const String hideCategoryConfirm = 'hide_category_confirm';
   static const String hide = 'hide';
-  static const String hideCategorySuccessMessage = 'hide_category_success_message';
+  static const String hideCategorySuccessMessage =
+      'hide_category_success_message';
   static const String addNewProductDesc = "add_new_product_desc";
 
   // -- Chatbot AI
@@ -1269,7 +1270,8 @@ class TTexts {
   static const String verifiedLabel = "verified_label";
   static const String barcodeCandidateTitle = "barcode_candidate_title";
   static const String barcodeCandidateSubtitle = "barcode_candidate_subtitle";
-  static const String barcodeMatchesMultipleProducts = "barcode_matches_multiple_products";
+  static const String barcodeMatchesMultipleProducts =
+      "barcode_matches_multiple_products";
   static const String skipLabel = "skip_label";
   static const String createProduct = "create_product";
 

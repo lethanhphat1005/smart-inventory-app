@@ -103,12 +103,12 @@ class TSnackbarsWidget {
             ),
           ),
           if (actionBtn != null) ...[actionBtn, const SizedBox(width: 12)],
-          IconButton(
-            onPressed: () => Get.closeCurrentSnackbar(),
-            icon: const Icon(Icons.close, color: Color(0xFF9CA3AF), size: 20),
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
-          ),
+          // IconButton(
+          //   onPressed: () {
+          //     Get.closeCurrentSnackbar();
+          //   },
+          //   icon: const Icon(Icons.close, color: Color(0xFF9CA3AF), size: 20),
+          // )
         ],
       ),
       padding: const EdgeInsets.all(16),
@@ -123,7 +123,8 @@ class TSnackbarsWidget {
           offset: const Offset(0, 4),
         ),
       ],
-      duration: const Duration(seconds: 3), // Chỉnh lại 3s cho nhanh gọn
+      duration: const Duration(milliseconds: 2500),
+      animationDuration: const Duration(milliseconds: 1000),
       isDismissible: true,
       dismissDirection: DismissDirection.horizontal,
     );
