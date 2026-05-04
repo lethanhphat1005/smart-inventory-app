@@ -467,4 +467,11 @@ class ProfileEditStoreController extends GetxController {
     addressController.dispose();
     super.onClose();
   }
+
+  // RESET STATE KHI THOÁT
+  void resetFormState() {
+    isEditing.value = false;
+    addressPredictions.clear();
+    _initializeFields(); 
+  }
 }
