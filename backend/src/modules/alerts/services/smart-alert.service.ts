@@ -367,7 +367,7 @@ export class SmartAlertService {
 
       // Trường hợp 1: Trên hệ thống báo hết hàng (0) nhưng đếm thực tế lại có hàng -> Bất thường
       if (item.systemQuantity === 0) {
-        return diff > 0;
+        return diff >= 3;
       }
 
       // Trường hợp 2: Lệch trên 5% VÀ phải lệch ít nhất 3 đơn vị
@@ -500,7 +500,7 @@ export class SmartAlertService {
     const formattedPrice = new Intl.NumberFormat('en-US').format(
       payload.totalPrice,
     );
-    const bodyText = `An unusually large ${actionType} transaction was recorded. Total value: ${formattedPrice} Dollar (${payload.itemCount} items).`;
+    const bodyText = `An unusually large ${actionType} transaction was recorded. Total value: ${formattedPrice} with (${payload.itemCount} items).`;
 
     // Gửi thông báo
     await Promise.all(

@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/infrastructure/network/app_client.dart';
 import 'package:frontend/core/ui/widgets/t_snackbars_widget.dart';
 import 'package:frontend/features/notification/controller/notification_controller.dart';
@@ -153,8 +154,8 @@ class NotificationService {
 
         if (type == 'ROLE_UPDATED') {
           TSnackbarsWidget.warning(
-              title: 'Quyền hạn thay đổi',
-              message: 'Vui lòng đăng nhập lại để cập nhật quyền hạn mới.');
+              title: TTexts.noPermissionTitle.tr,
+              message: TTexts.noPermissionContent.tr);
 
           await supabase!.auth.signOut();
           // Đăng xuất Google để lần sau hiện lại popup chọn tài khoản

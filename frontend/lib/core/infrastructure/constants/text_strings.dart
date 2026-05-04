@@ -452,7 +452,8 @@ class TTexts {
   static const String hideCategoryTitle = 'hide_category_title';
   static const String hideCategoryConfirm = 'hide_category_confirm';
   static const String hide = 'hide';
-  static const String hideCategorySuccessMessage = 'hide_category_success_message';
+  static const String hideCategorySuccessMessage =
+      'hide_category_success_message';
   static const String addNewProductDesc = "add_new_product_desc";
 
   // -- Chatbot AI
@@ -1027,6 +1028,10 @@ class TTexts {
   static const String connectionError = "connection_error";
   static const String cannotDeleteNotification = "cannot_delete_notification";
   static const String undoButton = "undo_button";
+  static const String noPermissionTitle = "no_permission_title";
+  static const String noPermissionContent = "no_permission_content";
+  static const String informationTitle = "information_title";
+  static const String informationContent = "information_content";
 
   // -- Time Ago
   static const String daysAgo = "days_ago";
@@ -1269,7 +1274,8 @@ class TTexts {
   static const String verifiedLabel = "verified_label";
   static const String barcodeCandidateTitle = "barcode_candidate_title";
   static const String barcodeCandidateSubtitle = "barcode_candidate_subtitle";
-  static const String barcodeMatchesMultipleProducts = "barcode_matches_multiple_products";
+  static const String barcodeMatchesMultipleProducts =
+      "barcode_matches_multiple_products";
   static const String skipLabel = "skip_label";
   static const String createProduct = "create_product";
 
