@@ -15,6 +15,10 @@ final Map<String, String> enNotification = {
   TTexts.connectionError: 'Connection Error',
   TTexts.cannotDeleteNotification: 'Cannot delete notification at this time.',
   TTexts.undoButton: 'Undo',
+  TTexts.noPermissionTitle: 'Authority changes',
+  TTexts.noPermissionContent: 'Please log in again to update your permissions.',
+  TTexts.informationTitle: 'Information',
+  TTexts.informationContent: 'This notification has been processed previously.',
 
   // Time Ago
   TTexts.daysAgo: 'days ago',

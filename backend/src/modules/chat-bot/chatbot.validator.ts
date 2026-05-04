@@ -5,14 +5,14 @@ export const chatPayloadSchema = z.object({
     message: z
       .string()
       .trim()
-      .min(1, 'Tin nhắn không được để trống')
-      .max(100, 'Tin nhắn quá dài, vui lòng nhập tối đa 100 ký tự'),
+      .min(1, 'Message cannot be empty')
+      .max(100, 'Message cannot exceed 100 characters'),
   }),
 });
 
 export const confirmActionSchema = z.object({
   body: z.object({
-    draftActionId: z.string().trim().min(1, 'Mã giao dịch nháp là bắt buộc'),
+    draftActionId: z.string().trim().min(1, 'Draft action ID is required'),
     isConfirmed: z.boolean(),
   }),
 });

@@ -33,72 +33,10 @@ class NotificationController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    // _getArgument();
     fetchNotifications();
 
     _setupPagination();
-    // _setupRealtime();
   }
-
-  // ==========================================
-  // HÀM LẤY ARGUMENT TỪ ROUTE
-  // ==========================================
-  // void _getArgument() {
-  //   final args = Get.arguments;
-
-  //   if (args != null) {
-  //     if (args is UserProfileModel) {
-  //       currentUser = args;
-  //     } else if (args is Rxn<UserProfileModel>) {
-  //       currentUser = args.value;
-  //     }
-
-  //     if (currentUser != null) {
-  //       debugPrint("🎯 Đã nhận thông báo cho user: ${currentUser!.fullName}");
-  //     } else {
-  //       debugPrint(
-  //           "⚠️ Argument có tồn tại nhưng dữ liệu bên trong bị rỗng (null)");
-  //     }
-  //   } else {
-  //     // Đây là nơi thông báo lỗi bạn đang thấy xuất hiện
-  //     debugPrint("⚠️ Không nhận được bất kỳ argument nào từ trang trước!");
-  //   }
-  // }
-
-  // ==========================================
-  // 1. SETUP REALTIME (SUPABASE)
-  // ==========================================
-  // void _setupRealtime(String currentUserId) {
-  //   // Tạm thời hardcode userId để test, sau này bạn lấy từ State management của bạn (GetX/Provider)
-  //   //const currentUserId = '665ef842-704d-4479-b996-fc9e2c663587';
-
-  //   if (currentUserId.isEmpty) return;
-
-  //   Supabase.instance.client
-  //       .channel('public:notification')
-  //       .onPostgresChanges(
-  //         event: PostgresChangeEvent.insert,
-  //         schema: 'public',
-  //         // 👇 SỬA Ở ĐÂY: Chữ 'notification' phải viết thường y hệt trong Database
-  //         table: 'notification',
-  //         filter: PostgresChangeFilter(
-  //           type: PostgresChangeFilterType.eq,
-  //           column:
-  //               'user_id', // 👈 LƯU Ý: Prisma thường map xuống DB là snake_case.
-  //           // Bạn hãy check lại trong bảng notification xem cột lưu ID
-  //           // người dùng là 'userId' hay 'user_id' để truyền cho đúng nhé!
-  //           value: currentUserId,
-  //         ),
-  //         callback: (payload) {
-  //           debugPrint(
-  //               '🔔 REALTIME BÁO CÓ THÔNG BÁO MỚI: ${payload.newRecord}');
-
-  //           // Tải lại danh sách từ trang 1
-  //           fetchNotifications();
-  //         },
-  //       )
-  //       .subscribe();
-  // }
 
   void _setupPagination() {
     scrollController.addListener(() {
@@ -256,10 +194,21 @@ class NotificationController extends GetxController {
     fetchNotifications();
   }
 
-  void handleNotificationClick(NotificationModel item) {
-    if (!item.isRead) {
-      markAsRead(item.notificationId);
+  Future<void> handleNotificationClick(NotificationModel item) async {
+    if (item.type == 'ROLE_UPDATED') {
+      if (item.isRead) {
+        TSnackbarsWidget.info(
+          title: TTexts.informationTitle.tr,
+          message: TTexts.informationContent.tr,
+        );
+        return;
+      }
     }
+
+    if (!item.isRead) {
+      await markAsRead(item.notificationId);
+    }
+
     NotificationRouter.navigate(item.type, item.referenceId, item.storeId);
   }
 
