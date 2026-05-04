@@ -77,6 +77,8 @@ class TransactionCartItemWidget extends StatelessWidget {
                     overflow: TextOverflow.ellipsis),
                 const SizedBox(height: 4),
                 Text('\$$price',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                         fontSize: 13, color: AppColors.subText)),
               ],
