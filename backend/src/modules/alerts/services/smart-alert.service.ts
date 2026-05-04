@@ -361,12 +361,22 @@ export class SmartAlertService {
   public async checkDiscrepancyRule(payload: DiscrepancyPayload) {
     const { storeId, adjustmentId, items } = payload;
 
-    // Lọc ra các item có độ lệch bất thường (Ví dụ: lệch từ 5 đơn vị trở lên)
-    const abnormalItems = items.filter(
-      (item) => Math.abs(item.systemQuantity - item.actualQuantity) >= 5,
-    );
+    // Lọc ra các item có độ lệch bất thường dựa trên Tỉ lệ % và Số lượng tối thiểu
+    const abnormalItems = items.filter((item) => {
+      const diff = Math.abs(item.systemQuantity - item.actualQuantity);
 
-    // Nếu không có sản phẩm nào lệch quá ngưỡng, dừng lại không báo
+      // Trường hợp 1: Trên hệ thống báo hết hàng (0) nhưng đếm thực tế lại có hàng -> Bất thường
+      if (item.systemQuantity === 0) {
+        return diff > 0;
+      }
+
+      // Trường hợp 2: Lệch trên 5% VÀ phải lệch ít nhất 3 đơn vị
+      const percentage = diff / item.systemQuantity;
+
+      return percentage >= 0.05 && diff >= 3;
+    });
+
+    // Nếu không có sản phẩm nào thỏa mãn điều kiện bất thường, dừng lại
     if (abnormalItems.length === 0) {
       return;
     }
@@ -424,7 +434,51 @@ export class SmartAlertService {
     totalPrice: number;
     itemCount: number;
   }) {
-    if (payload.totalPrice < 500) {
+    // Lấy mốc thời gian 30 ngày trước để tính Trung Bình Trượt (Moving Average)
+    const thirtyDaysAgo = new Date();
+
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    // Dùng Prisma Aggregate để lấy giá trị trung bình trong 30 ngày gần nhất
+    const stats = await prisma.transaction.aggregate({
+      where: {
+        storeId: payload.storeId,
+        type: payload.type as 'import' | 'export',
+        status: 'completed',
+        createdAt: {
+          gte: thirtyDaysAgo,
+        },
+      },
+      _avg: {
+        totalPrice: true,
+      },
+      _count: {
+        transactionId: true,
+      },
+    });
+
+    const averagePrice = stats._avg.totalPrice
+      ? Number(stats._avg.totalPrice)
+      : 0;
+    const transactionCount = stats._count.transactionId;
+
+    let isAbnormal = false;
+
+    // Logic kiểm tra bất thường
+    if (transactionCount < 5) {
+      // Cold Start: Cửa hàng mới hoặc quá ít giao dịch trong tháng, dùng mức sàn 500
+      isAbnormal = payload.totalPrice >= 500;
+    } else {
+      // Dynamic Threshold: Giao dịch lớn hơn 150% trung bình 30 ngày
+      const dynamicThreshold = averagePrice * 1.5;
+
+      // Chặn dưới: Phải lớn hơn 100$ và lớn hơn 150% trung bình mới báo (tránh spam bill nhỏ)
+      const minThreshold = Math.max(dynamicThreshold, 100);
+
+      isAbnormal = payload.totalPrice > minThreshold;
+    }
+
+    if (!isAbnormal) {
       return;
     }
 
@@ -440,14 +494,13 @@ export class SmartAlertService {
     const notiType = isImport ? appEvents.IMPORT : appEvents.EXPORT;
 
     const title = isImport
-      ? '📦 Stock Import Completed'
-      : '🚚 Stock Export Completed';
+      ? '📦 Unusual Large Import Detected'
+      : '🚚 Unusual Large Export Detected';
 
-    // Format tiền tệ VNĐ (thêm dấu phẩy)
     const formattedPrice = new Intl.NumberFormat('en-US').format(
       payload.totalPrice,
     );
-    const bodyText = `A successful ${actionType} transaction was recorded. Total value: ${formattedPrice} Dollar (${payload.itemCount} items).`;
+    const bodyText = `An unusually large ${actionType} transaction was recorded. Total value: ${formattedPrice} Dollar (${payload.itemCount} items).`;
 
     // Gửi thông báo
     await Promise.all(
