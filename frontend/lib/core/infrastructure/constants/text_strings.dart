@@ -360,8 +360,8 @@ class TTexts {
   static const String homeScanBarcodeSub = "home_scan_barcode_sub";
   static const String homeAddProduct = "home_add_product";
   static const String homeAddProductSub = "home_add_product_sub";
-  static const String homeViewReports = "home_view_reports";
-  static const String homeViewReportsSub = "home_view_reports_sub";
+  static const String homeReorderThreshold = "home_reorder_threshold";
+  static const String homeReorderThresholdSub = "home_reorder_threshold_sub";
   static const String surplus = 'surplus';
   static const String shrinkage = 'shrinkage';
   static const String dailyStockHealth = 'daily_stock_health';

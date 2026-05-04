@@ -36,7 +36,22 @@ class HomeQuickActionsWidget extends StatelessWidget {
           clipBehavior: Clip.none,
           child: Row(
             children: [
-              // 1. THẺ SCAN
+              // 1. THẺ REORDER SUGGESTION
+
+              _buildPremiumCard(
+                icon: Icons.lightbulb_outline,
+                title: TTexts.reorderThreshold.tr,
+                subtitle: TTexts.homeReorderThresholdSub.tr,
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xFF5FC8F9), Color(0xFF0189C8)],
+                ),
+                onTap: () => Get.toNamed(AppRoutes.reorderSuggestion),
+              ),
+              const SizedBox(width: AppSizes.p16),
+
+              // 2. THẺ SCAN
               _buildPremiumCard(
                 icon: Iconsax.scan_barcode_copy,
                 title: TTexts.homeScanBarcode.tr,
@@ -57,7 +72,7 @@ class HomeQuickActionsWidget extends StatelessWidget {
                 },
               ),
 
-              // 2. THẺ ADD PRODUCT
+              // 3. THẺ ADD PRODUCT
               if (isManager) ...[
                 const SizedBox(width: AppSizes.p16),
                 _buildPremiumCard(
@@ -73,22 +88,7 @@ class HomeQuickActionsWidget extends StatelessWidget {
                 ),
               ],
 
-              // 3. THẺ VIEW REPORTS
-              // const SizedBox(width: AppSizes.p16),
-              // _buildPremiumCard(
-              //   icon: Iconsax.chart_square_copy,
-              //   title: TTexts.homeViewReports.tr,
-              //   subtitle: TTexts.homeViewReportsSub.tr,
-              //   gradient: const LinearGradient(
-              //     begin: Alignment.topLeft,
-              //     end: Alignment.bottomRight,
-              //     colors: [Color(0xFF7B61FF), Color(0xFF5835E5)],
-              //   ),
-              //   onTap: () {
-              //   },
-              // ),
-
-              // 4. THẺ VIEW ADJUSTMENTS (ĐÃ ĐỔI SANG MÀU XANH TEAL TRÁNH TRÙNG MÀU APP)
+              // 5. THẺ VIEW ADJUSTMENTS (ĐÃ ĐỔI SANG MÀU XANH TEAL TRÁNH TRÙNG MÀU APP)
               const SizedBox(width: AppSizes.p16),
               _buildPremiumCard(
                 icon: Iconsax.setting_2_copy,
@@ -107,7 +107,7 @@ class HomeQuickActionsWidget extends StatelessWidget {
                 },
               ),
 
-              // 5. THẺ LOW STOCK ALERTS (MÀU ĐỎ)
+              // 6. THẺ LOW STOCK ALERTS (MÀU ĐỎ)
               const SizedBox(width: AppSizes.p16),
               _buildPremiumCard(
                 icon: Iconsax.warning_2_copy,

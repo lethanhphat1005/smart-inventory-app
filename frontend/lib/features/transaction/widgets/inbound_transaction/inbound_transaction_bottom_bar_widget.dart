@@ -32,18 +32,23 @@ class InboundTransactionBottomBarWidget
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
                     TTexts.totalFunds.tr,
                     style: const TextStyle(
                         fontSize: 16, fontWeight: FontWeight.bold),
                   ),
-                  Text(
-                    '${controller.totalItems} ${TTexts.items.tr.toLowerCase()} • \$${controller.totalFunds.toStringAsFixed(2)}',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: isEmpty ? AppColors.softGrey : AppColors.primary,
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Text(
+                      '${controller.totalItems} ${TTexts.items.tr.toLowerCase()} • \$${controller.totalFunds.toStringAsFixed(2)}',
+                      textAlign: TextAlign.right,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: isEmpty ? AppColors.softGrey : AppColors.primary,
+                      ),
                     ),
                   ),
                 ],

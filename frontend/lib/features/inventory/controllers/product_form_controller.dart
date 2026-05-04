@@ -414,7 +414,7 @@ class ProductFormController extends GetxController with TErrorHandler {
     // TRƯỜNG HỢP 1: CÓ ẢNH RỒI XÓA ĐI TRỐNG TRƠN -> BẬT DIALOG HỎI XÁC NHẬN
     if (isImageEmptyNow && hadImageBefore) {
       Get.dialog(TCustomDialogWidget(
-        title: TTexts.deleteProductImageTitle.tr, 
+        title: TTexts.deleteProductImageTitle.tr,
         description: TTexts.deleteProductImageMessage.tr,
         icon: const Text('🗑️', style: TextStyle(fontSize: 40)),
         primaryButtonText: TTexts.delete.tr,
@@ -711,9 +711,7 @@ class ProductFormController extends GetxController with TErrorHandler {
       final newProduct = await _provider.createProduct(productPayload);
 
       final packagePayload = {
-        'variant': packageVariantNameController.text.trim().isNotEmpty
-            ? packageVariantNameController.text.trim()
-            : null,
+        'variant': packageVariantNameController.text.trim(),
         'unitId': selectedUnitId.value,
         'importPrice': parsePrice(importPriceController.text),
         'sellingPrice': parsePrice(salePriceController.text),
@@ -840,9 +838,7 @@ class ProductFormController extends GetxController with TErrorHandler {
       if (isUpdate) {
         final targetPackageId = packageToEdit!.productPackageId;
         final packagePayload = {
-          'variant': packageVariantNameController.text.trim().isNotEmpty
-              ? packageVariantNameController.text.trim()
-              : null,
+          'variant': packageVariantNameController.text.trim(),
           'unitId': selectedUnitId.value,
           'importPrice': parsePrice(importPriceController.text),
           'sellingPrice': parsePrice(salePriceController.text),
@@ -888,9 +884,7 @@ class ProductFormController extends GetxController with TErrorHandler {
         _triggerRefreshAndClose(TTexts.packageUpdatedSuccess.tr);
       } else {
         final packagePayload = {
-          'variant': packageVariantNameController.text.trim().isNotEmpty
-              ? packageVariantNameController.text.trim()
-              : null,
+          'variant': packageVariantNameController.text.trim(),
           'unitId': selectedUnitId.value,
           'importPrice': parsePrice(importPriceController.text),
           'sellingPrice': parsePrice(salePriceController.text),

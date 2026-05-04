@@ -400,7 +400,7 @@ class ProfileEditStoreController extends GetxController {
 
       if (currentName.isEmpty) {
         TSnackbarsWidget.warning(
-          title: TTexts.errorTitle.tr,
+          title: TTexts.warningTitle.tr,
           message: TTexts.fillAllFields.tr,
         );
         return;

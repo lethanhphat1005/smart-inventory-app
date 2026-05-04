@@ -29,7 +29,6 @@ const createProductPackageBodySchema = z
       variant: z
         .string()
         .trim()
-        .min(1, 'Variant cannot be empty')
         .max(255, 'Variant cannot exceed 255 characters')
         .optional()
         .default(''),
@@ -60,7 +59,6 @@ const updateProductPackageBodySchema = z
     variant: z
       .string()
       .trim()
-      .min(1, 'Variant cannot be empty')
       .max(255, 'Variant cannot exceed 255 characters')
       .nullable()
       .optional(),
