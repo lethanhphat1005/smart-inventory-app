@@ -9,6 +9,8 @@ import {
   FRIENDLY_REPLY_MODEL,
   FRIENDLY_REPLY_TEMPERATURE,
   LOCK_TTL_SECONDS,
+  OUT_OF_DOMAIN_KEYWORDS,
+  STATIC_REJECTION_REPLY,
 } from '../chatbot.constants.js';
 import {
   buildChatDraftKey,
@@ -45,7 +47,6 @@ export class ChatbotService {
     private readonly llmProvider: LLMProvider,
   ) {}
 
-  // tạo reply cho mọi request của user
   private async generateFriendlyReply(
     userMessage: string,
     systemContext: string,
@@ -92,11 +93,10 @@ export class ChatbotService {
     if (!acquired) {
       throw new CustomError({
         message:
-          'Tori is thinking about your previous question, please wait a few seconds! ⏳',
+          'Tori is still processing your previous message ⏳ Please wait a moment!',
         status: StatusCodes.TOO_MANY_REQUESTS,
       });
     }
-
     try {
       const previousHistory = await this.chatMemoryService.getChatHistory(
         storeId,
@@ -118,7 +118,6 @@ export class ChatbotService {
           .join(', ');
         const actionName = cart.type === 'create_export' ? 'XUẤT' : 'NHẬP';
 
-        // Chèn ngay sau system prompt để AI luôn nhớ trạng thái giỏ hàng
         messages.splice(1, 0, {
           role: 'system',
           content: `[TEMPORARY CART STATUS]: The user has an incomplete inventory session at ${actionName}. Items added: ${cartDetails}. Please prioritize processing this session.`,
@@ -128,6 +127,13 @@ export class ChatbotService {
       const messagesToSave: ChatHistoryMessage[] = [
         { role: 'user', content: payload.message },
       ];
+
+      if (this.isOutOfDomain(payload.message)) {
+        return {
+          aiIntent: 'out_of_domain',
+          botReply: STATIC_REJECTION_REPLY,
+        };
+      }
 
       const response = await this.llmProvider.createChatCompletion({
         model: COORDINATOR_MODEL,
@@ -180,9 +186,12 @@ export class ChatbotService {
             finalResponse = {
               aiIntent: 'clarify',
               botReply: await this.generateFriendlyReply(
-                payload.message,
-                validationResult.reason ||
-                  'The information is insufficient; the user is requested to provide clarification.',
+                this.buildReplyContext(
+                  payload.message,
+                  validationResult.reason ||
+                    'The information is insufficient; the user is requested to provide clarification.',
+                ),
+                '', // systemContext nay đã gộp vào context
               ),
             };
 
@@ -228,8 +237,11 @@ export class ChatbotService {
                 finalResponse = {
                   aiIntent: 'unknown',
                   botReply: await this.generateFriendlyReply(
-                    payload.message,
-                    'No, this feature is not currently available on the system.',
+                    this.buildReplyContext(
+                      payload.message,
+                      'No, this feature is not currently available on the system.',
+                    ),
+                    '', // systemContext nay đã gộp vào context
                   ),
                 };
             }
@@ -251,11 +263,14 @@ export class ChatbotService {
         finalResponse = {
           aiIntent: 'unknown',
           botReply: await this.generateFriendlyReply(
-            payload.message,
-            `SYSTEM MODERATION COMMAND: The user is chatting and the message doesn't require calling a tool.
-              - If it's a basic greeting, respond in a friendly manner.
-              - If it's a question about unrelated topics (such as celebrities, history, mathematics, coding, etc.),
-              ABSOLUTELY DO NOT respond. It is MANDATORY to apply the REJECTION FORMULA in the "OUT-OF-LINE DISCIPLINE" rule.`,
+            this.buildReplyContext(
+              payload.message,
+              `SYSTEM MODERATION COMMAND: The user is chatting and the message doesn't require calling a tool.
+                - If it's a basic greeting, respond in a friendly manner.
+                - If it's a question about unrelated topics (such as celebrities, history, mathematics, coding, etc.),
+                ABSOLUTELY DO NOT respond. It is MANDATORY to apply the REJECTION FORMULA in the "OUT-OF-LINE DISCIPLINE" rule.`,
+            ),
+            '', // systemContext nay đã gộp vào context
           ),
         };
       }
@@ -265,18 +280,15 @@ export class ChatbotService {
         content: finalResponse.botReply,
       });
 
-      if (finalResponse.aiIntent !== 'unknown') {
+      const isShouldSave = !['out_of_domain'].includes(finalResponse.aiIntent);
+
+      if (isShouldSave) {
         await this.chatMemoryService.saveChatHistory(
           storeId,
           userId,
           messagesToSave,
         );
       }
-      // else {
-      // Nếu user hỏi lan man quá nhiều, chủ động clear history luôn để reset AI
-      // (Tùy chọn: bạn có thể bỏ dòng này nếu muốn nhẹ tay hơn)
-      // await this.chatMemoryService.clearChatHistory(storeId, userId);
-      // }
 
       return finalResponse;
     } catch (error) {
@@ -286,7 +298,11 @@ export class ChatbotService {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
       });
     } finally {
-      await this.redisClient.del(lockKey);
+      try {
+        await this.redisClient.del(lockKey);
+      } catch (e) {
+        console.error('[Lock release failed]', e);
+      }
     }
   }
 
@@ -378,8 +394,11 @@ export class ChatbotService {
       );
 
       return await this.generateFriendlyReply(
-        'I want to cancel the transaction.',
-        'The operation has been cancelled.',
+        this.buildReplyContext(
+          'I want to cancel the transaction.',
+          'The operation has been cancelled.',
+        ),
+        '',
       );
     }
 
@@ -403,8 +422,11 @@ export class ChatbotService {
     await this.chatMemoryService.clearCartSession(draft.storeId, draft.userId);
 
     return await this.generateFriendlyReply(
-      'Confirmation successful',
-      'Great! The transaction has been recorded in the system.',
+      this.buildReplyContext(
+        'Confirmation successful',
+        'Great! The transaction has been recorded in the system.',
+      ),
+      '',
     );
   }
 
@@ -440,7 +462,10 @@ export class ChatbotService {
 
     return {
       aiIntent: 'get_low_stock',
-      botReply: await this.generateFriendlyReply(userMessage, systemContext),
+      botReply: await this.generateFriendlyReply(
+        this.buildReplyContext(userMessage, systemContext),
+        '',
+      ),
       data: { totalCount, items: displayItems },
     };
   }
@@ -454,8 +479,11 @@ export class ChatbotService {
       return {
         aiIntent: 'get_product_info',
         botReply: await this.generateFriendlyReply(
-          userMessage,
-          'Please ask the user to provide the name of the product they are looking for.',
+          this.buildReplyContext(
+            userMessage,
+            'Please ask the user to provide the name of the product they are looking for.',
+          ),
+          '',
         ),
       };
     }
@@ -466,8 +494,11 @@ export class ChatbotService {
       return {
         aiIntent: 'get_product_info',
         botReply: await this.generateFriendlyReply(
-          userMessage,
-          `${productName} was not found in the inventory.`,
+          this.buildReplyContext(
+            userMessage,
+            `${productName} was not found in the inventory.`,
+          ),
+          '',
         ),
       };
     }
@@ -481,7 +512,10 @@ Inventory: ${exactMatch.quantity} ${exactMatch.productPackage.unit.name}.`;
 
       return {
         aiIntent: 'get_product_info',
-        botReply: await this.generateFriendlyReply(userMessage, context),
+        botReply: await this.generateFriendlyReply(
+          this.buildReplyContext(userMessage, context),
+          '',
+        ),
         data: exactMatch,
       };
     }
@@ -492,7 +526,10 @@ Inventory: ${firstResult.quantity} ${firstResult.productPackage.unit.name}.`;
 
       return {
         aiIntent: 'get_product_info',
-        botReply: await this.generateFriendlyReply(userMessage, context),
+        botReply: await this.generateFriendlyReply(
+          this.buildReplyContext(userMessage, context),
+          '',
+        ),
         data: firstResult,
       };
     }
@@ -500,8 +537,11 @@ Inventory: ${firstResult.quantity} ${firstResult.productPackage.unit.name}.`;
     return {
       aiIntent: 'choose_product',
       botReply: await this.generateFriendlyReply(
-        userMessage,
-        `The system found multiple results for "${productName}". PLEASE SAY IN SHORT: "Tori found several similar products. Please select the exact one from the list below 👇". DO NOT list products yourself.`,
+        this.buildReplyContext(
+          userMessage,
+          `The system found multiple results for "${productName}". PLEASE SAY IN SHORT: "Tori found several similar products. Please select the exact one from the list below 👇". DO NOT list products yourself.`,
+        ),
+        '',
       ),
       data: { originalIntent: 'get_product_info', items: searchResult },
     };
@@ -526,8 +566,11 @@ Inventory: ${firstResult.quantity} ${firstResult.productPackage.unit.name}.`;
       return {
         aiIntent: intent,
         botReply: await this.generateFriendlyReply(
-          userMessage,
-          'The user is asked to specify the product name and the quantity they wish to process.',
+          this.buildReplyContext(
+            userMessage,
+            'The user is asked to specify the product name and the quantity they wish to process.',
+          ),
+          '',
         ),
       };
     }
@@ -556,8 +599,11 @@ Inventory: ${firstResult.quantity} ${firstResult.productPackage.unit.name}.`;
         return {
           aiIntent: intent,
           botReply: await this.generateFriendlyReply(
-            userMessage,
-            `Error: "${item.product_name}" was not found. Previous items remain in the cart.`,
+            this.buildReplyContext(
+              userMessage,
+              `Error: "${item.product_name}" was not found. Previous items remain in the cart.`,
+            ),
+            '',
           ),
         };
       }
@@ -577,8 +623,11 @@ Inventory: ${firstResult.quantity} ${firstResult.productPackage.unit.name}.`;
         return {
           aiIntent: 'choose_product',
           botReply: await this.generateFriendlyReply(
-            userMessage,
-            `Many items similar to "${item.product_name}" were found. PLEASE SAY THIS IN SHORT: "There are several products with the same name, please click to select the correct type you want to ${isExport ? 'export' : 'import'} below 👇". ABSOLUTELY DO NOT list items yourself.`,
+            this.buildReplyContext(
+              userMessage,
+              `Many items similar to "${item.product_name}" were found. PLEASE SAY THIS IN SHORT: "There are several products with the same name, please click to select the correct type you want to ${isExport ? 'export' : 'import'} below 👇". ABSOLUTELY DO NOT list items yourself.`,
+            ),
+            '',
           ),
           data: {
             originalIntent: intent,
@@ -606,8 +655,11 @@ Inventory: ${firstResult.quantity} ${firstResult.productPackage.unit.name}.`;
         return {
           aiIntent: intent,
           botReply: await this.generateFriendlyReply(
-            userMessage,
-            `Error: Insufficient stock. The inventory has ${targetItem.quantity}, but you want to export a total of ${newQuantity} (including items in the cart).`,
+            this.buildReplyContext(
+              userMessage,
+              `Error: Insufficient stock. The inventory has ${targetItem.quantity}, but you want to export a total of ${newQuantity} (including items in the cart).`,
+            ),
+            '',
           ),
         };
       }
@@ -673,7 +725,10 @@ Inventory: ${firstResult.quantity} ${firstResult.productPackage.unit.name}.`;
 
     return {
       aiIntent: isExport ? 'confirm_export' : 'confirm_import',
-      botReply: await this.generateFriendlyReply(userMessage, systemContext),
+      botReply: await this.generateFriendlyReply(
+        this.buildReplyContext(userMessage, systemContext),
+        '',
+      ),
       data: { draftActionId: draftId },
     };
   }
@@ -740,5 +795,15 @@ Inventory: ${firstResult.quantity} ${firstResult.productPackage.unit.name}.`;
     }
 
     return res.items as InventoryItemData[];
+  }
+
+  private isOutOfDomain(message: string): boolean {
+    const lower = message.toLowerCase();
+
+    return OUT_OF_DOMAIN_KEYWORDS.some((kw) => lower.includes(kw));
+  }
+
+  private buildReplyContext(userMessage: string, systemData: string): string {
+    return `[USER MESSAGE]: ${userMessage}\n[SYSTEM DATA]: ${systemData}`;
   }
 }
