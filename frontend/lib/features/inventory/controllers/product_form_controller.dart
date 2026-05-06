@@ -718,7 +718,7 @@ class ProductFormController extends GetxController with TErrorHandler {
       };
 
       final inventoryPayload = {
-        'quantity': 0,
+        'quantity': _getParsedQuantity(),
         'reorderThreshold': _getParsedThreshold(),
       };
 
