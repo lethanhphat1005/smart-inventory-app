@@ -182,7 +182,7 @@ model ProductPackage {
 
 model ProductPackageBarcode {
   productPackageBarcodeId String               @id @default(uuid()) @map("product_package_barcode_id")
-  barcode                 String               @unique
+  barcode                 String
   type                    BarcodeType?         @map("barcode_type")
   isVerified              Boolean              @default(true) @map("is_verified")
   source                  PackageBarcodeSource

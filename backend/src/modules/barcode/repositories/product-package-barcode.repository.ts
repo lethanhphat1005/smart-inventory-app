@@ -3,6 +3,7 @@ import type {
   BarcodeType,
   PackageBarcodeSource,
   Prisma,
+  ProductPackageBarcode,
 } from '../../../generated/prisma/client.js';
 import type { ProductPackageResponseDto } from '../../product-packages/index.js';
 import type {
@@ -92,12 +93,26 @@ export class PackageBarcodeRepository {
     return mapping ? this.mapMappingRecord(mapping) : null;
   }
 
-  async findOneByBarcode(
+  async checkOneExistedInStore(
+    storeId: string,
     barcode: string,
-  ): Promise<ProductPackageBarcodeMappingRecord | null> {
+  ): Promise<
+    (Omit<
+        ProductPackageBarcode,
+        'createdAt' | 'updatedAt' | 'productPackageBarcodeId' | 'confidence'
+      > & { confidence: number | null })
+    | null
+  > {
     const mapping = await this.db.productPackageBarcode.findFirst({
       where: {
         barcode,
+        productPackage: {
+          activeStatus: 'active',
+          product: {
+            storeId,
+            activeStatus: 'active',
+          },
+        },
       },
       select: {
         barcode: true,
@@ -105,21 +120,16 @@ export class PackageBarcodeRepository {
         source: true,
         isVerified: true,
         confidence: true,
-        productPackage: {
-          select: {
-            productPackageId: true,
-            displayName: true,
-            variant: true,
-            importPrice: true,
-            sellingPrice: true,
-            unitId: true,
-            productId: true,
-          },
-        },
+        productPackageId: true,
       },
     });
 
-    return mapping ? this.mapMappingRecord(mapping) : null;
+    return mapping
+      ? {
+          ...mapping,
+          confidence: mapping.confidence?.toNumber() ?? null,
+        }
+      : null;
   }
 
   async findByProductPackageId(
