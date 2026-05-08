@@ -47,15 +47,18 @@ export class ProductPackageBarcodeService {
     );
 
     const existingMapping =
-      await this.packageBarcodeRepository.findOneByBarcode(normalizedBarcode);
+      await this.packageBarcodeRepository.checkOneExistedInStore(
+        input.storeId,
+        normalizedBarcode,
+      );
 
     // 1 barcode không được map sang 2 package khác nhau
     if (
       existingMapping &&
-      existingMapping.productPackage.productPackageId !== input.productPackageId
+      existingMapping.productPackageId !== input.productPackageId
     ) {
       throw new CustomError({
-        message: 'Barcode mapping already exists',
+        message: 'Barcode mapping already exists in the store',
         status: StatusCodes.CONFLICT,
       });
     }
@@ -104,7 +107,10 @@ export class ProductPackageBarcodeService {
     const normalizedBarcode = input.barcode.trim();
 
     const existingMapping =
-      await this.packageBarcodeRepository.findOneByBarcode(normalizedBarcode);
+      await this.packageBarcodeRepository.checkOneExistedInStore(
+        input.storeId,
+        normalizedBarcode,
+      );
 
     if (!existingMapping) {
       throw new CustomError({
@@ -114,7 +120,7 @@ export class ProductPackageBarcodeService {
     }
 
     if (
-      existingMapping.productPackage.productPackageId !== input.productPackageId
+      existingMapping.productPackageId !== input.productPackageId
     ) {
       throw new CustomError({
         message: 'Barcode does not belong to this product package',

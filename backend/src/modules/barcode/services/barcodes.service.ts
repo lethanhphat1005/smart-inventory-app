@@ -649,24 +649,27 @@ export class BarcodesService {
     source: 'user_confirmed' | 'barcode_flow_create';
     type?: ConfirmBarcodeMappingInput['type'];
   }): Promise<ConfirmBarcodeMappingResponseDto> {
-    const existingMapping =
-      await this.packageBarcodeRepository.findOneByBarcode(input.barcode);
-
-    // 1 barcode không được map sang 2 package khác nhau
-    if (
-      existingMapping &&
-      existingMapping.productPackage.productPackageId !== input.productPackageId
-    ) {
-      throw new CustomError({
-        message: 'Barcode mapping already exists',
-        status: StatusCodes.CONFLICT,
-      });
-    }
-
     const productPackage = await this.ensureActiveProductPackage(
       input.storeId,
       input.productPackageId,
     );
+
+    const existingMapping =
+      await this.packageBarcodeRepository.checkOneExistedInStore(
+        input.storeId,
+        input.barcode,
+      );
+
+    // 1 barcode không được map sang 2 package khác nhau
+    if (
+      existingMapping &&
+      existingMapping.productPackageId !== input.productPackageId
+    ) {
+      throw new CustomError({
+        message: 'Barcode mapping already exists in the store',
+        status: StatusCodes.CONFLICT,
+      });
+    }
 
     // chỉ return data nếu mapping đã tồn tại và đúng package (idempotent)
     if (existingMapping) {
