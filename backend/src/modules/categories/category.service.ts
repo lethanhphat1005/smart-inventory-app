@@ -3,7 +3,7 @@ import { StatusCodes } from 'http-status-codes';
 import { CategoryRepository } from './repositories/category.repository.js';
 import { HiddenDefaultRepository } from './repositories/hidden-default.repository.js';
 import { CustomError } from '../../common/errors/index.js';
-import { buildAuditDiff } from '../../common/utils/build-audit-diff.js';
+import { buildAuditDiff } from '../../common/utils/index.js';
 import { prisma } from '../../db/prismaClient.js'; // gọi prisma để dùng cơ chế $transaction
 import { AuditLogRepository } from '../audit-log/index.js';
 import { ProductRepository, productService } from '../products/index.js';
@@ -100,6 +100,20 @@ export class CategoriesService {
         message: 'You do not have permission to update this category',
         status: StatusCodes.FORBIDDEN,
       });
+    }
+
+    if (data.name !== undefined && data.name !== foundCategory.name) {
+      const isDuplicate = await this.categoryRepository.checkDuplicateName(
+        storeId,
+        data.name,
+      );
+
+      if (isDuplicate) {
+        throw new CustomError({
+          message: 'Category name already exists',
+          status: StatusCodes.CONFLICT,
+        });
+      }
     }
 
     const { oldValue, newValue } = buildAuditDiff(
