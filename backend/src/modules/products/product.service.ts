@@ -256,7 +256,7 @@ export class ProductService {
       productId,
     );
 
-    if (data.categoryId) {
+    if (data.categoryId !== undefined) {
       await this.checkCategoryExisted(data.categoryId);
     }
 
