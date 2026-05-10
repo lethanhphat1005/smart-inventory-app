@@ -1,7 +1,4 @@
-import {
-  HISTORY_SUMMARY_THRESHOLD,
-  HISTORY_TTL_SECONDS,
-} from '../chatbot.constants.js';
+import { HISTORY_TTL_SECONDS } from '../chatbot.constants.js';
 import { buildChatHistoryKey } from '../chatbot.mapper.js';
 
 import type { CartSession, ChatHistoryMessage } from '../chatbot.type.js';
@@ -30,25 +27,14 @@ export class ChatMemoryService {
 
     history.push(...newMessages);
 
-    if (history.length > HISTORY_SUMMARY_THRESHOLD) {
-      // Giữ lại 4 message cuối, tóm tắt phần còn lại thành 1 system note
-      const tail = history.slice(-4);
-      const summarized = history
-        .slice(0, -4)
-        .filter((m) => m.role === 'user' || m.role === 'assistant')
-        .map(
-          (m) =>
-            `[${m.role}]: ${typeof m.content === 'string' ? m.content.slice(0, 80) : ''}`,
-        )
-        .join('\n');
+    const maxMessagesKept = 12;
 
-      history = [
-        {
-          role: 'system',
-          content: `[CONVERSATION SUMMARY — earlier in this session]:\n${summarized}`,
-        },
-        ...tail,
-      ];
+    if (history.length > maxMessagesKept) {
+      history = history.slice(-maxMessagesKept);
+    }
+
+    while (history.length > 0 && history[0]?.role === 'tool') {
+      history.shift();
     }
 
     await this.redisClient.set(
