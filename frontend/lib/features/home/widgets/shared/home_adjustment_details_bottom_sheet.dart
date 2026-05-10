@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:get/get.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
@@ -52,11 +53,11 @@ class HomeAdjustmentDetailsBottomSheet extends StatelessWidget {
         // 2. Title
         Text(
           TTexts.checkDetails.tr,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
             color: AppColors.primaryText,
-            fontFamily: 'Poppins',
+            fontFamily: AppFonts.mainFont,
           ),
         ),
         const SizedBox(height: 24),

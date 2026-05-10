@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/core/ui/widgets/t_custom_fade_overlay_widget.dart';
@@ -36,8 +37,8 @@ class InventoryDetailHistoryWidget extends GetView<InventoryDetailController> {
                     Text(
                       TTexts.noHistoryAvailable.tr,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontFamily: 'Poppins',
+                      style: TextStyle(
+                        fontFamily: AppFonts.mainFont,
                         color: AppColors.subText,
                         fontSize: 14,
                         fontWeight: FontWeight.w400,
@@ -146,7 +147,7 @@ class InventoryDetailHistoryWidget extends GetView<InventoryDetailController> {
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
                   color: displayColor,
-                  fontFamily: 'Poppins')),
+                  fontFamily: AppFonts.mainFont)),
         ),
       ),
     );

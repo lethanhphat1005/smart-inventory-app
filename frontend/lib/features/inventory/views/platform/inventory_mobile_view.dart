@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/state/controllers/barcode_action_controller.dart';
 import 'package:frontend/core/ui/layouts/t_barcode_scanner_layout.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:get/get.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
@@ -80,8 +81,8 @@ class InventoryMobileView extends GetView<InventoryController> {
                           children: [
                             Text(
                               TTexts.productCatalog.tr,
-                              style: const TextStyle(
-                                  fontFamily: 'Poppins',
+                              style: TextStyle(
+                                  fontFamily: AppFonts.mainFont,
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                   color: AppColors.primaryText),

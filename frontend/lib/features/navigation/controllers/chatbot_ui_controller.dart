@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/infrastructure/utils/error_handler_utils.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/features/home/controllers/home_controller.dart';
 import 'package:frontend/features/inventory/controllers/inventory_controller.dart';
 import 'package:frontend/features/navigation/providers/chatbot_provider.dart';
@@ -76,13 +77,15 @@ class ChatbotUiController extends GetxController with TErrorHandler {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: Text(
           TTexts.chatbotResetTitle.tr,
-          style: const TextStyle(
-              fontFamily: 'Poppins', fontWeight: FontWeight.w600, fontSize: 18),
+          style: TextStyle(
+              fontFamily: AppFonts.mainFont,
+              fontWeight: FontWeight.w600,
+              fontSize: 18),
         ),
         content: Text(
           TTexts.chatbotResetMessage.tr,
-          style: const TextStyle(
-              fontFamily: 'Poppins',
+          style: TextStyle(
+              fontFamily: AppFonts.mainFont,
               fontSize: 14,
               color: AppColors.primaryText),
         ),
@@ -92,9 +95,9 @@ class ChatbotUiController extends GetxController with TErrorHandler {
           TextButton(
             onPressed: () => Get.back(),
             child: Text(TTexts.cancel.tr,
-                style: const TextStyle(
+                style: TextStyle(
                     color: AppColors.subText,
-                    fontFamily: 'Poppins',
+                    fontFamily: AppFonts.mainFont,
                     fontWeight: FontWeight.w500)),
           ),
           ElevatedButton(
@@ -112,8 +115,9 @@ class ChatbotUiController extends GetxController with TErrorHandler {
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             ),
             child: Text(TTexts.chatbotResetBtn.tr,
-                style: const TextStyle(
-                    fontFamily: 'Poppins', fontWeight: FontWeight.w600)),
+                style: TextStyle(
+                    fontFamily: AppFonts.mainFont,
+                    fontWeight: FontWeight.w600)),
           ),
         ],
       ),
@@ -145,12 +149,12 @@ class ChatbotUiController extends GetxController with TErrorHandler {
         Get.find<HomeController>().loadAllHomeData();
       }
 
-      // 2. Cập nhật trang Inventory 
+      // 2. Cập nhật trang Inventory
       if (Get.isRegistered<InventoryController>()) {
         Get.find<InventoryController>().fetchDashboardData(isRefresh: true);
       }
 
-      // 3. Cập nhật trang Báo cáo 
+      // 3. Cập nhật trang Báo cáo
       if (Get.isRegistered<ReportController>()) {
         Get.find<ReportController>().fetchTransactions(isRefresh: true);
       }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:get/get.dart';
 import 'package:frontend/core/infrastructure/constants/image_strings.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
@@ -35,8 +36,8 @@ class VerifyEmailGoToGmailButtonWidget extends GetView<VerifyEmailController> {
             const SizedBox(width: AppSizes.p12),
             Text(
               TTexts.goToGmail.tr,
-              style: const TextStyle(
-                fontFamily: 'Poppins',
+              style: TextStyle(
+                fontFamily: AppFonts.mainFont,
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
                 color: Colors.white,

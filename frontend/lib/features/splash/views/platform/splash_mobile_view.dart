@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:get/get.dart';
 import 'package:frontend/core/infrastructure/constants/image_strings.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
@@ -29,7 +30,7 @@ class SplashMobileView extends StatelessWidget {
               Text(
                 TTexts.splashSlogan.tr,
                 style: TextStyle(
-                  fontFamily: 'Poppins',
+                  fontFamily: AppFonts.mainFont,
                   fontSize: 14,
                   fontWeight: FontWeight.w400,
                   color: AppColors.primaryText.withOpacity(0.6),
@@ -48,7 +49,7 @@ class SplashMobileView extends StatelessWidget {
                 () => Text(
                   controller.loadingMessage.value,
                   style: TextStyle(
-                    fontFamily: 'Poppins',
+                    fontFamily: AppFonts.mainFont,
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                     color: AppColors.primaryText.withOpacity(0.5),

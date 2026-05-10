@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/models/transaction_model.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/features/report/controllers/report_controller.dart';
 import 'package:get/get.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -37,11 +38,11 @@ class ReportCalendarWidget extends GetView<ReportController> {
           // Lấy danh sách event cho từng ngày
           eventLoader: controller.getTransactionsForDay,
 
-          headerStyle: const HeaderStyle(
+          headerStyle: HeaderStyle(
             formatButtonVisible: false,
             titleCentered: true,
             titleTextStyle: TextStyle(
-                fontFamily: 'Poppins',
+                fontFamily: AppFonts.mainFont,
                 fontSize: 16,
                 fontWeight: FontWeight.w600),
           ),

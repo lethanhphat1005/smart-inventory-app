@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/features/inventory/widgets/shared/inventory_product_form_action_buttons_widget.dart';
 import 'package:frontend/features/inventory/widgets/shared/inventory_product_form_base_info_widget.dart';
 import 'package:frontend/features/inventory/widgets/shared/inventory_product_form_image_widget.dart';
@@ -61,8 +62,8 @@ class ProductFormMobileView extends GetView<ProductFormController> {
                         // TITLE & SUBTITLE ĐỘNG THEO MODE
                         Text(
                           _getHeaderTitle(mode, step),
-                          style: const TextStyle(
-                              fontFamily: 'Poppins',
+                          style: TextStyle(
+                              fontFamily: AppFonts.mainFont,
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                               color: AppColors.primaryText),
@@ -70,8 +71,8 @@ class ProductFormMobileView extends GetView<ProductFormController> {
                         const SizedBox(height: 6),
                         Text(
                           _getHeaderSubtitle(mode, step),
-                          style: const TextStyle(
-                              fontFamily: 'Poppins',
+                          style: TextStyle(
+                              fontFamily: AppFonts.mainFont,
                               fontSize: 13,
                               color: AppColors.subText,
                               height: 1.4),

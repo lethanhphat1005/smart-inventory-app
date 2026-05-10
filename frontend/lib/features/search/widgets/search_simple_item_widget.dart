@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:frontend/core/infrastructure/utils/url_helper_utils.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart' show AppFonts;
 import 'package:frontend/core/ui/widgets/t_no_image_widget.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -52,8 +53,8 @@ class SearchSimpleItemWidget extends StatelessWidget {
 
       subtitleWidget = Text(
         '${TTexts.salePrice.tr}: $formattedPrice',
-        style: const TextStyle(
-          fontFamily: 'Poppins',
+        style: TextStyle(
+          fontFamily: AppFonts.mainFont,
           fontSize: 12,
           color: AppColors.subText,
         ),

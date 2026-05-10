@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:get/get.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
@@ -12,8 +13,8 @@ class VerifyEmailMessageWidget extends StatelessWidget {
     return RichText(
       textAlign: TextAlign.justify,
       text: TextSpan(
-        style: const TextStyle(
-          fontFamily: 'Poppins',
+        style: TextStyle(
+          fontFamily: AppFonts.mainFont,
           fontSize: 13,
           color: AppColors.subText,
           height: 1.5,

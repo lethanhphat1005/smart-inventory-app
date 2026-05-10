@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:get/get.dart';
 import 'package:frontend/core/infrastructure/constants/image_strings.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
@@ -55,8 +56,8 @@ class AuthHeaderWidget extends StatelessWidget {
           // 2. Tiêu đề
           Text(
             title,
-            style: const TextStyle(
-              fontFamily: 'Poppins',
+            style: TextStyle(
+              fontFamily: AppFonts.mainFont,
               fontSize: 32,
               fontWeight: FontWeight.w700,
               color: Colors.white,
@@ -68,8 +69,8 @@ class AuthHeaderWidget extends StatelessWidget {
           // Phụ đề
           Text(
             subtitle,
-            style: const TextStyle(
-              fontFamily: 'Poppins',
+            style: TextStyle(
+              fontFamily: AppFonts.mainFont,
               fontSize: 12,
               color: Colors.white70,
             ),

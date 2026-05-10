@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:frontend/core/ui/widgets/t_primary_button_widget.dart'; // Nút bấm chuẩn của bạn
 import 'package:get/get.dart';
@@ -46,8 +47,8 @@ class TDataErrorLayout extends StatelessWidget {
             // 2. Tiêu đề lỗi
             Text(
               title ?? TTexts.errorNotFoundTitle.tr,
-              style: const TextStyle(
-                fontFamily: 'Poppins',
+              style: TextStyle(
+                fontFamily: AppFonts.mainFont,
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: AppColors.primaryText,
@@ -61,8 +62,8 @@ class TDataErrorLayout extends StatelessWidget {
               child: Text(
                 message ?? TTexts.errorNotFoundMessage.tr,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontFamily: 'Poppins',
+                style: TextStyle(
+                  fontFamily: AppFonts.mainFont,
                   fontSize: 14,
                   color: AppColors.subText,
                   height: 1.6,

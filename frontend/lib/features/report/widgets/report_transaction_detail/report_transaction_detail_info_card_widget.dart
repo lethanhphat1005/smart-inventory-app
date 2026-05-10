@@ -6,6 +6,7 @@ import 'package:frontend/core/infrastructure/utils/day_formatter_utils.dart';
 import 'package:frontend/core/state/services/store_service.dart';
 import 'package:frontend/core/state/services/user_service.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:get/get.dart';
 
 class ReportTransactionDetailInfoCardWidget extends StatelessWidget {
@@ -75,8 +76,8 @@ class ReportTransactionDetailInfoCardWidget extends StatelessWidget {
                           Text(userName,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                  fontFamily: 'Poppins',
+                              style: TextStyle(
+                                  fontFamily: AppFonts.mainFont,
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
                                   color: AppColors.primaryText)),

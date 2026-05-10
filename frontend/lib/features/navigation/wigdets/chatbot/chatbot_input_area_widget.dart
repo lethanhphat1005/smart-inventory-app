@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/core/infrastructure/constants/text_strings.dart'; 
+import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/features/navigation/controllers/chatbot_ui_controller.dart';
 import 'package:frontend/features/navigation/wigdets/chatbot/chatbot_input_action_menu_widget.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
@@ -47,14 +48,15 @@ class ChatbotInputAreaWidget extends StatelessWidget {
                     minLines: 1,
                     cursorColor: const Color(0xFFF08D9B),
                     textInputAction: TextInputAction.send,
-                    style: const TextStyle(fontSize: 13, fontFamily: 'Poppins'),
+                    style:
+                        TextStyle(fontSize: 13, fontFamily: AppFonts.mainFont),
                     onSubmitted: (_) => controller.sendMessage(),
                     decoration: InputDecoration(
-                      hintText: TTexts.chatbotInputHint.tr, 
-                      hintStyle: const TextStyle(
+                      hintText: TTexts.chatbotInputHint.tr,
+                      hintStyle: TextStyle(
                           color: AppColors.subText,
                           fontSize: 13,
-                          fontFamily: 'Poppins'),
+                          fontFamily: AppFonts.mainFont),
                       border: InputBorder.none,
                       contentPadding: const EdgeInsets.symmetric(
                           horizontal: 16, vertical: 12),

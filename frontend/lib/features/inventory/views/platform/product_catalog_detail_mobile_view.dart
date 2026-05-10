@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/widgets/t_refresh_indicator_widget.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
@@ -42,8 +43,8 @@ class ProductCatalogDetailMobileView
                         // TÊN SẢN PHẨM
                         Text(
                           controller.rxName.value,
-                          style: const TextStyle(
-                              fontFamily: 'Poppins',
+                          style: TextStyle(
+                              fontFamily: AppFonts.mainFont,
                               fontSize: 22,
                               fontWeight: FontWeight.bold,
                               color: AppColors.primaryText),
@@ -89,8 +90,8 @@ class ProductCatalogDetailMobileView
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(TTexts.packagesOrVariants.tr,
-                        style: const TextStyle(
-                            fontFamily: 'Poppins',
+                        style: TextStyle(
+                            fontFamily: AppFonts.mainFont,
                             fontSize: 16,
                             fontWeight: FontWeight.bold)),
 
@@ -201,7 +202,7 @@ class ProductCatalogDetailMobileView
           Text(
             label,
             style: TextStyle(
-              fontFamily: 'Poppins',
+              fontFamily: AppFonts.mainFont,
               fontSize: 11,
               fontWeight: FontWeight.w600,
               color: color == AppColors.softGrey ? AppColors.subText : color,

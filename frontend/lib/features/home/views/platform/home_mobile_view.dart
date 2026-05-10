@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/widgets/t_bottom_nav_spacer_widget.dart';
 import 'package:frontend/core/ui/widgets/t_custom_fade_overlay_widget.dart';
 import 'package:frontend/core/ui/widgets/t_refresh_indicator_widget.dart';
@@ -55,8 +56,8 @@ class HomeMobileScreen extends GetView<HomeController> {
                           const SizedBox(height: AppSizes.p32),
                           Text(
                             TTexts.homeDailyOverview.tr,
-                            style: const TextStyle(
-                                fontFamily: 'Poppins',
+                            style: TextStyle(
+                                fontFamily: AppFonts.mainFont,
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                                 color: AppColors.primaryText),

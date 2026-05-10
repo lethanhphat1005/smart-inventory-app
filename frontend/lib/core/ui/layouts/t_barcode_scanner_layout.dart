@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:frontend/core/ui/widgets/t_custom_header_widget.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
@@ -80,11 +81,11 @@ class _TBarcodeScannerLayoutState extends State<TBarcodeScannerLayout>
                   // Tiêu đề
                   Text(
                     TTexts.manualBarcodeEntryTitle.tr,
-                    style: const TextStyle(
+                    style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w500,
                         color: AppColors.primaryText,
-                        fontFamily: 'Poppins'),
+                        fontFamily: AppFonts.mainFont),
                   ),
                   const SizedBox(height: 6),
 
@@ -92,11 +93,11 @@ class _TBarcodeScannerLayoutState extends State<TBarcodeScannerLayout>
                   Text(
                     TTexts.manualBarcodeEntryDesc.tr,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
+                    style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w400,
                         color: AppColors.subText,
-                        fontFamily: 'Poppins',
+                        fontFamily: AppFonts.mainFont,
                         height: 1.3),
                   ),
                   const SizedBox(height: AppSizes.p24),

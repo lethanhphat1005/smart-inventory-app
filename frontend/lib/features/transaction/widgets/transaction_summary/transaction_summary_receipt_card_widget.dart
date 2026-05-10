@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:frontend/features/transaction/controllers/transaction_summary_controller.dart';
 import 'package:get/get.dart';
@@ -128,20 +129,20 @@ class TransactionSummaryReceiptCardWidget
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(leftTitle,
-                  style: const TextStyle(
+                  style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w500,
                       color: AppColors.subText,
-                      fontFamily: 'Poppins')),
+                      fontFamily: AppFonts.mainFont)),
               const SizedBox(height: 4),
               customLeftWidget ??
                   Text(
                     leftValue,
-                    style: const TextStyle(
+                    style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w400,
                         color: AppColors.primaryText,
-                        fontFamily: 'Poppins'),
+                        fontFamily: AppFonts.mainFont),
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
                   ),

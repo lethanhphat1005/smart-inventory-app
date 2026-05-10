@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
@@ -39,8 +40,8 @@ class AddMembersInviteCodeWidget extends GetView<AddMembersController> {
                   Expanded(
                     child: Text(
                       controller.activeInviteCode.value,
-                      style: const TextStyle(
-                          fontFamily: 'Poppins',
+                      style: TextStyle(
+                          fontFamily: AppFonts.mainFont,
                           fontSize: 22,
                           fontWeight: FontWeight.w900,
                           letterSpacing: 2.0,

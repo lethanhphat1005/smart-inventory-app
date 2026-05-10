@@ -2,6 +2,7 @@
 
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
@@ -60,11 +61,11 @@ class TAppBarWidget extends StatelessWidget implements PreferredSizeWidget {
           title: titleWidget ??
               (title != null
                   ? Text(title!,
-                      style: const TextStyle(
+                      style: TextStyle(
                           color: AppColors.primaryText,
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          fontFamily: 'Poppins'))
+                          fontFamily: AppFonts.mainFont))
                   : null),
           actions: [
             if (showSearchIcon)

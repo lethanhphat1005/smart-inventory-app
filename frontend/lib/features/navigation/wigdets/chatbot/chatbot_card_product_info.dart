@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/core/infrastructure/constants/text_strings.dart'; // Đã thêm
+import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/infrastructure/utils/url_helper_utils.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/features/navigation/models/chat_message_model.dart';
 import 'package:frontend/routes/app_routes.dart';
 import 'package:frontend/core/ui/widgets/t_no_image_widget.dart';
@@ -35,13 +36,13 @@ class ChatCardProductInfo extends StatelessWidget {
     final quantity = item['quantity'] ?? pkg['quantity'] ?? 0;
     final unitName = pkg['unit']?['name'] ?? '';
 
-    // Lấy Threshold 
+    // Lấy Threshold
     final threshold = int.tryParse(item['reorder_threshold']?.toString() ??
             item['reorderThreshold']?.toString() ??
             pkg['reorder_threshold']?.toString() ??
             '10') ??
         10;
-        
+
     final formatCurrency = NumberFormat.decimalPattern('en_US');
     final sellingPrice = formatCurrency
         .format(num.tryParse(pkg['sellingPrice']?.toString() ?? '0') ?? 0);
@@ -120,12 +121,12 @@ class ChatCardProductInfo extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               Text(displayName,
-                  style: const TextStyle(
+                  style: TextStyle(
                       fontWeight: FontWeight.w500,
                       fontSize: 15,
                       color: AppColors.primaryText,
                       height: 1.4,
-                      fontFamily: 'Poppins'),
+                      fontFamily: AppFonts.mainFont),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis),
               const SizedBox(height: 8),
@@ -133,19 +134,19 @@ class ChatCardProductInfo extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.baseline,
                 textBaseline: TextBaseline.alphabetic,
                 children: [
-                  const Text("\$",
+                  Text("\$",
                       style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                           color: AppColors.primary,
-                          fontFamily: 'Poppins')),
+                          fontFamily: AppFonts.mainFont)),
                   const SizedBox(width: 2),
                   Text(sellingPrice,
-                      style: const TextStyle(
+                      style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w800,
                           color: AppColors.primary,
-                          fontFamily: 'Poppins')),
+                          fontFamily: AppFonts.mainFont)),
                 ],
               ),
               const SizedBox(height: 12),
@@ -167,7 +168,7 @@ class ChatCardProductInfo extends StatelessWidget {
                                 color: stockColor,
                                 fontSize: 12,
                                 fontWeight: FontWeight.w500,
-                                fontFamily: 'Poppins')),
+                                fontFamily: AppFonts.mainFont)),
                       ],
                     ),
                   ),
@@ -184,7 +185,7 @@ class ChatCardProductInfo extends StatelessWidget {
                                 color: Colors.grey.shade600,
                                 fontSize: 12,
                                 fontWeight: FontWeight.w400,
-                                fontFamily: 'Poppins'))),
+                                fontFamily: AppFonts.mainFont))),
                 ],
               ),
             ],

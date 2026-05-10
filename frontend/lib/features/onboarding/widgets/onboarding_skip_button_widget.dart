@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:get/get.dart';
 
@@ -24,8 +25,8 @@ class OnboardingSkipButtonWidget extends StatelessWidget {
       ),
       child: Text(
         TTexts.onboardingSkip.tr,
-        style: const TextStyle(
-          fontFamily: 'Poppins',
+        style: TextStyle(
+          fontFamily: AppFonts.mainFont,
           fontSize: 16,
           fontWeight: FontWeight.w500,
           color: AppColors.primaryText,

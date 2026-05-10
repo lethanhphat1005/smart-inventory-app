@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/features/inventory/widgets/inventory/inventory_empty_category_widget.dart';
 import 'package:frontend/routes/app_routes.dart';
 import 'package:get/get.dart';
@@ -86,7 +87,7 @@ class InventoryDynamicCategoryWidget extends GetView<InventoryController> {
                             color: bgColor,
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            fontFamily: 'Poppins')),
+                            fontFamily: AppFonts.mainFont)),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -140,8 +141,8 @@ class InventoryDynamicCategoryWidget extends GetView<InventoryController> {
             icon: const Icon(Iconsax.category_2_copy, size: 18),
             label: Text(
               TTexts.seeAllCategories.tr,
-              style: const TextStyle(
-                  fontWeight: FontWeight.w600, fontFamily: 'Poppins'),
+              style: TextStyle(
+                  fontWeight: FontWeight.w600, fontFamily: AppFonts.mainFont),
             ),
             style: OutlinedButton.styleFrom(
               side: BorderSide(color: AppColors.primary.withOpacity(0.3)),

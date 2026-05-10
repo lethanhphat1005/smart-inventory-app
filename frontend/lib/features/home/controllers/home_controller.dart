@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/utils/error_handler_utils.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/features/home/model/home_adjustment_model.dart';
 import 'package:frontend/features/home/providers/home_provider.dart';
 import 'package:frontend/features/home/widgets/shared/home_adjustment_details_bottom_sheet.dart';
@@ -450,11 +451,11 @@ class HomeController extends GetxController with TErrorHandler {
           const SizedBox(height: AppSizes.p16),
           Text(
             TTexts.overviewInfoTitle.tr,
-            style: const TextStyle(
+            style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: AppColors.primaryText,
-                fontFamily: 'Poppins'),
+                fontFamily: AppFonts.mainFont),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 32),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:get/get.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/features/home/controllers/home_controller.dart';
@@ -91,10 +92,10 @@ class _HomeRevenueBarChartWidgetState extends State<HomeRevenueBarChartWidget> {
                     padding: const EdgeInsets.only(right: 8),
                     child: Text(
                       label,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: AppColors.subText,
                         fontSize: 10,
-                        fontFamily: 'Poppins',
+                        fontFamily: AppFonts.mainFont,
                       ),
                     ),
                   );

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/image_strings.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 
 /// Nút đăng nhập/Đăng ký bằng mạng xã hội (Google) có thể tái sử dụng
@@ -37,8 +38,8 @@ class AuthSocialButtonWidget extends StatelessWidget {
             const SizedBox(width: AppSizes.p24),
             Text(
               title,
-              style: const TextStyle(
-                fontFamily: 'Poppins',
+              style: TextStyle(
+                fontFamily: AppFonts.mainFont,
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
                 color: AppColors.primaryText,

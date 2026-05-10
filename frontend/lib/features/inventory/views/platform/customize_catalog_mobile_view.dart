@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
@@ -25,11 +26,11 @@ class CustomCatalogMobileView extends GetView<CustomizeCatalogController> {
             ),
             child: Text(
               TTexts.save.tr,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppColors.primary,
                 fontWeight: FontWeight.bold,
                 fontSize: 12,
-                fontFamily: 'Poppins',
+                fontFamily: AppFonts.mainFont,
               ),
             ),
           )
@@ -92,10 +93,10 @@ class CustomCatalogMobileView extends GetView<CustomizeCatalogController> {
                   ),
                   title: Text(
                     catName,
-                    style: const TextStyle(
+                    style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
-                        fontFamily: 'Poppins'),
+                        fontFamily: AppFonts.mainFont),
                   ),
                   subtitle: Text(
                     isTop4

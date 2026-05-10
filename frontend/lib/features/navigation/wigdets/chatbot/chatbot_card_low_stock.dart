@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/features/navigation/models/chat_message_model.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/features/navigation/wigdets/chatbot/chatbot_message_widget.dart';
@@ -66,11 +67,11 @@ class ChatCardLowStock extends StatelessWidget {
                 padding: const EdgeInsets.only(left: 12),
                 child: Text(
                   TTexts.chatbotViewFullList.tr,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
                     color: AppColors.subText,
                     fontWeight: FontWeight.w500,
-                    fontFamily: 'Poppins',
+                    fontFamily: AppFonts.mainFont,
                   ),
                 ),
               ),

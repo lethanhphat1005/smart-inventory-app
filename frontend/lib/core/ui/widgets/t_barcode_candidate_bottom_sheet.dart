@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/state/controllers/barcode_scanner_controller.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:frontend/core/ui/widgets/t_bottom_sheet_widget.dart';
 import 'package:get/get.dart';
@@ -73,11 +74,11 @@ class _TBarcodeCandidateBottomSheetState
           // 2. Title
           Text(
             TTexts.barcodeCandidateTitle.tr,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
               color: AppColors.primaryText,
-              fontFamily: 'Poppins',
+              fontFamily: AppFonts.mainFont,
             ),
           ),
           const SizedBox(height: AppSizes.p8),
@@ -86,11 +87,11 @@ class _TBarcodeCandidateBottomSheetState
           Text(
             '${TTexts.barcodeCandidateSubtitle.tr} [${widget.barcode}] ${TTexts.barcodeMatchesMultipleProducts.tr}',
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 13,
               color: AppColors.subText,
               height: 1.5,
-              fontFamily: 'Poppins',
+              fontFamily: AppFonts.mainFont,
             ),
           ),
           const SizedBox(height: AppSizes.p24),

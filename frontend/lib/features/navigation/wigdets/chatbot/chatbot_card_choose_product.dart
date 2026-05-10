@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/features/navigation/controllers/chatbot_ui_controller.dart';
 import 'package:frontend/features/navigation/models/chat_message_model.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
@@ -41,11 +42,11 @@ class ChatCardChooseProduct extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
               child: Text(message.text,
-                  style: const TextStyle(
+                  style: TextStyle(
                       fontSize: 14.5,
                       color: AppColors.primaryText,
                       fontWeight: FontWeight.w500,
-                      fontFamily: 'Poppins')),
+                      fontFamily: AppFonts.mainFont)),
             ),
             ListView.separated(
               padding: const EdgeInsets.only(bottom: 8),
@@ -137,7 +138,7 @@ class ChatCardChooseProduct extends StatelessWidget {
                                           ? Colors.grey
                                           : AppColors.primaryText,
                                       fontWeight: FontWeight.w500,
-                                      fontFamily: 'Poppins')),
+                                      fontFamily: AppFonts.mainFont)),
                               const SizedBox(height: 4),
                               Text(stockText,
                                   style: TextStyle(

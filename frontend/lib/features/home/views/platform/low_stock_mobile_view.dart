@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:frontend/core/ui/widgets/t_app_bar_widget.dart';
 import 'package:frontend/core/ui/widgets/t_animation_loader_widget.dart';
@@ -155,8 +156,8 @@ class LowStockMobileView extends GetView<LowStockController> {
           const SizedBox(width: 8),
           Text(
             title,
-            style: const TextStyle(
-              fontFamily: 'Poppins',
+            style: TextStyle(
+              fontFamily: AppFonts.mainFont,
               fontSize: 16,
               fontWeight: FontWeight.bold,
               color: AppColors.primaryText,

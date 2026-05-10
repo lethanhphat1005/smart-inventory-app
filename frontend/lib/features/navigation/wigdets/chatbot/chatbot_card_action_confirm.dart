@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
-import 'package:frontend/core/infrastructure/constants/text_strings.dart'; 
+import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/features/navigation/controllers/chatbot_ui_controller.dart';
 import 'package:frontend/features/navigation/models/chat_message_model.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
@@ -38,7 +39,7 @@ class ChatCardActionConfirm extends StatelessWidget {
                   fontSize: 12,
                   color: Colors.grey.shade500,
                   fontStyle: FontStyle.italic,
-                  fontFamily: 'Poppins'),
+                  fontFamily: AppFonts.mainFont),
             ),
           ],
         ),
@@ -78,23 +79,23 @@ class ChatCardActionConfirm extends StatelessWidget {
                         fontSize: 15,
                         color: actionColor,
                         fontWeight: FontWeight.w600,
-                        fontFamily: 'Poppins')),
+                        fontFamily: AppFonts.mainFont)),
               ],
             ),
             const SizedBox(height: 12),
             MarkdownBody(
               data: message.text,
               styleSheet: MarkdownStyleSheet(
-                p: const TextStyle(
+                p: TextStyle(
                     fontSize: 14,
                     color: AppColors.primaryText,
                     height: 1.5,
-                    fontFamily: 'Poppins'),
-                strong: const TextStyle(
+                    fontFamily: AppFonts.mainFont),
+                strong: TextStyle(
                     fontSize: 14,
                     color: AppColors.primaryText,
                     fontWeight: FontWeight.w600,
-                    fontFamily: 'Poppins'),
+                    fontFamily: AppFonts.mainFont),
               ),
             ),
             const SizedBox(height: 16),
@@ -116,10 +117,10 @@ class ChatCardActionConfirm extends StatelessWidget {
                             borderRadius: BorderRadius.circular(16)),
                         foregroundColor: Colors.grey.shade700),
                     child: Text(TTexts.cancel.tr,
-                        style: const TextStyle(
+                        style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
-                            fontFamily: 'Poppins')),
+                            fontFamily: AppFonts.mainFont)),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -133,11 +134,11 @@ class ChatCardActionConfirm extends StatelessWidget {
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16))),
                     child: Text(TTexts.confirm.tr,
-                        style: const TextStyle(
+                        style: TextStyle(
                             fontSize: 13,
                             color: Colors.white,
                             fontWeight: FontWeight.w600,
-                            fontFamily: 'Poppins')),
+                            fontFamily: AppFonts.mainFont)),
                   ),
                 ),
               ],

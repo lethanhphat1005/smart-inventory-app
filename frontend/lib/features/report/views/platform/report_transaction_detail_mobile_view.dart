@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:frontend/core/ui/widgets/t_app_bar_widget.dart';
 import 'package:frontend/core/ui/widgets/t_bottom_sheet_widget.dart';
@@ -71,8 +72,8 @@ class ReportTransactionDetailView
                   padding: const EdgeInsets.fromLTRB(
                       AppSizes.p20, 32, AppSizes.p20, 16),
                   child: Text(TTexts.items.tr,
-                      style: const TextStyle(
-                          fontFamily: 'Poppins',
+                      style: TextStyle(
+                          fontFamily: AppFonts.mainFont,
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: AppColors.primaryText)),
@@ -142,8 +143,8 @@ class ReportTransactionDetailView
                             fontWeight: FontWeight.w500)),
                     const SizedBox(height: 4),
                     Text('$totalQty',
-                        style: const TextStyle(
-                            fontFamily: 'Poppins',
+                        style: TextStyle(
+                            fontFamily: AppFonts.mainFont,
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                             color: AppColors.primaryText)),
@@ -160,8 +161,8 @@ class ReportTransactionDetailView
                             fontWeight: FontWeight.w500)),
                     const SizedBox(height: 4),
                     Text(moneyFormatted,
-                        style: const TextStyle(
-                            fontFamily: 'Poppins',
+                        style: TextStyle(
+                            fontFamily: AppFonts.mainFont,
                             fontSize: 22,
                             color: AppColors.primary,
                             fontWeight: FontWeight.bold)),

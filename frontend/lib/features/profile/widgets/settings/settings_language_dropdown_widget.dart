@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/features/profile/controllers/settings_controller.dart';
 import 'package:get/get.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
@@ -162,8 +163,8 @@ class _SettingsLanguageDropdownWidgetState
                                     ),
                                     const SizedBox(width: 12),
                                     Text(lang.name,
-                                        style: const TextStyle(
-                                            fontFamily: 'Poppins',
+                                        style: TextStyle(
+                                            fontFamily: AppFonts.mainFont,
                                             fontSize: 14,
                                             color: AppColors.primaryText,
                                             fontWeight: FontWeight.w600)),
@@ -207,8 +208,8 @@ class _SettingsLanguageDropdownWidgetState
                 // 1. Label (Giống TTextFormFieldWidget)
                 Text(
                   TTexts.settingsLanguage.tr,
-                  style: const TextStyle(
-                    fontFamily: 'Poppins',
+                  style: TextStyle(
+                    fontFamily: AppFonts.mainFont,
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                     color: AppColors.subText,
@@ -248,8 +249,8 @@ class _SettingsLanguageDropdownWidgetState
                       Expanded(
                         child: Text(
                           selectedLang.name,
-                          style: const TextStyle(
-                            fontFamily: 'Poppins',
+                          style: TextStyle(
+                            fontFamily: AppFonts.mainFont,
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
                             color: AppColors.subText,

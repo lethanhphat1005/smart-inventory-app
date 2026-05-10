@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/infrastructure/models/language_model.dart';
+import 'package:frontend/core/infrastructure/utils/full_screen_loader_utils.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
@@ -34,26 +35,34 @@ class SettingsController extends GetxController {
     } else {
       languageController.text = TTexts.settingsEnglish.tr;
     }
-
-    // Load tiền tệ hiện tại
-    currencyController.text = storage.read('app_currency') ?? 'VND';
   }
 
-  void changeLanguage(LanguageModel lang) {
-    // Cập nhật text trên ô Input
-    languageController.text = lang.name;
+  Future<void> changeLanguage(LanguageModel lang) async {
+    try {
+      // 1. Hiện loader để che đi quá trình UI bị giật khi đổi font
+      FullScreenLoaderUtils.openLoadingDialog(TTexts.loading.tr);
 
-    // Cập nhật Locale của GetX
-    var locale = Locale(lang.code, lang.locale);
-    Get.updateLocale(locale);
+      // 2. Cập nhật text trên ô Input
+      languageController.text = lang.name;
 
-    // Lưu vào bộ nhớ
-    storage.write('app_language', lang.code);
-  }
+      // 3. Cập nhật Locale của GetX
+      var locale = Locale(lang.code, lang.locale);
+      await Get.updateLocale(locale);
 
-  void changeCurrency(String currencyName) {
-    currencyController.text = currencyName;
-    storage.write('app_currency', currencyName);
+      // 4. Đợi khoảng 300-500ms để Flutter engine nạp xong font BeVietnamPro vào cache
+      // và tính toán lại layout xong xuôi.
+      await Future.delayed(const Duration(milliseconds: 400));
+
+      // 5. Lưu vào bộ nhớ
+      storage.write('app_language', lang.code);
+
+      // 6. Tắt loader - Lúc này UI đã ổn định hoàn toàn với font mới
+      FullScreenLoaderUtils.stopLoading();
+    } catch (e) {
+      FullScreenLoaderUtils.stopLoading();
+      // Sử dụng TErrorHandler nếu bạn đã mixin nó vào
+      debugPrint("Lỗi đổi ngôn ngữ: $e");
+    }
   }
 
   @override

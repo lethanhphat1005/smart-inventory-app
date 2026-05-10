@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:frontend/core/ui/widgets/t_image_widget.dart';
 import '../widgets/onboarding_next_button_widget.dart';
@@ -86,8 +87,8 @@ class OnboardingStandardLayout extends StatelessWidget {
           // 2. Tiêu đề
           Text(
             title,
-            style: const TextStyle(
-              fontFamily: 'Poppins',
+            style: TextStyle(
+              fontFamily: AppFonts.mainFont,
               fontSize: 28,
               fontWeight: FontWeight.w700,
               color: AppColors.primaryText,
@@ -99,8 +100,8 @@ class OnboardingStandardLayout extends StatelessWidget {
           // 3. Mô tả
           Text(
             subtitle,
-            style: const TextStyle(
-              fontFamily: 'Poppins',
+            style: TextStyle(
+              fontFamily: AppFonts.mainFont,
               fontSize: 16,
               fontWeight: FontWeight.w400,
               color: AppColors.subText,

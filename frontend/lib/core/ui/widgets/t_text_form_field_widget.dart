@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 
 /// Text Input Form Field
@@ -53,8 +54,8 @@ class TTextFormFieldWidget extends StatelessWidget {
         RichText(
           text: TextSpan(
             text: label,
-            style: const TextStyle(
-              fontFamily: 'Poppins',
+            style: TextStyle(
+              fontFamily: AppFonts.mainFont,
               fontSize: 12,
               fontWeight: FontWeight.w500,
               color: AppColors.subText,
@@ -90,7 +91,7 @@ class TTextFormFieldWidget extends StatelessWidget {
             cursorColor: AppColors.primary,
             onFieldSubmitted: onFieldSubmitted,
             style: TextStyle(
-              fontFamily: 'Poppins',
+              fontFamily: AppFonts.mainFont,
               fontSize: 12,
               fontWeight: FontWeight.w500,
               color: readOnly ? AppColors.subText : AppColors.primaryText,

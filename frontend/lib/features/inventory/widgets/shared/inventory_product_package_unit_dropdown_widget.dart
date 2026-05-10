@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:get/get.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
@@ -149,14 +150,14 @@ class _InventoryProductPackageUnitDropdownWidgetState
                                           MainAxisAlignment.spaceBetween,
                                       children: [
                                         Text(unit.name,
-                                            style: const TextStyle(
-                                                fontFamily: 'Poppins',
+                                            style: TextStyle(
+                                                fontFamily: AppFonts.mainFont,
                                                 fontSize: 14,
                                                 color: AppColors.primaryText,
                                                 fontWeight: FontWeight.w600)),
                                         Text(unit.code,
-                                            style: const TextStyle(
-                                                fontFamily: 'Poppins',
+                                            style: TextStyle(
+                                                fontFamily: AppFonts.mainFont,
                                                 fontSize: 12,
                                                 color: AppColors.subText,
                                                 fontWeight: FontWeight.w500)),

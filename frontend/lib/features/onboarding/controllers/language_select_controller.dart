@@ -48,7 +48,6 @@ class LanguageSelectController extends GetxController with TErrorHandler {
       // 4. Đi đến Onboarding
       Get.offAllNamed(AppRoutes.onboarding);
     } catch (e) {
-      // Sử dụng mixin xử lý lỗi của bạn
       handleError(e);
     }
   }

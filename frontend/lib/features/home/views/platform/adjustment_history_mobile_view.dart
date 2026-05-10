@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:frontend/core/ui/widgets/t_app_bar_widget.dart';
 import 'package:frontend/core/ui/widgets/t_empty_state_widget.dart';
@@ -113,8 +114,8 @@ class AdjustmentHistoryMobileView extends GetView<AdjustmentHistoryController> {
                             padding: const EdgeInsets.only(top: 8, bottom: 16),
                             child: Text(
                               controller.formatDateHeader(dateKey),
-                              style: const TextStyle(
-                                  fontFamily: 'Poppins',
+                              style:  TextStyle(
+                                  fontFamily: AppFonts.mainFont,
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                   color: AppColors.primaryText),

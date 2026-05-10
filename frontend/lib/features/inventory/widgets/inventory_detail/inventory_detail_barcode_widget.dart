@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:frontend/features/inventory/controllers/inventory_detail_controller.dart';
 import 'package:get/get.dart';
@@ -80,11 +81,11 @@ class InventoryDetailBarcodeWidget extends GetView<InventoryDetailController> {
                             Flexible(
                               child: Text(
                                 controller.barcode,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
                                   letterSpacing: 2.0,
-                                  fontFamily: 'Poppins',
+                                  fontFamily: AppFonts.mainFont,
                                   color: AppColors.primaryText,
                                 ),
                                 overflow: TextOverflow.ellipsis,
@@ -105,8 +106,8 @@ class InventoryDetailBarcodeWidget extends GetView<InventoryDetailController> {
                                 ),
                                 child: Text(
                                   '+${barcodes.length - 1}',
-                                  style: const TextStyle(
-                                    fontFamily: 'Poppins',
+                                  style: TextStyle(
+                                    fontFamily: AppFonts.mainFont,
                                     fontSize: 11,
                                     fontWeight: FontWeight.bold,
                                     color: AppColors.primary,

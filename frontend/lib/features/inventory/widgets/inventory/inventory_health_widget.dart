@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:get/get.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/features/inventory/controllers/inventory_controller.dart';
@@ -43,10 +44,10 @@ class InventoryHealthWidget extends GetView<InventoryController> {
                     builder: (context, value, child) {
                       return Text(
                         value.toInt().toString(),
-                        style: const TextStyle(
+                        style: TextStyle(
                             fontSize: 42,
                             fontWeight: FontWeight.w900,
-                            fontFamily: 'Poppins',
+                            fontFamily: AppFonts.mainFont,
                             height: 1),
                       );
                     },

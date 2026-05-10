@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:frontend/features/report/controllers/report_controller.dart';
 import 'package:get/get.dart';
@@ -17,8 +18,8 @@ class ReportDateHeaderWidget extends GetView<ReportController> {
         children: [
           Text(
             controller.currentDateStr,
-            style: const TextStyle(
-                fontFamily: 'Poppins',
+            style: TextStyle(
+                fontFamily: AppFonts.mainFont,
                 fontSize: 34,
                 color: AppColors.primaryText,
                 fontWeight: FontWeight.w400),
@@ -27,7 +28,7 @@ class ReportDateHeaderWidget extends GetView<ReportController> {
           Text(
             controller.currentDayStr,
             style: TextStyle(
-                fontFamily: 'Poppins',
+                fontFamily: AppFonts.mainFont,
                 fontSize: 18,
                 color: AppColors.subText.withOpacity(0.8),
                 fontWeight: FontWeight.w400),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/widgets/t_refresh_indicator_widget.dart';
 import 'package:frontend/features/inventory/widgets/category_detail/category_detail_action_menu_widget.dart';
 import 'package:get/get.dart';
@@ -27,11 +28,11 @@ class CategoryDetailMobileView extends GetView<CategoryDetailController> {
       appBar: TAppBarWidget(
         titleWidget: Obx(() => Text(
               controller.rxCategory.value.name,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppColors.primaryText,
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                fontFamily: 'Poppins',
+                fontFamily: AppFonts.mainFont,
               ),
             )),
         showBackArrow: true,
@@ -56,8 +57,8 @@ class CategoryDetailMobileView extends GetView<CategoryDetailController> {
                       children: [
                         Text(
                           controller.rxCategory.value.name,
-                          style: const TextStyle(
-                              fontFamily: 'Poppins',
+                          style: TextStyle(
+                              fontFamily: AppFonts.mainFont,
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                               color: AppColors.primaryText),
@@ -70,8 +71,8 @@ class CategoryDetailMobileView extends GetView<CategoryDetailController> {
                                       .rxCategory.value.description!.isNotEmpty)
                               ? controller.rxCategory.value.description!
                               : TTexts.noCategoryDescription.tr,
-                          style: const TextStyle(
-                              fontFamily: 'Poppins',
+                          style: TextStyle(
+                              fontFamily: AppFonts.mainFont,
                               fontSize: 12,
                               height: 1.5,
                               color: AppColors.subText),
