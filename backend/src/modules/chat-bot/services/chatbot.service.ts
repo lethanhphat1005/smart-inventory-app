@@ -835,6 +835,6 @@ Inventory: ${firstResult.quantity} ${firstResult.productPackage.unit.name}.`;
   }
 
   private buildReplyContext(userMessage: string, systemData: string): string {
-    return `[USER MESSAGE]: ${userMessage}\n[SYSTEM DATA]: ${systemData}`;
+    return `[USER MESSAGE]: ${userMessage}\n[SYSTEM DATA]: ${systemData}\n[INSTRUCTION]: Reply to the user in the language they used above.`;
   }
 }
