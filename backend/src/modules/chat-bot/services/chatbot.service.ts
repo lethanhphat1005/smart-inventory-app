@@ -16,6 +16,7 @@ import {
   buildChatDraftKey,
   buildChatLockKey,
   buildCoordinatorMessages,
+  buildUserDraftRefKey,
   findExactInventoryMatch,
 } from '../chatbot.mapper.js';
 import { getFriendlyReplyPrompt } from '../chatbot.prompt.js';
@@ -27,6 +28,7 @@ import type { InventoryService } from '../../inventories/index.js';
 import type { TransactionService } from '../../transactions/transaction.service.js';
 import type { ChatbotRequestDto, ChatbotResponseDto } from '../chatbot.dto.js';
 import type {
+  CartItem,
   ChatHistoryMessage,
   DraftAction,
   DraftActionType,
@@ -98,6 +100,26 @@ export class ChatbotService {
       });
     }
     try {
+      const draftRefKey = buildUserDraftRefKey(storeId, userId);
+      const pendingDraftId = await this.redisClient.get(draftRefKey);
+
+      if (pendingDraftId) {
+        // Kiểm tra xem draft gốc có còn sống không (chưa hết hạn TTL)
+        const draftExists = await this.redisClient.exists(
+          buildChatDraftKey(pendingDraftId),
+        );
+
+        if (draftExists) {
+          return {
+            aiIntent: 'pending_confirmation',
+            botReply:
+              'Bạn đang có một phiếu nháp chưa được xác nhận. Vui lòng xác nhận hoặc hủy phiếu trước khi chúng ta tiếp tục nhé! 📦⚠️',
+          };
+        }
+        // Xóa ref key rác nếu draft đã hết hạn
+        await this.redisClient.del(draftRefKey);
+      }
+
       const previousHistory = await this.chatMemoryService.getChatHistory(
         storeId,
         userId,
@@ -385,8 +407,11 @@ export class ChatbotService {
 
     const draft = JSON.parse(draftData) as DraftAction;
 
+    const refKey = buildUserDraftRefKey(draft.storeId, draft.userId);
+
     if (!isConfirmed) {
       await this.redisClient.del(draftKey); // Xóa khỏi Redis
+      await this.redisClient.del(refKey);
 
       await this.chatMemoryService.clearChatHistory(
         draft.storeId,
@@ -417,6 +442,7 @@ export class ChatbotService {
     }
 
     await this.redisClient.del(draftKey);
+    await this.redisClient.del(refKey);
 
     await this.chatMemoryService.clearChatHistory(draft.storeId, draft.userId);
     await this.chatMemoryService.clearCartSession(draft.storeId, draft.userId);
@@ -585,6 +611,9 @@ Inventory: ${firstResult.quantity} ${firstResult.productPackage.unit.name}.`;
       cart = { type: intent, items: [] };
     }
 
+    // Tạo bản sao sâu (deep clone) để tính toán an toàn
+    const tempCartItems: CartItem[] = cart.items.map((item) => ({ ...item }));
+
     for (const item of itemsToProcess) {
       if (!item.product_name || !item.quantity) {
         continue;
@@ -595,20 +624,29 @@ Inventory: ${firstResult.quantity} ${firstResult.productPackage.unit.name}.`;
         item.product_name,
       );
 
+      // NẾU LỖI: Cần lưu lại những món ĐÃ THÀNH CÔNG trước đó vào Redis trước khi thoát
+      const saveProgressAndReturn = async (
+        returnPayload: ChatbotResponseDto,
+      ) => {
+        cart!.items = tempCartItems; // Gán phần đã xử lý được
+        await this.chatMemoryService.saveCartSession(storeId, userId, cart!);
+
+        return returnPayload;
+      };
+
       if (searchResult.length === 0) {
-        return {
+        return saveProgressAndReturn({
           aiIntent: intent,
           botReply: await this.generateFriendlyReply(
             this.buildReplyContext(
               userMessage,
-              `Error: "${item.product_name}" was not found. Previous items remain in the cart.`,
+              `Error: "${item.product_name}" was not found. Previous items (if any) have been saved to the cart.`,
             ),
             '',
           ),
-        };
+        });
       }
 
-      // Xử lý exact match (đã rút gọn cho dễ đọc, bạn giữ nguyên logic match của bạn)
       let targetItem: InventoryItemData;
       const exactMatch = findExactInventoryMatch(
         searchResult,
@@ -620,7 +658,8 @@ Inventory: ${firstResult.quantity} ${firstResult.productPackage.unit.name}.`;
       } else if (searchResult.length === 1) {
         targetItem = searchResult[0]!;
       } else {
-        return {
+        // Có nhiều kết quả -> Yêu cầu user chọn -> Vẫn phải lưu tiến độ các món trước đó
+        return saveProgressAndReturn({
           aiIntent: 'choose_product',
           botReply: await this.generateFriendlyReply(
             this.buildReplyContext(
@@ -634,7 +673,7 @@ Inventory: ${firstResult.quantity} ${firstResult.productPackage.unit.name}.`;
             quantity: item.quantity,
             items: searchResult,
           },
-        };
+        });
       }
 
       const pkg = targetItem.productPackage;
@@ -642,33 +681,33 @@ Inventory: ${firstResult.quantity} ${firstResult.productPackage.unit.name}.`;
         ? Number(pkg.sellingPrice)
         : Number(pkg.importPrice);
 
-      // 2. LOGIC CỘNG DỒN GIỎ HÀNG
-      const existingItem = cart.items.find(
+      // 2. LOGIC CỘNG DỒN GIỎ HÀNG (Vào biến tạm)
+      const existingItem = tempCartItems.find(
         (i) => i.productPackageId === pkg.productPackageId,
       );
       const newQuantity = existingItem
         ? existingItem.quantity + Number(item.quantity)
         : Number(item.quantity);
 
-      // Validate tồn kho với TỔNG SỐ LƯỢNG (cũ + mới)
+      // Validate tồn kho
       if (isExport && targetItem.quantity < newQuantity) {
-        return {
+        return saveProgressAndReturn({
           aiIntent: intent,
           botReply: await this.generateFriendlyReply(
             this.buildReplyContext(
               userMessage,
-              `Error: Insufficient stock. The inventory has ${targetItem.quantity}, but you want to export a total of ${newQuantity} (including items in the cart).`,
+              `Error: Insufficient stock. The inventory has ${targetItem.quantity}, but you want to export a total of ${newQuantity}.`,
             ),
             '',
           ),
-        };
+        });
       }
 
-      // Cập nhật mảng items trong Cart
+      // Cập nhật mảng items tạm
       if (existingItem) {
         existingItem.quantity = newQuantity;
       } else {
-        cart.items.push({
+        tempCartItems.push({
           productPackageId: pkg.productPackageId,
           displayName: pkg.displayName,
           quantity: Number(item.quantity),
@@ -677,7 +716,8 @@ Inventory: ${firstResult.quantity} ${firstResult.productPackage.unit.name}.`;
       }
     }
 
-    // 3. LƯU GIỎ HÀNG VÀO REDIS
+    // 3. LƯU GIỎ HÀNG VÀO REDIS (Nếu vòng lặp trót lọt hoàn toàn)
+    cart.items = tempCartItems;
     await this.chatMemoryService.saveCartSession(storeId, userId, cart);
 
     // 4. TẠO LẠI DRAFT VỚI TOÀN BỘ GIỎ HÀNG
@@ -699,7 +739,7 @@ Inventory: ${firstResult.quantity} ${firstResult.productPackage.unit.name}.`;
     );
 
     const payload: TransactionPayload = {
-      note: `${isExport ? 'Xuất' : 'Nhập'} kho nhiều sản phẩm qua AI Assistant`,
+      note: `${isExport ? 'Xuất' : 'Nhập'} kho qua AI Assistant`,
       items: transactionItems,
     };
 
@@ -720,7 +760,13 @@ Inventory: ${firstResult.quantity} ${firstResult.productPackage.unit.name}.`;
       DRAFT_TTL_SECONDS,
     );
 
-    // Sửa lại cho đồng bộ tiếng Anh
+    await this.redisClient.set(
+      buildUserDraftRefKey(storeId, userId),
+      draftId,
+      'EX',
+      DRAFT_TTL_SECONDS,
+    );
+
     const systemContext = `The cart has been updated for ${actionText}. Current items: ${successMessages.join(', ')}. Total: ${grandTotal.toLocaleString('en-US')} VND. Ask if they want to add more or confirm the order.`;
 
     return {
