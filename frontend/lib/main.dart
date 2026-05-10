@@ -110,17 +110,24 @@ void main() async {
     );
   };
 
+  final storage = GetStorage();
+  String? savedLang = storage.read('app_language');
+  // Nếu đã lưu 'vi' thì dùng tiếng Việt, ngược lại dùng tiếng Anh làm mặc định
+  Locale initialLocale =
+      savedLang == 'vi' ? const Locale('vi', 'VN') : const Locale('en', 'US');
+
   runApp(
     DevicePreview(
       // enabled: !kReleaseMode,
       enabled: false,
-      builder: (context) => const App(),
+      builder: (context) => App(initialLocale: initialLocale),
     ),
   );
 }
 
 class App extends StatelessWidget {
-  const App({super.key});
+  final Locale initialLocale;
+  const App({super.key, required this.initialLocale});
 
   @override
   Widget build(BuildContext context) {
@@ -159,7 +166,8 @@ class App extends StatelessWidget {
 
       // Khai báo Localization ở đây là chuẩn nhất
       translations: AppTranslations(),
-      locale: const Locale('en', 'US'),
+      locale: initialLocale, // Sử dụng biến locale tự động nạp từ bộ nhớ
+      fallbackLocale: const Locale('en', 'US'),
 
       initialBinding: InitialBinding(),
       initialRoute: AppRoutes.splash,

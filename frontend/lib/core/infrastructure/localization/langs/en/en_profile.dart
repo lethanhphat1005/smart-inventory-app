@@ -114,6 +114,17 @@ final Map<String, String> enProfile = {
   TTexts.profileNoMembers: 'No members found',
   TTexts.profileNoMembersSubtitle: 'There are no members in this store.',
 
+  //--Settings
+  TTexts.profileAppSettings: "App Settings",
+  TTexts.settingsTitle: 'Settings',
+  TTexts.settingsSubtitle: 'Manage your application language and preferences.',
+  TTexts.settingsLanguage: 'Language',
+  TTexts.settingsSelectLanguage: 'Select Language',
+  TTexts.settingsCurrency: 'Currency',
+  TTexts.settingsSelectCurrency: 'Select Currency',
+  TTexts.settingsVietnamese: 'Vietnamese',
+  TTexts.settingsEnglish: 'English',
+
   //Exceptions
   TTexts.userNotFound: 'User information not found',
   TTexts.userIdNotFound: 'User ID not found for profile update',

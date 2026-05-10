@@ -44,11 +44,13 @@ import 'package:frontend/features/profile/bindings/profile_assigns_role_binding.
 import 'package:frontend/features/profile/bindings/profile_binding.dart';
 import 'package:frontend/features/profile/bindings/profile_edit_profile_binding.dart';
 import 'package:frontend/features/profile/bindings/profile_edit_store_binding.dart';
+import 'package:frontend/features/profile/bindings/settings_binding.dart';
 import 'package:frontend/features/profile/views/profile_assigns_role_view.dart';
 import 'package:frontend/features/profile/views/profile_change_password_view.dart';
 import 'package:frontend/features/profile/views/profile_edit_store_view.dart';
 import 'package:frontend/features/profile/views/profile_edit_view.dart';
 import 'package:frontend/features/profile/views/profile_view.dart';
+import 'package:frontend/features/profile/views/settings_view.dart';
 import 'package:frontend/features/report/bindings/report_transaction_detail_binding.dart';
 import 'package:frontend/features/report/views/platform/report_transaction_detail_mobile_view.dart';
 import 'package:frontend/features/report/views/report_view.dart';
@@ -403,6 +405,12 @@ class AppPages {
       binding: ProfileAssignsRoleBinding(),
       transition: Transition.cupertino,
     ),
+
+    GetPage(
+        name: AppRoutes.settings,
+        page: () => const SettingsView(),
+        binding: SettingsBinding(),
+        transition: Transition.cupertino),
 
     // -- Reorder suggestion
     GetPage(

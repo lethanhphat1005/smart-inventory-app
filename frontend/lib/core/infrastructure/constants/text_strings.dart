@@ -1099,6 +1099,7 @@ class TTexts {
   static const String memberRemovedSuccess = 'member_removed_success';
   static const String deleteMemberTitle = 'delete_member_title';
   static const String deleteMemberMessage = 'delete_member_message';
+
   //--Edit profile
   static const String editTitle = 'edit_title';
   static const String editLoading = 'edit_loading';
@@ -1178,6 +1179,17 @@ class TTexts {
   static const String assignsRoleAll = 'assigns_role_all';
   static const String assignsRoleOwner = 'assigns_role_owner';
   static const String assignsRoleSearchHint = 'assigns_role_search_hint';
+
+  // -- Settings
+  static const String profileAppSettings = "profile_app_settings";
+  static const String settingsTitle = "settings_title";
+  static const String settingsSubtitle = "settings_subtitle";
+  static const String settingsLanguage = "settings_language";
+  static const String settingsSelectLanguage = "settings_select_language";
+  static const String settingsCurrency = "settings_currency";
+  static const String settingsSelectCurrency = "settings_select_currency";
+  static const String settingsVietnamese = "settings_vietnamese";
+  static const String settingsEnglish = "settings_english";
 
   //Exceptions
   static const String userNotFound = "user_not_found";
