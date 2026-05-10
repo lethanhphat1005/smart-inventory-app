@@ -397,13 +397,42 @@ export class ChatbotService {
     }
 
     const draft = JSON.parse(draftData) as DraftAction;
-
     const refKey = buildUserDraftRefKey(draft.storeId, draft.userId);
 
-    if (!isConfirmed) {
-      await this.redisClient.del(draftKey); // Xóa khỏi Redis
-      await this.redisClient.del(refKey);
+    try {
+      if (!isConfirmed) {
+        await this.chatMemoryService.clearChatHistory(
+          draft.storeId,
+          draft.userId,
+        );
 
+        return await this.generateFriendlyReply(
+          this.buildReplyContext(
+            'I want to cancel the transaction.',
+            'The operation has been cancelled.',
+          ),
+          '',
+        );
+      }
+
+      if (draft.type === 'create_import') {
+        await this.transactionService.createImportTransaction(
+          draft.storeId,
+          draft.userId,
+          draft.payload,
+        );
+      } else {
+        await this.transactionService.createExportTransaction(
+          draft.storeId,
+          draft.userId,
+          draft.payload,
+        );
+      }
+
+      await this.chatMemoryService.clearCartSession(
+        draft.storeId,
+        draft.userId,
+      );
       await this.chatMemoryService.clearChatHistory(
         draft.storeId,
         draft.userId,
@@ -411,40 +440,18 @@ export class ChatbotService {
 
       return await this.generateFriendlyReply(
         this.buildReplyContext(
-          'I want to cancel the transaction.',
-          'The operation has been cancelled.',
+          'Confirmation successful',
+          'Great! The transaction has been recorded in the system.',
         ),
         '',
       );
+    } catch (error) {
+      console.error('[Confirm Action Error]', error);
+      throw error;
+    } finally {
+      await this.redisClient.del(draftKey);
+      await this.redisClient.del(refKey);
     }
-
-    if (draft.type === 'create_import') {
-      await this.transactionService.createImportTransaction(
-        draft.storeId,
-        draft.userId,
-        draft.payload,
-      );
-    } else {
-      await this.transactionService.createExportTransaction(
-        draft.storeId,
-        draft.userId,
-        draft.payload,
-      );
-    }
-
-    await this.redisClient.del(draftKey);
-    await this.redisClient.del(refKey);
-
-    await this.chatMemoryService.clearChatHistory(draft.storeId, draft.userId);
-    await this.chatMemoryService.clearCartSession(draft.storeId, draft.userId);
-
-    return await this.generateFriendlyReply(
-      this.buildReplyContext(
-        'Confirmation successful',
-        'Great! The transaction has been recorded in the system.',
-      ),
-      '',
-    );
   }
 
   private async handleGetLowStock(
@@ -538,7 +545,7 @@ Inventory: ${exactMatch.quantity} ${exactMatch.productPackage.unit.name}.`;
     }
 
     if (searchResult.length === 1 && firstResult) {
-      const context = `Product ${firstResult.productPackage.displayName} has a selling price of ${firstResult.productPackage.sellingPrice} VND. 
+      const context = `Product ${firstResult.productPackage.displayName} has a selling price of ${firstResult.productPackage.sellingPrice}. 
 Inventory: ${firstResult.quantity} ${firstResult.productPackage.unit.name}.`;
 
       return {
