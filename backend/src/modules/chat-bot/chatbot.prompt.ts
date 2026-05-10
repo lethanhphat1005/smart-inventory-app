@@ -26,6 +26,7 @@ TOOL CALLING RULES:
 3. Call 'create_import' or 'create_export' ONLY when the user wants to create an import/export transaction.
 4. You MUST provide data via the 'products' parameter as an array of objects, even if there is only one product.
 5. DO NOT add strange characters or redundant quotes to the JSON string.
+6. CART AWARENESS: When creating transactions, ONLY extract the NEW products requested in the current message. ABSOLUTELY DO NOT include products that were already processed in previous messages, because the system automatically maintains the cart state.
 
 EXAMPLES OF NOT CALLING TOOLS (DIRECT REPLY OR REFUSAL):
 - "Who are you?" -> Introduce yourself.

@@ -99,26 +99,6 @@ export class ChatbotService {
       });
     }
     try {
-      const draftRefKey = buildUserDraftRefKey(storeId, userId);
-      const pendingDraftId = await this.redisClient.get(draftRefKey);
-
-      if (pendingDraftId) {
-        // Kiểm tra xem draft gốc có còn sống không (chưa hết hạn TTL)
-        const draftExists = await this.redisClient.exists(
-          buildChatDraftKey(pendingDraftId),
-        );
-
-        if (draftExists) {
-          return {
-            aiIntent: 'pending_confirmation',
-            botReply:
-              'Bạn đang có một phiếu nháp chưa được xác nhận. Vui lòng xác nhận hoặc hủy phiếu trước khi chúng ta tiếp tục nhé! 📦⚠️',
-          };
-        }
-        // Xóa ref key rác nếu draft đã hết hạn
-        await this.redisClient.del(draftRefKey);
-      }
-
       const previousHistory = await this.chatMemoryService.getChatHistory(
         storeId,
         userId,
@@ -181,6 +161,40 @@ export class ChatbotService {
         } else {
           const intent = toolCall.function.name;
           let params: LLMToolParams = {};
+
+          // -------------------------------------------------------------
+          // LOGIC KIỂM TRA PENDING DRAFT (ĐÃ NÂNG CẤP)
+          // -------------------------------------------------------------
+          if (intent === 'create_import' || intent === 'create_export') {
+            const draftRefKey = buildUserDraftRefKey(storeId, userId);
+            const pendingDraftId = await this.redisClient.get(draftRefKey);
+
+            if (pendingDraftId) {
+              const draftKey = buildChatDraftKey(pendingDraftId);
+              const draftData = await this.redisClient.get(draftKey);
+
+              if (draftData) {
+                const draft = JSON.parse(draftData) as DraftAction;
+
+                if (intent !== draft.type) {
+                  const draftTypeVN =
+                    draft.type === 'create_import' ? 'NHẬP' : 'XUẤT';
+
+                  return {
+                    aiIntent:
+                      draft.type === 'create_import'
+                        ? 'confirm_import'
+                        : 'confirm_export',
+                    botReply: `Tori phát hiện bạn đang có một phiếu ${draftTypeVN} kho chưa hoàn tất. Bạn không thể tạo phiếu ${draftTypeVN === 'NHẬP' ? 'XUẤT' : 'NHẬP'} lúc này. Vui lòng Xác nhận hoặc Hủy phiếu cũ ở thẻ bên dưới nhé! 📦⚠️`,
+                    data: { draftActionId: pendingDraftId },
+                  };
+                }
+              } else {
+                await this.redisClient.del(draftRefKey);
+              }
+            }
+          }
+          // -------------------------------------------------------------
 
           try {
             if (toolCall.function.arguments) {
@@ -405,6 +419,10 @@ export class ChatbotService {
           draft.storeId,
           draft.userId,
         );
+        await this.chatMemoryService.clearCartSession(
+          draft.storeId,
+          draft.userId,
+        );
 
         return await this.generateFriendlyReply(
           this.buildReplyContext(
@@ -415,6 +433,7 @@ export class ChatbotService {
         );
       }
 
+      // Xử lý tạo giao dịch
       if (draft.type === 'create_import') {
         await this.transactionService.createImportTransaction(
           draft.storeId,
@@ -429,11 +448,11 @@ export class ChatbotService {
         );
       }
 
-      await this.chatMemoryService.clearCartSession(
+      await this.chatMemoryService.clearChatHistory(
         draft.storeId,
         draft.userId,
       );
-      await this.chatMemoryService.clearChatHistory(
+      await this.chatMemoryService.clearCartSession(
         draft.storeId,
         draft.userId,
       );
@@ -441,14 +460,12 @@ export class ChatbotService {
       return await this.generateFriendlyReply(
         this.buildReplyContext(
           'Confirmation successful',
-          'Great! The transaction has been recorded in the system.',
+          'Great! The transaction has been recorded.',
         ),
         '',
       );
-    } catch (error) {
-      console.error('[Confirm Action Error]', error);
-      throw error;
     } finally {
+      // LUÔN LUÔN xóa key để giải phóng người dùng dù thành công hay thất bại
       await this.redisClient.del(draftKey);
       await this.redisClient.del(refKey);
     }
@@ -612,6 +629,8 @@ Inventory: ${firstResult.quantity} ${firstResult.productPackage.unit.name}.`;
     // Tạo bản sao sâu (deep clone) để tính toán an toàn
     const tempCartItems: CartItem[] = cart.items.map((item) => ({ ...item }));
 
+    const newlyAddedItems: string[] = [];
+
     for (const item of itemsToProcess) {
       if (!item.product_name || !item.quantity) {
         continue;
@@ -712,6 +731,8 @@ Inventory: ${firstResult.quantity} ${firstResult.productPackage.unit.name}.`;
           unitPrice: price,
         });
       }
+
+      newlyAddedItems.push(`${Number(item.quantity)} ${pkg.displayName}`);
     }
 
     // 3. LƯU GIỎ HÀNG VÀO REDIS (Nếu vòng lặp trót lọt hoàn toàn)
@@ -765,9 +786,8 @@ Inventory: ${firstResult.quantity} ${firstResult.productPackage.unit.name}.`;
       DRAFT_TTL_SECONDS,
     );
 
-    // Thay đổi cách hiển thị Grand Total ở cuối hàm
-    const formattedTotal = grandTotal.toLocaleString('en-US'); // Chỉ format dấu phẩy ngăn cách
-    const systemContext = `The cart has been updated. Current items: ${successMessages.join(', ')}. Total: ${formattedTotal}. Ask if they want to add more or confirm.`;
+    const formattedTotal = grandTotal.toLocaleString('en-US');
+    const systemContext = `Successfully added to cart: ${newlyAddedItems.join(', ')}. Current entire cart items: ${successMessages.join(', ')}. Grand Total: ${formattedTotal}. Ask if they want to add more or confirm.`;
 
     return {
       aiIntent: isExport ? 'confirm_export' : 'confirm_import',

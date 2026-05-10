@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
-import 'package:frontend/core/infrastructure/constants/text_strings.dart'; 
+import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/features/navigation/controllers/chatbot_ui_controller.dart';
 import 'package:frontend/features/navigation/models/chat_message_model.dart';
@@ -103,11 +103,7 @@ class ChatCardActionConfirm extends StatelessWidget {
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () {
-                      message.isResolved = true;
-                      controller.messages.refresh();
-                      controller.messages.add(ChatMessage(
-                          text: TTexts.chatbotActionCancelled.tr,
-                          isUser: false)); // Đã gắn .tr
+                      controller.cancelTransaction(message);
                     },
                     style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 12),
