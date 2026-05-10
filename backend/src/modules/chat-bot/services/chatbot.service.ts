@@ -9,7 +9,6 @@ import {
   FRIENDLY_REPLY_MODEL,
   FRIENDLY_REPLY_TEMPERATURE,
   LOCK_TTL_SECONDS,
-  OUT_OF_DOMAIN_KEYWORDS,
   STATIC_REJECTION_REPLY,
 } from '../chatbot.constants.js';
 import {
@@ -150,13 +149,6 @@ export class ChatbotService {
         { role: 'user', content: payload.message },
       ];
 
-      if (this.isOutOfDomain(payload.message)) {
-        return {
-          aiIntent: 'out_of_domain',
-          botReply: STATIC_REJECTION_REPLY,
-        };
-      }
-
       const response = await this.llmProvider.createChatCompletion({
         model: COORDINATOR_MODEL,
         messages,
@@ -283,16 +275,15 @@ export class ChatbotService {
         }
       } else {
         finalResponse = {
-          aiIntent: 'unknown',
+          aiIntent: 'out_of_domain_or_casual',
           botReply: await this.generateFriendlyReply(
             this.buildReplyContext(
               payload.message,
-              `SYSTEM MODERATION COMMAND: The user is chatting and the message doesn't require calling a tool.
-                - If it's a basic greeting, respond in a friendly manner.
-                - If it's a question about unrelated topics (such as celebrities, history, mathematics, coding, etc.),
-                ABSOLUTELY DO NOT respond. It is MANDATORY to apply the REJECTION FORMULA in the "OUT-OF-LINE DISCIPLINE" rule.`,
+              `SYSTEM MODERATION: 
+               - If the user's message is a greeting or general system question -> Reply friendly as Tori.
+               - If the message is OUT OF DOMAIN (e.g. coding, math, weather, history, gossip...) -> REFUSE to answer. Strictly reply with exactly this message: "${STATIC_REJECTION_REPLY}"`,
             ),
-            '', // systemContext nay đã gộp vào context
+            '',
           ),
         };
       }
@@ -841,12 +832,6 @@ Inventory: ${firstResult.quantity} ${firstResult.productPackage.unit.name}.`;
     }
 
     return res.items as InventoryItemData[];
-  }
-
-  private isOutOfDomain(message: string): boolean {
-    const lower = message.toLowerCase();
-
-    return OUT_OF_DOMAIN_KEYWORDS.some((kw) => lower.includes(kw));
   }
 
   private buildReplyContext(userMessage: string, systemData: string): string {

@@ -16,34 +16,6 @@ export const CHAT_HISTORY_KEY_PREFIX = 'chatbot:history:';
 export const CHAT_LOCK_KEY_PREFIX = 'chatbot:lock:';
 export const CHAT_DRAFT_KEY_PREFIX = 'chatbot:draft:';
 
-export const OUT_OF_DOMAIN_KEYWORDS = [
-  'code',
-  'python',
-  'javascript',
-  'weather',
-  'thời tiết',
-  'lịch sử',
-  'nấu ăn',
-  'công thức',
-  'toán',
-  'math',
-  'translate',
-  'dịch',
-  'bài thơ',
-  'poem',
-  'song',
-  'bài hát',
-  'phim',
-  'movie',
-  'celebrity',
-  'sao',
-  'sport',
-  'bóng đá',
-  'chính trị',
-  'news',
-  'tin tức',
-];
-
 export const STATIC_REJECTION_REPLY =
   "Sorry, Tori is just a warehouse manager — I can't help with that 😅. " +
   'Need me to check stock levels or create an import/export draft? 📦';
