@@ -39,7 +39,9 @@ import 'package:frontend/features/navigation/views/navigation_view.dart';
 import 'package:frontend/features/notification/bindings/reorder_suggestion_binding.dart';
 import 'package:frontend/features/notification/view/notification_view.dart';
 import 'package:frontend/features/notification/view/reorder_suggestion_view.dart';
+import 'package:frontend/features/onboarding/bindings/language_select_binding.dart';
 import 'package:frontend/features/onboarding/bindings/onboarding_binding.dart';
+import 'package:frontend/features/onboarding/views/language_select_view.dart';
 import 'package:frontend/features/profile/bindings/profile_assigns_role_binding.dart';
 import 'package:frontend/features/profile/bindings/profile_binding.dart';
 import 'package:frontend/features/profile/bindings/profile_edit_profile_binding.dart';
@@ -98,6 +100,14 @@ class AppPages {
       name: AppRoutes.splash,
       page: () => const SplashView(),
       binding: SplashBinding(),
+    ),
+
+    // -- Language Select
+    GetPage(
+      name: AppRoutes.languageSelect,
+      page: () => const LanguageSelectView(),
+      binding: LanguageSelectBinding(),
+      transition: Transition.fadeIn,
     ),
 
     // -- On boarding

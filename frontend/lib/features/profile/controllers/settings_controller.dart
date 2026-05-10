@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
-import 'package:frontend/features/profile/models/language_model.dart';
+import 'package:frontend/core/infrastructure/models/language_model.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 

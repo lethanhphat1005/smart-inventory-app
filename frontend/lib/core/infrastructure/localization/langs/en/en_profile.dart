@@ -122,8 +122,6 @@ final Map<String, String> enProfile = {
   TTexts.settingsSelectLanguage: 'Select Language',
   TTexts.settingsCurrency: 'Currency',
   TTexts.settingsSelectCurrency: 'Select Currency',
-  TTexts.settingsVietnamese: 'Vietnamese',
-  TTexts.settingsEnglish: 'English',
 
   //Exceptions
   TTexts.userNotFound: 'User information not found',

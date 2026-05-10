@@ -34,7 +34,7 @@ final Map<String, String> enCore = {
   TTexts.errorUnknownTitle: 'Unknown Error',
   TTexts.errorUnknownMessage: 'An unexpected error occurred. Please try again.',
   TTexts.fabScanBarcode: 'Scan Barcode',
-  TTexts.fabAddManual: 'Add Manual', 
+  TTexts.fabAddManual: 'Add Manual',
   TTexts.defaultCategory: "Default",
 
   // -- Search

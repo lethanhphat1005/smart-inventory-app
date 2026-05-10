@@ -33,6 +33,16 @@ class TTexts {
   static const String deleting = "deleting";
   static const String defaultCategory = "default_category";
 
+  // -- Language Selection Screen
+  static const String languageSelectTitle = "language_select_title";
+  static const String languageSelectSubtitle = "language_select_subtitle";
+  static const String languageSelectBtnContinue =
+      "language_select_btn_continue";
+  static const String languageSelectSelectLanguage =
+      "language_select_select_language";
+  static const String settingsVietnameseSub = "settings_vietnamese_sub";
+  static const String settingsEnglishSub = "settings_english_sub";
+
   // -- Search
   static const String searchHint = "search_hint";
   static const String recentSearches = "recent_searches";

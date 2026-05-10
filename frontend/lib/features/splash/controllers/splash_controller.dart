@@ -156,12 +156,20 @@ class SplashController extends GetxController {
     final authService = Get.find<AuthService>();
     final storeService = Get.find<StoreService>();
 
+    // 1. Kiểm tra xem đã chọn ngôn ngữ lần đầu chưa
+    final isLanguageSelected = storage.read('IS_LANGUAGE_SELECTED') ?? false;
+    if (!isLanguageSelected) {
+      Get.offAllNamed(AppRoutes.languageSelect);
+      return;
+    }
+
+    // 2. Kiểm tra Onboarding (Logic cũ của bạn)
     final isFirstTime = storage.read('IS_FIRST_TIME') ?? true;
 
     if (isFirstTime) {
       Get.offAllNamed(AppRoutes.onboarding);
     } else if (authService.isLoggedIn.value) {
-      // Kiểm tra có cửa hàng chưa
+      // ... giữ nguyên logic kiểm tra store và notification của bạn
       if (storeService.currentStoreId.value.isNotEmpty) {
         if (NotificationService.pendingInitialMessage != null) {
           debugPrint(
