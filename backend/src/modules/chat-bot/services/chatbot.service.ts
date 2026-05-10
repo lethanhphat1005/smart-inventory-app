@@ -524,7 +524,7 @@ export class ChatbotService {
     const firstResult = searchResult[0];
 
     if (exactMatch) {
-      const context = `Product ${exactMatch.productPackage.displayName} has a selling price of ${exactMatch.productPackage.sellingPrice} VND. 
+      const context = `Product ${exactMatch.productPackage.displayName} has a selling price of ${exactMatch.productPackage.sellingPrice}. 
 Inventory: ${exactMatch.quantity} ${exactMatch.productPackage.unit.name}.`;
 
       return {
@@ -593,7 +593,7 @@ Inventory: ${firstResult.quantity} ${firstResult.productPackage.unit.name}.`;
     }
 
     const isExport = intent === 'create_export';
-    const actionText = isExport ? 'XUẤT KHO' : 'NHẬP KHO';
+    // const actionText = isExport ? 'XUẤT KHO' : 'NHẬP KHO';
 
     // 1. LẤY GIỎ HÀNG HIỆN TẠI (hoặc tạo mới)
     let cart = await this.chatMemoryService.getCartSession(storeId, userId);
@@ -758,7 +758,9 @@ Inventory: ${firstResult.quantity} ${firstResult.productPackage.unit.name}.`;
       DRAFT_TTL_SECONDS,
     );
 
-    const systemContext = `The cart has been updated for ${actionText}. Current items: ${successMessages.join(', ')}. Total: ${grandTotal.toLocaleString('en-US')} VND. Ask if they want to add more or confirm the order.`;
+    // Thay đổi cách hiển thị Grand Total ở cuối hàm
+    const formattedTotal = grandTotal.toLocaleString('en-US'); // Chỉ format dấu phẩy ngăn cách
+    const systemContext = `The cart has been updated. Current items: ${successMessages.join(', ')}. Total: ${formattedTotal}. Ask if they want to add more or confirm.`;
 
     return {
       aiIntent: isExport ? 'confirm_export' : 'confirm_import',
