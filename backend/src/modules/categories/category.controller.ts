@@ -70,7 +70,7 @@ export class CategoryController {
     });
   };
 
-  softDeleteOne = async (
+  softDeleteDefaultOne = async (
     req: Request,
     res: Response<ApiResponse<null>>,
   ): Promise<void> => {
@@ -78,6 +78,20 @@ export class CategoryController {
     const { categoryId } = req.params;
 
     await this.categoryService.softDeleteDefault(storeId, categoryId as string);
+
+    sendResponse.success(res, null, {
+      status: StatusCodes.OK,
+    });
+  };
+
+  restoreDefaultOne = async (
+    req: Request,
+    res: Response<ApiResponse<null>>,
+  ): Promise<void> => {
+    const storeId = requireReqStoreContext(req).storeId;
+    const { categoryId } = req.params;
+
+    await this.categoryService.restoreDefault(storeId, categoryId as string);
 
     sendResponse.success(res, null, {
       status: StatusCodes.OK,
