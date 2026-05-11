@@ -30,16 +30,28 @@ export type NormalizedBarcodeData = {
   normalizedPackageText?: string;
 };
 
+// kết quả trích xuất từ API barcode chưa chuẩn hóa
+// dùng cho auto-fill
+export type ExtractedBarcodeData = {
+  extractedName?: string;
+  extractedBrand?: string;
+  extractedPackageText?: string;
+};
+
+// data trả về cho hàm service lấy barcode cache/api
+export type BarcodeLookupData = {
+  normalizedData: NormalizedBarcodeData | null;
+  prefill: BarcodePrefill | null;
+};
+
 // lớp abstraction query từ API barcode
 export type BarcodeLookupProviderResult = {
   rawPayload: unknown;
   status: BarcodeStatus;
   provider?: string;
   type?: BarcodeType;
-  normalizedName?: string;
-  normalizedBrand?: string;
-  normalizedPackageText?: string;
-};
+} & NormalizedBarcodeData &
+  ExtractedBarcodeData;
 
 export type BarcodeApiCacheUpsertInput = {
   barcode: string;
@@ -47,10 +59,8 @@ export type BarcodeApiCacheUpsertInput = {
   status: BarcodeStatus;
   provider?: string;
   type?: BarcodeType;
-  normalizedName?: string;
-  normalizedBrand?: string;
-  normalizedPackageText?: string;
-};
+} & NormalizedBarcodeData &
+  ExtractedBarcodeData;
 
 // chấm điểm candidate matching
 export type BarcodeCandidateScoreDetail = {

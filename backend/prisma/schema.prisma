@@ -255,6 +255,9 @@ model BarcodeApiCache {
   provider              String?
   type                  BarcodeType?
   status                BarcodeStatus
+  extractedName         String?       @map("extracted_name")
+  extractedBrand        String?       @map("extracted_brand")
+  extractedPackageText  String?       @map("extracted_package_text")
   normalizedName        String?       @map("normalized_name")
   normalizedBrand       String?       @map("normalized_brand")
   normalizedPackageText String?       @map("normalized_package_text")
