@@ -49,7 +49,6 @@ class InboundTransactionMobileView
               Expanded(
                 child: Obx(() {
                   if (controller.cartItems.isEmpty) {
-                    // ĐÃ SỬA: Xóa params để tránh lỗi báo đỏ Widget
                     return const TransactionEmptyWidget();
                   }
 
@@ -75,6 +74,7 @@ class InboundTransactionMobileView
                               controller.updateItemQuantity(
                                   item.productPackageId!, newQty);
                             },
+                            onDelete: () => controller.confirmRemoveItem(index),
                           );
                         },
                       ),

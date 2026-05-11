@@ -131,7 +131,7 @@ class InboundTransactionItemAddController extends GetxController
             fetchedBarcode.value = packageFullData['barcodeValue'] ?? '';
           }
         } catch (e) {
-          debugPrint('Error fetching package details: $e'); // Đã sửa sang T.A
+          debugPrint('Error fetching package details: $e');
         }
       }
 
@@ -141,11 +141,14 @@ class InboundTransactionItemAddController extends GetxController
               await _provider.getProductById(targetProductId);
           fetchedBrandName.value =
               productFullData['brand'] ?? TTexts.noBrand.tr;
-          fetchedCategoryName.value =
-              productFullData['category']?['name'] ?? TTexts.uncategorized.tr;
+  
+          fetchedCategoryName.value = productFullData['categoryName'] ??
+              productFullData['category']?['name'] ??
+              TTexts.uncategorized.tr;
+
           fetchedImageUrl.value = _validateUrl(productFullData['imageUrl']);
         } catch (e) {
-          debugPrint('Error fetching product image: $e'); // Đã sửa sang T.A
+          debugPrint('Error fetching product image: $e');
         }
       }
     } catch (e) {

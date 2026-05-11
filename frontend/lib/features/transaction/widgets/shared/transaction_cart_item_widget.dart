@@ -16,6 +16,7 @@ class TransactionCartItemWidget extends StatefulWidget {
   final VoidCallback onIncrease;
   final VoidCallback onDecrease;
   final Function(int)? onQuantityChanged;
+  final VoidCallback? onDelete;
   final bool isOutbound;
   final String? imageUrl;
 
@@ -25,6 +26,7 @@ class TransactionCartItemWidget extends StatefulWidget {
     required this.onIncrease,
     required this.onDecrease,
     this.onQuantityChanged,
+    this.onDelete,
     this.isOutbound = false,
     this.imageUrl,
   });
@@ -38,6 +40,9 @@ class _TransactionCartItemWidgetState extends State<TransactionCartItemWidget> {
   late TextEditingController _qtyController;
   final FocusNode _focusNode = FocusNode();
 
+  // Khai báo giới hạn tối đa
+  int get _maxAllowed => widget.isOutbound ? widget.item.currentStock : 999999;
+
   @override
   void initState() {
     super.initState();
@@ -46,7 +51,7 @@ class _TransactionCartItemWidgetState extends State<TransactionCartItemWidget> {
 
     _focusNode.addListener(() {
       if (!_focusNode.hasFocus) {
-        _submitQuantity(); 
+        _submitQuantity();
       }
     });
   }
@@ -68,15 +73,13 @@ class _TransactionCartItemWidgetState extends State<TransactionCartItemWidget> {
   }
 
   void _onInputChanged(String value) {
-    if (value.isEmpty) {
-      return;
-    }
+    if (value.isEmpty) return;
 
     int newQty = int.tryParse(value) ?? 1;
 
-    // Giới hạn max 100,000
-    if (newQty > 100000) {
-      newQty = 100000;
+    // Chặn không cho nhập lố giới hạn
+    if (newQty >= _maxAllowed) {
+      newQty = _maxAllowed;
       _qtyController.text = newQty.toString();
       _qtyController.selection = TextSelection.fromPosition(
           TextPosition(offset: _qtyController.text.length));
@@ -90,7 +93,7 @@ class _TransactionCartItemWidgetState extends State<TransactionCartItemWidget> {
           TextPosition(offset: _qtyController.text.length));
     }
 
-    // Nếu gõ số > 0 thì lập tức update lên Controller 
+    // Nếu gõ số > 0 thì lập tức update lên Controller
     if (newQty > 0) {
       widget.onQuantityChanged?.call(newQty);
     }
@@ -119,10 +122,7 @@ class _TransactionCartItemWidgetState extends State<TransactionCartItemWidget> {
     int current = int.tryParse(_qtyController.text) ?? 0;
     int newQty = current + 1;
 
-    if (newQty > 100000) newQty = 100000;
-    if (widget.isOutbound && newQty > widget.item.currentStock) {
-      newQty = widget.item.currentStock;
-    }
+    if (newQty >= _maxAllowed) newQty = _maxAllowed;
 
     _qtyController.text = newQty.toString();
     widget.onQuantityChanged?.call(newQty);
@@ -136,8 +136,9 @@ class _TransactionCartItemWidgetState extends State<TransactionCartItemWidget> {
     final category = widget.item.packageInfo?.product?.categoryName ??
         TTexts.uncategorized.tr;
     final price = widget.item.unitPrice.toStringAsFixed(2);
-    final bool canIncrease =
-        !widget.isOutbound || (widget.item.quantity < widget.item.currentStock);
+
+    // Nút cộng chỉ vô hiệu hóa nếu chạm ngưỡng thực sự
+    final bool canIncrease = widget.item.quantity < _maxAllowed;
 
     return GestureDetector(
       onTap: () {
@@ -170,6 +171,7 @@ class _TransactionCartItemWidgetState extends State<TransactionCartItemWidget> {
           });
         }
       },
+      onLongPress: widget.onDelete,
       child: Container(
         padding: const EdgeInsets.all(12),
         margin: const EdgeInsets.only(bottom: 16),
@@ -216,7 +218,7 @@ class _TransactionCartItemWidgetState extends State<TransactionCartItemWidget> {
                   Text(name,
                       style: const TextStyle(
                           fontWeight: FontWeight.w600,
-                          fontSize: 14,
+                          fontSize: 16,
                           height: 1.2,
                           color: AppColors.primaryText),
                       maxLines: 2,
@@ -224,83 +226,113 @@ class _TransactionCartItemWidgetState extends State<TransactionCartItemWidget> {
                   const SizedBox(height: 4),
                   Text(category,
                       style: const TextStyle(
-                          fontSize: 10,
-                          color: AppColors.subText,
-                          fontWeight: FontWeight.w400)),
+                          fontSize: 13, color: AppColors.subText)),
+
                   const SizedBox(height: 12),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+                  // Bọc Column để chứa giá trị và Dòng cảnh báo bên dưới
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Text('\$$price',
-                          style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.primaryText)),
-                      GestureDetector(
-                        onTap: () {},
-                        child: Container(
-                          height: 38,
-                          decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(20),
-                              boxShadow: [
-                                BoxShadow(
-                                    color: Colors.black.withOpacity(0.06),
-                                    blurRadius: 10,
-                                    offset: const Offset(0, 2))
-                              ]),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              // Nút Trừ nội bộ
-                              _buildQtyBtn(
-                                  icon: Icons.remove,
-                                  onTap: _internalDecrement,
-                                  color: AppColors.primaryText),
-
-                              IntrinsicWidth(
-                                child: Container(
-                                  constraints: const BoxConstraints(
-                                      minWidth: 30, maxWidth: 100),
-                                  alignment: Alignment.center,
-                                  child: TextFormField(
-                                    controller: _qtyController,
-                                    focusNode: _focusNode,
-                                    textAlign: TextAlign.center,
-                                    keyboardType: TextInputType.number,
-                                    showCursor: true,
-                                    cursorColor: AppColors.primary,
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.digitsOnly,
-                                    ],
-                                    onChanged:
-                                        _onInputChanged, // Lắng nghe tức thì
-                                    onFieldSubmitted: (_) => _submitQuantity(),
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: 14),
-                                    decoration: const InputDecoration(
-                                      border: InputBorder.none,
-                                      contentPadding:
-                                          EdgeInsets.symmetric(horizontal: 4),
-                                      isDense: true,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text('\$$price',
+                              style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.primaryText)),
+                          GestureDetector(
+                            onTap: () {},
+                            child: Container(
+                              height: 38,
+                              decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(20),
+                                  boxShadow: [
+                                    BoxShadow(
+                                        color: Colors.black.withOpacity(0.06),
+                                        blurRadius: 10,
+                                        offset: const Offset(0, 2))
+                                  ]),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  _buildQtyBtn(
+                                      icon: Icons.remove,
+                                      onTap: _internalDecrement,
+                                      color: AppColors.primaryText),
+                                  IntrinsicWidth(
+                                    child: Container(
+                                      constraints: const BoxConstraints(
+                                          minWidth: 30, maxWidth: 100),
+                                      alignment: Alignment.center,
+                                      child: TextFormField(
+                                        controller: _qtyController,
+                                        focusNode: _focusNode,
+                                        textAlign: TextAlign.center,
+                                        keyboardType: TextInputType.number,
+                                        showCursor: true,
+                                        cursorColor: AppColors.primary,
+                                        inputFormatters: [
+                                          FilteringTextInputFormatter
+                                              .digitsOnly,
+                                          LengthLimitingTextInputFormatter(
+                                              6), // CHẶN NHẬP QUÁ 6 KÝ TỰ (999.999)
+                                        ],
+                                        onChanged: _onInputChanged,
+                                        onFieldSubmitted: (_) =>
+                                            _submitQuantity(),
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.w700,
+                                            fontSize: 15),
+                                        decoration: const InputDecoration(
+                                          border: InputBorder.none,
+                                          contentPadding: EdgeInsets.symmetric(
+                                              horizontal: 4),
+                                          isDense: true,
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                ),
+                                  _buildQtyBtn(
+                                      icon: Icons.add,
+                                      onTap: canIncrease
+                                          ? _internalIncrement
+                                          : null,
+                                      color: canIncrease
+                                          ? AppColors.primaryText
+                                          : AppColors.softGrey),
+                                ],
                               ),
-
-                              // Nút Cộng nội bộ
-                              _buildQtyBtn(
-                                  icon: Icons.add,
-                                  onTap:
-                                      canIncrease ? _internalIncrement : null,
-                                  color: canIncrease
-                                      ? AppColors.primaryText
-                                      : AppColors.softGrey),
-                            ],
+                            ),
                           ),
-                        ),
+                        ],
+                      ),
+
+                      // HIỂN THỊ CẢNH BÁO KHI CHẠM NGƯỠNG
+                      ValueListenableBuilder<TextEditingValue>(
+                        valueListenable: _qtyController,
+                        builder: (context, value, child) {
+                          final current = int.tryParse(value.text) ?? 1;
+                          if (current >= _maxAllowed) {
+                            return Padding(
+                              padding: const EdgeInsets.only(top: 6),
+                              child: Text(
+                                widget.isOutbound
+                                    ? TTexts.maxStockReached.tr
+                                    : TTexts.maxQuantityReached.tr,
+                                style: const TextStyle(
+                                    color: Colors.orange,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    fontStyle: FontStyle.italic),
+                              ),
+                            );
+                          }
+                          return const SizedBox.shrink();
+                        },
                       ),
                     ],
                   ),

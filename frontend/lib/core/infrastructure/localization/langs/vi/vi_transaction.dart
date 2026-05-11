@@ -31,6 +31,10 @@ final Map<String, String> viTransaction = {
       "Các sản phẩm sau có biến động số lượng lớn (>= 10 đơn vị):",
   TTexts.priceFluctuationDesc: "Các sản phẩm sau có thay đổi về giá.",
   TTexts.andMore: "và nhiều hơn nữa...",
+  TTexts.removeProductTitle: "Xóa Sản Phẩm",
+  TTexts.removeProductDesc: "Bạn có chắc chắn muốn xóa sản phẩm này khỏi giao dịch không?",
+  TTexts.maxQuantityReached: "Đã đạt giới hạn số lượng tối đa",
+  TTexts.maxStockReached: "Đã đạt giới hạn tồn kho hiện tại",
 
   // -- Inbound
   TTexts.inboundTransaction: "Giao Dịch Nhập Kho",

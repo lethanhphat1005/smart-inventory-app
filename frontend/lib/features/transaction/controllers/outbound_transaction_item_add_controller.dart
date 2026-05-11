@@ -63,6 +63,12 @@ class OutboundTransactionItemAddController extends GetxController
       fetchedCategoryName.value = TTexts.uncategorized.tr;
       fetchedBrandName.value = initialItem.product?.brand ?? TTexts.noBrand.tr;
       fetchedImageUrl.value = _validateUrl(initialItem.product?.imageUrl);
+      fetchedCategoryName.value = initialItem.product?.categoryName ??
+          initialItem.inventory.productPackage?.product?.categoryName ??
+          TTexts.uncategorized.tr;
+
+      fetchedBrandName.value = initialItem.product?.brand ?? TTexts.noBrand.tr;
+      fetchedImageUrl.value = _validateUrl(initialItem.product?.imageUrl);
 
       _fetchFreshData();
     } else {
@@ -149,8 +155,11 @@ class OutboundTransactionItemAddController extends GetxController
               await _provider.getProductById(targetProductId);
           fetchedBrandName.value =
               productFullData['brand'] ?? TTexts.noBrand.tr;
-          fetchedCategoryName.value =
-              productFullData['category']?['name'] ?? TTexts.uncategorized.tr;
+
+          fetchedCategoryName.value = productFullData['categoryName'] ??
+              productFullData['category']?['name'] ??
+              TTexts.uncategorized.tr;
+
           fetchedImageUrl.value = _validateUrl(productFullData['imageUrl']);
         } catch (e) {
           debugPrint('Lỗi fetch product: $e');

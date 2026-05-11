@@ -31,6 +31,11 @@ final Map<String, String> enTransaction = {
       "The following items have high quantity fluctuations (>= 10 units):",
   TTexts.priceFluctuationDesc: "The following items have price changes.",
   TTexts.andMore: "and more...",
+  TTexts.removeProductTitle: "Remove Product",
+  TTexts.removeProductDesc:
+      "Are you sure you want to remove this product from the transaction?",
+  TTexts.maxQuantityReached: "Maximum quantity reached",
+  TTexts.maxStockReached: "Maximum current stock reached",
 
   // -- Inbound
   TTexts.inboundTransaction: "Inbound Transaction",
@@ -119,7 +124,8 @@ final Map<String, String> enTransaction = {
   TTexts.quantityGreaterThanZero: "Quantity must be greater than zero.",
   TTexts.unitPriceLabel: "Unit Price",
   TTexts.deleteSearchTitle: "Delete Search History",
-  TTexts.deleteSearchMessage: "Are you sure you want to delete this search keyword?",
+  TTexts.deleteSearchMessage:
+      "Are you sure you want to delete this search keyword?",
 
   // Specific Reasons
   TTexts.reasonRetailSale: 'Retail Sale',

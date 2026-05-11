@@ -54,14 +54,20 @@ class StockAdjustmentItemCardWidget extends GetView<StockAdjustmentController> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("$index. ${item.name}",
-                style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 13,
-                    color: AppColors.primaryText)),
+            // CHỐNG TRÀN TÊN SẢN PHẨM
+            Text(
+              "$index. ${item.name}",
+              style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13,
+                  color: AppColors.primaryText),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
             const SizedBox(height: 12),
             Row(
               children: [
+                // HÌNH ẢNH
                 Container(
                   width: 48,
                   height: 48,
@@ -84,25 +90,40 @@ class StockAdjustmentItemCardWidget extends GetView<StockAdjustmentController> {
                   ),
                 ),
                 const SizedBox(width: 16),
+
+                // THÔNG TIN SỐ LƯỢNG (ĐÃ FIX OVERFLOW)
                 Expanded(
                   child: Column(
                     children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text("${TTexts.system.tr}: ${item.systemQty}",
+                          Flexible(
+                            child: Text(
+                              "${TTexts.system.tr}: ${item.systemQty}",
                               style: const TextStyle(
-                                  fontSize: 12, fontWeight: FontWeight.w500)),
-                          Text("${TTexts.actual.tr}: ${item.actualQty.value}",
+                                  fontSize: 12, fontWeight: FontWeight.w500),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Flexible(
+                            child: Text(
+                              "${TTexts.actual.tr}: ${item.actualQty.value}",
                               style: const TextStyle(
-                                  fontSize: 12, fontWeight: FontWeight.w500)),
+                                  fontSize: 12, fontWeight: FontWeight.w500),
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.right,
+                            ),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 4),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
+                          Flexible(
+                            child: Text(
                               "${TTexts.spread.tr}: ${item.spread > 0 ? '+' : ''}${item.spread}",
                               style: TextStyle(
                                   fontSize: 12,
@@ -110,7 +131,10 @@ class StockAdjustmentItemCardWidget extends GetView<StockAdjustmentController> {
                                       ? AppColors.subText
                                       : (item.spread > 0
                                           ? AppColors.stockIn
-                                          : AppColors.stockOut))),
+                                          : AppColors.stockOut)),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 4),
@@ -119,17 +143,24 @@ class StockAdjustmentItemCardWidget extends GetView<StockAdjustmentController> {
                           Text("${TTexts.status.tr}: ",
                               style: const TextStyle(
                                   fontSize: 12, color: AppColors.subText)),
-                          Text(statusText,
+                          Flexible(
+                            child: Text(
+                              statusText,
                               style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w500,
-                                  color: statusColor)),
+                                  color: statusColor),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
                         ],
                       ),
                     ],
                   ),
                 ),
                 const SizedBox(width: 16),
+
+                // CÁC NÚT BẤM BÊN PHẢI
                 Row(
                   children: [
                     if (isChecked)
@@ -162,6 +193,8 @@ class StockAdjustmentItemCardWidget extends GetView<StockAdjustmentController> {
                 ),
               ],
             ),
+
+            // LÝ DO VÀ GHI CHÚ
             if (isMismatched &&
                 (item.selectedReason.value.isNotEmpty ||
                     item.note.value.isNotEmpty)) ...[
@@ -174,7 +207,7 @@ class StockAdjustmentItemCardWidget extends GetView<StockAdjustmentController> {
                     : "${TTexts.reason.tr}: ${item.selectedReason.value.tr}",
                 style:
                     const TextStyle(fontSize: 12, color: AppColors.primaryText),
-              ),
+              ),  
             ]
           ],
         ),

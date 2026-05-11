@@ -365,6 +365,23 @@ class OutboundTransactionController extends GetxController with TErrorHandler {
     }
   }
 
+  void confirmRemoveItem(int index) {
+    Get.dialog(
+      TCustomDialogWidget(
+        title: TTexts.removeProductTitle.tr,
+        description: TTexts.removeProductDesc.tr,
+        icon: const Text('🗑️', style: TextStyle(fontSize: 40)),
+        primaryButtonText: TTexts.delete.tr,
+        onPrimaryPressed: () {
+          removeItem(index);
+          Get.back();
+        },
+        secondaryButtonText: TTexts.cancel.tr,
+        onSecondaryPressed: () => Get.back(),
+      ),
+    );
+  }
+
   void handleExit() {
     if (cartItems.isNotEmpty) {
       Get.dialog(

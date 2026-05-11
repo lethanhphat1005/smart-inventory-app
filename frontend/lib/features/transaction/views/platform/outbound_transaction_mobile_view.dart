@@ -76,6 +76,8 @@ class OutboundTransactionMobileView
                                 controller.updateItemQuantity(
                                     item.productPackageId!, newQty);
                               },
+                              onDelete: () =>
+                                  controller.confirmRemoveItem(index),
                             ),
                           );
                         },

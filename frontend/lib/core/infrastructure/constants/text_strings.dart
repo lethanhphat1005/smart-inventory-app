@@ -808,7 +808,11 @@ class TTexts {
   static const String barcodeNotFoundMessage = "barcode_not_found_message";
   static const String errorProcessingBarcode = "error_processing_barcode";
   static const String tReason = "t_reason";
-
+  static const String removeProductTitle = "remove_product_title";
+  static const String removeProductDesc = "remove_product_desc";
+  static const String maxQuantityReached = "max_quantity_reached";
+  static const String maxStockReached = "max_stock_reached";
+  
   // --- Inbound ---
   static const String inboundTransaction = "inbound_transaction";
   static const String emptyInboundCartTitle = "empty_inbound_cart_title";
