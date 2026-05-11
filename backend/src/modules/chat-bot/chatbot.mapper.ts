@@ -39,3 +39,6 @@ export const findExactInventoryMatch = (
       normalizeInventoryName(item.productPackage.displayName) ===
       normalizeInventoryName(keyword),
   );
+
+export const buildUserDraftRefKey = (storeId: string, userId: string): string =>
+  `${CHAT_DRAFT_KEY_PREFIX}ref:${storeId}:${userId}`;

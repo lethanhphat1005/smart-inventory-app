@@ -25,25 +25,60 @@ class ChatCardActionConfirm extends StatelessWidget {
         ? TTexts.chatbotConfirmImport.tr
         : TTexts.chatbotConfirmExport.tr;
 
+    // HIỂN THỊ KẾT QUẢ SAU KHI RESOLVED
     if (message.isResolved) {
-      return Padding(
-        padding: const EdgeInsets.only(bottom: 16),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Iconsax.tick_circle, color: Colors.grey.shade400, size: 16),
-            const SizedBox(width: 6),
-            Text(
-              "$title ${TTexts.chatbotResolved.tr}",
-              style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey.shade500,
-                  fontStyle: FontStyle.italic,
-                  fontFamily: AppFonts.mainFont),
+      // Giả sử logic lưu trạng thái hủy trong data: message.data['isCancelled'] == true
+      final isCancelled = message.data?['isCancelled'] == true;
+
+      if (isCancelled) {
+        return Align(
+          alignment: Alignment.centerLeft,
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 16, left: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+                color: const Color(0xFFFCEBEB),
+                borderRadius: BorderRadius.circular(12)),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Iconsax.close_circle, color: Color(0xFFA32D2D), size: 18),
+                SizedBox(width: 8),
+                Text("Đã hủy phiếu",
+                    style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xFFA32D2D),
+                        fontFamily: 'Poppins')),
+              ],
             ),
-          ],
-        ),
-      );
+          ),
+        );
+      } else {
+        return Align(
+          alignment: Alignment.centerLeft,
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 16, left: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+                color: const Color(0xFFEAF3DE),
+                borderRadius: BorderRadius.circular(12)),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Iconsax.tick_circle, color: Color(0xFF3B6D11), size: 18),
+                SizedBox(width: 8),
+                Text("Đã tạo phiếu thành công",
+                    style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xFF3B6D11),
+                        fontFamily: 'Poppins')),
+              ],
+            ),
+          ),
+        );
+      }
     }
 
     return Align(
@@ -104,11 +139,7 @@ class ChatCardActionConfirm extends StatelessWidget {
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () {
-                      message.isResolved = true;
-                      controller.messages.refresh();
-                      controller.messages.add(ChatMessage(
-                          text: TTexts.chatbotActionCancelled.tr,
-                          isUser: false)); // Đã gắn .tr
+                      controller.cancelTransaction(message);
                     },
                     style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 12),

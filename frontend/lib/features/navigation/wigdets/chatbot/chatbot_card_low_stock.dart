@@ -18,10 +18,7 @@ class ChatCardLowStock extends StatelessWidget {
     List<dynamic> items = [];
     int totalCount = 0;
 
-    if (message.data is List) {
-      items = message.data as List<dynamic>;
-      totalCount = items.length;
-    } else if (message.data is Map) {
+    if (message.data is Map) {
       final rawData = message.data as Map<String, dynamic>;
       items = (rawData['items'] ?? rawData['data'] ?? []) as List<dynamic>;
       totalCount = rawData['totalCount'] ?? items.length;

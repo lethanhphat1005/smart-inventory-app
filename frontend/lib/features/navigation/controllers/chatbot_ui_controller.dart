@@ -28,10 +28,23 @@ class ChatbotUiController extends GetxController with TErrorHandler {
 
   void toggleChat() {
     isChatOpen.value = !isChatOpen.value;
+    // Nếu hành động là đóng chatbot, thực hiện ẩn bàn phím
+    if (!isChatOpen.value) {
+      _hideKeyboard();
+    }
   }
 
   void closeChat() {
-    if (isChatOpen.value) isChatOpen.value = false;
+    if (isChatOpen.value) {
+      isChatOpen.value = false;
+      _hideKeyboard();
+    }
+  }
+
+  void _hideKeyboard() {
+    focusNode.unfocus(); // Bỏ focus khỏi ô nhập liệu
+    // Cách tiếp cận an toàn hơn để đảm bảo bàn phím đóng hoàn toàn
+    FocusManager.instance.primaryFocus?.unfocus();
   }
 
   Future<void> sendMessage() async {
@@ -101,7 +114,8 @@ class ChatbotUiController extends GetxController with TErrorHandler {
                     fontWeight: FontWeight.w500)),
           ),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
+              await _apiClient.delete('/api/chat-bot/history');
               messages.clear();
               Get.back();
               Get.back();
@@ -133,17 +147,19 @@ class ChatbotUiController extends GetxController with TErrorHandler {
 
       final draftActionId = message.data['draftActionId'];
 
-      await _apiClient.post(
+      final response = await _apiClient.post(
         '/api/chat-bot/confirm',
         data: {'draftActionId': draftActionId, 'isConfirmed': true},
       );
+      final serverMessage = response.data['data']?['message'] as String?;
 
       message.isResolved = true;
       messages.refresh();
 
       messages.add(ChatMessage(
-          text: TTexts.chatbotTransactionSuccess.tr, isUser: false));
-
+        text: serverMessage ?? TTexts.chatbotTransactionSuccess.tr,
+        isUser: false,
+      ));
       // 1. Cập nhật Dashboard
       if (Get.isRegistered<HomeController>()) {
         Get.find<HomeController>().loadAllHomeData();
@@ -179,6 +195,48 @@ class ChatbotUiController extends GetxController with TErrorHandler {
         );
       }
     });
+  }
+
+  Future<void> cancelTransaction(ChatMessage message) async {
+    if (message.isResolved) return;
+
+    try {
+      isTyping.value = true;
+      _scrollToBottom();
+
+      final draftActionId = message.data['draftActionId'];
+
+      // Gọi API báo Hủy cho Backend dọn dẹp Redis
+      await _apiClient.post(
+        '/api/chat-bot/confirm',
+        data: {'draftActionId': draftActionId, 'isConfirmed': false},
+      );
+
+      message.isResolved = true;
+      messages.refresh();
+
+      // Thông báo cho user là đã hủy thành công
+      messages.add(
+          ChatMessage(text: "Đã hủy phiếu nháp thành công! ❌", isUser: false));
+    } catch (e) {
+      handleError(e);
+      messages.add(ChatMessage(
+          text: "Không thể hủy phiếu, vui lòng thử lại.", isUser: false));
+    } finally {
+      isTyping.value = false;
+      _scrollToBottom();
+    }
+  }
+
+  Future<void> clearChatData() async {
+    try {
+      messages.clear();
+      isChatOpen.value = false;
+
+      await _apiClient.delete('/api/chat-bot/history');
+    } catch (e) {
+      debugPrint('Lỗi khi xóa lịch sử chat: $e');
+    }
   }
 
   @override
