@@ -1,0 +1,53 @@
+import 'package:frontend/core/infrastructure/constants/text_strings.dart';
+
+final Map<String, String> viChatbot = {
+  TTexts.chatbotName: 'Tori',
+  TTexts.chatbotOnline: 'Trực tuyến',
+  TTexts.chatbotInputHint: 'Nhập tin nhắn...',
+  TTexts.chatbotWelcomeMsg:
+      'Xin chào! Tôi là trợ lý AI của bạn. Hôm nay tôi có thể giúp bạn quản lý kho hàng như thế nào?',
+  TTexts.chatbotErrorTitle: 'Lỗi Trò Chuyện',
+  TTexts.chatbotErrorMsg:
+      'Không thể gửi tin nhắn. Vui lòng kiểm tra kết nối và thử lại.',
+  TTexts.chatbotTyping: 'AI đang nhập...',
+  TTexts.chatbotEmptyInputWarning: 'Vui lòng nhập tin nhắn.',
+  TTexts.chatbotMockResponse: 'Tích hợp API đang được phát triển. Bạn đã nói:',
+  TTexts.chatbotFallbackReply: "Xin lỗi, tôi không hiểu yêu cầu này.",
+  TTexts.chatbotConnectionError: "Oops! Kết nối tới AI đã bị mất 😢",
+  TTexts.chatbotResetTitle: "Đặt Lại Cuộc Trò Chuyện",
+  TTexts.chatbotResetMessage:
+      "Bạn có chắc muốn xóa toàn bộ tin nhắn không? Hành động này không thể hoàn tác.",
+  TTexts.chatbotResetBtn: "Đặt lại",
+  TTexts.chatbotTransactionSuccess:
+      "Giao dịch thành công! Dữ liệu kho hàng đã được cập nhật.",
+  TTexts.chatbotTransactionFailed:
+      "Giao dịch thất bại. Yêu cầu có thể đã hết hạn.",
+  TTexts.chatbotSuggestionTitle: 'Tôi có thể giúp gì cho bạn?',
+  TTexts.chatbotSuggestionSub:
+      'Chọn một gợi ý hoặc nhập yêu cầu của bạn bên dưới.',
+  TTexts.chatbotPromptLowStock: 'Những mặt hàng nào sắp hết?',
+  TTexts.chatbotPromptCheckInfo: 'Kiểm tra thông tin',
+  TTexts.chatbotPromptImport: 'Tạo phiếu nhập',
+  TTexts.chatbotPromptExport: 'Tạo phiếu xuất',
+  TTexts.chatbotConfirmImport: 'Xác Nhận Nhập Kho',
+  TTexts.chatbotConfirmExport: 'Xác Nhận Xuất Kho',
+  TTexts.chatbotResolved: '(Đã xử lý)',
+  TTexts.chatbotActionCancelled: 'Hành động đã bị hủy.',
+  TTexts.chatbotOutOfStock: 'Hết hàng',
+  TTexts.chatbotLowStockPrefix: 'Sắp hết:',
+  TTexts.chatbotLeftPrefix: 'Còn lại:',
+  TTexts.chatbotInStockPrefix: 'Trong kho:',
+  TTexts.chatbotLowStockAlert: 'Sắp hết hàng:',
+  TTexts.chatbotLowStockFoundPrefix: 'Tôi tìm thấy',
+  TTexts.chatbotLowStockFoundSuffix:
+      'mặt hàng đang sắp hết trong kho. Vui lòng vuốt để xem các thẻ bên dưới:',
+  TTexts.chatbotViewFullList: 'Xem danh sách đầy đủ ->',
+  TTexts.chatbotNoImageTitle: 'Không Có Hình Ảnh',
+  TTexts.chatbotNoImageDesc: 'Hình ảnh sản phẩm không khả dụng',
+  TTexts.chatbotMenuLowStock: 'Mặt hàng sắp hết',
+  TTexts.chatbotMenuCreateImport: 'Tạo Phiếu Nhập',
+  TTexts.chatbotMenuCreateExport: 'Tạo Phiếu Xuất',
+  TTexts.chatbotQuickActionLowStock: 'Sắp hết',
+  TTexts.chatbotQuickActionImport: 'Nhập kho',
+  TTexts.chatbotQuickActionExport: 'Xuất kho',
+};
