@@ -1,5 +1,4 @@
 import 'package:frontend/core/infrastructure/models/transaction_model.dart';
-import 'package:frontend/core/infrastructure/utils/day_formatter_utils.dart';
 import 'package:frontend/core/infrastructure/utils/error_handler_utils.dart';
 import 'package:frontend/features/report/providers/report_provider.dart';
 import 'package:get/get.dart';
@@ -100,35 +99,38 @@ class ReportController extends GetxController with TErrorHandler {
     return a.year == b.year && a.month == b.month && a.day == b.day;
   }
 
-  String get currentDateStr {
+String get currentDateStr {
     final now = DateTime.now();
-    final months = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December'
-    ];
     final targetDay = activeTab.value == 'Today' ? now : selectedDay.value;
 
+    // Nếu là Tiếng Việt
+    if (Get.locale?.languageCode == 'vi') {
+      return 'Ngày ${targetDay.day} tháng ${targetDay.month}, ${targetDay.year}';
+    }
+
+    // Nếu là Tiếng Anh (Mặc định)
+    final months = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
     return '${months[targetDay.month - 1]} ${targetDay.day}, ${targetDay.year}';
   }
 
   String get currentDayStr {
     final now = DateTime.now();
     final targetDay = activeTab.value == 'Today' ? now : selectedDay.value;
-    if (isSameDay(now, targetDay)) return 'Today';
-    if (isSameDay(now.subtract(const Duration(days: 1)), targetDay)) {
-      return 'Yesterday';
+
+    // Trong Dart: weekday 1 = Thứ Hai, 7 = Chủ Nhật
+    if (Get.locale?.languageCode == 'vi') {
+      final daysVi = [
+        'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy', 'Chủ Nhật'
+      ];
+      return daysVi[targetDay.weekday - 1];
     }
 
-    return DayFormatterUtils.formatDate(targetDay, format: 'EEEE');
+    final daysEn = [
+      'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
+    ];
+    return daysEn[targetDay.weekday - 1];
   }
 }

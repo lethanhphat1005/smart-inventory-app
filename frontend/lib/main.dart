@@ -23,6 +23,9 @@ import 'package:get_storage/get_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/ui/theme/app_theme.dart';
 
+// ĐÃ SỬA IMPORT Ở ĐÂY: Dùng local thay vì file
+import 'package:intl/date_symbol_data_local.dart';
+
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
@@ -42,13 +45,19 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   HttpOverrides.global = MyHttpOverrides();
 
+  // --- THÊM DÒNG NÀY ---
+  // Khởi tạo dữ liệu đa ngôn ngữ cho Lịch (Cả Anh và Việt để không bao giờ bị lỗi)
+  await initializeDateFormatting('en_US', null);
+  await initializeDateFormatting('vi_VN', null);
+  // ---------------------
+
   // Khởi tạo GetStorage TRƯỚC KHI init các Service phụ thuộc
   await GetStorage.init();
 
   // Đọc file .env
   await dotenv.load(fileName: ".env");
 
-  // Khởi tạo Firebase và Notification Service (Cập nhật theo code của bạn)
+  // Khởi tạo Firebase và Notification Service
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -112,7 +121,7 @@ void main() async {
 
   final storage = GetStorage();
   String? savedLang = storage.read('app_language');
-  // Nếu đã lưu 'vi' thì dùng tiếng Việt, ngược lại dùng tiếng Anh làm mặc định
+  // Giữ nguyên logic gốc của bạn: Nếu đã lưu 'vi' thì dùng tiếng Việt, ngược lại dùng tiếng Anh làm mặc định
   Locale initialLocale =
       savedLang == 'vi' ? const Locale('vi', 'VN') : const Locale('en', 'US');
 
@@ -164,9 +173,9 @@ class App extends StatelessWidget {
       theme: AppTheme.lightTheme,
       themeMode: ThemeMode.light,
 
-      // Khai báo Localization ở đây là chuẩn nhất
+      // Khai báo Localization
       translations: AppTranslations(),
-      locale: initialLocale, // Sử dụng biến locale tự động nạp từ bộ nhớ
+      locale: initialLocale,
       fallbackLocale: const Locale('en', 'US'),
 
       initialBinding: InitialBinding(),

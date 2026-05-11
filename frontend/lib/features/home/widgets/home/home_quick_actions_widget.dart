@@ -64,6 +64,7 @@ class HomeQuickActionsWidget extends StatelessWidget {
                 ),
                 onTap: () {
                   Get.to(() => TBarcodeScannerLayout(
+                        title: TTexts.barCodeScan.tr,
                         onScanned: (code) {
                           // Gọi controller xử lý logic điều hướng/bottom sheet
                           BarcodeActionController.instance
