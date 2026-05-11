@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/utils/day_formatter_utils.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 
 class HomeTransactionItemWidget extends StatelessWidget {
   final IconData icon;
@@ -48,8 +49,8 @@ class HomeTransactionItemWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(title,
-                    style: const TextStyle(
-                        fontFamily: 'Poppins',
+                    style: TextStyle(
+                        fontFamily: AppFonts.mainFont,
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                         color: AppColors.primaryText)),
@@ -57,15 +58,15 @@ class HomeTransactionItemWidget extends StatelessWidget {
                 Row(
                   children: [
                     Text(formattedTime,
-                        style: const TextStyle(
-                            fontFamily: 'Poppins',
+                        style: TextStyle(
+                            fontFamily: AppFonts.mainFont,
                             fontSize: 10,
                             color: AppColors.softGrey)),
                     if (qtyInfo != null) ...[
                       const SizedBox(width: 12),
                       Text(qtyInfo!,
-                          style: const TextStyle(
-                              fontFamily: 'Poppins',
+                          style: TextStyle(
+                              fontFamily: AppFonts.mainFont,
                               fontSize: 13,
                               fontWeight: FontWeight.w400,
                               color: AppColors.subText)),
@@ -77,7 +78,7 @@ class HomeTransactionItemWidget extends StatelessWidget {
           ),
           Text(amount,
               style: TextStyle(
-                  fontFamily: 'Poppins',
+                  fontFamily: AppFonts.mainFont,
                   fontSize: 10,
                   fontWeight: FontWeight.w500,
                   color: isPositive ? AppColors.stockIn : AppColors.stockOut)),

@@ -4,6 +4,7 @@ import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/infrastructure/models/inventory_model.dart';
 import 'package:frontend/core/infrastructure/utils/url_helper_utils.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:frontend/core/ui/widgets/t_no_image_widget.dart';
 import 'package:get/get.dart';
@@ -87,8 +88,8 @@ class LowStockItemWidget extends StatelessWidget {
                     productName,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontFamily: 'Poppins',
+                    style: TextStyle(
+                      fontFamily: AppFonts.mainFont,
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
                       color: AppColors.primaryText,
@@ -105,7 +106,7 @@ class LowStockItemWidget extends StatelessWidget {
                       Text(
                         "$qty",
                         style: TextStyle(
-                          fontFamily: 'Poppins',
+                          fontFamily: AppFonts.mainFont,
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
                           color: statusColor,

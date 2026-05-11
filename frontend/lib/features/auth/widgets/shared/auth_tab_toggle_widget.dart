@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/routes/app_routes.dart';
 import 'package:get/get.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
@@ -63,7 +64,7 @@ class AuthTabToggleWidget extends StatelessWidget {
                     child: Text(
                       TTexts.loginTab.tr,
                       style: TextStyle(
-                        fontFamily: 'Poppins',
+                        fontFamily: AppFonts.mainFont,
                         fontWeight: isLogin ? FontWeight.w600 : FontWeight.w500,
                         color:
                             isLogin ? AppColors.primaryText : AppColors.subText,
@@ -89,7 +90,7 @@ class AuthTabToggleWidget extends StatelessWidget {
                     child: Text(
                       TTexts.signupTab.tr,
                       style: TextStyle(
-                        fontFamily: 'Poppins',
+                        fontFamily: AppFonts.mainFont,
                         fontWeight:
                             !isLogin ? FontWeight.w600 : FontWeight.w500,
                         color: !isLogin

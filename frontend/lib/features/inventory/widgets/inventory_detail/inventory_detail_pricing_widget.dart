@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:frontend/features/inventory/controllers/inventory_detail_controller.dart';
 import 'package:get/get.dart';
@@ -39,7 +40,7 @@ class InventoryDetailPricingWidget extends GetView<InventoryDetailController> {
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
                 color: color,
-                fontFamily: 'Poppins')),
+                fontFamily: AppFonts.mainFont)),
       ],
     );
   }
@@ -61,7 +62,7 @@ class InventoryDetailPricingWidget extends GetView<InventoryDetailController> {
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
                 color: color,
-                fontFamily: 'Poppins')),
+                fontFamily: AppFonts.mainFont)),
       ],
     );
   }

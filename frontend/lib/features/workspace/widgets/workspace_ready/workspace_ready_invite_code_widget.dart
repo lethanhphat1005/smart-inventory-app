@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
@@ -44,8 +45,8 @@ class WorkspaceReadyInviteCodeWidget extends StatelessWidget {
             children: [
               Text(
                 inviteCode,
-                style: const TextStyle(
-                  fontFamily: 'Poppins',
+                style: TextStyle(
+                  fontFamily: AppFonts.mainFont,
                   fontSize: 24,
                   fontWeight: FontWeight.w900,
                   letterSpacing: 4.0,

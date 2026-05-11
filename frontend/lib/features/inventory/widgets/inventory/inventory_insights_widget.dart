@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:frontend/routes/app_routes.dart';
 
@@ -29,8 +30,8 @@ class InventoryInsightsWidget extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(TTexts.inventoryInsights.tr,
-                  style: const TextStyle(
-                      fontFamily: 'Poppins',
+                  style: TextStyle(
+                      fontFamily: AppFonts.mainFont,
                       fontWeight: FontWeight.bold,
                       fontSize: 14)),
               InkWell(

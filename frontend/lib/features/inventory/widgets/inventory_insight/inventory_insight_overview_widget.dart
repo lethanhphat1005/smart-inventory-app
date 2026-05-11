@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart'; // ĐÃ IMPORT APPSIZES
 import 'package:frontend/features/inventory/controllers/inventory_insight_controller.dart';
 import 'package:get/get.dart';
@@ -104,7 +105,7 @@ class InventoryInsightOverviewWidget
             Text(
               "$count",
               style: TextStyle(
-                fontFamily: 'Poppins',
+                fontFamily: AppFonts.mainFont,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: isSelected ? Colors.white : AppColors.primaryText,

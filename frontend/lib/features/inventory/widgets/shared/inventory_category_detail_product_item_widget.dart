@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/models/product_model.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 
@@ -61,8 +62,8 @@ class InventoryCategoryDetailProductItemWidget extends StatelessWidget {
                         product.name,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                            fontFamily: 'Poppins',
+                        style: TextStyle(
+                            fontFamily: AppFonts.mainFont,
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
                             color: AppColors.primaryText),
@@ -70,8 +71,8 @@ class InventoryCategoryDetailProductItemWidget extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         'Brand: ${product.brand ?? "N/A"}',
-                        style: const TextStyle(
-                            fontFamily: 'Poppins',
+                        style: TextStyle(
+                            fontFamily: AppFonts.mainFont,
                             fontSize: 10,
                             color: AppColors.subText),
                       ),

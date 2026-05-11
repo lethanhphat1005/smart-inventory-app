@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/ui/layouts/t_barcode_scanner_layout.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/widgets/t_expandable_fab_widget.dart';
 import 'package:frontend/routes/app_routes.dart';
 import 'package:get/get.dart';
@@ -88,8 +89,8 @@ class AllProductsMobileView extends GetView<AllProductsController> {
                 sliver: SliverToBoxAdapter(
                   child: Text(
                     "${TTexts.totalActiveProducts.tr}: $count ${TTexts.items.tr}",
-                    style: const TextStyle(
-                      fontFamily: 'Poppins',
+                    style: TextStyle(
+                      fontFamily: AppFonts.mainFont,
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: AppColors.subText,

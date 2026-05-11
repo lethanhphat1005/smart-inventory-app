@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/features/inventory/controllers/product_catalog_detail_controller.dart';
 import 'package:frontend/features/inventory/widgets/shared/inventory_barcode_list_bottom_sheet_widget.dart';
 import 'package:get/get.dart';
@@ -80,8 +81,8 @@ class ProductCatalogDetailPackageItemWidget
                 fullDisplayName,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                    fontFamily: 'Poppins',
+                style: TextStyle(
+                    fontFamily: AppFonts.mainFont,
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
                     color: AppColors.primaryText),
@@ -130,7 +131,7 @@ class ProductCatalogDetailPackageItemWidget
                                 ? package.barcodeValue!
                                 : TTexts.noBarcode.tr,
                             style: TextStyle(
-                              fontFamily: 'Poppins',
+                              fontFamily: AppFonts.mainFont,
                               fontSize: 13,
                               fontWeight: hasMultipleBarcodes
                                   ? FontWeight.w600
@@ -154,8 +155,8 @@ class ProductCatalogDetailPackageItemWidget
                             ),
                             child: Text(
                               '+${package.barcodes.length - 1}',
-                              style: const TextStyle(
-                                fontFamily: 'Poppins',
+                              style: TextStyle(
+                                fontFamily: AppFonts.mainFont,
                                 fontSize: 11,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
@@ -197,8 +198,8 @@ class ProductCatalogDetailPackageItemWidget
       children: [
         Text(
           label,
-          style: const TextStyle(
-            fontFamily: 'Poppins',
+          style: TextStyle(
+            fontFamily: AppFonts.mainFont,
             fontSize: 11,
             color: AppColors.softGrey,
           ),
@@ -206,7 +207,7 @@ class ProductCatalogDetailPackageItemWidget
         Text(
           '\$${price.toStringAsFixed(2)}',
           style: TextStyle(
-              fontFamily: 'Poppins',
+              fontFamily: AppFonts.mainFont,
               fontSize: 14,
               fontWeight: FontWeight.bold,
               color: priceColor),

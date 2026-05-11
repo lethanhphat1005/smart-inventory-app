@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:get/get.dart';
 
@@ -62,11 +63,11 @@ class ChatbotSuggestedPrompts extends StatelessWidget {
               const SizedBox(height: 20),
               Text(
                 TTexts.chatbotSuggestionTitle.tr,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w600,
                   color: AppColors.primaryText,
-                  fontFamily: 'Poppins',
+                  fontFamily: AppFonts.mainFont,
                 ),
               ),
               const SizedBox(height: 8),
@@ -76,7 +77,7 @@ class ChatbotSuggestedPrompts extends StatelessWidget {
                 style: TextStyle(
                     fontSize: 14,
                     color: AppColors.subText.withOpacity(0.8),
-                    fontFamily: 'Poppins'),
+                    fontFamily: AppFonts.mainFont),
               ),
               const SizedBox(height: 32),
               Wrap(
@@ -111,11 +112,11 @@ class ChatbotSuggestedPrompts extends StatelessWidget {
                           const SizedBox(width: 8),
                           Text(
                             prompt['text'] as String,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 13.5,
                               fontWeight: FontWeight.w500,
                               color: AppColors.primaryText,
-                              fontFamily: 'Poppins',
+                              fontFamily: AppFonts.mainFont,
                             ),
                           ),
                         ],

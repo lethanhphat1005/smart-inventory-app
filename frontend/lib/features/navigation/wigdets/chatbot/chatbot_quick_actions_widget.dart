@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart'; // Đã thêm
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/features/navigation/controllers/chatbot_ui_controller.dart';
 import 'package:get/get.dart';
 
@@ -69,11 +70,11 @@ class ChatbotQuickActionsWidget extends StatelessWidget {
               ),
               child: Text(
                 action["label"] as String,
-                style: const TextStyle(
+                style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                     color: AppColors.primary,
-                    fontFamily: 'Poppins'),
+                    fontFamily: AppFonts.mainFont),
               ),
             ),
           );

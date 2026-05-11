@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'app_colors.dart';
 import 'app_sizes.dart';
 
@@ -8,7 +9,7 @@ class AppTheme {
   // Chỉ dùng duy nhất một theme sáng
   static ThemeData get lightTheme => ThemeData(
         useMaterial3: true,
-        fontFamily: 'Poppins', // Gọi font mặc định từ pubspec.yaml
+        fontFamily: AppFonts.mainFont, // Gọi font mặc định từ pubspec.yaml
         brightness: Brightness.light,
 
         // 1. Cấu hình màu sắc cốt lõi (Flutter sẽ tự dùng các màu này để vẽ các UI khác)

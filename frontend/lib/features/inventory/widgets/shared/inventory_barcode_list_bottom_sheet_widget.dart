@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/infrastructure/models/product_package_model.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:get/get.dart';
@@ -54,11 +55,11 @@ class InventoryBarcodeListBottomSheetWidget extends StatelessWidget {
         // 2. Title
         Text(
           TTexts.barcodeListTitle.tr,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
             color: AppColors.primaryText,
-            fontFamily: 'Poppins',
+            fontFamily: AppFonts.mainFont,
           ),
         ),
         const SizedBox(height: AppSizes.p8),
@@ -69,11 +70,11 @@ class InventoryBarcodeListBottomSheetWidget extends StatelessWidget {
           textAlign: TextAlign.center,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 13,
             color: AppColors.subText,
             height: 1.5,
-            fontFamily: 'Poppins',
+            fontFamily: AppFonts.mainFont,
           ),
         ),
         const SizedBox(height: AppSizes.p24),
@@ -132,8 +133,8 @@ class InventoryBarcodeListBottomSheetWidget extends StatelessWidget {
                                     Expanded(
                                       child: Text(
                                         barcodeItem.barcode,
-                                        style: const TextStyle(
-                                          fontFamily: 'Poppins',
+                                        style: TextStyle(
+                                          fontFamily: AppFonts.mainFont,
                                           fontSize: 15,
                                           fontWeight: FontWeight.bold,
                                           color: AppColors.primaryText,
@@ -169,8 +170,8 @@ class InventoryBarcodeListBottomSheetWidget extends StatelessWidget {
                                 const SizedBox(height: 4),
                                 Text(
                                   '${TTexts.sourceLabel.tr}: ${_getFriendlySource(barcodeItem.source)}',
-                                  style: const TextStyle(
-                                    fontFamily: 'Poppins',
+                                  style: TextStyle(
+                                    fontFamily: AppFonts.mainFont,
                                     fontSize: 12,
                                     color: AppColors.softGrey,
                                   ),

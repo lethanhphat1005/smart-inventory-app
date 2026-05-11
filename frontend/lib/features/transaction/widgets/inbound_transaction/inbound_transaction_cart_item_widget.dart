@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/infrastructure/models/transaction_detail_model.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 
@@ -55,8 +56,8 @@ class InboundTransactionCartItemWidget extends StatelessWidget {
               children: [
                 Text(
                   name,
-                  style: const TextStyle(
-                    fontFamily: 'Poppins',
+                  style: TextStyle(
+                    fontFamily: AppFonts.mainFont,
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
                     color: AppColors.primaryText,
@@ -67,8 +68,8 @@ class InboundTransactionCartItemWidget extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   '\$$price',
-                  style: const TextStyle(
-                    fontFamily: 'Poppins',
+                  style: TextStyle(
+                    fontFamily: AppFonts.mainFont,
                     fontSize: 13,
                     color: AppColors.subText,
                   ),
@@ -95,8 +96,8 @@ class InboundTransactionCartItemWidget extends StatelessWidget {
                 alignment: Alignment.center,
                 child: Text(
                   '${item.quantity}',
-                  style: const TextStyle(
-                    fontFamily: 'Poppins',
+                  style: TextStyle(
+                    fontFamily: AppFonts.mainFont,
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
                   ),

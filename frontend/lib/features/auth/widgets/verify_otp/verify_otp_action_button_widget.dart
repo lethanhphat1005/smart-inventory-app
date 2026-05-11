@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/image_strings.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:frontend/core/ui/widgets/t_primary_button_widget.dart';
 import 'package:frontend/features/auth/controllers/verify_otp_controller.dart';
@@ -50,8 +51,8 @@ class VerifyOTPButtonWidget extends StatelessWidget {
                 const SizedBox(width: AppSizes.p12),
                 Text(
                   TTexts.goToGmail.tr,
-                  style: const TextStyle(
-                    fontFamily: 'Poppins',
+                  style: TextStyle(
+                    fontFamily: AppFonts.mainFont,
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                     color: Colors.black,

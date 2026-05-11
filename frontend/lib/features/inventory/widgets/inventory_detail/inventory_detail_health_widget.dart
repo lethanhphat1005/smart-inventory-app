@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/features/inventory/controllers/inventory_detail_controller.dart';
 import 'package:get/get.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
@@ -34,10 +35,10 @@ class InventoryDetailHealthWidget extends GetView<InventoryDetailController> {
                   strokeCap: StrokeCap.round),
               Center(
                 child: Text("$healthPercent%",
-                    style: const TextStyle(
+                    style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
-                        fontFamily: 'Poppins',
+                        fontFamily: AppFonts.mainFont,
                         color: AppColors.primaryText)),
               ),
             ],

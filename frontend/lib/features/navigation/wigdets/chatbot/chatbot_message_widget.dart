@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/features/navigation/models/chat_message_model.dart';
 import 'package:get/get.dart';
 
@@ -47,7 +48,7 @@ class ChatbotMessage extends StatelessWidget {
               color: isUser ? Colors.white : AppColors.primaryText,
               height: 1.4,
               fontWeight: FontWeight.w400,
-              fontFamily: 'Poppins',
+              fontFamily: AppFonts.mainFont,
             ),
             strong: TextStyle(
               fontSize: 15,

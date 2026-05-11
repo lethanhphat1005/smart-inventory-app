@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:get/get.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
@@ -85,8 +86,8 @@ class _TPhoneFormFieldWidgetState extends State<TPhoneFormFieldWidget> {
         RichText(
           text: TextSpan(
             text: widget.label,
-            style: const TextStyle(
-              fontFamily: 'Poppins',
+            style: TextStyle(
+              fontFamily: AppFonts.mainFont,
               fontSize: AppSizes.p12,
               fontWeight: FontWeight.w500,
               color: AppColors.subText,
@@ -139,21 +140,21 @@ class _TPhoneFormFieldWidgetState extends State<TPhoneFormFieldWidget> {
             ],
             keyboardType: TextInputType.phone,
             style: TextStyle(
-              fontFamily: 'Poppins',
+              fontFamily: AppFonts.mainFont,
               fontSize: AppSizes.p14,
               fontWeight: FontWeight.w500,
               color: textColor,
             ),
             dropdownTextStyle: TextStyle(
-              fontFamily: 'Poppins',
+              fontFamily: AppFonts.mainFont,
               fontSize: AppSizes.p14,
               fontWeight: FontWeight.w500,
               color: textColor,
             ),
             decoration: InputDecoration(
               hintText: TTexts.editPhoneNumberHint.tr,
-              hintStyle: const TextStyle(
-                fontFamily: 'Poppins',
+              hintStyle: TextStyle(
+                fontFamily: AppFonts.mainFont,
                 fontSize: AppSizes.p14,
                 fontWeight: FontWeight.w400,
                 color: AppColors.softGrey,
@@ -205,10 +206,10 @@ class _TPhoneFormFieldWidgetState extends State<TPhoneFormFieldWidget> {
             padding: const EdgeInsets.only(top: AppSizes.p8, left: AppSizes.p4),
             child: Text(
               TTexts.editPhoneNumberInvalid.tr,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppColors.alertText,
                 fontSize: AppSizes.p12,
-                fontFamily: 'Poppins',
+                fontFamily: AppFonts.mainFont,
               ),
             ),
           ),

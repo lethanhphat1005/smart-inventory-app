@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
@@ -28,8 +29,10 @@ class AllProductsSearchBarWidget extends GetView<AllProductsController> {
         controller: controller.searchController,
         onChanged: (value) => controller.searchQuery.value = value,
         cursorColor: AppColors.primary,
-        style: const TextStyle(
-            fontFamily: 'Poppins', fontSize: 12, color: AppColors.primaryText),
+        style: TextStyle(
+            fontFamily: AppFonts.mainFont,
+            fontSize: 12,
+            color: AppColors.primaryText),
         decoration: InputDecoration(
           hintText: TTexts.searchItemsPackages.tr,
           hintStyle: const TextStyle(color: AppColors.subText, fontSize: 12),

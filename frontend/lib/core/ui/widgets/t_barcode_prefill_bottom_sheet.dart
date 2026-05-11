@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/state/controllers/barcode_scanner_controller.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/widgets/t_bottom_sheet_widget.dart';
 import 'package:get/get.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
@@ -61,11 +62,11 @@ class TBarcodePrefillBottomSheet extends StatelessWidget {
           // 2. Title
           Text(
             TTexts.barcodePrefillTitle.tr,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
               color: AppColors.primaryText,
-              fontFamily: 'Poppins',
+              fontFamily: AppFonts.mainFont,
             ),
           ),
           const SizedBox(height: AppSizes.p8),
@@ -74,11 +75,11 @@ class TBarcodePrefillBottomSheet extends StatelessWidget {
           Text(
             TTexts.barcodePrefillDesc.tr,
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 13,
               color: AppColors.subText,
               height: 1.5,
-              fontFamily: 'Poppins',
+              fontFamily: AppFonts.mainFont,
             ),
           ),
           const SizedBox(height: AppSizes.p24),
@@ -101,8 +102,8 @@ class TBarcodePrefillBottomSheet extends StatelessWidget {
                     const SizedBox(width: 8),
                     Text(
                       barcode,
-                      style: const TextStyle(
-                        fontFamily: 'Poppins',
+                      style: TextStyle(
+                        fontFamily: AppFonts.mainFont,
                         fontWeight: FontWeight.bold,
                         fontSize: 15,
                         color: AppColors.primaryText,
@@ -169,11 +170,11 @@ class TBarcodePrefillBottomSheet extends StatelessWidget {
                     children: [
                       Text(
                         name,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
                           color: AppColors.primaryText,
                           fontSize: 16,
-                          fontFamily: 'Poppins',
+                          fontFamily: AppFonts.mainFont,
                         ),
                       ),
                       const SizedBox(height: 6),

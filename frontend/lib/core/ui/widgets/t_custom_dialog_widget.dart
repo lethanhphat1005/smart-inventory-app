@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:get/get.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
@@ -61,8 +62,8 @@ class TCustomDialogWidget extends StatelessWidget {
               // ==========================================
               Text(
                 title,
-                style: const TextStyle(
-                  fontFamily: 'Poppins',
+                style: TextStyle(
+                  fontFamily: AppFonts.mainFont,
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
                   color: AppColors.primaryText,
@@ -73,8 +74,8 @@ class TCustomDialogWidget extends StatelessWidget {
 
               Text(
                 description,
-                style: const TextStyle(
-                  fontFamily: 'Poppins',
+                style: TextStyle(
+                  fontFamily: AppFonts.mainFont,
                   fontSize: 14,
                   fontWeight: FontWeight.w400,
                   color: AppColors.subText,
@@ -110,8 +111,8 @@ class TCustomDialogWidget extends StatelessWidget {
                   ),
                   child: Text(
                     primaryButtonText,
-                    style: const TextStyle(
-                      fontFamily: 'Poppins',
+                    style: TextStyle(
+                      fontFamily: AppFonts.mainFont,
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                       color: AppColors.white,
@@ -136,8 +137,8 @@ class TCustomDialogWidget extends StatelessWidget {
                     ),
                     child: Text(
                       secondaryButtonText!,
-                      style: const TextStyle(
-                        fontFamily: 'Poppins',
+                      style: TextStyle(
+                        fontFamily: AppFonts.mainFont,
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                         color: AppColors.primaryText,

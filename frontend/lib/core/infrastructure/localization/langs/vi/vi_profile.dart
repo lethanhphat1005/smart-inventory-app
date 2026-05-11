@@ -123,6 +123,15 @@ final Map<String, String> viProfile = {
   TTexts.profileNoMembersSubtitle:
       'Không có thành viên nào trong cửa hàng này.',
 
+  //--Settings
+  TTexts.profileAppSettings: "Cài đặt ứng dụng",
+  TTexts.settingsTitle: 'Cài đặt',
+  TTexts.settingsSubtitle: 'Quản lý ngôn ngữ và các tuỳ chọn của ứng dụng.',
+  TTexts.settingsLanguage: 'Ngôn ngữ',
+  TTexts.settingsSelectLanguage: 'Chọn ngôn ngữ',
+  TTexts.settingsCurrency: 'Tiền tệ',
+  TTexts.settingsSelectCurrency: 'Chọn tiền tệ',
+
   //Exceptions
   TTexts.userNotFound: 'Không tìm thấy thông tin người dùng',
   TTexts.userIdNotFound: 'Không tìm thấy ID người dùng để cập nhật hồ sơ',

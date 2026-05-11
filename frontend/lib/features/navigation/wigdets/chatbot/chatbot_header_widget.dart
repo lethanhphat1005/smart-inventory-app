@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/image_strings.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/features/navigation/controllers/chatbot_ui_controller.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
@@ -59,12 +60,12 @@ class ChatbotHeaderWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  TTexts.chatbotName.tr, 
-                  style: const TextStyle(
+                  TTexts.chatbotName.tr,
+                  style: TextStyle(
                     fontSize: 16.5,
                     fontWeight: FontWeight.w700,
                     color: AppColors.primaryText,
-                    fontFamily: 'Poppins',
+                    fontFamily: AppFonts.mainFont,
                     letterSpacing: 0.2,
                   ),
                 ),
@@ -78,12 +79,12 @@ class ChatbotHeaderWidget extends StatelessWidget {
                             color: Color(0xFF00C853), shape: BoxShape.circle)),
                     const SizedBox(width: 6),
                     Text(
-                      TTexts.chatbotOnline.tr, 
-                      style: const TextStyle(
+                      TTexts.chatbotOnline.tr,
+                      style: TextStyle(
                           fontSize: 12,
                           color: AppColors.subText,
                           fontWeight: FontWeight.w500,
-                          fontFamily: 'Poppins'),
+                          fontFamily: AppFonts.mainFont),
                     ),
                   ],
                 ),

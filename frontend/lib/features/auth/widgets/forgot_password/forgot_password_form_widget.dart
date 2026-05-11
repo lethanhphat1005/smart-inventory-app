@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:get/get.dart';
 import 'package:frontend/core/infrastructure/constants/image_strings.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
@@ -21,8 +22,8 @@ class ForgotPasswordFormWidget extends GetView<ForgotPasswordController> {
         Center(
           child: Text(
             TTexts.forgotPasswordInnerTitle.tr,
-            style: const TextStyle(
-              fontFamily: 'Poppins',
+            style: TextStyle(
+              fontFamily: AppFonts.mainFont,
               fontSize: 16,
               fontWeight: FontWeight.w500,
               color: AppColors.primaryText,

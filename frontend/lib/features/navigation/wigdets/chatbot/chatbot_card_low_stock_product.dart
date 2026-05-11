@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/infrastructure/utils/url_helper_utils.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/routes/app_routes.dart';
 import 'package:frontend/core/ui/widgets/t_no_image_widget.dart';
 import 'package:get/get.dart';
@@ -49,7 +50,7 @@ class ChatCardLowStockProduct extends StatelessWidget {
           "${TTexts.chatbotLowStockPrefix.tr} $quantity $unitName".trim();
     } else {
       stockColor = AppColors.stockIn;
-      stockText = "${TTexts.chatbotLeftPrefix.tr} $quantity $unitName".trim();  
+      stockText = "${TTexts.chatbotLeftPrefix.tr} $quantity $unitName".trim();
     }
 
     return GestureDetector(
@@ -105,12 +106,12 @@ class ChatCardLowStockProduct extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(displayName,
-                      style: const TextStyle(
+                      style: TextStyle(
                           fontWeight: FontWeight.w500,
                           fontSize: 14,
                           color: AppColors.primaryText,
                           height: 1.4,
-                          fontFamily: 'Poppins'),
+                          fontFamily: AppFonts.mainFont),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis),
                   const Spacer(),
@@ -131,7 +132,7 @@ class ChatCardLowStockProduct extends StatelessWidget {
                                     color: stockColor,
                                     fontSize: 12,
                                     fontWeight: FontWeight.w500,
-                                    fontFamily: 'Poppins'),
+                                    fontFamily: AppFonts.mainFont),
                                 overflow: TextOverflow.ellipsis)),
                       ],
                     ),

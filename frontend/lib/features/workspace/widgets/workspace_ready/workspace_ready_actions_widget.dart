@@ -1,5 +1,6 @@
 // lib/features/workspace/widgets/workspace_ready/workspace_ready_actions_widget.dart
 import 'package:flutter/material.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:get/get.dart';
 import 'package:frontend/routes/app_routes.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
@@ -26,8 +27,8 @@ class WorkspaceReadyActionsWidget extends StatelessWidget {
             ),
             child: Text(
               TTexts.backToWorkspaces.tr,
-              style: const TextStyle(
-                  fontFamily: 'Poppins',
+              style: TextStyle(
+                  fontFamily: AppFonts.mainFont,
                   color: AppColors.primaryText,
                   fontWeight: FontWeight.w600,
                   fontSize: 16),
@@ -48,8 +49,8 @@ class WorkspaceReadyActionsWidget extends StatelessWidget {
             ),
             child: Text(
               TTexts.goToDashboard.tr,
-              style: const TextStyle(
-                fontFamily: 'Poppins',
+              style: TextStyle(
+                fontFamily: AppFonts.mainFont,
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
                 color: AppColors.white,

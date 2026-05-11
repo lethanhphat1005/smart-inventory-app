@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:get/get.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
@@ -46,8 +47,8 @@ class _HomeRevenueChartWidgetState extends State<HomeRevenueChartWidget> {
             _buildHeader(),
             const SizedBox(height: AppSizes.p12),
             Text("$prefix\$${amount.abs().toStringAsFixed(2)}",
-                style: const TextStyle(
-                    fontFamily: 'Poppins',
+                style: TextStyle(
+                    fontFamily: AppFonts.mainFont,
                     fontSize: 32,
                     fontWeight: FontWeight.bold)),
             const SizedBox(height: AppSizes.p8),
@@ -72,8 +73,10 @@ class _HomeRevenueChartWidgetState extends State<HomeRevenueChartWidget> {
             isLineChart
                 ? TTexts.homeTodaysRevenue.tr
                 : TTexts.homeProfitLossWeek.tr,
-            style: const TextStyle(
-                fontFamily: 'Poppins', fontSize: 15, color: AppColors.subText)),
+            style: TextStyle(
+                fontFamily: AppFonts.mainFont,
+                fontSize: 15,
+                color: AppColors.subText)),
         _buildToggleButtons(),
       ],
     );
@@ -89,13 +92,13 @@ class _HomeRevenueChartWidgetState extends State<HomeRevenueChartWidget> {
         const SizedBox(width: 4),
         Text("${isUp ? '+' : ''}${percent.toStringAsFixed(1)}%",
             style: TextStyle(
-                fontFamily: 'Poppins',
+                fontFamily: AppFonts.mainFont,
                 fontWeight: FontWeight.bold,
                 color: color)),
         const SizedBox(width: 8),
         Text(label,
-            style: const TextStyle(
-                fontFamily: 'Poppins',
+            style: TextStyle(
+                fontFamily: AppFonts.mainFont,
                 color: AppColors.softGrey,
                 fontSize: 13)),
       ],

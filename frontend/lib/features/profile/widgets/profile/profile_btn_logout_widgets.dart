@@ -60,7 +60,7 @@ class ProfileLogoutButtonWidget extends StatelessWidget {
                 TTexts.profileBtnLogout.tr,
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
-                  fontSize: AppSizes.p16,
+                  fontSize: AppSizes.p12,
                 ),
               ),
             ],

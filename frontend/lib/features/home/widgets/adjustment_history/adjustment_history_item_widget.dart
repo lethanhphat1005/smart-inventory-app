@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/infrastructure/utils/day_formatter_utils.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:frontend/features/home/model/adjustment_history_model.dart';
 import 'package:get/get.dart';
@@ -58,8 +59,8 @@ class AdjustmentHistoryItemWidget extends StatelessWidget {
                     model.productName,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                        fontFamily: 'Poppins',
+                    style: TextStyle(
+                        fontFamily: AppFonts.mainFont,
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                         color: AppColors.primaryText),
@@ -71,8 +72,8 @@ class AdjustmentHistoryItemWidget extends StatelessWidget {
                           size: 12, color: AppColors.softGrey),
                       const SizedBox(width: 4),
                       Text(timeStr,
-                          style: const TextStyle(
-                              fontFamily: 'Poppins',
+                          style: TextStyle(
+                              fontFamily: AppFonts.mainFont,
                               fontSize: 10,
                               fontWeight: FontWeight.w500,
                               color: AppColors.subText)),
@@ -82,8 +83,8 @@ class AdjustmentHistoryItemWidget extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             "${TTexts.qty.tr}: ${model.oldQuantity} → ${model.newQuantity}",
-                            style: const TextStyle(
-                                fontFamily: 'Poppins',
+                            style: TextStyle(
+                                fontFamily: AppFonts.mainFont,
                                 fontSize: 10,
                                 fontWeight: FontWeight.w500,
                                 color: AppColors.subText)),
@@ -97,7 +98,7 @@ class AdjustmentHistoryItemWidget extends StatelessWidget {
             Text(
               diffStr,
               style: TextStyle(
-                fontFamily: 'Poppins',
+                fontFamily: AppFonts.mainFont,
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
                 color:

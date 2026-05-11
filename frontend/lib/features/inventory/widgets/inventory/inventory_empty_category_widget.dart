@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
@@ -39,8 +40,8 @@ class InventoryEmptyCategoryWidget extends GetView<InventoryController> {
           const SizedBox(height: AppSizes.p16),
           Text(
             TTexts.noCategoriesFound.tr,
-            style: const TextStyle(
-              fontFamily: 'Poppins',
+            style: TextStyle(
+              fontFamily: AppFonts.mainFont,
               fontSize: 16,
               fontWeight: FontWeight.bold,
               color: AppColors.primaryText,
@@ -70,8 +71,8 @@ class InventoryEmptyCategoryWidget extends GetView<InventoryController> {
             icon: const Icon(Iconsax.add_circle_copy, size: 18),
             label: Text(
               TTexts.addNewCategory.tr,
-              style: const TextStyle(
-                  fontWeight: FontWeight.bold, fontFamily: 'Poppins'),
+              style: TextStyle(
+                  fontWeight: FontWeight.bold, fontFamily: AppFonts.mainFont),
             ),
           ),
         ],

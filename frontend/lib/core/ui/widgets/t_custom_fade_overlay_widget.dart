@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 
 class TCustomFadeOverlayWidget extends StatelessWidget {
@@ -49,8 +50,8 @@ class TCustomFadeOverlayWidget extends StatelessWidget {
                 children: [
                   Text(
                     text,
-                    style: const TextStyle(
-                      fontFamily: 'Poppins', // Chuẩn Poppins
+                    style: TextStyle(
+                      fontFamily: AppFonts.mainFont,
                       color: AppColors.primary,
                       fontWeight: FontWeight.w600,
                       fontSize: 13,

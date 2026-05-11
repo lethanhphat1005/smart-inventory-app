@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:frontend/features/inventory/controllers/inventory_detail_controller.dart';
 import 'package:get/get.dart';
@@ -148,7 +149,7 @@ class _InventoryDetailStockStatsWidgetState
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                   color: color,
-                  fontFamily: 'Poppins')),
+                  fontFamily: AppFonts.mainFont)),
         ],
       ),
     );
@@ -380,10 +381,10 @@ class _LineChartPainter extends CustomPainter {
         final textSpan = TextSpan(
           text:
               "${TTexts.chartTooltipIn.tr}: ${data[i]['in']}  |  ${TTexts.chartTooltipOut.tr}: ${data[i]['out']}",
-          style: const TextStyle(
+          style: TextStyle(
               color: Colors.white,
               fontSize: 11,
-              fontFamily: 'Poppins',
+              fontFamily: AppFonts.mainFont,
               fontWeight: FontWeight.bold),
         );
         final tpTooltip =

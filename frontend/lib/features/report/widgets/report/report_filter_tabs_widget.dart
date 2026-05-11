@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:get/get.dart';
 import 'package:frontend/features/report/controllers/report_controller.dart';
@@ -64,7 +65,7 @@ class ReportFilterTabsWidget extends GetView<ReportController> {
         child: Text(
           displayText,
           style: TextStyle(
-            fontFamily: 'Poppins',
+            fontFamily: AppFonts.mainFont,
             fontSize: 13,
             fontWeight: isActive ? FontWeight.w500 : FontWeight.w400,
             color: isActive ? Colors.white : AppColors.primaryText,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:frontend/core/infrastructure/models/transaction_model.dart';
 import 'package:frontend/features/report/controllers/report_transaction_export_controller.dart';
@@ -37,8 +38,8 @@ class ReportTransactionExportBottomSheetWidget
             Text(
               TTexts.exportingProgress
                   .trParams({'percent': percent.toString()}),
-              style: const TextStyle(
-                  fontFamily: 'Poppins',
+              style: TextStyle(
+                  fontFamily: AppFonts.mainFont,
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: AppColors.primaryText),
@@ -75,8 +76,8 @@ class ReportTransactionExportBottomSheetWidget
           ),
           const SizedBox(height: 16),
           Text(TTexts.exportTransaction.tr,
-              style: const TextStyle(
-                  fontFamily: 'Poppins',
+              style: TextStyle(
+                  fontFamily: AppFonts.mainFont,
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: AppColors.primaryText),

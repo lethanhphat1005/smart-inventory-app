@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
@@ -85,10 +86,10 @@ class AdjustmentHistorySearchBarWidget extends StatelessWidget {
                       cursorColor: AppColors.primary,
                       controller: controller,
                       onChanged: onChanged,
-                      style: const TextStyle(
+                      style: TextStyle(
                           color: AppColors.primaryText,
                           fontSize: 12,
-                          fontFamily: 'Poppins'),
+                          fontFamily: AppFonts.mainFont),
                       decoration: InputDecoration(
                         hintText: hintText,
                         hintStyle: const TextStyle(

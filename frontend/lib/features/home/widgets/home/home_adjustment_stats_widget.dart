@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/utils/day_formatter_utils.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:frontend/core/ui/widgets/t_custom_fade_overlay_widget.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
@@ -35,8 +36,8 @@ class HomeAdjustmentStatsWidget extends GetView<HomeController> {
                 children: [
                   Text(
                     TTexts.recentAdjustments.tr,
-                    style: const TextStyle(
-                        fontFamily: 'Poppins',
+                    style: TextStyle(
+                        fontFamily: AppFonts.mainFont,
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
                         color: AppColors.primaryText),
@@ -48,8 +49,8 @@ class HomeAdjustmentStatsWidget extends GetView<HomeController> {
                       child: Center(
                         child: Text(
                           TTexts.noRecentAdjustments.tr,
-                          style: const TextStyle(
-                              fontFamily: 'Poppins',
+                          style: TextStyle(
+                              fontFamily: AppFonts.mainFont,
                               fontSize: 14,
                               color: AppColors.softGrey,
                               fontStyle: FontStyle.italic),
@@ -98,8 +99,8 @@ class HomeAdjustmentStatsWidget extends GetView<HomeController> {
                                       item.productName,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
-                                          fontFamily: 'Poppins',
+                                      style: TextStyle(
+                                          fontFamily: AppFonts.mainFont,
                                           fontSize: 12,
                                           fontWeight: FontWeight.w500,
                                           color: AppColors.primaryText),
@@ -113,8 +114,8 @@ class HomeAdjustmentStatsWidget extends GetView<HomeController> {
                                         const SizedBox(width: 4),
                                         Text(
                                           timeStr,
-                                          style: const TextStyle(
-                                              fontFamily: 'Poppins',
+                                          style: TextStyle(
+                                              fontFamily: AppFonts.mainFont,
                                               fontSize: 10,
                                               fontWeight: FontWeight.w400,
                                               color: AppColors.subText),
@@ -123,8 +124,8 @@ class HomeAdjustmentStatsWidget extends GetView<HomeController> {
                                         // Hiển thị Qty: 23 -> 21
                                         Text(
                                             "${TTexts.qty.tr}: ${item.oldQuantity} → ${item.newQuantity}",
-                                            style: const TextStyle(
-                                                fontFamily: 'Poppins',
+                                            style: TextStyle(
+                                                fontFamily: AppFonts.mainFont,
                                                 fontSize: 10,
                                                 fontWeight: FontWeight.w400,
                                                 color: AppColors.subText)),
@@ -138,7 +139,7 @@ class HomeAdjustmentStatsWidget extends GetView<HomeController> {
                               Text(
                                 diffStr,
                                 style: TextStyle(
-                                  fontFamily: 'Poppins',
+                                  fontFamily: AppFonts.mainFont,
                                   fontSize: 12,
                                   fontWeight: FontWeight.w500,
                                   color: item.isPositive
