@@ -174,7 +174,9 @@ export class ChatbotService {
                 const draft = JSON.parse(draftData) as DraftAction;
 
                 if (intent !== draft.type) {
-                  const conflictReply = 'Tori phát hiện...';
+                  const draftTypeVN =
+                    draft.type === 'create_import' ? 'NHẬP' : 'XUẤT';
+                  const conflictReply = `Tori phát hiện bạn đang có một phiếu ${draftTypeVN} kho chưa hoàn tất. Bạn không thể tạo phiếu ${draftTypeVN === 'NHẬP' ? 'XUẤT' : 'NHẬP'} lúc này. Vui lòng Xác nhận hoặc Hủy phiếu cũ ở thẻ bên dưới nhé! 📦⚠️`;
 
                   await this.chatMemoryService.saveChatHistory(
                     storeId,
@@ -527,7 +529,7 @@ export class ChatbotService {
         ? `There are a total of ${totalCount} products that have reached the warning level. List of the 5 most depleted products: ${displayItems.map((i) => i.productPackage.displayName).join(', ')}`
         : 'Great, no products are currently at the warning level!';
 
-    if (res.items.length > 100) {
+    if (res.items.length >= 100) {
       systemContext +=
         ' Note: The system only shows data for the first 100 products scanned. Please visit the Low Stock screen for a complete list.';
     }

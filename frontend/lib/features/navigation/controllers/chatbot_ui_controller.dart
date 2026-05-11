@@ -111,7 +111,8 @@ class ChatbotUiController extends GetxController with TErrorHandler {
                     fontWeight: FontWeight.w500)),
           ),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
+              await _apiClient.delete('/api/chat-bot/history');
               messages.clear();
               Get.back();
               Get.back();
@@ -142,17 +143,19 @@ class ChatbotUiController extends GetxController with TErrorHandler {
 
       final draftActionId = message.data['draftActionId'];
 
-      await _apiClient.post(
+      final response = await _apiClient.post(
         '/api/chat-bot/confirm',
         data: {'draftActionId': draftActionId, 'isConfirmed': true},
       );
+      final serverMessage = response.data['data']?['message'] as String?;
 
       message.isResolved = true;
       messages.refresh();
 
       messages.add(ChatMessage(
-          text: TTexts.chatbotTransactionSuccess.tr, isUser: false));
-
+        text: serverMessage ?? TTexts.chatbotTransactionSuccess.tr,
+        isUser: false,
+      ));
       // 1. Cập nhật Dashboard
       if (Get.isRegistered<HomeController>()) {
         Get.find<HomeController>().loadAllHomeData();

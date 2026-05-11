@@ -20,37 +20,22 @@ class ChatCardLowStockProduct extends StatelessWidget {
 
     final displayName =
         pkg['displayName'] ?? product?['name'] ?? TTexts.unknownProduct.tr;
-    final quantity = itemData['quantity'] ?? pkg['quantity'] ?? 0;
+    final quantity = (itemData['quantity'] ?? pkg['quantity'] ?? 0) as int;
     final unitName = pkg['unit']?['name'] ?? '';
 
-    final threshold = int.tryParse(itemData['reorder_threshold']?.toString() ??
-            itemData['reorderThreshold']?.toString() ??
-            '10') ??
-        10;
-    final String rawUrl = product?['imageUrl']?.toString() ??
-        pkg?['imageUrl']?.toString() ??
-        itemData['imageUrl']?.toString() ??
-        '';
+    final threshold =
+        int.tryParse(itemData['reorder_threshold']?.toString() ?? '20') ?? 20;
+
+    final String rawUrl =
+        product?['imageUrl']?.toString() ?? pkg?['imageUrl']?.toString() ?? '';
     final String finalImageUrl = UrlHelperUtils.normalizeImageUrl(rawUrl) ?? '';
 
     final productId = product?['productId'] ?? pkg['productId'];
     final packageId = pkg['productPackageId'];
     final barcode = pkg['barcodeValue'] ?? '';
 
-    Color stockColor;
-    String stockText;
-
-    if (quantity == 0) {
-      stockColor = AppColors.stockOut;
-      stockText = TTexts.chatbotOutOfStock.tr;
-    } else if (quantity <= threshold) {
-      stockColor = AppColors.primary;
-      stockText =
-          "${TTexts.chatbotLowStockPrefix.tr} $quantity $unitName".trim();
-    } else {
-      stockColor = AppColors.stockIn;
-      stockText = "${TTexts.chatbotLeftPrefix.tr} $quantity $unitName".trim();  
-    }
+    double progress = threshold > 0 ? quantity / threshold : 0.0;
+    if (progress > 1.0) progress = 1.0;
 
     return GestureDetector(
       onTap: () {
@@ -64,88 +49,86 @@ class ChatCardLowStockProduct extends StatelessWidget {
         }
       },
       child: Container(
-        width: 200,
-        margin: const EdgeInsets.only(bottom: 8),
-        padding: const EdgeInsets.all(12),
+        width: Get.width * 0.82,
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: [
-              BoxShadow(
-                  color: Colors.black.withOpacity(0.03),
-                  blurRadius: 20,
-                  offset: const Offset(0, 8))
-            ]),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.grey.shade200),
+        ),
+        child: Row(
           children: [
-            Expanded(
-              flex: 3,
-              child: Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                    color: const Color(0xFFF8F9FA),
-                    borderRadius: BorderRadius.circular(18)),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(18),
-                  child: finalImageUrl.isNotEmpty
-                      ? CachedNetworkImage(
-                          imageUrl: finalImageUrl,
-                          fit: BoxFit.cover,
-                          errorWidget: (context, url, error) =>
-                              _buildImagePlaceholder())
-                      : _buildImagePlaceholder(),
-                ),
+            Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                  color: const Color(0xFFF8F9FA),
+                  borderRadius: BorderRadius.circular(10)),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: finalImageUrl.isNotEmpty
+                    ? CachedNetworkImage(
+                        imageUrl: finalImageUrl,
+                        fit: BoxFit.cover,
+                        errorWidget: (context, url, error) =>
+                            _buildImagePlaceholder())
+                    : _buildImagePlaceholder(),
               ),
             ),
-            const SizedBox(height: 14),
+            const SizedBox(width: 10),
             Expanded(
-              flex: 2,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(displayName,
                       style: const TextStyle(
                           fontWeight: FontWeight.w500,
-                          fontSize: 14,
-                          color: AppColors.primaryText,
-                          height: 1.4,
-                          fontFamily: 'Poppins'),
-                      maxLines: 2,
+                          fontSize: 13,
+                          color: AppColors.primaryText),
+                      maxLines: 1,
                       overflow: TextOverflow.ellipsis),
-                  const Spacer(),
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                    decoration: BoxDecoration(
-                        color: stockColor.withOpacity(0.08),
-                        borderRadius: BorderRadius.circular(100)),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Iconsax.box, color: stockColor, size: 14),
-                        const SizedBox(width: 6),
-                        Flexible(
-                            child: Text(stockText,
-                                style: TextStyle(
-                                    color: stockColor,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                    fontFamily: 'Poppins'),
-                                overflow: TextOverflow.ellipsis)),
-                      ],
-                    ),
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                            color: const Color(0xFFFAEEDA),
+                            borderRadius: BorderRadius.circular(100)),
+                        child: Text("$quantity / $threshold $unitName",
+                            style: const TextStyle(
+                                color: Color(0xFF854F0B),
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600)),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: LinearProgressIndicator(
+                            value: progress,
+                            minHeight: 4,
+                            backgroundColor: Colors.grey.shade200,
+                            valueColor: const AlwaysStoppedAnimation<Color>(
+                                Color(0xFFEF9F27)),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
             ),
+            const SizedBox(width: 6),
+            Icon(Iconsax.arrow_right_3, size: 16, color: Colors.grey.shade400)
           ],
         ),
       ),
     );
   }
 
-  Widget _buildImagePlaceholder() {
-    return const TNoImageWidget(iconSize: 32);
-  }
+  Widget _buildImagePlaceholder() => const TNoImageWidget(iconSize: 20);
 }

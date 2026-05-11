@@ -14,21 +14,37 @@ class ChatbotSuggestedPrompts extends StatelessWidget {
     final prompts = [
       {
         "icon": Iconsax.warning_2,
+        "iconColor": const Color(0xFFA32D2D),
+        "bgColor": const Color(0xFFFCEBEB),
+        "title": "Hàng sắp hết",
+        "sub": "Gửi ngay",
         "text": TTexts.chatbotPromptLowStock.tr,
         "autoSend": true,
       },
       {
         "icon": Iconsax.box_search,
+        "iconColor": const Color(0xFF185FA5),
+        "bgColor": const Color(0xFFE6F1FB),
+        "title": "Tìm sản phẩm",
+        "sub": "Nhập tên SP",
         "text": TTexts.chatbotPromptCheckInfo.tr,
         "autoSend": false,
       },
       {
         "icon": Iconsax.import_1,
+        "iconColor": const Color(0xFF3B6D11),
+        "bgColor": const Color(0xFFEAF3DE),
+        "title": "Tạo phiếu nhập",
+        "sub": "Nhập tên + SL",
         "text": TTexts.chatbotPromptImport.tr,
         "autoSend": false,
       },
       {
         "icon": Iconsax.export_1,
+        "iconColor": const Color(0xFF854F0B),
+        "bgColor": const Color(0xFFFAEEDA),
+        "title": "Tạo phiếu xuất",
+        "sub": "Nhập tên + SL",
         "text": TTexts.chatbotPromptExport.tr,
         "autoSend": false,
       },
@@ -38,10 +54,9 @@ class ChatbotSuggestedPrompts extends StatelessWidget {
       child: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Container(
                 padding: const EdgeInsets.all(16),
@@ -69,31 +84,28 @@ class ChatbotSuggestedPrompts extends StatelessWidget {
                   fontFamily: 'Poppins',
                 ),
               ),
-              const SizedBox(height: 8),
-              Text(
-                TTexts.chatbotSuggestionSub.tr,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                    fontSize: 14,
-                    color: AppColors.subText.withOpacity(0.8),
-                    fontFamily: 'Poppins'),
-              ),
               const SizedBox(height: 32),
-              Wrap(
-                spacing: 12,
-                runSpacing: 12,
-                alignment: WrapAlignment.center,
-                children: prompts.map((prompt) {
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                  childAspectRatio: 1.4,
+                ),
+                itemCount: prompts.length,
+                itemBuilder: (context, index) {
+                  final prompt = prompts[index];
                   return InkWell(
                     onTap: () => onAction(
                         prompt['text'] as String, prompt['autoSend'] as bool),
-                    borderRadius: BorderRadius.circular(24),
+                    borderRadius: BorderRadius.circular(16),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 18, vertical: 12),
+                      padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(24),
+                        borderRadius: BorderRadius.circular(16),
                         border: Border.all(color: Colors.grey.shade200),
                         boxShadow: [
                           BoxShadow(
@@ -103,18 +115,36 @@ class ChatbotSuggestedPrompts extends StatelessWidget {
                           )
                         ],
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(prompt['icon'] as IconData,
-                              size: 16, color: AppColors.subText),
-                          const SizedBox(width: 8),
+                          Container(
+                            width: 32,
+                            height: 32,
+                            decoration: BoxDecoration(
+                              color: prompt['bgColor'] as Color,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Icon(prompt['icon'] as IconData,
+                                size: 16, color: prompt['iconColor'] as Color),
+                          ),
+                          const Spacer(),
                           Text(
-                            prompt['text'] as String,
+                            prompt['title'] as String,
                             style: const TextStyle(
-                              fontSize: 13.5,
-                              fontWeight: FontWeight.w500,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
                               color: AppColors.primaryText,
+                              fontFamily: 'Poppins',
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            prompt['sub'] as String,
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: AppColors.subText.withOpacity(0.8),
                               fontFamily: 'Poppins',
                             ),
                           ),
@@ -122,7 +152,7 @@ class ChatbotSuggestedPrompts extends StatelessWidget {
                       ),
                     ),
                   );
-                }).toList(),
+                },
               ),
             ],
           ),
