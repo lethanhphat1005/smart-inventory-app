@@ -42,6 +42,8 @@ class ChatbotUiController extends GetxController with TErrorHandler {
   }
 
   Future<void> sendMessage() async {
+    if (isTyping.value) return;
+
     final text = textController.text.trim();
     if (text.isEmpty) return;
 
@@ -148,7 +150,7 @@ class ChatbotUiController extends GetxController with TErrorHandler {
   }
 
   Future<void> confirmTransaction(ChatMessage message) async {
-    if (message.isResolved) return;
+    if (message.isResolved || isTyping.value) return;
 
     try {
       isTyping.value = true;
@@ -196,7 +198,7 @@ class ChatbotUiController extends GetxController with TErrorHandler {
   }
 
   Future<void> cancelTransaction(ChatMessage message) async {
-    if (message.isResolved) return;
+    if (message.isResolved || isTyping.value) return;
 
     try {
       isTyping.value = true;

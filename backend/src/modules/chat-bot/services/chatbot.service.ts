@@ -853,12 +853,50 @@ Inventory: ${firstResult.quantity} ${firstResult.productPackage.unit.name}.`;
     storeId: string,
     keyword: string,
   ): Promise<InventoryItemData[]> {
-    const cleanKeyword = keyword
+    const aliasMap: Record<string, string> = {
+      // Đồ uống
+      'bò húc': 'redbull',
+      'bò cụng': 'redbull',
+      'sting dâu': 'sting đỏ',
+      'cô ca': 'coca',
+      pexi: 'pepsi',
+      'nước lọc': 'aquafina',
+      'trà xanh': 'không độ',
+      'ô long': 'tea plus',
+
+      // Đồ ăn / Snack
+      'mì tôm': 'hảo hảo',
+      'bim bim': 'oishi',
+      'xúc xích': 'cp',
+      'sữa đặc': 'ông thọ',
+
+      // Hóa mỹ phẩm / Cá nhân
+      bvs: 'băng vệ sinh',
+      bcs: 'bao cao su',
+      'áo mưa': 'bao cao su',
+      kđr: 'kem đánh răng',
+      'sữa tắm': 'lifebuoy',
+      'dầu gội': 'clear',
+
+      // Gia vị
+      'bột ngọt': 'ajinomoto',
+      'mì chính': 'ajinomoto',
+      'nước mắm': 'nam ngư',
+    };
+
+    let cleanKeyword = keyword
+      .toLowerCase()
       .replace(
         /\b(lốc|thùng|chai|lon|gói|hộp|pack|case|bottle|can|bag|box)\b/gi,
         '',
       )
       .trim();
+
+    for (const [slang, realName] of Object.entries(aliasMap)) {
+      if (cleanKeyword.includes(slang)) {
+        cleanKeyword = cleanKeyword.replace(slang, realName);
+      }
+    }
 
     const query = {
       keyword: cleanKeyword || keyword.trim(),
@@ -866,17 +904,14 @@ Inventory: ${firstResult.quantity} ${firstResult.productPackage.unit.name}.`;
       page: 1,
     } as unknown as ListInventoriesQueryDto;
 
-    // 1. search với keyword gốc
     let res = await this.inventoryService.getInventoriesByStoreId(
       storeId,
       query,
     );
 
-    // 2. fallback bỏ ngoặc hoặc prefix
     if (res.items.length === 0) {
       const splitArr = keyword.split('(');
 
-      // TODO: Nên tối ưu ở đây
       const fallbackName = keyword.includes('(')
         ? (splitArr[0] ?? '').trim()
         : keyword

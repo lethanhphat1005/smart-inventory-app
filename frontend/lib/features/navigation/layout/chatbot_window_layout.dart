@@ -64,6 +64,9 @@ class ChatbotWindowLayout extends StatelessWidget {
                         !controller.isTyping.value) {
                       return ChatbotSuggestedPrompts(
                         onAction: (text, autoSend) {
+                          // 🛑 CHỐNG SPAM: Ngăn double-tap siêu tốc vào nút gợi ý
+                          if (controller.isTyping.value) return;
+
                           if (autoSend) {
                             controller.textController.text = text;
                             controller.sendMessage();
@@ -79,18 +82,28 @@ class ChatbotWindowLayout extends StatelessWidget {
                       );
                     }
 
-                    return ListView.builder(
-                      controller: controller.scrollController,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 24),
-                      itemCount: controller.messages.length +
-                          (controller.isTyping.value ? 1 : 0),
-                      itemBuilder: (context, index) {
-                        if (index == controller.messages.length) {
-                          return const ChatTypingIndicator();
-                        }
-                        return _buildMessageRouter(controller.messages[index]);
+                    // 🛑 CẢI THIỆN UX: Chạm vào vùng chat trống để ẩn bàn phím ngay lập tức
+                    return GestureDetector(
+                      onTap: () {
+                        controller.focusNode.unfocus();
+                        FocusManager.instance.primaryFocus?.unfocus();
                       },
+                      child: ListView.builder(
+                        controller: controller.scrollController,
+                        // Thêm physics này để vùng trống cũng bắt được sự kiện vuốt/chạm
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 24),
+                        itemCount: controller.messages.length +
+                            (controller.isTyping.value ? 1 : 0),
+                        itemBuilder: (context, index) {
+                          if (index == controller.messages.length) {
+                            return const ChatTypingIndicator();
+                          }
+                          return _buildMessageRouter(
+                              controller.messages[index]);
+                        },
+                      ),
                     );
                   }),
                 ),
