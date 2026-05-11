@@ -104,11 +104,9 @@ class AuthProvider {
   }
 
   Future<void> logout() async {
-    // Gọi xóa token ở server TRƯỚC KHI Supabase sign out
     await NotificationService.removeTokenFromBackend();
 
-    await supabase.auth.signOut();
-    // Đăng xuất Google để lần sau hiện lại popup chọn tài khoản
-    await GoogleSignIn.instance.signOut();
+    await Future.wait(
+        [supabase.auth.signOut(), GoogleSignIn.instance.signOut()]);
   }
 }

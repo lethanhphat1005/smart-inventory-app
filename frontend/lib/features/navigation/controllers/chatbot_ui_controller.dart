@@ -224,6 +224,17 @@ class ChatbotUiController extends GetxController with TErrorHandler {
     }
   }
 
+  Future<void> clearChatData() async {
+    try {
+      messages.clear();
+      isChatOpen.value = false;
+
+      await _apiClient.delete('/api/chat-bot/history');
+    } catch (e) {
+      debugPrint('Lỗi khi xóa lịch sử chat: $e');
+    }
+  }
+
   @override
   void onClose() {
     textController.dispose();
