@@ -33,7 +33,8 @@ class InboundTransactionController extends GetxController with TErrorHandler {
       cartItems.fold(0, (sum, item) => sum + (item.quantity * item.unitPrice));
 
   void addToCart(Map<String, dynamic> productData,
-      {int quantity = 1, double? customPrice}) {
+      {int quantity = 1, double? customPrice, bool isReplace = false}) {
+    // ĐÃ THÊM isReplace = false
     final String? pkgId = productData['productPackageId'];
     final int stock = productData['currentStock'] ?? 0;
 
@@ -48,9 +49,13 @@ class InboundTransactionController extends GetxController with TErrorHandler {
 
     if (index != -1) {
       final currentItem = cartItems[index];
+
+      final int newQuantity =
+          isReplace ? quantity : currentItem.quantity + quantity;
+
       cartItems[index] = TransactionDetailModel(
         productPackageId: pkgId,
-        quantity: currentItem.quantity + quantity,
+        quantity: newQuantity,
         unitPrice: customPrice ?? currentItem.unitPrice,
         packageInfo: productData['packageInfo'] ?? currentItem.packageInfo,
         currentStock: stock,
@@ -81,6 +86,14 @@ class InboundTransactionController extends GetxController with TErrorHandler {
         currentStock: item.currentStock,
         reorderThreshold: item.reorderThreshold,
       );
+    }
+  }
+
+  void updateItemQuantity(String packageId, int newQuantity) {
+    final index =
+        cartItems.indexWhere((item) => item.productPackageId == packageId);
+    if (index != -1 && newQuantity > 0) {
+      cartItems[index] = cartItems[index].copyWith(quantity: newQuantity);
     }
   }
 

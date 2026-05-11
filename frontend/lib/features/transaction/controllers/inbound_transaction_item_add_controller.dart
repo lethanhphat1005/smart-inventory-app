@@ -40,14 +40,26 @@ class InboundTransactionItemAddController extends GetxController
   final RxList<ProductPackageBarcodeModel> fetchedBarcodesList =
       <ProductPackageBarcodeModel>[].obs;
 
+  bool isEditing = false;
+
   @override
   void onInit() {
     super.onInit();
-    if (Get.arguments != null &&
-        Get.arguments is InventoryInsightDisplayModel) {
-      initialItem = Get.arguments as InventoryInsightDisplayModel;
+    if (Get.arguments != null) {
+      if (Get.arguments is Map) {
+        initialItem = Get.arguments['displayItem'];
+        isEditing = Get.arguments['isEditing'] ?? false;
+        final int passedQty = Get.arguments['quantity'] ?? 1;
 
-      fetchedCategoryName.value = TTexts.uncategorized.tr;
+        quantityController.text = passedQty.toString();
+        itemQuantity.value = passedQty;
+      } else {
+        initialItem = Get.arguments as InventoryInsightDisplayModel;
+      }
+
+      fetchedCategoryName.value = initialItem.product?.categoryName ??
+          initialItem.inventory.productPackage?.product?.categoryName ??
+          TTexts.uncategorized.tr;
       fetchedBrandName.value = initialItem.product?.brand ?? TTexts.noBrand.tr;
       fetchedImageUrl.value = _validateUrl(initialItem.product?.imageUrl);
 
@@ -213,7 +225,7 @@ class InboundTransactionItemAddController extends GetxController
       if (qty <= 0) {
         TSnackbarsWidget.warning(
             title: TTexts.warningTitle.tr,
-            message: TTexts.quantityGreaterThanZero.tr); // Đã gắn localization
+            message: TTexts.quantityGreaterThanZero.tr);
         return;
       }
       FullScreenLoaderUtils.openLoadingDialog(TTexts.loadingAddingToCart.tr);
@@ -230,21 +242,25 @@ class InboundTransactionItemAddController extends GetxController
       if (realPkgId.isEmpty || realPkgId == 'null') {
         FullScreenLoaderUtils.stopLoading();
         TSnackbarsWidget.error(
-            title: TTexts.errorTitle.tr,
-            message: TTexts.errorNoPackageId.tr); // Đã gắn localization
+            title: TTexts.errorTitle.tr, message: TTexts.errorNoPackageId.tr);
         return;
       }
 
       ProductModel finalProduct;
       if (initialItem.product != null) {
-        finalProduct =
-            initialItem.product!.copyWith(imageUrl: fetchedImageUrl.value);
+        // ĐÃ SỬA LỖI CATEGORY: Truyền thêm categoryName vào copyWith
+        finalProduct = initialItem.product!.copyWith(
+          imageUrl: fetchedImageUrl.value,
+          categoryName: fetchedCategoryName.value,
+        );
       } else {
         finalProduct = ProductModel.fromJson({
           'productId': package?.productId ?? '',
           'name': displayName,
           'imageUrl': fetchedImageUrl.value,
           'brand': fetchedBrandName.value,
+          // ĐÃ SỬA LỖI CATEGORY: Truyền categoryName vào Json
+          'categoryName': fetchedCategoryName.value,
         });
       }
 
@@ -265,6 +281,7 @@ class InboundTransactionItemAddController extends GetxController
         cartData,
         quantity: qty,
         customPrice: double.tryParse(priceController.text),
+        isReplace: isEditing,
       );
 
       FullScreenLoaderUtils.stopLoading();

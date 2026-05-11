@@ -67,4 +67,22 @@ class TransactionDetailModel {
         'quantity': quantity,
         'unit_price': unitPrice,
       };
+
+  TransactionDetailModel copyWith({
+    String? productPackageId,
+    int? quantity,
+    double? unitPrice,
+    ProductPackageModel? packageInfo,
+    int? currentStock,
+    int? reorderThreshold,
+  }) {
+    return TransactionDetailModel(
+      productPackageId: productPackageId ?? this.productPackageId,
+      quantity: quantity ?? this.quantity,
+      unitPrice: unitPrice ?? this.unitPrice,
+      packageInfo: packageInfo ?? this.packageInfo,
+      currentStock: currentStock ?? this.currentStock,
+      reorderThreshold: reorderThreshold ?? this.reorderThreshold,
+    );
+  }
 }

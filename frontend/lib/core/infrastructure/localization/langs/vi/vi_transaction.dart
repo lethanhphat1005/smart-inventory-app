@@ -77,7 +77,7 @@ final Map<String, String> viTransaction = {
   TTexts.productNameUnknown: "Sản Phẩm Không Xác Định",
   TTexts.labelNoBarcode: "N/A",
   TTexts.labelStock: "Tồn Kho",
-  TTexts.labelImportPrice: "Giá Nhập (\$)",
+  TTexts.labelImportPrice: "Giá Nhập",
   TTexts.labelQuantity: "Số Lượng",
   TTexts.labelTicket: "Phiếu",
   TTexts.errorNoPackageId: "Không tìm thấy hoặc ID gói không hợp lệ",

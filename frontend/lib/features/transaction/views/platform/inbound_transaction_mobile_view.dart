@@ -71,6 +71,10 @@ class InboundTransactionMobileView
                                 index, item.quantity + 1),
                             onDecrease: () => controller.updateQuantity(
                                 index, item.quantity - 1),
+                            onQuantityChanged: (newQty) {
+                              controller.updateItemQuantity(
+                                  item.productPackageId!, newQty);
+                            },
                           );
                         },
                       ),
@@ -93,7 +97,6 @@ class InboundTransactionMobileView
           padding: EdgeInsets.fromLTRB(0, AppSizes.p24, 0, 16),
           child: Divider(color: AppColors.divider),
         ),
-        
         TTextFormFieldWidget(
           label: TTexts.noteLabel.tr,
           controller: controller.noteController,
