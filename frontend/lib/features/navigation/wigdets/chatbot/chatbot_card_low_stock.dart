@@ -15,75 +15,61 @@ class ChatCardLowStock extends StatelessWidget {
   final ChatMessage message;
 
   const ChatCardLowStock({super.key, required this.message});
-
   @override
   Widget build(BuildContext context) {
     List<dynamic> items = [];
-    int totalCount = 0;
 
     if (message.data is List) {
       items = message.data as List<dynamic>;
-      totalCount = items.length;
     } else if (message.data is Map) {
       final rawData = message.data as Map<String, dynamic>;
       items = (rawData['items'] ?? rawData['data'] ?? []) as List<dynamic>;
-      totalCount = (rawData['totalCount'] as num?)?.toInt() ?? items.length;
     }
-
-    if (items.isEmpty && totalCount == 0) return const SizedBox.shrink();
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header message
           Align(
             alignment: Alignment.centerLeft,
             child: ChatbotMessage(
-              message: ChatMessage(
-                text:
-                    '${TTexts.chatbotLowStockFoundPrefix.tr} $totalCount ${TTexts.chatbotLowStockFoundSuffix.tr}',
-                isUser: false,
-              ),
+              message: message,
             ),
           ),
-          const SizedBox(height: 8),
-
-          // Product list — dọc, không scroll ngang
-          ...items.map((item) => ChatCardLowStockProduct(
-                itemData: item as Map<String, dynamic>,
-              )),
-
-          const SizedBox(height: 4),
-
-          // View full list link
-          GestureDetector(
-            onTap: () => Get.toNamed(AppRoutes.lowStock),
-            child: Padding(
-              padding: const EdgeInsets.only(left: 4),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Iconsax.link,
-                    size: 13,
-                    color: AppColors.subText.withOpacity(0.55),
-                  ),
-                  const SizedBox(width: 5),
-                  Text(
-                    TTexts.chatbotViewFullList.tr,
-                    style: TextStyle(
-                      fontSize: 12.5,
+          if (items.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            ...items.map((item) => ChatCardLowStockProduct(
+                  itemData: item as Map<String, dynamic>,
+                )),
+            const SizedBox(height: 4),
+            GestureDetector(
+              onTap: () => Get.toNamed(AppRoutes.lowStock),
+              child: Padding(
+                padding: const EdgeInsets.only(left: 4),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Iconsax.link,
+                      size: 13,
                       color: AppColors.subText.withOpacity(0.55),
-                      fontWeight: FontWeight.w500,
-                      fontFamily: 'Poppins',
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 5),
+                    Text(
+                      TTexts.chatbotViewFullList.tr,
+                      style: TextStyle(
+                        fontSize: 12.5,
+                        color: AppColors.subText.withOpacity(0.55),
+                        fontWeight: FontWeight.w500,
+                        fontFamily: 'Poppins',
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
+          ],
         ],
       ),
     );

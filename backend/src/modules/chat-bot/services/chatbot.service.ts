@@ -379,23 +379,46 @@ export class ChatbotService {
       case 'create_import':
       case 'create_export': {
         const items = params.products || [];
-        const hasSingleItem = params.product_name && params.quantity;
 
-        if (items.length === 0 && !hasSingleItem) {
+        // 1. Nếu không có item nào
+        if (items.length === 0 && !(params.product_name && params.quantity)) {
           return {
             isValid: false,
             reason: `What product and quantity do you want to import using ${intent === 'create_import' ? 'import' : 'export'}? Please provide enough information so Tori can create the order.`,
           };
         }
 
-        // Kiểm tra xem số lượng có hợp lý không (tránh AI bịa số âm hoặc số 0)
-        if (hasSingleItem && Number(params.quantity) <= 0) {
+        // 2. GUARDRAIL THÉP: Kiểm tra xem người dùng CÓ THỰC SỰ GÕ SỐ lượng vào tin nhắn không!
+        // Quét các chữ số (0-9) hoặc các chữ cái chỉ số lượng cơ bản tiếng Anh/Việt
+        const hasNumberInMessage =
+          /\d/.test(normalizedMessage) ||
+          // eslint-disable-next-line max-len
+          /một|hai|ba|bốn|năm|sáu|bảy|tám|chín|mười|chục|trăm|ngàn|one|two|three|four|five|ten/i.test(
+            normalizedMessage,
+          );
+
+        if (!hasNumberInMessage) {
           return {
             isValid: false,
-            reason: 'The number must be greater than 0.',
+            reason: `The user specified the product but did NOT provide the exact quantity in their message. You MUST NOT assume the quantity. Ask the user clearly: "How many [Product Name] do you want to ${intent === 'create_import' ? 'import' : 'export'}?"`,
           };
         }
 
+        const hasMissingQuantity = items.some(
+          (item) =>
+            item.quantity === undefined ||
+            item.quantity === null ||
+            Number.isNaN(Number(item.quantity)),
+        );
+
+        if (hasMissingQuantity) {
+          return {
+            isValid: false,
+            reason: `Ask the user clearly: "How many [Product Name] do you want to ${intent === 'create_import' ? 'import' : 'export'}?"`,
+          };
+        }
+
+        // 4. Kiểm tra số lượng âm/bằng 0
         const hasInvalidQuantity = items.some(
           (item) => Number(item.quantity) <= 0,
         );
@@ -524,9 +547,13 @@ export class ChatbotService {
     const totalCount = allLowStockItems.length;
     const displayItems = allLowStockItems.slice(0, 5);
 
+    const productListStr = displayItems
+      .map((i) => `${i.productPackage.displayName} (${i.quantity} left)`)
+      .join(', ');
+
     let systemContext =
       totalCount > 0
-        ? `There are a total of ${totalCount} products that have reached the warning level. List of the 5 most depleted products: ${displayItems.map((i) => i.productPackage.displayName).join(', ')}`
+        ? `There are a total of ${totalCount} products that have reached the warning level. List of the 5 most depleted products: ${productListStr}. DO NOT invent or add any other numbers.`
         : 'Great, no products are currently at the warning level!';
 
     if (res.items.length >= 100) {

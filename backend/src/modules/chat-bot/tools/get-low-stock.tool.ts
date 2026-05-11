@@ -5,7 +5,7 @@ export const GET_LOW_STOCK = {
   function: {
     name: 'get_low_stock',
     description:
-      'Xem danh sách các sản phẩm sắp hết hàng hoặc đã hết hàng trong kho cần nhập thêm.',
+      'Gọi tool này khi người dùng hỏi về: danh sách sản phẩm sắp hết hàng, cảnh báo tồn kho, hàng đã hết, hoặc cần nhập thêm hàng gì. Không yêu cầu tham số.',
     parameters: {
       type: 'object',
       properties: {},
