@@ -88,16 +88,29 @@ categoryRouter
   );
 
 /**
- * API endpoint: PATCH /api/categories/:categoryId/hide
+ * API endpoint: POST /api/categories/:categoryId/hide
  * Ẩn một category mặc định khỏi cửa hàng hiện tại
  *
  * Path params:
  *  - categoryId: string (UUID, required)
  */
-categoryRouter.patch(
+categoryRouter.post(
   '/:categoryId/hide',
   requirePermission(PERMISSION.CATEGORY_WRITE),
-  asyncWrapper(categoryController.softDeleteOne),
+  asyncWrapper(categoryController.softDeleteDefaultOne),
+);
+
+/**
+ * API endpoint: DELETE /api/categories/:categoryId/unhide
+ * Bỏ ẩn một category mặc định khỏi cửa hàng hiện tại
+ *
+ * Path params:
+ *  - categoryId: string (UUID, required)
+ */
+categoryRouter.delete(
+  '/:categoryId/unhide',
+  requirePermission(PERMISSION.CATEGORY_WRITE),
+  asyncWrapper(categoryController.restoreDefaultOne),
 );
 
 export { categoryRouter };

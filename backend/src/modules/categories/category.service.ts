@@ -189,6 +189,41 @@ export class CategoriesService {
     await this.hiddenDefaultRepository.hideOne(storeId, categoryId);
   }
 
+  public async restoreDefault(
+    storeId: string,
+    categoryId: string,
+  ): Promise<void> {
+    const foundCategory = await this.categoryRepository.findById(categoryId);
+
+    if (!foundCategory) {
+      throw new CustomError({
+        message: 'Category not found',
+        status: StatusCodes.NOT_FOUND,
+      });
+    }
+
+    if (!foundCategory.isDefault) {
+      throw new CustomError({
+        message: 'Cannot hide the custom category',
+        status: StatusCodes.BAD_REQUEST,
+      });
+    }
+
+    const isVisible = await this.hiddenDefaultRepository.isDefaultOneVisible(
+      storeId,
+      categoryId,
+    );
+
+    if (isVisible) {
+      throw new CustomError({
+        message: 'The default category is already visible',
+        status: StatusCodes.CONFLICT,
+      });
+    }
+
+    await this.hiddenDefaultRepository.unhideOne(storeId, categoryId);
+  }
+
   public async deleteCustomCategory(
     storeId: string,
     userId: string,
