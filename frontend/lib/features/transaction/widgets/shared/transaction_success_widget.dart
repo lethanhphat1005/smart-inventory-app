@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/image_strings.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:get/get.dart';
 
 class TransactionSuccessWidget extends StatelessWidget {
@@ -18,8 +19,8 @@ class TransactionSuccessWidget extends StatelessWidget {
               width: 250, height: 250),
           const SizedBox(height: 24),
           Text(TTexts.transactionCompletedTitle.tr,
-              style: const TextStyle(
-                  fontFamily: 'Poppins',
+              style: TextStyle(
+                  fontFamily: AppFonts.mainFont,
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                   color: AppColors.primaryText)),

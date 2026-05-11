@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:get/get.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
@@ -30,7 +31,7 @@ class RegisterPasswordStrengthIndicatorWidget extends StatelessWidget {
         Text(
           _getStrengthText(strength),
           style: TextStyle(
-            fontFamily: 'Poppins',
+            fontFamily: AppFonts.mainFont,
             fontSize: 12,
             fontWeight: FontWeight.w500,
             color: _getStrengthColor(strength),

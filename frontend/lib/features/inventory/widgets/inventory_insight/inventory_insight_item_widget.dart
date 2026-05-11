@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:frontend/core/ui/widgets/t_no_image_widget.dart';
 import 'package:frontend/features/inventory/controllers/inventory_insight_controller.dart';
@@ -105,10 +106,10 @@ class InventoryInsightItemWidget extends GetView<InventoryInsightController> {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text("\$${price.toStringAsFixed(2)}",
-                        style: const TextStyle(
+                        style: TextStyle(
                             fontWeight: FontWeight.w500,
                             fontSize: 12,
-                            fontFamily: 'Poppins',
+                            fontFamily: AppFonts.mainFont,
                             color: AppColors.primaryText)),
                     const SizedBox(height: AppSizes.p8),
                     Container(

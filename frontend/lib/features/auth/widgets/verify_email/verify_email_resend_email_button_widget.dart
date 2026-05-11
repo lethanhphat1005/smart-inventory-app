@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:get/get.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
@@ -41,7 +42,7 @@ class VerifyEmailResendEmailButton extends GetView<VerifyEmailController> {
                   : Text(
                       TTexts.resendEmail.tr,
                       style: TextStyle(
-                        fontFamily: 'Poppins',
+                        fontFamily: AppFonts.mainFont,
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                         color: isTimerZero
@@ -59,8 +60,8 @@ class VerifyEmailResendEmailButton extends GetView<VerifyEmailController> {
           if (controller.timerCountdown.value > 0) {
             return RichText(
               text: TextSpan(
-                style: const TextStyle(
-                  fontFamily: 'Poppins',
+                style: TextStyle(
+                  fontFamily: AppFonts.mainFont,
                   fontSize: 12,
                   color: AppColors.subText,
                 ),

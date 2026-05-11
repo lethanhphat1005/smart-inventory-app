@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/models/category_model.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:get/get.dart';
@@ -76,7 +77,7 @@ class ProductCatalogCategoryListItemWidget extends StatelessWidget {
                               color: bgColor,
                               fontSize: 22,
                               fontWeight: FontWeight.bold,
-                              fontFamily: 'Poppins'),
+                              fontFamily: AppFonts.mainFont),
                         ),
                       ),
                       const SizedBox(width: AppSizes.p16),
@@ -88,8 +89,8 @@ class ProductCatalogCategoryListItemWidget extends StatelessWidget {
                               name,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                  fontFamily: 'Poppins',
+                              style: TextStyle(
+                                  fontFamily: AppFonts.mainFont,
                                   fontSize: 13,
                                   fontWeight: FontWeight.bold,
                                   color: AppColors.primaryText),
@@ -102,8 +103,8 @@ class ProductCatalogCategoryListItemWidget extends StatelessWidget {
                                   : TTexts.noCategoryDescription.tr,
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                  fontFamily: 'Poppins',
+                              style: TextStyle(
+                                  fontFamily: AppFonts.mainFont,
                                   fontSize: 10,
                                   height: 1.3,
                                   color: AppColors.subText),
@@ -136,8 +137,8 @@ class ProductCatalogCategoryListItemWidget extends StatelessWidget {
                   ),
                   child: Text(
                     TTexts.defaultCategory.tr.toUpperCase(),
-                    style: const TextStyle(
-                      fontFamily: 'Poppins',
+                    style: TextStyle(
+                      fontFamily: AppFonts.mainFont,
                       fontSize: 7,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,

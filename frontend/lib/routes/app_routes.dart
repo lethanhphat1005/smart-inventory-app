@@ -2,6 +2,7 @@ class AppRoutes {
   AppRoutes._();
 
   static const splash = '/splash';
+  static const languageSelect = '/language-select';
   static const onboarding = '/onboarding';
   static const login = '/login';
   static const register = '/register';
@@ -49,6 +50,7 @@ class AppRoutes {
   static const changePassword = '/change_password';
   static const editStore = '/edit_store';
   static const assignsRole = '/assign_role';
+  static const settings = '/settings'; 
 
   static const reorderSuggestion = '/reorder_suggestion';
 

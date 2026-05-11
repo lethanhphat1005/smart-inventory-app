@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:get/get.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
@@ -72,7 +73,7 @@ class ProductFormProgressBarWidget extends GetView<ProductFormController> {
         const SizedBox(height: 8),
         Text(label,
             style: TextStyle(
-                fontFamily: 'Poppins',
+                fontFamily: AppFonts.mainFont,
                 fontSize: 11,
                 color: labelColor,
                 fontWeight: labelWeight)),

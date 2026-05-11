@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:frontend/features/notification/controller/notification_controller.dart';
 import 'package:frontend/features/notification/utils/notification_constants.dart';
@@ -68,7 +69,7 @@ Widget _buildFilterChip(
         child: Text(
           label,
           style: TextStyle(
-            fontFamily: 'Poppins',
+            fontFamily: AppFonts.mainFont,
             fontSize: 13,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
             color: isSelected ? AppColors.white : AppColors.subText,

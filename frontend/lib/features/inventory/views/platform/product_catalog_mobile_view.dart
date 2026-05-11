@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/widgets/t_empty_state_widget.dart';
 import 'package:frontend/core/ui/widgets/t_form_skeleton_widget.dart';
 import 'package:frontend/core/ui/widgets/t_refresh_indicator_widget.dart';
@@ -60,8 +61,8 @@ class ProductCatalogMobileView extends GetView<ProductCatalogController> {
                 sliver: SliverToBoxAdapter(
                   child: Text(
                     "${TTexts.totalCategories.tr}: ${controller.totalCategories} ${TTexts.categoriesUnit.tr}",
-                    style: const TextStyle(
-                      fontFamily: 'Poppins',
+                    style: TextStyle(
+                      fontFamily: AppFonts.mainFont,
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
                       color: AppColors.softGrey,
@@ -129,8 +130,8 @@ class ProductCatalogMobileView extends GetView<ProductCatalogController> {
                                   top: 8, bottom: 12, left: 24, right: 24),
                               child: Text(
                                 letter,
-                                style: const TextStyle(
-                                  fontFamily: 'Poppins',
+                                style: TextStyle(
+                                  fontFamily: AppFonts.mainFont,
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
                                   color: AppColors.primary,

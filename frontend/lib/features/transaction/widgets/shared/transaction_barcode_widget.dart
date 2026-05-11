@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:frontend/features/transaction/controllers/inbound_transaction_item_add_controller.dart';
 import 'package:frontend/features/transaction/controllers/outbound_transaction_item_add_controller.dart';
@@ -89,11 +90,11 @@ class TransactionBarcodeWidget extends StatelessWidget {
                             Flexible(
                               child: Text(
                                 displayBarcode,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                   letterSpacing: 1.5,
-                                  fontFamily: 'Poppins',
+                                  fontFamily: AppFonts.mainFont,
                                   color: AppColors.primaryText,
                                 ),
                                 overflow: TextOverflow.ellipsis,
@@ -113,8 +114,8 @@ class TransactionBarcodeWidget extends StatelessWidget {
                                 ),
                                 child: Text(
                                   '+${barcodes.length - 1}',
-                                  style: const TextStyle(
-                                    fontFamily: 'Poppins',
+                                  style: TextStyle(
+                                    fontFamily: AppFonts.mainFont,
                                     fontSize: 11,
                                     fontWeight: FontWeight.bold,
                                     color: AppColors.primary,

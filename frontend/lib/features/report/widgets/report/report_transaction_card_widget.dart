@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart'; // ĐÃ THÊM
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:get/get.dart'; // ĐÃ THÊM
 import 'package:iconsax_flutter/iconsax_flutter.dart';
@@ -36,7 +37,7 @@ class ReportTransactionCardWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // ==============================================================
-    // LOGIC MÀU SẮC VÀ DẤU VÀO 
+    // LOGIC MÀU SẮC VÀ DẤU VÀO
     // ==============================================================
     String finalItemsDisplay = itemsDisplay;
     Color finalItemsColor = itemsColor;
@@ -142,19 +143,19 @@ class ReportTransactionCardWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(leftTitle,
-                  style: const TextStyle(
+                  style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w500,
                       color: AppColors.subText,
-                      fontFamily: 'Poppins')),
+                      fontFamily: AppFonts.mainFont)),
               const SizedBox(height: 4),
               customLeftWidget ??
                   Text(leftValue,
-                      style: const TextStyle(
+                      style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w400,
                           color: AppColors.primaryText,
-                          fontFamily: 'Poppins'),
+                          fontFamily: AppFonts.mainFont),
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1),
             ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/routes/app_routes.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart'; // ĐẢM BẢO CÓ IMPORT NÀYtext_strings.dart';
@@ -30,8 +31,8 @@ class HomeHeaderWidget extends StatelessWidget {
 
                   return Text(
                     '${homeController.greetingText}, $displayName',
-                    style: const TextStyle(
-                      fontFamily: 'Poppins',
+                    style: TextStyle(
+                      fontFamily: AppFonts.mainFont,
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
                       color: AppColors.primaryText,
@@ -42,8 +43,8 @@ class HomeHeaderWidget extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   TTexts.homeDailyOverview.tr,
-                  style: const TextStyle(
-                    fontFamily: 'Poppins',
+                  style: TextStyle(
+                    fontFamily: AppFonts.mainFont,
                     fontSize: 14,
                     color: AppColors.subText,
                   ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:get/get.dart';
 
 /// Widget hiển thị tiêu đề Onboarding với chữ 'S' được cách điệu
@@ -12,8 +13,8 @@ class OnboardingTitleWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return RichText(
       text: TextSpan(
-        style: const TextStyle(
-          fontFamily: 'Poppins',
+        style: TextStyle(
+          fontFamily: AppFonts.mainFont,
           fontSize: 42,
           color: AppColors.primaryText,
           height: 1.2,

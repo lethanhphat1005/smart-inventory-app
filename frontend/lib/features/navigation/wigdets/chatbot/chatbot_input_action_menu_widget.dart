@@ -1,7 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:frontend/core/infrastructure/constants/text_strings.dart'; // Đã thêm
+import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:frontend/features/navigation/controllers/chatbot_ui_controller.dart';
 import 'package:get/get.dart';
@@ -217,11 +218,11 @@ class _ChatbotInputActionMenuWidgetState
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
         child: Text(text,
-            style: const TextStyle(
+            style: TextStyle(
                 color: AppColors.primaryText,
                 fontSize: 13.5,
                 fontWeight: FontWeight.w600,
-                fontFamily: 'Poppins')),
+                fontFamily: AppFonts.mainFont)),
       ),
     );
   }

@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:frontend/core/state/services/supabase_storage_service.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:get/get.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
@@ -163,17 +164,17 @@ class ProductFormController extends GetxController with TErrorHandler {
         padding: const EdgeInsets.only(bottom: AppSizes.p16),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text(title,
-              style: const TextStyle(
+              style: TextStyle(
                   fontWeight: FontWeight.bold,
                   color: AppColors.primaryText,
-                  fontFamily: 'Poppins',
+                  fontFamily: AppFonts.mainFont,
                   fontSize: 14)),
           const SizedBox(height: 4),
           Text(desc,
-              style: const TextStyle(
+              style: TextStyle(
                   color: AppColors.subText,
                   fontSize: 13,
-                  fontFamily: 'Poppins',
+                  fontFamily: AppFonts.mainFont,
                   height: 1.4)),
         ]));
   }
@@ -1052,7 +1053,7 @@ class ProductFormController extends GetxController with TErrorHandler {
                           borderRadius: BorderRadius.circular(12)),
                       title: Text(cat.name,
                           style: TextStyle(
-                              fontFamily: 'Poppins',
+                              fontFamily: AppFonts.mainFont,
                               fontWeight: isSelected
                                   ? FontWeight.bold
                                   : FontWeight.w500,

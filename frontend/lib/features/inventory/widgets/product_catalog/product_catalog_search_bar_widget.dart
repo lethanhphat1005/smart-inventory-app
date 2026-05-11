@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 
@@ -29,8 +30,8 @@ class ProductCatalogSearchBarWidget extends GetView<ProductCatalogController> {
         controller: controller.searchController,
         onChanged: (value) => controller.searchQuery.value = value,
         cursorColor: AppColors.primary, // Vẫn giữ con trỏ màu cam
-        style: const TextStyle(
-          fontFamily: 'Poppins',
+        style: TextStyle(
+          fontFamily: AppFonts.mainFont,
           fontSize: 12,
           color: AppColors.primaryText,
         ),

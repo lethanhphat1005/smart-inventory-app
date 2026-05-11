@@ -19,6 +19,12 @@ final Map<String, String> enAuth = {
   TTexts.errorTimeoutMessage:
       'The server took too long to respond. Please check your network and try again.',
 
+  // -- Language Select
+  TTexts.languageSelectTitle: "Welcome to Storix!",
+  TTexts.languageSelectSubtitle: "Please select your language to continue.",
+  TTexts.languageSelectBtnContinue: "Continue",
+  TTexts.languageSelectSelectLanguage: "Selected Language",
+
   // General Auth
   TTexts.authOrDivider: "Or",
   TTexts.authentication: 'Authentication',

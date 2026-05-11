@@ -39,16 +39,20 @@ import 'package:frontend/features/navigation/views/navigation_view.dart';
 import 'package:frontend/features/notification/bindings/reorder_suggestion_binding.dart';
 import 'package:frontend/features/notification/view/notification_view.dart';
 import 'package:frontend/features/notification/view/reorder_suggestion_view.dart';
+import 'package:frontend/features/onboarding/bindings/language_select_binding.dart';
 import 'package:frontend/features/onboarding/bindings/onboarding_binding.dart';
+import 'package:frontend/features/onboarding/views/language_select_view.dart';
 import 'package:frontend/features/profile/bindings/profile_assigns_role_binding.dart';
 import 'package:frontend/features/profile/bindings/profile_binding.dart';
 import 'package:frontend/features/profile/bindings/profile_edit_profile_binding.dart';
 import 'package:frontend/features/profile/bindings/profile_edit_store_binding.dart';
+import 'package:frontend/features/profile/bindings/settings_binding.dart';
 import 'package:frontend/features/profile/views/profile_assigns_role_view.dart';
 import 'package:frontend/features/profile/views/profile_change_password_view.dart';
 import 'package:frontend/features/profile/views/profile_edit_store_view.dart';
 import 'package:frontend/features/profile/views/profile_edit_view.dart';
 import 'package:frontend/features/profile/views/profile_view.dart';
+import 'package:frontend/features/profile/views/settings_view.dart';
 import 'package:frontend/features/report/bindings/report_transaction_detail_binding.dart';
 import 'package:frontend/features/report/views/platform/report_transaction_detail_mobile_view.dart';
 import 'package:frontend/features/report/views/report_view.dart';
@@ -96,6 +100,14 @@ class AppPages {
       name: AppRoutes.splash,
       page: () => const SplashView(),
       binding: SplashBinding(),
+    ),
+
+    // -- Language Select
+    GetPage(
+      name: AppRoutes.languageSelect,
+      page: () => const LanguageSelectView(),
+      binding: LanguageSelectBinding(),
+      transition: Transition.fadeIn,
     ),
 
     // -- On boarding
@@ -403,6 +415,12 @@ class AppPages {
       binding: ProfileAssignsRoleBinding(),
       transition: Transition.cupertino,
     ),
+
+    GetPage(
+        name: AppRoutes.settings,
+        page: () => const SettingsView(),
+        binding: SettingsBinding(),
+        transition: Transition.cupertino),
 
     // -- Reorder suggestion
     GetPage(

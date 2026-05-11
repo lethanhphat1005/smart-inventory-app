@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/widgets/t_custom_fade_overlay_widget.dart';
 import 'package:frontend/routes/app_routes.dart'; // ĐÃ IMPORT ROUTES
 import 'package:get/get.dart';
@@ -39,8 +40,8 @@ class HomeLowStockAlertsWidget extends GetView<HomeController> {
                     children: [
                       Text(
                         TTexts.homeLowStockAlerts.tr,
-                        style: const TextStyle(
-                            fontFamily: 'Poppins',
+                        style: TextStyle(
+                            fontFamily: AppFonts.mainFont,
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
                             color: AppColors.primaryText),
@@ -54,8 +55,8 @@ class HomeLowStockAlertsWidget extends GetView<HomeController> {
                                 BorderRadius.circular(AppSizes.radius12)),
                         child: Text(
                           '${items.length} ${TTexts.homeItems.tr}',
-                          style: const TextStyle(
-                              fontFamily: 'Poppins',
+                          style: TextStyle(
+                              fontFamily: AppFonts.mainFont,
                               color: AppColors.toastErrorGradientEnd,
                               fontWeight: FontWeight.bold,
                               fontSize: 10),
@@ -136,14 +137,14 @@ class HomeLowStockAlertsWidget extends GetView<HomeController> {
                 Text(name,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                        fontFamily: 'Poppins',
+                    style: TextStyle(
+                        fontFamily: AppFonts.mainFont,
                         fontWeight: FontWeight.w500,
                         fontSize: 12,
                         color: AppColors.primaryText)),
                 Text(category,
-                    style: const TextStyle(
-                        fontFamily: 'Poppins',
+                    style: TextStyle(
+                        fontFamily: AppFonts.mainFont,
                         fontSize: 10,
                         color: AppColors.subText)),
               ],
@@ -159,8 +160,8 @@ class HomeLowStockAlertsWidget extends GetView<HomeController> {
                       shape: BoxShape.circle)),
               const SizedBox(width: 4),
               Text(quantityText,
-                  style: const TextStyle(
-                      fontFamily: 'Poppins',
+                  style: TextStyle(
+                      fontFamily: AppFonts.mainFont,
                       color: AppColors.toastErrorGradientEnd,
                       fontWeight: FontWeight.w500,
                       fontSize: 10)),

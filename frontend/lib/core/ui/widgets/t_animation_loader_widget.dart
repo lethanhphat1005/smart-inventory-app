@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 
 /// Widget hiển thị thẻ Loading bo góc có chữ
@@ -44,8 +45,8 @@ class TAnimationLoaderWidget extends StatelessWidget {
             const SizedBox(height: AppSizes.p16),
             Text(
               text,
-              style: const TextStyle(
-                fontFamily: 'Poppins',
+              style: TextStyle(
+                fontFamily: AppFonts.mainFont,
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
                 color: AppColors.primaryText,

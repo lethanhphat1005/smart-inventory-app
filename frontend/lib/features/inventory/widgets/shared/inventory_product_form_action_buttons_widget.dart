@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:get/get.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
@@ -83,8 +84,8 @@ class InventoryProductFormActionButtonsWidget
                 onTap: () => controller.confirmSkipAndCreateProductOnly(),
                 child: Text(
                   TTexts.skipAndCreate.tr,
-                  style: const TextStyle(
-                    fontFamily: 'Poppins',
+                  style: TextStyle(
+                    fontFamily: AppFonts.mainFont,
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
                     color: AppColors.subText, // Màu xám nhẹ

@@ -41,8 +41,8 @@ class ProfileMenuItemWidget extends StatelessWidget {
           title: Text(
             title.tr,
             style: const TextStyle(
-              fontSize: AppSizes.p15,
-              fontWeight: FontWeight.w500,
+              fontSize: AppSizes.p12,
+              fontWeight: FontWeight.w400,
             ),
           ),
           trailing: const Icon(

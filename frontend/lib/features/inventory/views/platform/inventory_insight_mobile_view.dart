@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:frontend/features/inventory/controllers/inventory_insight_controller.dart';
 import 'package:frontend/features/inventory/widgets/inventory_insight/inventory_insight_category_chip_widget.dart';
@@ -78,10 +79,10 @@ class InventoryInsightMobileView extends GetView<InventoryInsightController> {
                       const SizedBox(height: 4),
                       Text(
                         "${controller.getCount(TTexts.tabAll)} ${TTexts.items.tr}",
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 32,
                           fontWeight: FontWeight.bold,
-                          fontFamily: 'Poppins',
+                          fontFamily: AppFonts.mainFont,
                           color: AppColors.primaryText,
                         ),
                       ),

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/models/transaction_detail_model.dart';
 import 'package:frontend/core/infrastructure/utils/url_helper_utils.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/widgets/t_no_image_widget.dart';
 import 'package:frontend/routes/app_routes.dart';
 import 'package:get/get.dart';
@@ -121,8 +122,8 @@ class ReportTransactionDetailItemCardWidget extends StatelessWidget {
                       Text(
                           item.packageInfo?.displayName ??
                               TTexts.unknownProduct.tr,
-                          style: const TextStyle(
-                              fontFamily: 'Poppins',
+                          style: TextStyle(
+                              fontFamily: AppFonts.mainFont,
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
                               color: AppColors.primaryText),
@@ -137,8 +138,8 @@ class ReportTransactionDetailItemCardWidget extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(priceStr,
-                              style: const TextStyle(
-                                  fontFamily: 'Poppins',
+                              style: TextStyle(
+                                  fontFamily: AppFonts.mainFont,
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
                                   color: AppColors.primary)),

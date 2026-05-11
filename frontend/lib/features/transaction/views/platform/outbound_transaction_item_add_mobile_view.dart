@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:get/get.dart';
 import 'package:frontend/features/transaction/controllers/outbound_transaction_item_add_controller.dart';
 import 'package:frontend/features/transaction/widgets/shared/transaction_header_widget.dart';
@@ -80,15 +81,15 @@ class OutboundTransactionItemAddMobileView
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(TTexts.subtotal.tr,
-                              style: const TextStyle(
-                                  fontFamily: 'Poppins',
+                              style: TextStyle(
+                                  fontFamily: AppFonts.mainFont,
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
                                   color: AppColors.primaryText)),
                           Text(
                               '\$${controller.totalPrice.value.toStringAsFixed(2)}',
-                              style: const TextStyle(
-                                  fontFamily: 'Poppins',
+                              style: TextStyle(
+                                  fontFamily: AppFonts.mainFont,
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
                                   color: AppColors.primary)),

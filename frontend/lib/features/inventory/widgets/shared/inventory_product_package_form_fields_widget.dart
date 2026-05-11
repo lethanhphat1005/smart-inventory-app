@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/features/inventory/widgets/shared/inventory_product_package_unit_dropdown_widget.dart';
 import 'package:frontend/features/inventory/widgets/shared/inventory_product_barcode_item_widget.dart';
 import 'package:get/get.dart';
@@ -115,9 +116,9 @@ class InventoryProductPackageFormFieldsWidget
                             color: AppColors.primaryText.withOpacity(0.9),
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          textStyle: const TextStyle(
+                          textStyle: TextStyle(
                               color: Colors.white,
-                              fontFamily: 'Poppins',
+                              fontFamily: AppFonts.mainFont,
                               fontSize: 12),
                           child: const Icon(Iconsax.info_circle_copy,
                               color: AppColors.softGrey, size: 22),

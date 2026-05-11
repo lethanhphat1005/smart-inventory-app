@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/state/controllers/barcode_action_controller.dart';
 import 'package:frontend/core/ui/layouts/t_barcode_scanner_layout.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/routes/app_routes.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
@@ -22,8 +23,8 @@ class HomeQuickActionsWidget extends StatelessWidget {
       children: [
         Text(
           TTexts.homeQuickActions.tr,
-          style: const TextStyle(
-            fontFamily: 'Poppins',
+          style: TextStyle(
+            fontFamily: AppFonts.mainFont,
             fontSize: 16,
             fontWeight: FontWeight.bold,
             color: AppColors.primaryText,
@@ -63,6 +64,7 @@ class HomeQuickActionsWidget extends StatelessWidget {
                 ),
                 onTap: () {
                   Get.to(() => TBarcodeScannerLayout(
+                        title: TTexts.barCodeScan.tr,
                         onScanned: (code) {
                           // Gọi controller xử lý logic điều hướng/bottom sheet
                           BarcodeActionController.instance
@@ -170,8 +172,8 @@ class HomeQuickActionsWidget extends StatelessWidget {
             const Spacer(),
             Text(
               title,
-              style: const TextStyle(
-                fontFamily: 'Poppins',
+              style: TextStyle(
+                fontFamily: AppFonts.mainFont,
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
@@ -182,7 +184,7 @@ class HomeQuickActionsWidget extends StatelessWidget {
             Text(
               subtitle,
               style: TextStyle(
-                fontFamily: 'Poppins',
+                fontFamily: AppFonts.mainFont,
                 color: Colors.white.withOpacity(0.65),
                 fontSize: 11,
                 fontWeight: FontWeight.w400,

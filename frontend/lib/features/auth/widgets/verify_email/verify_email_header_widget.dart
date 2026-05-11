@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:get/get.dart';
 import 'package:frontend/core/ui/widgets/t_image_widget.dart';
 import 'package:frontend/core/infrastructure/constants/image_strings.dart';
@@ -14,8 +15,8 @@ class VerifyEmailHeaderWidget extends StatelessWidget {
       children: [
         Text(
           TTexts.verifyEmailInnerTitle.tr,
-          style: const TextStyle(
-            fontFamily: 'Poppins',
+          style: TextStyle(
+            fontFamily: AppFonts.mainFont,
             fontSize: 16,
             fontWeight: FontWeight.w500,
             color: AppColors.primaryText,

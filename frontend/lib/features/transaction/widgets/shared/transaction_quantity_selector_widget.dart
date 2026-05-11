@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
@@ -27,8 +28,8 @@ class TransactionQuantitySelectorWidget extends StatelessWidget {
       children: [
         Text(
           TTexts.labelQuantity.tr,
-          style: const TextStyle(
-            fontFamily: 'Poppins',
+          style: TextStyle(
+            fontFamily: AppFonts.mainFont,
             fontSize: 12,
             fontWeight: FontWeight.w500,
             color: AppColors.subText,
@@ -86,8 +87,8 @@ class TransactionQuantitySelectorWidget extends StatelessWidget {
                               TextPosition(offset: controller.text.length));
                         }
                       },
-                      style: const TextStyle(
-                        fontFamily: 'Poppins',
+                      style: TextStyle(
+                        fontFamily: AppFonts.mainFont,
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
                         color: AppColors.primaryText,

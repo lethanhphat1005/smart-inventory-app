@@ -13,6 +13,7 @@ import 'package:frontend/core/infrastructure/localization/langs/en/en_transactio
 import 'package:frontend/core/infrastructure/localization/langs/en/en_system.dart';
 import 'package:frontend/core/infrastructure/localization/langs/en/en_workspace.dart';
 import 'package:frontend/core/infrastructure/localization/langs/en/en_profile.dart';
+import 'package:frontend/core/infrastructure/localization/langs/global_langs.dart';
 
 final Map<String, String> enUS = {
   ...enCore,
@@ -29,5 +30,6 @@ final Map<String, String> enUS = {
   ...enReorderSuggestion,
   ...enExport,
   ...enBarcode,
-  ...enChatbot
+  ...enChatbot,
+  ...globalLangs,
 };

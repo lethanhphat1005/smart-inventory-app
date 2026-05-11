@@ -29,14 +29,13 @@ class ProfileMenuWidget extends StatelessWidget {
 
           ProfileMenuItemWidget(
             icon: Iconsax.user_copy,
-            title: TTexts.profileMyAccount.tr,
-            onTap: () => Get.find<ProfileController>().goToEditProfile(),
+            title: TTexts.profileMyAccount,
+            onTap: () => controller.goToEditProfile(),
           ),
           ProfileMenuItemWidget(
             icon: Iconsax.lock_copy,
-            title: TTexts.profileChangePassword.tr,
-            onTap: () =>
-                Get.find<ProfileController>().goToChangePasswordProfile(),
+            title: TTexts.profileChangePassword,
+            onTap: () => controller.goToChangePasswordProfile(),
           ),
 
           const SizedBox(height: AppSizes.p16),
@@ -46,11 +45,21 @@ class ProfileMenuWidget extends StatelessWidget {
             ProfileSectionTitleWidget(title: TTexts.profileManagement.tr),
             ProfileMenuItemWidget(
               icon: Iconsax.security_safe_copy,
-              title: TTexts.profileUserManagement.tr,
-              onTap: () =>
-                  Get.find<ProfileController>().goToAssignsRoleProfile(),
+              title: TTexts.profileUserManagement,
+              onTap: () => controller.goToAssignsRoleProfile(),
             ),
           ],
+
+          const SizedBox(height: AppSizes.p16),
+
+          // APP SETTINGS
+          ProfileSectionTitleWidget(title: TTexts.profileAppSettings.tr),
+
+          ProfileMenuItemWidget(
+            icon: Iconsax.setting_2_copy,
+            title: TTexts.settingsTitle,
+            onTap: () => controller.goToSettings(),
+          ),
         ],
       );
     });

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:get/get.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
@@ -44,8 +45,8 @@ class TSnackbarsWidget {
         ),
         child: Text(
           actionText,
-          style: const TextStyle(
-            fontFamily: 'Poppins',
+          style: TextStyle(
+            fontFamily: AppFonts.mainFont,
             color: AppColors.primaryText,
             fontSize: 12,
             fontWeight: FontWeight.w500,
@@ -78,8 +79,8 @@ class TSnackbarsWidget {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
-                    fontFamily: 'Poppins',
+                  style: TextStyle(
+                    fontFamily: AppFonts.mainFont,
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
                     color: AppColors.primaryText,
@@ -91,8 +92,8 @@ class TSnackbarsWidget {
                   message,
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontFamily: 'Poppins',
+                  style: TextStyle(
+                    fontFamily: AppFonts.mainFont,
                     fontSize: 10,
                     fontWeight: FontWeight.w400,
                     color: AppColors.subText,
@@ -282,8 +283,8 @@ class TSnackbarsWidget {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
-                      fontFamily: 'Poppins',
+                    style: TextStyle(
+                      fontFamily: AppFonts.mainFont,
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
                       color: AppColors.primaryText,
@@ -293,8 +294,8 @@ class TSnackbarsWidget {
                   const SizedBox(height: 4),
                   Text(
                     message,
-                    style: const TextStyle(
-                      fontFamily: 'Poppins',
+                    style: TextStyle(
+                      fontFamily: AppFonts.mainFont,
                       fontSize: 12,
                       fontWeight: FontWeight.w400,
                       color: AppColors.subText,
@@ -323,8 +324,8 @@ class TSnackbarsWidget {
               ),
               child: Text(
                 buttonName,
-                style: const TextStyle(
-                  fontFamily: 'Poppins',
+                style: TextStyle(
+                  fontFamily: AppFonts.mainFont,
                   color: AppColors.primaryText,
                   fontSize: 12,
                   fontWeight: FontWeight.w600,

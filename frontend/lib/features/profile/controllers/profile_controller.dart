@@ -203,6 +203,7 @@ class ProfileController extends GetxController {
   void goToEditProfile() => Get.toNamed(AppRoutes.editProfile);
   void goToChangePasswordProfile() => Get.toNamed(AppRoutes.changePassword);
   void goToEditStoreProfile() => Get.toNamed(AppRoutes.editStore);
+  void goToSettings() => Get.toNamed(AppRoutes.settings);
   void goToAssignsRoleProfile() {
     // Staff or Manager không được vào
     if (currentUserStoreRole.value == 'staff' ||

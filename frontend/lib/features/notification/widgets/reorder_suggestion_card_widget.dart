@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/infrastructure/models/reorder_suggestion_model.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
@@ -54,7 +55,7 @@ class ReorderSuggestionCardWidget extends StatelessWidget {
                           Text(
                             TTexts.productLabel.tr.toUpperCase(),
                             style: TextStyle(
-                              fontFamily: 'Poppins',
+                              fontFamily: AppFonts.mainFont,
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
                               letterSpacing: 0.5,
@@ -66,8 +67,8 @@ class ReorderSuggestionCardWidget extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         item.productName,
-                        style: const TextStyle(
-                          fontFamily: 'Poppins',
+                        style: TextStyle(
+                          fontFamily: AppFonts.mainFont,
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                           color: AppColors.primaryText,
@@ -126,8 +127,8 @@ class ReorderSuggestionCardWidget extends StatelessWidget {
                     children: [
                       Text(
                         TTexts.suggestedImportLabel.tr,
-                        style: const TextStyle(
-                          fontFamily: 'Poppins',
+                        style: TextStyle(
+                          fontFamily: AppFonts.mainFont,
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
                           color: AppColors.subText,
@@ -136,8 +137,8 @@ class ReorderSuggestionCardWidget extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         '+${item.suggestedQuantity}',
-                        style: const TextStyle(
-                          fontFamily: 'Poppins',
+                        style: TextStyle(
+                          fontFamily: AppFonts.mainFont,
                           fontSize: 28,
                           fontWeight: FontWeight.w800,
                           color: AppColors.primary,
@@ -171,8 +172,8 @@ class ReorderSuggestionCardWidget extends StatelessWidget {
                 Expanded(
                   child: Text(
                     item.reason,
-                    style: const TextStyle(
-                      fontFamily: 'Poppins',
+                    style: TextStyle(
+                      fontFamily: AppFonts.mainFont,
                       fontSize: 13,
                       fontStyle: FontStyle.italic,
                       color: AppColors.subText,
@@ -195,8 +196,8 @@ class ReorderSuggestionCardWidget extends StatelessWidget {
       children: [
         Text(
           label,
-          style: const TextStyle(
-            fontFamily: 'Poppins',
+          style: TextStyle(
+            fontFamily: AppFonts.mainFont,
             fontSize: 13,
             color: AppColors.softGrey,
           ),
@@ -204,7 +205,7 @@ class ReorderSuggestionCardWidget extends StatelessWidget {
         Text(
           value,
           style: TextStyle(
-            fontFamily: 'Poppins',
+            fontFamily: AppFonts.mainFont,
             fontSize: 14,
             fontWeight: FontWeight.bold,
             color: valueColor,

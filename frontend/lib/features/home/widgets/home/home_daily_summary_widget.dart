@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:frontend/features/home/controllers/home_controller.dart';
 import 'package:get/get.dart';
@@ -27,8 +28,8 @@ class HomeDailySummaryWidget extends GetView<HomeController> {
             children: [
               Text(
                 TTexts.homeInventoryOverview.tr,
-                style: const TextStyle(
-                  fontFamily: 'Poppins',
+                style: TextStyle(
+                  fontFamily: AppFonts.mainFont,
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
                   color: AppColors.primaryText,
@@ -101,8 +102,8 @@ class HomeDailySummaryWidget extends GetView<HomeController> {
             Icon(icon, size: 20, color: color), // Tăng nhẹ size icon
             const SizedBox(height: 8),
             Text(value,
-                style: const TextStyle(
-                    fontFamily: 'Poppins',
+                style: TextStyle(
+                    fontFamily: AppFonts.mainFont,
                     fontSize: 16,
                     fontWeight: FontWeight.w600, // GIẢM ĐỘ ĐẬM
                     color: AppColors.primaryText)),
@@ -194,16 +195,16 @@ class HomeDailySummaryWidget extends GetView<HomeController> {
           children: [
             Text(
               inQty.toString(),
-              style: const TextStyle(
-                  fontFamily: 'Poppins',
+              style: TextStyle(
+                  fontFamily: AppFonts.mainFont,
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
                   color: AppColors.stockIn),
             ),
             Text(
               outQty.toString(),
-              style: const TextStyle(
-                  fontFamily: 'Poppins',
+              style: TextStyle(
+                  fontFamily: AppFonts.mainFont,
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
                   color: AppColors.stockOut),

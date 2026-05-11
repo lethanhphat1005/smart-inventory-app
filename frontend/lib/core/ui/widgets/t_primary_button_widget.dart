@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 
 class TPrimaryButtonWidget extends StatelessWidget {
@@ -108,7 +109,7 @@ class TPrimaryButtonWidget extends StatelessWidget {
             text,
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontFamily: 'Poppins',
+              fontFamily: AppFonts.mainFont,
               fontSize: fontSize,
               fontWeight: FontWeight.w600,
               color: textColor,

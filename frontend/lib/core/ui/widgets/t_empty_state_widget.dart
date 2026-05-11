@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 
 class TEmptyStateWidget extends StatelessWidget {
   final IconData icon;
@@ -46,8 +47,8 @@ class TEmptyStateWidget extends StatelessWidget {
             Text(
               title,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontFamily: 'Poppins',
+              style: TextStyle(
+                fontFamily: AppFonts.mainFont,
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
                 color: AppColors.primaryText,
@@ -59,8 +60,8 @@ class TEmptyStateWidget extends StatelessWidget {
             Text(
               subtitle,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontFamily: 'Poppins',
+              style: TextStyle(
+                fontFamily: AppFonts.mainFont,
                 fontSize: 12,
                 height: 1.5, // Giúp văn bản đa dòng thoáng hơn
                 color: AppColors.subText,

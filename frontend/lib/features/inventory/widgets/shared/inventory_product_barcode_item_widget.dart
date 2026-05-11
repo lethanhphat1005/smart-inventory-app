@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 
@@ -62,7 +63,7 @@ class InventoryProductBarcodeItemWidget extends StatelessWidget {
                 AnimatedDefaultTextStyle(
                   duration: const Duration(milliseconds: 300),
                   style: TextStyle(
-                    fontFamily: 'Poppins',
+                    fontFamily: AppFonts.mainFont,
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 1.0,

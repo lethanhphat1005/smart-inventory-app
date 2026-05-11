@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
@@ -69,8 +70,8 @@ class InventoryProductFormImageWidget extends GetView<ProductFormController> {
                                     size: 56, color: AppColors.primary),
                                 const SizedBox(height: 12),
                                 Text(TTexts.uploadImage.tr,
-                                    style: const TextStyle(
-                                        fontFamily: 'Poppins',
+                                    style: TextStyle(
+                                        fontFamily: AppFonts.mainFont,
                                         fontSize: 14,
                                         color: AppColors.primaryText,
                                         fontWeight: FontWeight.w600)),
@@ -119,8 +120,9 @@ class InventoryProductFormImageWidget extends GetView<ProductFormController> {
           ListTile(
             leading: const Icon(Iconsax.camera_copy, color: AppColors.primary),
             title: Text(TTexts.takePhoto.tr,
-                style: const TextStyle(
-                    fontFamily: 'Poppins', fontWeight: FontWeight.w600)),
+                style: TextStyle(
+                    fontFamily: AppFonts.mainFont,
+                    fontWeight: FontWeight.w600)),
             onTap: () {
               Get.back();
               controller.pickImage(ImageSource.camera);
@@ -130,8 +132,9 @@ class InventoryProductFormImageWidget extends GetView<ProductFormController> {
           ListTile(
             leading: const Icon(Iconsax.gallery_copy, color: AppColors.primary),
             title: Text(TTexts.chooseFromGallery.tr,
-                style: const TextStyle(
-                    fontFamily: 'Poppins', fontWeight: FontWeight.w600)),
+                style: TextStyle(
+                    fontFamily: AppFonts.mainFont,
+                    fontWeight: FontWeight.w600)),
             onTap: () {
               Get.back();
               controller.pickImage(ImageSource.gallery);

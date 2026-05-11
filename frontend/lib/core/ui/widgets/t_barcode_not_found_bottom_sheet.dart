@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/state/controllers/barcode_scanner_controller.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:get/get.dart';
 import 'package:frontend/core/ui/widgets/t_bottom_sheet_widget.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
@@ -20,10 +21,10 @@ class TBarcodeNotFoundBottomSheet {
           children: [
             Text(
               TTexts.barcodeNoDataDesc.tr,
-              style: const TextStyle(
+              style: TextStyle(
                   color: AppColors.subText,
                   fontSize: AppSizes.p14,
-                  fontFamily: 'Poppins'),
+                  fontFamily: AppFonts.mainFont),
             ),
             const SizedBox(height: AppSizes.p16),
 

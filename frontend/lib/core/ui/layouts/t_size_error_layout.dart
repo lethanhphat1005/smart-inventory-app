@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:frontend/core/infrastructure/constants/image_strings.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:frontend/core/ui/widgets/t_image_widget.dart';
 import 'package:frontend/core/ui/widgets/t_primary_button_widget.dart';
@@ -39,7 +40,7 @@ class TSizeErrorLayout extends StatelessWidget {
                     TTexts.errorAccessRestrictedTitle.tr,
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontFamily: 'Poppins',
+                      fontFamily: AppFonts.mainFont,
                       fontSize: isSmallScreen ? 26 : 36,
                       fontWeight: FontWeight.w700,
                       color: AppColors.primaryText,
@@ -55,8 +56,8 @@ class TSizeErrorLayout extends StatelessWidget {
                     child: Text(
                       TTexts.errorAccessRestrictedSubtitle.tr,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontFamily: 'Poppins',
+                      style: TextStyle(
+                        fontFamily: AppFonts.mainFont,
                         fontSize: 16,
                         color: AppColors.subText,
                         height: 1.6,

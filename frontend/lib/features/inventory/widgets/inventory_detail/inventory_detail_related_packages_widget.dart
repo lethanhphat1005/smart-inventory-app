@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:frontend/features/inventory/controllers/inventory_detail_controller.dart';
 import 'package:get/get.dart';
@@ -33,8 +34,8 @@ class InventoryDetailRelatedPackagesWidget
                 Text(
                   TTexts.noRelatedPackages.tr,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontFamily: 'Poppins',
+                  style: TextStyle(
+                    fontFamily: AppFonts.mainFont,
                     color: AppColors.subText,
                     fontSize: 14,
                     fontWeight: FontWeight.w400,
@@ -103,8 +104,8 @@ class InventoryDetailRelatedPackagesWidget
                       TextSpan(
                         text:
                             '  (+$extraCount ${TTexts.barcode.tr.toLowerCase()}})',
-                        style: const TextStyle(
-                          fontFamily: 'Poppins',
+                        style: TextStyle(
+                          fontFamily: AppFonts.mainFont,
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
                           color: AppColors.primary,

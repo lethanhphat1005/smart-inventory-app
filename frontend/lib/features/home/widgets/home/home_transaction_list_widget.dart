@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/widgets/t_empty_state_widget.dart';
 import 'package:get/get.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
@@ -16,8 +17,8 @@ class HomeTransactionListWidget extends GetView<HomeController> {
       children: [
         Text(
           TTexts.homeTodaysTransactions.tr,
-          style: const TextStyle(
-              fontFamily: 'Poppins',
+          style: TextStyle(
+              fontFamily: AppFonts.mainFont,
               fontSize: 14,
               fontWeight: FontWeight.bold,
               color: AppColors.primaryText),

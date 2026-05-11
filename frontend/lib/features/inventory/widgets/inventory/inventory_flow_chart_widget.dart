@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:get/get.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
@@ -31,8 +32,8 @@ class InventoryFlowChartWidget extends GetView<InventoryController> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(TTexts.stockFlow.tr,
-                  style: const TextStyle(
-                      fontFamily: 'Poppins',
+                  style: TextStyle(
+                      fontFamily: AppFonts.mainFont,
                       fontWeight: FontWeight.bold,
                       fontSize: 14)),
             ],
@@ -80,7 +81,7 @@ class InventoryFlowChartWidget extends GetView<InventoryController> {
         const SizedBox(height: 4),
         Text(value,
             style: TextStyle(
-                fontFamily: 'Poppins',
+                fontFamily: AppFonts.mainFont,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: color)),
@@ -119,11 +120,11 @@ class InventoryFlowChartWidget extends GetView<InventoryController> {
 
                 return BarTooltipItem(
                   '${TTexts.chartTooltipIn.tr}: $inVal\n${TTexts.chartTooltipOut.tr}: $outVal',
-                  const TextStyle(
+                  TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,
                     fontSize: 12,
-                    fontFamily: 'Poppins',
+                    fontFamily: AppFonts.mainFont,
                   ),
                 );
               },

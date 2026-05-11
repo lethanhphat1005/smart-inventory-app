@@ -1,6 +1,7 @@
 // lib/core/widgets/t_custom_header_widget.dart
 
 import 'package:flutter/material.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:get/get.dart';
 
 class TCustomHeaderWidget extends StatelessWidget {
@@ -52,7 +53,7 @@ class TCustomHeaderWidget extends StatelessWidget {
           Text(
             title,
             style: TextStyle(
-              fontFamily: 'Poppins',
+              fontFamily: AppFonts.mainFont,
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: textColor,

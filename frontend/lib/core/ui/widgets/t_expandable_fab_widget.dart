@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:get/get.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
@@ -167,8 +168,8 @@ class _TExpandableFabWidgetState extends State<TExpandableFabWidget>
                   ),
                   child: Text(
                     label,
-                    style: const TextStyle(
-                      fontFamily: 'Poppins',
+                    style: TextStyle(
+                      fontFamily: AppFonts.mainFont,
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: AppColors.white,

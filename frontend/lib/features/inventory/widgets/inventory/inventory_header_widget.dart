@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:get/get.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
@@ -22,8 +23,8 @@ class InventoryHeaderWidget extends StatelessWidget {
               children: [
                 Text(
                   TTexts.inventoryHub.tr,
-                  style: const TextStyle(
-                      fontFamily: 'Poppins',
+                  style: TextStyle(
+                      fontFamily: AppFonts.mainFont,
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
                       color: AppColors.primaryText),
@@ -31,8 +32,8 @@ class InventoryHeaderWidget extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   TTexts.manageProductsStock.tr,
-                  style: const TextStyle(
-                      fontFamily: 'Poppins',
+                  style: TextStyle(
+                      fontFamily: AppFonts.mainFont,
                       fontSize: 13,
                       color: AppColors.subText),
                 ),

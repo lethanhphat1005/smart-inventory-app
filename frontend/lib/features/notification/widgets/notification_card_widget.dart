@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 
@@ -75,7 +76,7 @@ class NotificationCardWidget extends StatelessWidget {
                       Text(
                         notification.title,
                         style: TextStyle(
-                          fontFamily: 'Poppins',
+                          fontFamily: AppFonts.mainFont,
                           fontSize: 15,
                           fontWeight:
                               isUnread ? FontWeight.w700 : FontWeight.w500,
@@ -88,7 +89,7 @@ class NotificationCardWidget extends StatelessWidget {
                       Text(
                         notification.body,
                         style: TextStyle(
-                          fontFamily: 'Poppins',
+                          fontFamily: AppFonts.mainFont,
                           fontSize: 13,
                           color: isUnread
                               ? AppColors.subText
@@ -100,7 +101,7 @@ class NotificationCardWidget extends StatelessWidget {
                       Text(
                         timeAgo,
                         style: TextStyle(
-                          fontFamily: 'Poppins',
+                          fontFamily: AppFonts.mainFont,
                           fontSize: 12,
                           fontWeight:
                               isUnread ? FontWeight.w600 : FontWeight.w400,

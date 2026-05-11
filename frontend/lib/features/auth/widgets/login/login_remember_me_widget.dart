@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/features/auth/controllers/login_controller.dart';
 import 'package:frontend/routes/app_routes.dart';
 import 'package:get/get.dart';
@@ -30,8 +31,8 @@ class LoginRememberMeWidget extends GetView<LoginController> {
               const SizedBox(width: 8),
               Text(
                 TTexts.rememberMe.tr,
-                style: const TextStyle(
-                  fontFamily: 'Poppins',
+                style: TextStyle(
+                  fontFamily: AppFonts.mainFont,
                   fontSize: 12,
                   color: AppColors.subText,
                 ),
@@ -47,8 +48,8 @@ class LoginRememberMeWidget extends GetView<LoginController> {
           style: TextButton.styleFrom(padding: EdgeInsets.zero),
           child: Text(
             TTexts.forgotPassword.tr,
-            style: const TextStyle(
-              fontFamily: 'Poppins',
+            style: TextStyle(
+              fontFamily: AppFonts.mainFont,
               fontSize: 12,
               fontWeight: FontWeight.w600,
               color: AppColors.primary,
