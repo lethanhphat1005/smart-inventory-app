@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/infrastructure/utils/url_helper_utils.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
-import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/features/navigation/models/chat_message_model.dart';
 import 'package:frontend/routes/app_routes.dart';
 import 'package:frontend/core/ui/widgets/t_no_image_widget.dart';

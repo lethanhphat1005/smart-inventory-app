@@ -133,7 +133,7 @@ class ChatbotSuggestedPrompts extends StatelessWidget {
                           const Spacer(),
                           Text(
                             prompt['title'] as String,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
                               color: AppColors.primaryText,
