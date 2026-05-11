@@ -4,7 +4,9 @@ import { CustomError } from '../../../common/errors/index.js';
 import { logger } from '../../../common/utils/index.js';
 import { ProductPackageRepository } from '../../product-packages/repositories/product-package.repository.js';
 import {
-  BARCODE_CACHE_TTL,
+  VALID_BARCODE_CACHE_TTL,
+  INVALID_BARCODE_CACHE_TTL,
+  NOT_FOUND_BARCODE_CACHE_TTL,
   SCORE_WEIGHT,
   PACKAGE_BARCODE_CONFIDENCE,
 } from '../barcode.constant.js';
@@ -31,6 +33,7 @@ import type {
   ScanBarcodeServiceResult,
   BarcodePrefill,
   TokenMatchResult,
+  BarcodeLookupData,
 } from '../barcodes.type.js';
 
 export class BarcodesService {
@@ -41,30 +44,38 @@ export class BarcodesService {
     private readonly barcodeProviderService: BarcodeProviderServicePort,
   ) {}
 
-  // Build data (đã chuẩn hóa) cho UI khi không tìm thấy record match
-  private buildPrefill(
-    normalizedData: NormalizedBarcodeData | null,
-  ): BarcodePrefill | undefined {
-    if (!normalizedData) {
-      return undefined;
+  // Build data cho auto-fill UI khi không tìm thấy record match
+  private buildPrefill(payload: {
+    extractedName?: string | null;
+    extractedBrand?: string | null;
+    extractedPackageText?: string | null;
+  }): BarcodePrefill | null {
+    if (!payload) {
+      return null;
     }
 
     const prefill: BarcodePrefill = {};
 
-    if (normalizedData.normalizedName !== undefined) {
-      prefill.name = normalizedData.normalizedName;
+    if (payload.extractedName !== undefined && payload.extractedName !== null) {
+      prefill.name = payload.extractedName;
     }
 
-    if (normalizedData.normalizedBrand !== undefined) {
-      prefill.brand = normalizedData.normalizedBrand;
+    if (
+      payload.extractedBrand !== undefined &&
+      payload.extractedBrand !== null
+    ) {
+      prefill.brand = payload.extractedBrand;
     }
 
-    if (normalizedData.normalizedPackageText !== undefined) {
-      prefill.packageText = normalizedData.normalizedPackageText;
+    if (
+      payload.extractedPackageText !== undefined &&
+      payload.extractedPackageText !== null
+    ) {
+      prefill.packageText = payload.extractedPackageText;
     }
 
     if (Object.keys(prefill).length === 0) {
-      return undefined;
+      return null;
     }
 
     return prefill;
@@ -76,7 +87,15 @@ export class BarcodesService {
     const cacheAge = Date.now() - cache.fetchedAt.getTime();
 
     // so sánh thời gian tồn tại với ttl
-    return cacheAge <= BARCODE_CACHE_TTL;
+    if (cache.status === 'valid') {
+      return cacheAge <= VALID_BARCODE_CACHE_TTL;
+    }
+
+    if (cache.status === 'not_found') {
+      return cacheAge <= NOT_FOUND_BARCODE_CACHE_TTL;
+    }
+
+    return cacheAge <= INVALID_BARCODE_CACHE_TTL;
   }
 
   // Check 2 chuỗi token có match không bằng cơ chế token-based matching
@@ -400,51 +419,27 @@ export class BarcodesService {
   }
 
   // Lấy normalized data từ cache hoặc từ 3rd-party API
-  private async getNormalizedDataFromLookup(input: {
+  private async getBarcodeLookupData(input: {
     barcode: string;
     type?: ScanBarcodeInput['type'];
-  }): Promise<NormalizedBarcodeData | null> {
+  }): Promise<BarcodeLookupData> {
     const cache = await this.barcodeApiCacheRepository.findOneByBarcode(
       input.barcode,
     );
 
-    // 1. Nếu có cache và cache còn usable -> dùng luôn
+    // 1. Nếu có cache và cache usable (còn ttl) -> dùng luôn
     if (cache && this.shouldUseCache(cache)) {
-      logger.info(
-        {
-          barcode: input.barcode,
-          cacheId: cache.barcodeCacheId,
-        },
-        'Barcode scan cache hit',
-      );
-
       // update số lần/thời điểm dùng cache
       await this.barcodeApiCacheRepository.markAsUsed(cache.barcodeCacheId);
 
-      return normalizeApiPayload(cache);
+      return {
+        normalizedData: normalizeApiPayload(cache),
+        prefill: this.buildPrefill(cache),
+      };
     }
 
-    // 2. Nếu cache tồn tại nhưng hết ttl
-    if (cache) {
-      logger.warn(
-        {
-          barcode: input.barcode,
-          cacheId: cache.barcodeCacheId,
-        },
-        'Barcode cache is stale and will be refreshed',
-      );
-    }
-
-    logger.info(
-      {
-        barcode: input.barcode,
-        type: input.type ?? null,
-      },
-      'Barcode scan provider lookup started',
-    );
-
-    // 2.1. Operation nếu cache barcode này chưa tồn tại/tồn tại nhưng hết ttl
     try {
+      // 2. Nếu cache barcode này chưa tồn tại hoặc tồn tại nhưng hết ttl
       // lấy data từ 3rd-party API
       const providerResult = await this.barcodeProviderService.lookupBarcode({
         barcode: input.barcode,
@@ -453,83 +448,74 @@ export class BarcodesService {
         }),
       });
 
+      const cachePayload = this.toCachePayload(providerResult.rawPayload);
+
       // 3. Lưu cache
       // create nếu cache chưa tồn tại
       // hoặc update nếu cache đã tồn tại nhưng hết ttl
+      const cacheData = {
+        barcode: input.barcode,
+        payload: cachePayload,
+        status: providerResult.status,
+        ...(providerResult.provider !== undefined && {
+          provider: providerResult.provider,
+        }),
+        ...(providerResult.type !== undefined && {
+          type: providerResult.type,
+        }),
+        ...(providerResult.normalizedName !== undefined && {
+          normalizedName: providerResult.normalizedName,
+        }),
+        ...(providerResult.normalizedBrand !== undefined && {
+          normalizedBrand: providerResult.normalizedBrand,
+        }),
+        ...(providerResult.normalizedPackageText !== undefined && {
+          normalizedPackageText: providerResult.normalizedPackageText,
+        }),
+        ...(providerResult.extractedName !== undefined && {
+          extractedName: providerResult.extractedName,
+        }),
+        ...(providerResult.extractedBrand !== undefined && {
+          extractedBrand: providerResult.extractedBrand,
+        }),
+        ...(providerResult.extractedPackageText !== undefined && {
+          extractedPackageText: providerResult.extractedPackageText,
+        }),
+      };
+
       if (!cache) {
-        await this.barcodeApiCacheRepository.createOne({
-          barcode: input.barcode,
-          payload: this.toCachePayload(providerResult.rawPayload),
-          status: providerResult.status,
-          ...(providerResult.provider !== undefined && {
-            provider: providerResult.provider,
-          }),
-          ...(providerResult.type !== undefined && {
-            type: providerResult.type,
-          }),
-          ...(providerResult.normalizedName !== undefined && {
-            normalizedName: providerResult.normalizedName,
-          }),
-          ...(providerResult.normalizedBrand !== undefined && {
-            normalizedBrand: providerResult.normalizedBrand,
-          }),
-          ...(providerResult.normalizedPackageText !== undefined && {
-            normalizedPackageText: providerResult.normalizedPackageText,
-          }),
-        });
+        await this.barcodeApiCacheRepository.createOne(cacheData);
       } else {
-        await this.barcodeApiCacheRepository.updateOne(cache.barcodeCacheId, {
-          barcode: input.barcode,
-          payload: this.toCachePayload(providerResult.rawPayload),
-          status: providerResult.status,
-          ...(providerResult.provider !== undefined && {
-            provider: providerResult.provider,
-          }),
-          ...(providerResult.type !== undefined && {
-            type: providerResult.type,
-          }),
-          ...(providerResult.normalizedName !== undefined && {
-            normalizedName: providerResult.normalizedName,
-          }),
-          ...(providerResult.normalizedBrand !== undefined && {
-            normalizedBrand: providerResult.normalizedBrand,
-          }),
-          ...(providerResult.normalizedPackageText !== undefined && {
-            normalizedPackageText: providerResult.normalizedPackageText,
-          }),
-        });
+        await this.barcodeApiCacheRepository.updateOne(
+          cache.barcodeCacheId,
+          cacheData,
+        );
       }
 
-      logger.info(
-        {
-          barcode: input.barcode,
-          status: providerResult.status,
-          provider: providerResult.provider ?? null,
-        },
-        'Barcode scan provider lookup completed',
-      );
-
-      return normalizeApiPayload(providerResult);
+      return {
+        normalizedData: normalizeApiPayload(providerResult),
+        prefill: this.buildPrefill(providerResult),
+      };
     } catch (error) {
       if (cache) {
         logger.warn(
           {
             barcode: input.barcode,
             cacheId: cache.barcodeCacheId,
+            err: error,
           },
           'Barcode scan falls back to stale cache',
         );
 
-        return normalizeApiPayload(cache);
+        return {
+          normalizedData: normalizeApiPayload(cache),
+          prefill: this.buildPrefill(cache),
+        };
       }
 
       throw new CustomError({
         message: 'Failed to lookup barcode from provider',
         status: StatusCodes.BAD_GATEWAY,
-        details: {
-          err: error,
-          barcode: input.barcode,
-        },
       });
     }
   }
@@ -539,14 +525,6 @@ export class BarcodesService {
   ): Promise<ScanBarcodeServiceResult> {
     const barcode = input.barcode.trim();
 
-    logger.info(
-      {
-        barcode,
-        storeId: input.storeId,
-      },
-      'Barcode scan started',
-    );
-
     // tìm product package đã có record map với barcode này chưa
     const exactMapping = await this.packageBarcodeRepository.findByBarcode(
       input.storeId,
@@ -555,15 +533,6 @@ export class BarcodesService {
 
     // nếu có và đã verify -> trả về ngay
     if (exactMapping?.isVerified) {
-      logger.info(
-        {
-          barcode,
-          storeId: input.storeId,
-          productPackageId: exactMapping.productPackage.productPackageId,
-        },
-        'Barcode scan resolved by verified local mapping',
-      );
-
       return {
         resolutionType: 'exact_match',
         productPackage: exactMapping.productPackage,
@@ -572,7 +541,7 @@ export class BarcodesService {
 
     // Operation nếu barcode chưa map với product package nào
     // lấy normalized data từ cache/API
-    const normalizedData = await this.getNormalizedDataFromLookup({
+    const lookupData = await this.getBarcodeLookupData({
       barcode,
       ...(input.type !== undefined && {
         type: input.type,
@@ -581,10 +550,9 @@ export class BarcodesService {
     // lọc ra các matching package candidates
     const candidates = await this.buildCandidatesFromPayload({
       storeId: input.storeId,
-      normalizedData,
+      normalizedData: lookupData.normalizedData,
     });
-    // tạo prefill trả về
-    const prefill = this.buildPrefill(normalizedData);
+    const prefill = lookupData.prefill;
 
     // nếu có candidate thì trả về các candidate này
     if (candidates.length > 0) {
@@ -600,8 +568,8 @@ export class BarcodesService {
       return {
         resolutionType: 'candidate_match',
         candidates,
-        ...(prefill !== undefined && {
-          prefill,
+        ...(prefill !== null && {
+          prefill: prefill,
         }),
       };
     }
@@ -617,7 +585,7 @@ export class BarcodesService {
     // nếu không có candidate thì trả về prefill (normalized data từ cache/API)
     return {
       resolutionType: 'not_found',
-      ...(prefill !== undefined && {
+      ...(prefill !== null && {
         prefill,
       }),
     };
