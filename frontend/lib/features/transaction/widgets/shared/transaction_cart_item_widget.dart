@@ -46,7 +46,7 @@ class _TransactionCartItemWidgetState extends State<TransactionCartItemWidget> {
 
     _focusNode.addListener(() {
       if (!_focusNode.hasFocus) {
-        _submitQuantity(); // Phục hồi về 1 nếu để trống và unfocus
+        _submitQuantity(); 
       }
     });
   }
@@ -90,7 +90,7 @@ class _TransactionCartItemWidgetState extends State<TransactionCartItemWidget> {
           TextPosition(offset: _qtyController.text.length));
     }
 
-    // Nếu gõ số > 0 thì lập tức update lên Controller (giúp Bottom nhảy giá)
+    // Nếu gõ số > 0 thì lập tức update lên Controller 
     if (newQty > 0) {
       widget.onQuantityChanged?.call(newQty);
     }
@@ -159,7 +159,11 @@ class _TransactionCartItemWidgetState extends State<TransactionCartItemWidget> {
             inventory: inventory,
           );
 
-          Get.toNamed(AppRoutes.inboundTransactionItemAdd, arguments: {
+          final routeName = widget.isOutbound
+              ? AppRoutes.outboundTransactionItemAdd
+              : AppRoutes.inboundTransactionItemAdd;
+
+          Get.toNamed(routeName, arguments: {
             'displayItem': displayItem,
             'quantity': widget.item.quantity,
             'isEditing': true,

@@ -53,7 +53,7 @@ class OutboundTransactionController extends GetxController with TErrorHandler {
   }
 
   void addToCart(Map<String, dynamic> productData,
-      {int quantity = 1, double? customPrice}) {
+      {int quantity = 1, double? customPrice, bool isReplace = false}) {
     final String? pkgId = productData['productPackageId'];
     final int stock = productData['currentStock'] ?? 0;
 
@@ -68,18 +68,13 @@ class OutboundTransactionController extends GetxController with TErrorHandler {
 
     if (index != -1) {
       final currentItem = cartItems[index];
-      final newQty = currentItem.quantity + quantity;
 
-      if (newQty > stock) {
-        TSnackbarsWidget.warning(
-            title: TTexts.warningTitle.tr,
-            message: TTexts.batchExceedsStock.tr);
-        return;
-      }
+      final int newQuantity =
+          isReplace ? quantity : currentItem.quantity + quantity;
 
       cartItems[index] = TransactionDetailModel(
         productPackageId: pkgId,
-        quantity: newQty,
+        quantity: newQuantity,
         unitPrice: customPrice ?? currentItem.unitPrice,
         packageInfo: productData['packageInfo'] ?? currentItem.packageInfo,
         currentStock: stock,
@@ -123,6 +118,14 @@ class OutboundTransactionController extends GetxController with TErrorHandler {
         currentStock: item.currentStock,
         reorderThreshold: item.reorderThreshold,
       );
+    }
+  }
+
+  void updateItemQuantity(String packageId, int newQuantity) {
+    final index =
+        cartItems.indexWhere((item) => item.productPackageId == packageId);
+    if (index != -1 && newQuantity > 0) {
+      cartItems[index] = cartItems[index].copyWith(quantity: newQuantity);
     }
   }
 

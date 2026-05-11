@@ -39,12 +39,26 @@ class OutboundTransactionItemAddController extends GetxController
   final RxList<ProductPackageBarcodeModel> fetchedBarcodesList =
       <ProductPackageBarcodeModel>[].obs;
 
+  bool isEditing = false;
+
   @override
   void onInit() {
     super.onInit();
-    if (Get.arguments != null &&
-        Get.arguments is InventoryInsightDisplayModel) {
-      initialItem = Get.arguments as InventoryInsightDisplayModel;
+    if (Get.arguments != null) {
+      if (Get.arguments is Map) {
+        initialItem = Get.arguments['displayItem'];
+        isEditing = Get.arguments['isEditing'] ?? false;
+        final int passedQty = Get.arguments['quantity'] ?? 1;
+
+        quantityController.text = passedQty.toString();
+        itemQuantity.value = passedQty;
+      } else {
+        initialItem = Get.arguments as InventoryInsightDisplayModel;
+      }
+
+      fetchedCategoryName.value = initialItem.product?.categoryName ??
+          initialItem.inventory.productPackage?.product?.categoryName ??
+          TTexts.uncategorized.tr;
 
       fetchedCategoryName.value = TTexts.uncategorized.tr;
       fetchedBrandName.value = initialItem.product?.brand ?? TTexts.noBrand.tr;
@@ -257,14 +271,17 @@ class OutboundTransactionItemAddController extends GetxController
 
       ProductModel finalProduct;
       if (initialItem.product != null) {
-        finalProduct =
-            initialItem.product!.copyWith(imageUrl: fetchedImageUrl.value);
+        finalProduct = initialItem.product!.copyWith(
+          imageUrl: fetchedImageUrl.value,
+          categoryName: fetchedCategoryName.value,
+        );
       } else {
         finalProduct = ProductModel.fromJson({
           'productId': package?.productId ?? '',
           'name': displayName,
           'imageUrl': fetchedImageUrl.value,
           'brand': fetchedBrandName.value,
+          'categoryName': fetchedCategoryName.value,
         });
       }
 
@@ -285,6 +302,7 @@ class OutboundTransactionItemAddController extends GetxController
         cartData,
         quantity: qty,
         customPrice: double.tryParse(priceController.text),
+        isReplace: isEditing, // Báo cho Controller biết đây là ghi đè số lượng
       );
 
       FullScreenLoaderUtils.stopLoading();

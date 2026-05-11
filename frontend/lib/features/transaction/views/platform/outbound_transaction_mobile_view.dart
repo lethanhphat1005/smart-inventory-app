@@ -72,6 +72,10 @@ class OutboundTransactionMobileView
                                   index, item.quantity + 1),
                               onDecrease: () => controller.updateQuantity(
                                   index, item.quantity - 1),
+                              onQuantityChanged: (newQty) {
+                                controller.updateItemQuantity(
+                                    item.productPackageId!, newQty);
+                              },
                             ),
                           );
                         },
