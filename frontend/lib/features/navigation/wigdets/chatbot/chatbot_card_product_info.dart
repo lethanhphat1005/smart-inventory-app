@@ -35,9 +35,12 @@ class ChatCardProductInfo extends StatelessWidget {
     final quantity = item['quantity'] ?? pkg['quantity'] ?? 0;
     final unitName = pkg['unit']?['name'] ?? '';
 
-    final threshold = int.tryParse(item['reorder_threshold']?.toString() ??
-            pkg['reorder_threshold']?.toString() ??
-            '10') ??
+    final threshold = int.tryParse(
+          item['reorder_threshold']?.toString() ??
+              item['reorderThreshold']?.toString() ??
+              pkg['reorder_threshold']?.toString() ??
+              '10',
+        ) ??
         10;
 
     final formatCurrency = NumberFormat.decimalPattern('vi_VN');
@@ -45,6 +48,8 @@ class ChatCardProductInfo extends StatelessWidget {
         .format(num.tryParse(pkg['sellingPrice']?.toString() ?? '0') ?? 0);
     final importPrice = formatCurrency
         .format(num.tryParse(pkg['importPrice']?.toString() ?? '0') ?? 0);
+    final hasImportPrice =
+        (num.tryParse(pkg['importPrice']?.toString() ?? '0') ?? 0) > 0;
 
     final String rawUrl = product?['imageUrl']?.toString() ??
         pkg?['imageUrl']?.toString() ??
@@ -58,20 +63,22 @@ class ChatCardProductInfo extends StatelessWidget {
 
     Color stockColor;
     String stockText;
-    Color stockBgColor;
+    IconData stockIcon;
 
     if (quantity == 0) {
-      stockColor = const Color(0xFFA32D2D);
-      stockBgColor = const Color(0xFFFCEBEB);
+      stockColor = AppColors.stockOut;
       stockText = TTexts.chatbotOutOfStock.tr;
+      stockIcon = Iconsax.close_circle;
     } else if (quantity <= threshold) {
-      stockColor = const Color(0xFF854F0B);
-      stockBgColor = const Color(0xFFFAEEDA);
-      stockText = "Còn $quantity $unitName";
+      stockColor = AppColors.primary;
+      stockText =
+          '${TTexts.chatbotLowStockAlert.tr} $quantity $unitName'.trim();
+      stockIcon = Iconsax.warning_2;
     } else {
-      stockColor = const Color(0xFF3B6D11);
-      stockBgColor = const Color(0xFFEAF3DE);
-      stockText = "$quantity $unitName";
+      stockColor = AppColors.stockIn;
+      stockText =
+          '${TTexts.chatbotInStockPrefix.tr} $quantity $unitName'.trim();
+      stockIcon = Iconsax.tick_circle;
     }
 
     return Align(
@@ -79,148 +86,179 @@ class ChatCardProductInfo extends StatelessWidget {
       child: GestureDetector(
         onTap: () {
           if (productId != null) {
-            Get.toNamed(AppRoutes.inventoryDetail,
-                arguments: productId,
-                parameters: {
-                  'packageId': packageId?.toString() ?? '',
-                  'barcode': barcode?.toString() ?? ''
-                });
+            Get.toNamed(
+              AppRoutes.inventoryDetail,
+              arguments: productId,
+              parameters: {
+                'packageId': packageId?.toString() ?? '',
+                'barcode': barcode?.toString() ?? '',
+              },
+            );
           }
         },
         child: Container(
-          width: Get.width * 0.82,
+          constraints: BoxConstraints(maxWidth: Get.width * 0.85),
           margin: const EdgeInsets.only(bottom: 20),
-          padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.grey.shade200),
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 16,
+                offset: const Offset(0, 6),
+              ),
+            ],
           ),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    height: 72,
-                    width: 72,
-                    decoration: BoxDecoration(
-                        color: const Color(0xFFF8F9FA),
-                        borderRadius: BorderRadius.circular(12)),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: finalImageUrl.isNotEmpty
-                          ? CachedNetworkImage(
-                              imageUrl: finalImageUrl,
-                              fit: BoxFit.cover,
-                              errorWidget: (context, url, error) =>
-                                  _buildImagePlaceholder())
-                          : _buildImagePlaceholder(),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(displayName,
-                            style: const TextStyle(
-                                fontWeight: FontWeight.w500,
-                                fontSize: 13,
-                                color: AppColors.primaryText,
-                                height: 1.4,
-                                fontFamily: 'Poppins'),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis),
-                        const SizedBox(height: 6),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                              color: stockBgColor,
-                              borderRadius: BorderRadius.circular(100)),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                width: 6,
-                                height: 6,
-                                decoration: BoxDecoration(
-                                    color: stockColor, shape: BoxShape.circle),
-                              ),
-                              const SizedBox(width: 5),
-                              Text(stockText,
-                                  style: TextStyle(
-                                      color: stockColor,
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w500,
-                                      fontFamily: 'Poppins')),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
-                ],
-              ),
+              // ── Top: image + info ──
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                child: Divider(height: 1, color: Colors.grey.shade200),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text("Giá bán",
-                          style: TextStyle(
-                              fontSize: 11, color: AppColors.subText)),
-                      const SizedBox(height: 2),
-                      Text(sellingPrice,
-                          style: const TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.primary)),
-                    ],
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      const Text("Giá nhập",
-                          style: TextStyle(
-                              fontSize: 11, color: AppColors.subText)),
-                      const SizedBox(height: 2),
-                      Text(importPrice,
-                          style: const TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.primaryText)),
-                    ],
-                  ),
-                ],
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 12),
-                child: Divider(height: 1, color: Colors.grey.shade200),
-              ),
-              const Padding(
-                padding: EdgeInsets.only(top: 10),
+                padding: const EdgeInsets.all(14),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(Iconsax.export_3, size: 14, color: AppColors.subText),
-                    SizedBox(width: 4),
-                    Text("Xem chi tiết tồn kho",
-                        style: TextStyle(
-                            fontSize: 11,
-                            color: AppColors.subText,
-                            fontWeight: FontWeight.w500)),
+                    // Thumbnail
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Container(
+                        width: 72,
+                        height: 72,
+                        color: const Color(0xFFF4F5F7),
+                        child: finalImageUrl.isNotEmpty
+                            ? CachedNetworkImage(
+                                imageUrl: finalImageUrl,
+                                fit: BoxFit.cover,
+                                errorWidget: (_, __, ___) =>
+                                    _buildImagePlaceholder(),
+                              )
+                            : _buildImagePlaceholder(),
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+
+                    // Info
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            displayName,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.primaryText,
+                              height: 1.4,
+                              fontFamily: 'Poppins',
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+
+                          // Stock badge
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 9, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: stockColor.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(100),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(stockIcon, size: 13, color: stockColor),
+                                const SizedBox(width: 5),
+                                Flexible(
+                                  child: Text(
+                                    stockText,
+                                    style: TextStyle(
+                                      color: stockColor,
+                                      fontSize: 11.5,
+                                      fontWeight: FontWeight.w500,
+                                      fontFamily: 'Poppins',
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
-              )
+              ),
+
+              // ── Divider ──
+              Divider(height: 1, color: Colors.grey.shade100),
+
+              // ── Price row ──
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: _buildPriceCol(
+                        label: TTexts.chatbotSellingPrice.tr,
+                        value: sellingPrice,
+                        valueColor: AppColors.primary,
+                      ),
+                    ),
+                    if (hasImportPrice) ...[
+                      Container(
+                        width: 1,
+                        height: 32,
+                        color: Colors.grey.shade100,
+                        margin: const EdgeInsets.symmetric(horizontal: 12),
+                      ),
+                      Expanded(
+                        child: _buildPriceCol(
+                          label: TTexts.chatbotImportPrice.tr,
+                          value: importPrice,
+                          valueColor: AppColors.primaryText,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+
+              // ── Tap hint ──
+              if (productId != null)
+                Container(
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFF8F9FA),
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(20),
+                      bottomRight: Radius.circular(20),
+                    ),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Iconsax.link,
+                        size: 13,
+                        color: AppColors.subText.withOpacity(0.6),
+                      ),
+                      const SizedBox(width: 5),
+                      Text(
+                        TTexts.chatbotViewDetail.tr,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppColors.subText.withOpacity(0.6),
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
             ],
           ),
         ),
@@ -228,5 +266,35 @@ class ChatCardProductInfo extends StatelessWidget {
     );
   }
 
-  Widget _buildImagePlaceholder() => const TNoImageWidget(iconSize: 24);
+  Widget _buildPriceCol({
+    required String label,
+    required String value,
+    required Color valueColor,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 11,
+            color: AppColors.subText.withOpacity(0.7),
+            fontFamily: 'Poppins',
+          ),
+        ),
+        const SizedBox(height: 3),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            color: valueColor,
+            fontFamily: 'Poppins',
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildImagePlaceholder() => const TNoImageWidget(iconSize: 28);
 }

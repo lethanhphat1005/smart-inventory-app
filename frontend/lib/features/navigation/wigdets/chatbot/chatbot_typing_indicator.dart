@@ -11,53 +11,50 @@ class ChatTypingIndicator extends StatefulWidget {
 }
 
 class _ChatTypingIndicatorState extends State<ChatTypingIndicator>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
+    with TickerProviderStateMixin {
+  late final List<AnimationController> _controllers;
+  late final List<Animation<double>> _animations;
+
+  static const _dotCount = 3;
+  static const _dotSize = 7.0;
+  static const _dotSpacing = 5.0;
+  static const _jumpHeight = 5.0;
+  static const _staggerMs = 160;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1200),
-    )..repeat();
+    _controllers = List.generate(
+      _dotCount,
+      (i) => AnimationController(
+        vsync: this,
+        duration: const Duration(milliseconds: 500),
+      ),
+    );
+
+    _animations = _controllers.map((c) {
+      return Tween<double>(begin: 0, end: _jumpHeight).animate(
+        CurvedAnimation(parent: c, curve: Curves.easeInOut),
+      );
+    }).toList();
+
+    _startAnimations();
+  }
+
+  Future<void> _startAnimations() async {
+    for (int i = 0; i < _dotCount; i++) {
+      await Future.delayed(Duration(milliseconds: i * _staggerMs));
+      if (!mounted) return;
+      _controllers[i].repeat(reverse: true);
+    }
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    for (final c in _controllers) {
+      c.dispose();
+    }
     super.dispose();
-  }
-
-  Widget _buildDot(int index) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, child) {
-        final delay = index * 0.2;
-        var value = _controller.value - delay;
-        if (value < 0) value += 1.0;
-
-        // Tạo hiệu ứng fade và nảy nhẹ
-        final opacity = value < 0.5 ? 1.0 - (value * 2) : (value - 0.5) * 2;
-        final scale = opacity * 0.5 + 0.5;
-
-        return Transform.scale(
-          scale: scale,
-          child: Opacity(
-            opacity: opacity.clamp(0.3, 1.0),
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 2),
-              width: 6,
-              height: 6,
-              decoration: const BoxDecoration(
-                color: AppColors.primary,
-                shape: BoxShape.circle,
-              ),
-            ),
-          ),
-        );
-      },
-    );
   }
 
   @override
@@ -65,24 +62,62 @@ class _ChatTypingIndicatorState extends State<ChatTypingIndicator>
     return Align(
       alignment: Alignment.centerLeft,
       child: Container(
-        margin: const EdgeInsets.only(bottom: 24, left: 12),
+        margin: const EdgeInsets.only(bottom: 20),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.grey.shade200),
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(18),
+            topRight: Radius.circular(18),
+            bottomLeft: Radius.circular(4),
+            bottomRight: Radius.circular(18),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Row(
-              children: List.generate(3, (index) => _buildDot(index)),
+            SizedBox(
+              height: _dotSize + _jumpHeight,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: List.generate(_dotCount, (i) {
+                  return Padding(
+                    padding: EdgeInsets.only(
+                      right: i < _dotCount - 1 ? _dotSpacing : 0,
+                    ),
+                    child: AnimatedBuilder(
+                      animation: _animations[i],
+                      builder: (_, __) => Transform.translate(
+                        offset: Offset(0, -_animations[i].value),
+                        child: Container(
+                          width: _dotSize,
+                          height: _dotSize,
+                          decoration: BoxDecoration(
+                            color:
+                                AppColors.primary.withOpacity(0.7 - i * 0.15),
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }),
+              ),
             ),
             const SizedBox(width: 10),
             Text(
-              TTexts.chatbotTyping.tr, // "Tori đang trả lời..."
+              TTexts.chatbotTyping.tr,
               style: TextStyle(
-                color: AppColors.subText.withOpacity(0.8),
+                color: AppColors.subText.withOpacity(0.75),
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
                 fontFamily: 'Poppins',

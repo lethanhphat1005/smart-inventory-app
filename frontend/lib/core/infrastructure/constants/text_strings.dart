@@ -514,6 +514,35 @@ class TTexts {
   static const String chatbotQuickActionImport = "chatbot_quick_action_import";
   static const String chatbotQuickActionExport = "chatbot_quick_action_export";
 
+  // Suggested prompts — sub-text hướng dẫn
+  static const String chatbotPromptLowStockSub = 'chatbotPromptLowStockSub';
+  static const String chatbotPromptCheckInfoSub = 'chatbotPromptCheckInfoSub';
+  static const String chatbotPromptImportSub = 'chatbotPromptImportSub';
+  static const String chatbotPromptExportSub = 'chatbotPromptExportSub';
+
+// Product Info Card — nhãn giá
+  static const String chatbotSellingPrice = 'chatbotSellingPrice';
+  static const String chatbotImportPrice = 'chatbotImportPrice';
+  static const String chatbotViewDetail = 'chatbotViewDetail';
+
+// Action Confirm Card — resolved states
+  static const String chatbotTransactionConfirmedLabel =
+      'chatbotTransactionConfirmedLabel';
+  static const String chatbotTransactionCancelledLabel =
+      'chatbotTransactionCancelledLabel';
+
+// UI Controller — cancel messages (thay thế hardcode string cũ)
+  static const String chatbotTransactionCancelled =
+      'chatbotTransactionCancelled';
+  static const String chatbotTransactionCancelFailed =
+      'chatbotTransactionCancelFailed';
+
+// Choose Product Card — selected label + command templates
+  static const String chatbotSelected = 'chatbotSelected';
+  static const String chatbotCmdCheckInfo = 'chatbotCmdCheckInfo';
+  static const String chatbotCmdImport = 'chatbotCmdImport';
+  static const String chatbotCmdExport = 'chatbotCmdExport';
+
   // -- Customize Catalog
   static const String customizeCatalog = "customize_catalog";
   static const String pinnedOnHome = "pinned_on_home";

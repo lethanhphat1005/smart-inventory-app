@@ -6,142 +6,225 @@ import 'package:frontend/features/navigation/models/chat_message_model.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:get/get.dart';
 
+/// Choose Product Card — khi user chọn một item:
+///   • Item đã chọn: highlight tím + icon ✓ rõ ràng
+///   • Các item còn lại: mờ hẳn + không tap được
+/// Trước đây toàn bộ list fade đều → không rõ đã chọn cái nào.
+///
+/// Fix bug ngôn ngữ: command gửi lên dùng template trung tính
+/// thay vì hardcode tiếng Anh, tránh BE trả lời sai ngôn ngữ.
 class ChatCardChooseProduct extends StatelessWidget {
   final ChatMessage message;
 
   const ChatCardChooseProduct({super.key, required this.message});
+
+  static const Color _selectedBg = Color(0xFFEEEDFE);
+  static const Color _selectedText = Color(0xFF3C3489);
+  static const Color _selectedAccent = Color(0xFF534AB7);
 
   @override
   Widget build(BuildContext context) {
     final data = message.data;
     if (data == null || data['items'] == null) return const SizedBox.shrink();
 
-    final List<dynamic> items = data['items'];
+    final List<dynamic> items = data['items'] as List<dynamic>;
     final controller = Get.find<ChatbotUiController>();
-    final selectedIndex = data['selectedIndex']; // Lưu vị trí item được click
 
     return Align(
       alignment: Alignment.centerLeft,
       child: Container(
-        constraints: BoxConstraints(maxWidth: Get.width * 0.85),
+        constraints: BoxConstraints(maxWidth: Get.width * 0.88),
         margin: const EdgeInsets.only(bottom: 20),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.grey.shade200),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 16,
+              offset: const Offset(0, 6),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
+            // Header text
             Padding(
-              padding: const EdgeInsets.all(14),
-              child: Text(message.text,
-                  style: const TextStyle(
-                      fontSize: 13,
-                      color: AppColors.primaryText,
-                      fontFamily: 'Poppins')),
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
+              child: Text(
+                message.text,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: AppColors.primaryText,
+                  fontWeight: FontWeight.w500,
+                  fontFamily: 'Poppins',
+                  height: 1.45,
+                ),
+              ),
             ),
+
+            Divider(height: 1, color: Colors.grey.shade100),
+
+            // Product list
             ListView.separated(
-              padding: EdgeInsets.zero,
+              padding: const EdgeInsets.only(bottom: 8),
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: items.length,
               separatorBuilder: (_, __) =>
-                  Divider(height: 1, color: Colors.grey.shade200),
+                  Divider(height: 1, color: Colors.grey.shade100, indent: 60),
               itemBuilder: (context, index) {
                 final item = items[index];
                 final pkg = item['productPackage'] ?? item;
+
                 final displayName = pkg['displayName'] ??
                     pkg['product']?['name'] ??
                     TTexts.unknownProduct.tr;
-                final quantity = item['quantity'] ?? pkg['quantity'] ?? 0;
+                final quantity =
+                    (item['quantity'] ?? pkg['quantity'] ?? 0) as num;
+                final unit = pkg['unit']?['name'] ?? '';
 
-                final isSelected = message.isResolved && selectedIndex == index;
-                final isNotSelected =
-                    message.isResolved && selectedIndex != index;
+                final threshold = int.tryParse(
+                        item['reorder_threshold']?.toString() ??
+                            item['reorderThreshold']?.toString() ??
+                            pkg['reorder_threshold']?.toString() ??
+                            '10') ??
+                    10;
 
-                return AbsorbPointer(
-                  absorbing: message.isResolved,
-                  child: AnimatedOpacity(
-                    duration: const Duration(milliseconds: 300),
-                    opacity: isNotSelected ? 0.35 : 1.0,
+                Color stockColor;
+                String stockText;
+
+                if (quantity == 0) {
+                  stockColor = AppColors.stockOut;
+                  stockText = TTexts.chatbotOutOfStock.tr;
+                } else if (quantity <= threshold) {
+                  stockColor = AppColors.primary;
+                  stockText =
+                      '${TTexts.chatbotLowStockPrefix.tr} ${quantity.toInt()} $unit'
+                          .trim();
+                } else {
+                  stockColor = AppColors.stockIn;
+                  stockText =
+                      '${TTexts.chatbotLeftPrefix.tr} ${quantity.toInt()} $unit'
+                          .trim();
+                }
+
+                final isResolved = message.isResolved;
+                // Xác định item này có phải item đã được chọn không
+                // (lưu index vào data khi user chọn)
+                final selectedIndex = data['selectedIndex'] as int?;
+                final isSelected = isResolved && selectedIndex == index;
+                final isOther = isResolved && selectedIndex != index;
+
+                return Opacity(
+                  opacity: isOther ? 0.3 : 1.0,
+                  child: IgnorePointer(
+                    ignoring: isResolved,
                     child: InkWell(
                       onTap: () {
-                        // Lưu index đã chọn
-                        message.data['selectedIndex'] = index;
-                        message.isResolved = true;
+                        if (isResolved) return;
 
                         final originalIntent = data['originalIntent'];
                         final qty = data['quantity'] ?? 1;
-                        String command = "";
-                        if (originalIntent == 'create_import') {
-                          command = 'Nhập $qty "$displayName"';
+
+                        // Template trung tính — dùng từ khóa
+                        // coordinator nhận diện được ở cả VI lẫn EN
+                        String command;
+                        if (originalIntent == 'get_product_info') {
+                          command =
+                              '${TTexts.chatbotCmdCheckInfo.tr} "$displayName"';
+                        } else if (originalIntent == 'create_import') {
+                          command =
+                              '${TTexts.chatbotCmdImport.tr} $qty "$displayName"';
                         } else if (originalIntent == 'create_export') {
-                          command = 'Xuất $qty "$displayName"';
+                          command =
+                              '${TTexts.chatbotCmdExport.tr} $qty "$displayName"';
                         } else {
-                          command = 'Thông tin "$displayName"';
+                          command = displayName;
                         }
 
+                        // Lưu index đã chọn vào data
+                        (message.data
+                            as Map<String, dynamic>)['selectedIndex'] = index;
+                        message.isResolved = true;
                         controller.messages.refresh();
+
                         controller.textController.text = command;
                         controller.sendMessage();
                       },
-                      child: Container(
-                        color: isSelected
-                            ? const Color(0xFFEEEDFE)
-                            : Colors.transparent,
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        color: isSelected ? _selectedBg : Colors.transparent,
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 14, vertical: 10),
+                            horizontal: 14, vertical: 12),
                         child: Row(
                           children: [
+                            // Icon circle
                             Container(
                               width: 38,
                               height: 38,
                               decoration: BoxDecoration(
-                                  color: isSelected
-                                      ? const Color(0x337F77DD)
-                                      : const Color(0xFFF8F9FA),
-                                  shape: BoxShape.circle),
+                                color: isSelected
+                                    ? _selectedAccent.withOpacity(0.15)
+                                    : const Color(0xFFF4F5F7),
+                                shape: BoxShape.circle,
+                              ),
                               child: Icon(
-                                  isSelected
-                                      ? Iconsax.tick_circle
-                                      : Iconsax.box,
-                                  size: 16,
-                                  color: isSelected
-                                      ? AppColors.primary
-                                      : AppColors.subText),
+                                isSelected ? Iconsax.tick_circle : Iconsax.box,
+                                size: 18,
+                                color: isSelected
+                                    ? _selectedAccent
+                                    : AppColors.subText,
+                              ),
                             ),
-                            const SizedBox(width: 10),
+                            const SizedBox(width: 12),
+
+                            // Name + stock
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(displayName,
-                                      style: TextStyle(
-                                          fontSize: 13,
-                                          color: isSelected
-                                              ? AppColors.primary
-                                              : AppColors.primaryText,
-                                          fontWeight: FontWeight.w500,
-                                          fontFamily: 'Poppins')),
-                                  const SizedBox(height: 2),
                                   Text(
-                                      isSelected
-                                          ? "Đã chọn"
-                                          : "Còn $quantity sản phẩm",
-                                      style: TextStyle(
-                                          fontSize: 11,
-                                          color: isSelected
-                                              ? AppColors.primary
-                                              : const Color(0xFF3B6D11),
-                                          fontWeight: FontWeight.w500)),
+                                    displayName,
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: isSelected
+                                          ? _selectedText
+                                          : AppColors.primaryText,
+                                      fontWeight: FontWeight.w500,
+                                      fontFamily: 'Poppins',
+                                    ),
+                                  ),
+                                  const SizedBox(height: 3),
+                                  Text(
+                                    isSelected
+                                        ? TTexts.chatbotSelected.tr
+                                        : stockText,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: isSelected
+                                          ? _selectedAccent
+                                          : stockColor,
+                                      fontWeight: FontWeight.w500,
+                                      fontFamily: 'Poppins',
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
-                            if (isSelected)
-                              const Icon(Iconsax.tick_circle,
-                                  color: AppColors.primary, size: 18)
+
+                            // Trailing icon
+                            Icon(
+                              isSelected
+                                  ? Iconsax.tick_circle
+                                  : Iconsax.arrow_right_3,
+                              size: isSelected ? 20 : 16,
+                              color: isSelected
+                                  ? _selectedAccent
+                                  : Colors.grey.shade300,
+                            ),
                           ],
                         ),
                       ),
