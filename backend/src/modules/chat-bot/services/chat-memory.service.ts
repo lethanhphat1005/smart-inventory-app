@@ -1,4 +1,4 @@
-import { HISTORY_TTL_SECONDS } from '../chatbot.constants.js';
+import { CART_TTL_SECONDS, HISTORY_TTL_SECONDS } from '../chatbot.constants.js';
 import { buildChatHistoryKey } from '../chatbot.mapper.js';
 
 import type { CartSession, ChatHistoryMessage } from '../chatbot.type.js';
@@ -71,7 +71,7 @@ export class ChatMemoryService {
       this.buildCartKey(storeId, userId),
       JSON.stringify(cart),
       'EX',
-      3600,
+      CART_TTL_SECONDS,
     );
   }
 

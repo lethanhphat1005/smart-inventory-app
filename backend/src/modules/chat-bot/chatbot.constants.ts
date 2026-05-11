@@ -9,8 +9,9 @@ export const FRIENDLY_REPLY_TEMPERATURE = 0.3;
 export const MAX_HISTORY_LENGTH = 10;
 export const HISTORY_SUMMARY_THRESHOLD = 8;
 export const DRAFT_TTL_SECONDS = 300;
+export const CART_TTL_SECONDS = DRAFT_TTL_SECONDS;
 export const HISTORY_TTL_SECONDS = 3600;
-export const LOCK_TTL_SECONDS = 20;
+export const LOCK_TTL_SECONDS = 35;
 
 export const CHAT_HISTORY_KEY_PREFIX = 'chatbot:history:';
 export const CHAT_LOCK_KEY_PREFIX = 'chatbot:lock:';

@@ -48,10 +48,7 @@ export class ChatbotService {
     private readonly llmProvider: LLMProvider,
   ) {}
 
-  private async generateFriendlyReply(
-    userMessage: string,
-    systemContext: string,
-  ): Promise<string> {
+  private async generateFriendlyReply(context: string): Promise<string> {
     try {
       const response = await this.llmProvider.createChatCompletion({
         model: FRIENDLY_REPLY_MODEL,
@@ -63,16 +60,16 @@ export class ChatbotService {
           },
           {
             role: 'user',
-            content: `Sentence: "${userMessage}"\nData: ${systemContext}`,
+            content: context,
           },
         ],
       });
 
-      return response.choices[0]?.message?.content ?? systemContext;
+      return response.choices[0]?.message?.content ?? context;
     } catch (error) {
       console.error('[AI Responder Error]', error);
 
-      return systemContext;
+      return context;
     }
   }
 
@@ -177,15 +174,23 @@ export class ChatbotService {
                 const draft = JSON.parse(draftData) as DraftAction;
 
                 if (intent !== draft.type) {
-                  const draftTypeVN =
-                    draft.type === 'create_import' ? 'NHẬP' : 'XUẤT';
+                  const conflictReply = 'Tori phát hiện...';
+
+                  await this.chatMemoryService.saveChatHistory(
+                    storeId,
+                    userId,
+                    [
+                      { role: 'user', content: payload.message },
+                      { role: 'assistant', content: conflictReply },
+                    ],
+                  );
 
                   return {
                     aiIntent:
                       draft.type === 'create_import'
                         ? 'confirm_import'
                         : 'confirm_export',
-                    botReply: `Tori phát hiện bạn đang có một phiếu ${draftTypeVN} kho chưa hoàn tất. Bạn không thể tạo phiếu ${draftTypeVN === 'NHẬP' ? 'XUẤT' : 'NHẬP'} lúc này. Vui lòng Xác nhận hoặc Hủy phiếu cũ ở thẻ bên dưới nhé! 📦⚠️`,
+                    botReply: conflictReply,
                     data: { draftActionId: pendingDraftId },
                   };
                 }
@@ -219,7 +224,6 @@ export class ChatbotService {
                   validationResult.reason ||
                     'The information is insufficient; the user is requested to provide clarification.',
                 ),
-                '', // systemContext nay đã gộp vào context
               ),
             };
 
@@ -269,16 +273,15 @@ export class ChatbotService {
                       payload.message,
                       'No, this feature is not currently available on the system.',
                     ),
-                    '', // systemContext nay đã gộp vào context
                   ),
                 };
             }
 
-            const toolContent = finalResponse.data
-              ? JSON.stringify(finalResponse.data)
-              : finalResponse.aiIntent.includes('confirm')
-                ? 'Draft created, awaiting confirmation.'
-                : 'No data';
+            const toolContent = finalResponse.aiIntent.includes('confirm')
+              ? 'Draft created, awaiting user confirmation.'
+              : finalResponse.aiIntent === 'get_product_info'
+                ? `Found product: ${(finalResponse.data as InventoryItemData)?.productPackage?.displayName}`
+                : 'Tool executed successfully.';
 
             messagesToSave.push({
               role: 'tool',
@@ -297,7 +300,6 @@ export class ChatbotService {
                - If the user's message is a greeting or general system question -> Reply friendly as Tori.
                - If the message is OUT OF DOMAIN (e.g. coding, math, weather, history, gossip...) -> REFUSE to answer. Strictly reply with exactly this message: "${STATIC_REJECTION_REPLY}"`,
             ),
-            '',
           ),
         };
       }
@@ -307,7 +309,7 @@ export class ChatbotService {
         content: finalResponse.botReply,
       });
 
-      const isShouldSave = !['out_of_domain'].includes(finalResponse.aiIntent);
+      const isShouldSave = finalResponse.aiIntent !== 'out_of_domain_or_casual';
 
       if (isShouldSave) {
         await this.chatMemoryService.saveChatHistory(
@@ -344,8 +346,15 @@ export class ChatbotService {
     const isAskingForHelp = metaKeywords.some((kw) =>
       normalizedMessage.includes(kw),
     );
+    const hasActionKeyword = [
+      'import',
+      'export',
+      'xuất',
+      'nhập',
+      'tồn kho',
+    ].some((kw) => normalizedMessage.includes(kw));
 
-    if (isAskingForHelp) {
+    if (isAskingForHelp && !hasActionKeyword) {
       return {
         isValid: false,
         reason:
@@ -384,6 +393,14 @@ export class ChatbotService {
             reason: 'The number must be greater than 0.',
           };
         }
+
+        const hasInvalidQuantity = items.some(
+          (item) => Number(item.quantity) <= 0,
+        );
+
+        if (hasInvalidQuantity) {
+          return { isValid: false, reason: 'Số lượng phải lớn hơn 0.' };
+        }
         break;
       }
 
@@ -399,6 +416,8 @@ export class ChatbotService {
   public async confirmDraftAction(
     draftActionId: string,
     isConfirmed: boolean,
+    requestingStoreId: string,
+    requestingUserId: string,
   ): Promise<string> {
     const draftKey = buildChatDraftKey(draftActionId);
     const draftData = await this.redisClient.get(draftKey);
@@ -411,6 +430,17 @@ export class ChatbotService {
     }
 
     const draft = JSON.parse(draftData) as DraftAction;
+
+    if (
+      draft.storeId !== requestingStoreId ||
+      draft.userId !== requestingUserId
+    ) {
+      throw new CustomError({
+        message: 'Forbidden',
+        status: StatusCodes.FORBIDDEN,
+      });
+    }
+
     const refKey = buildUserDraftRefKey(draft.storeId, draft.userId);
 
     try {
@@ -429,7 +459,6 @@ export class ChatbotService {
             'I want to cancel the transaction.',
             'The operation has been cancelled.',
           ),
-          '',
         );
       }
 
@@ -462,7 +491,6 @@ export class ChatbotService {
           'Confirmation successful',
           'Great! The transaction has been recorded.',
         ),
-        '',
       );
     } finally {
       // LUÔN LUÔN xóa key để giải phóng người dùng dù thành công hay thất bại
@@ -486,8 +514,6 @@ export class ChatbotService {
       query,
     );
 
-    // NOTE: Nếu số lượng kết quả > 100 -> điều hướng user tới màn hình lowstock
-
     const allLowStockItems = (res.items as InventoryItemData[]).filter(
       (item) =>
         item.quantity <= (item.reorder_threshold ?? item.reorderThreshold ?? 0),
@@ -496,16 +522,20 @@ export class ChatbotService {
     const totalCount = allLowStockItems.length;
     const displayItems = allLowStockItems.slice(0, 5);
 
-    const systemContext =
+    let systemContext =
       totalCount > 0
         ? `There are a total of ${totalCount} products that have reached the warning level. List of the 5 most depleted products: ${displayItems.map((i) => i.productPackage.displayName).join(', ')}`
         : 'Great, no products are currently at the warning level!';
+
+    if (res.items.length > 100) {
+      systemContext +=
+        ' Note: The system only shows data for the first 100 products scanned. Please visit the Low Stock screen for a complete list.';
+    }
 
     return {
       aiIntent: 'get_low_stock',
       botReply: await this.generateFriendlyReply(
         this.buildReplyContext(userMessage, systemContext),
-        '',
       ),
       data: { totalCount, items: displayItems },
     };
@@ -524,7 +554,6 @@ export class ChatbotService {
             userMessage,
             'Please ask the user to provide the name of the product they are looking for.',
           ),
-          '',
         ),
       };
     }
@@ -539,7 +568,6 @@ export class ChatbotService {
             userMessage,
             `${productName} was not found in the inventory.`,
           ),
-          '',
         ),
       };
     }
@@ -555,7 +583,6 @@ Inventory: ${exactMatch.quantity} ${exactMatch.productPackage.unit.name}.`;
         aiIntent: 'get_product_info',
         botReply: await this.generateFriendlyReply(
           this.buildReplyContext(userMessage, context),
-          '',
         ),
         data: exactMatch,
       };
@@ -569,7 +596,6 @@ Inventory: ${firstResult.quantity} ${firstResult.productPackage.unit.name}.`;
         aiIntent: 'get_product_info',
         botReply: await this.generateFriendlyReply(
           this.buildReplyContext(userMessage, context),
-          '',
         ),
         data: firstResult,
       };
@@ -582,7 +608,6 @@ Inventory: ${firstResult.quantity} ${firstResult.productPackage.unit.name}.`;
           userMessage,
           `The system found multiple results for "${productName}". PLEASE SAY IN SHORT: "Tori found several similar products. Please select the exact one from the list below 👇". DO NOT list products yourself.`,
         ),
-        '',
       ),
       data: { originalIntent: 'get_product_info', items: searchResult },
     };
@@ -611,7 +636,6 @@ Inventory: ${firstResult.quantity} ${firstResult.productPackage.unit.name}.`;
             userMessage,
             'The user is asked to specify the product name and the quantity they wish to process.',
           ),
-          '',
         ),
       };
     }
@@ -659,7 +683,6 @@ Inventory: ${firstResult.quantity} ${firstResult.productPackage.unit.name}.`;
               userMessage,
               `Error: "${item.product_name}" was not found. Previous items (if any) have been saved to the cart.`,
             ),
-            '',
           ),
         });
       }
@@ -683,12 +706,12 @@ Inventory: ${firstResult.quantity} ${firstResult.productPackage.unit.name}.`;
               userMessage,
               `Many items similar to "${item.product_name}" were found. PLEASE SAY THIS IN SHORT: "There are several products with the same name, please click to select the correct type you want to ${isExport ? 'export' : 'import'} below 👇". ABSOLUTELY DO NOT list items yourself.`,
             ),
-            '',
           ),
           data: {
             originalIntent: intent,
             quantity: item.quantity,
             items: searchResult,
+            pendingProductName: item.product_name,
           },
         });
       }
@@ -715,7 +738,6 @@ Inventory: ${firstResult.quantity} ${firstResult.productPackage.unit.name}.`;
               userMessage,
               `Error: Insufficient stock. The inventory has ${targetItem.quantity}, but you want to export a total of ${newQuantity}.`,
             ),
-            '',
           ),
         });
       }
@@ -793,7 +815,6 @@ Inventory: ${firstResult.quantity} ${firstResult.productPackage.unit.name}.`;
       aiIntent: isExport ? 'confirm_export' : 'confirm_import',
       botReply: await this.generateFriendlyReply(
         this.buildReplyContext(userMessage, systemContext),
-        '',
       ),
       data: { draftActionId: draftId },
     };
