@@ -19,7 +19,7 @@ import 'package:frontend/core/ui/widgets/t_snackbars_widget.dart';
 import 'package:frontend/core/ui/widgets/t_custom_dialog_widget.dart';
 import 'package:frontend/core/state/controllers/barcode_scanner_controller.dart';
 import 'package:frontend/features/transaction/widgets/shared/transaction_scanner_bottom_bar_widget.dart';
-import 'package:frontend/features/transaction/widgets/inbound_transaction/inbound_scan_cart_bottom_sheet_widget.dart';
+import 'package:frontend/features/transaction/widgets/inbound_transaction/inbound_transaction_scan_cart_bottom_sheet_widget.dart';
 
 class InboundTransactionController extends GetxController with TErrorHandler {
   final TransactionProvider _provider = TransactionProvider();
@@ -52,7 +52,7 @@ class InboundTransactionController extends GetxController with TErrorHandler {
             totalItems: totalItems,
             totalPrice: totalFunds,
             onCartTap: () => Get.bottomSheet(
-                const InboundScanCartBottomSheetWidget(),
+                const InboundTransactionScanCartBottomSheetWidget(),
                 isScrollControlled: true),
             onConfirm: () => Get.back(), // Bấm Xong -> Thoát Scanner
           );

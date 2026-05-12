@@ -8,9 +8,9 @@ import 'package:frontend/features/transaction/controllers/inbound_transaction_co
 import 'package:frontend/features/transaction/widgets/shared/transaction_cart_item_widget.dart';
 import 'package:get/get.dart';
 
-class InboundScanCartBottomSheetWidget
+class InboundTransactionScanCartBottomSheetWidget
     extends GetView<InboundTransactionController> {
-  const InboundScanCartBottomSheetWidget({super.key});
+  const InboundTransactionScanCartBottomSheetWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -38,9 +38,9 @@ class InboundScanCartBottomSheetWidget
                   child: Text("🛒", style: TextStyle(fontSize: 32))),
             ),
             const SizedBox(height: AppSizes.p16),
-            const Text(
-              "Giỏ hàng hiện tại",
-              style: TextStyle(
+            Text(
+              TTexts.currentCart.tr,
+              style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: AppColors.primaryText),
@@ -91,12 +91,13 @@ class InboundScanCartBottomSheetWidget
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('${controller.totalItems} món',
+                    Text(
+                        '${controller.totalItems} ${TTexts.labelItemsCount.tr}',
                         style: const TextStyle(
                             color: AppColors.subText, fontSize: 13)),
                     const SizedBox(height: 2),
-                    const Text("Tạm tính",
-                        style: TextStyle(
+                    Text(TTexts.subtotal.tr,
+                        style: const TextStyle(
                             fontWeight: FontWeight.w500, fontSize: 14)),
                   ],
                 ),

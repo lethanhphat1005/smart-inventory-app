@@ -101,6 +101,11 @@ final Map<String, String> enTransaction = {
       "Auto-generated transaction for stock clearance before deletion.",
   TTexts.outboundOverflowLimitDesc:
       "Some items will exceed their CURRENT STOCK when added. How would you like to proceed?",
+  TTexts.currentCart: "Current Cart",
+  TTexts.clearCartConfirmDesc:
+      "Are you sure you want to remove all items from the current cart?",
+  TTexts.errorInvalidController:
+      "Valid Controller not found (Inbound/Outbound)",
 
   // --- Transaction Item Add ---
   TTexts.loadingAddingToCart: "Adding to transaction...",

@@ -913,6 +913,9 @@ class TTexts {
   static const String transactionDetails = "transaction_details";
   static const String selectExportType = "select_export_type";
   static const String outboundOverflowLimitDesc = "outbound_overflow_limit_desc";
+  static const String currentCart = "current_cart";
+  static const String clearCartConfirmDesc = "clear_cart_confirm_desc";
+  static const String errorInvalidController = "error_invalid_controller";
 
   // Specific Reasons
   static const String reasonRetailSale = "reason_retail_sale";

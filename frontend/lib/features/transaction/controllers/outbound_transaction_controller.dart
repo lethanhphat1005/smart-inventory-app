@@ -12,12 +12,15 @@ import 'package:frontend/core/ui/widgets/t_custom_dialog_widget.dart';
 import 'package:frontend/features/home/controllers/home_controller.dart';
 import 'package:frontend/features/report/controllers/report_controller.dart';
 import 'package:frontend/features/transaction/providers/transaction_provider.dart';
+import 'package:frontend/features/transaction/widgets/outbound_transaction/outbound_transaction_scan_cart_bottom_sheet_widget.dart';
 import 'package:frontend/routes/app_routes.dart';
 import 'package:get/get.dart';
 import 'package:dio/dio.dart';
 import 'package:frontend/features/inventory/providers/inventory_provider.dart';
 import 'package:frontend/core/infrastructure/models/product_model.dart';
 import 'package:frontend/features/inventory/models/inventory_insight_display_model.dart';
+import 'package:frontend/core/state/controllers/barcode_scanner_controller.dart';
+import 'package:frontend/features/transaction/widgets/shared/transaction_scanner_bottom_bar_widget.dart';
 
 class OutboundTransactionController extends GetxController with TErrorHandler {
   final TransactionProvider _provider = TransactionProvider();
@@ -69,8 +72,17 @@ class OutboundTransactionController extends GetxController with TErrorHandler {
     if (index != -1) {
       final currentItem = cartItems[index];
 
-      final int newQuantity =
-          isReplace ? quantity : currentItem.quantity + quantity;
+      int newQuantity = isReplace ? quantity : currentItem.quantity + quantity;
+
+      // ĐÃ SỬA: Chặn nếu số lượng cộng dồn lớn hơn tồn kho thực tế
+      if (newQuantity > stock) {
+        newQuantity = stock;
+        if (!isReplace) {
+          TSnackbarsWidget.warning(
+              title: TTexts.warningTitle.tr,
+              message: TTexts.batchExceedsStock.tr);
+        }
+      }
 
       cartItems[index] = TransactionDetailModel(
         productPackageId: pkgId,
@@ -82,10 +94,10 @@ class OutboundTransactionController extends GetxController with TErrorHandler {
       );
     } else {
       if (quantity > stock) {
+        quantity = stock;
         TSnackbarsWidget.warning(
             title: TTexts.warningTitle.tr,
             message: TTexts.batchExceedsStock.tr);
-        return;
       }
       cartItems.add(TransactionDetailModel(
         productPackageId: pkgId,
@@ -124,8 +136,24 @@ class OutboundTransactionController extends GetxController with TErrorHandler {
   void updateItemQuantity(String packageId, int newQuantity) {
     final index =
         cartItems.indexWhere((item) => item.productPackageId == packageId);
-    if (index != -1 && newQuantity > 0) {
-      cartItems[index] = cartItems[index].copyWith(quantity: newQuantity);
+    if (index != -1) {
+      // ĐÃ SỬA: Nếu giảm về <= 0 thì tự xóa khỏi giỏ
+      if (newQuantity <= 0) {
+        removeItem(index);
+      } else {
+        final item = cartItems[index];
+        // ĐÃ SỬA: Chặn nếu người dùng nhập số lố tồn kho trong ô Text
+        if (newQuantity > item.currentStock) {
+          cartItems[index] = item.copyWith(quantity: item.currentStock);
+          cartItems.refresh();
+          TSnackbarsWidget.warning(
+              title: TTexts.warningTitle.tr,
+              message: TTexts.batchExceedsStock.tr);
+        } else {
+          cartItems[index] = cartItems[index].copyWith(quantity: newQuantity);
+          cartItems.refresh();
+        }
+      }
     }
   }
 
@@ -299,6 +327,9 @@ class OutboundTransactionController extends GetxController with TErrorHandler {
       }
     }
   }
+
+  // =========================================================================
+  // MÁY QUÉT LIÊN TỤC VÀ ĐIỀU HƯỚNG
   // =========================================================================
 
   void openScanner() {
@@ -306,15 +337,26 @@ class OutboundTransactionController extends GetxController with TErrorHandler {
       () => TBarcodeScannerLayout(
         title: TTexts.scanProductBarcode.tr,
         onScanned: (code) {
-          Get.back();
-          _processScannedBarcode(code);
+          Get.find<BarcodeScannerController>().pauseScan();
+          _processContinuousScannedBarcode(code);
         },
+        bottomBar: Obx(() {
+          if (cartItems.isEmpty) return const SizedBox.shrink();
+          return TransactionScannerBottomBarWidget(
+            totalItems: totalItems,
+            totalPrice: totalFunds,
+            onCartTap: () => Get.bottomSheet(
+                const OutboundScanCartBottomSheetWidget(),
+                isScrollControlled: true),
+            onConfirm: () => Get.back(),
+          );
+        }),
       ),
       transition: Transition.downToUp,
     );
   }
 
-  Future<void> _processScannedBarcode(String barcode) async {
+  Future<void> _processContinuousScannedBarcode(String barcode) async {
     try {
       FullScreenLoaderUtils.openLoadingDialog(TTexts.searchingProduct.tr);
       final result = await _inventoryProvider.scanBarcode(barcode);
@@ -346,23 +388,50 @@ class OutboundTransactionController extends GetxController with TErrorHandler {
           inventory: inventoryModel,
         );
 
-        Get.toNamed(AppRoutes.outboundTransactionItemAdd,
-            arguments: displayItem);
+        // Chuyển sang trang chi tiết và báo cờ fromScanner
+        Get.toNamed(AppRoutes.outboundTransactionItemAdd, arguments: {
+          'displayItem': displayItem,
+          'fromScanner': true,
+        })?.then((_) {
+          // Khi quay lại từ trang Add Item, tiếp tục quét
+          Get.find<BarcodeScannerController>().resumeScan();
+        });
       } else if (resolutionType == 'candidate_match') {
         TSnackbarsWidget.warning(
             title: TTexts.unconfirmedBarcodeTitle.tr,
             message: TTexts.unconfirmedBarcodeMessage.tr);
+        Get.find<BarcodeScannerController>().resumeScan();
       } else {
         TSnackbarsWidget.warning(
             title: TTexts.warningTitle.tr,
             message: TTexts.barcodeNotFoundMessage.tr);
+        Get.find<BarcodeScannerController>().resumeScan();
       }
     } catch (e) {
       FullScreenLoaderUtils.stopLoading();
       TSnackbarsWidget.error(
           title: TTexts.errorServerTitle.tr,
           message: '${TTexts.errorProcessingBarcode.tr}: $e');
+      Get.find<BarcodeScannerController>().resumeScan();
     }
+  }
+
+  // ĐÃ THÊM: Phục vụ cho nút "Xóa tất cả" trong Scanner Bottom Sheet
+  void confirmClearCart() {
+    Get.dialog(
+      TCustomDialogWidget(
+        title: TTexts.clearAll.tr,
+        description: TTexts.clearCartConfirmDesc.tr,
+        icon: const Text('🗑️', style: TextStyle(fontSize: 40)),
+        primaryButtonText: TTexts.delete.tr,
+        onPrimaryPressed: () {
+          cartItems.clear();
+          Get.back();
+        },
+        secondaryButtonText: TTexts.cancel.tr,
+        onSecondaryPressed: () => Get.back(),
+      ),
+    );
   }
 
   void confirmRemoveItem(int index) {

@@ -15,7 +15,7 @@ class TransactionProductInfoWidget extends StatelessWidget {
     } else if (Get.isRegistered<OutboundTransactionItemAddController>()) {
       return Get.find<OutboundTransactionItemAddController>();
     }
-    throw Exception("Không tìm thấy Controller hợp lệ (Inbound/Outbound)");
+    throw Exception(TTexts.errorInvalidController.tr);
   }
 
   @override
@@ -33,20 +33,21 @@ class TransactionProductInfoWidget extends StatelessWidget {
                   controller.displayName,
                   textAlign: TextAlign.center,
                   style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primaryText,
-                      height: 1.3),
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primaryText,
+                    height: 1.3,
+                  ),
                 )),
-            const SizedBox(height: AppSizes.p8),
+            const SizedBox(height: 8),
             Obx(() => Text(
-                  '${TTexts.barcodeLabel.tr}: ${controller.barcode}',
+                  '${TTexts.barcode.tr}: ${controller.barcode}',
                   style: const TextStyle(
-                      fontSize: 14,
-                      color: AppColors.subText,
-                      fontWeight: FontWeight.w500),
+                    fontSize: 14,
+                    color: AppColors.subText,
+                  ),
                 )),
-            const SizedBox(height: AppSizes.p12),
+            const SizedBox(height: 16),
             Obx(() {
               return Wrap(
                 spacing: 8,
@@ -62,8 +63,9 @@ class TransactionProductInfoWidget extends StatelessWidget {
                     bgColor: controller.healthStatusColor.withOpacity(0.1),
                     hasBorder: false,
                   ),
-                  // 3. CHIP THƯƠNG HIỆU (Kiểm tra rỗng trước khi hiện)
-                  if (controller.brandName != 'No Brand' &&
+                  // ĐÃ SỬA LOCALE CHO 'No Brand'
+                  if (controller.brandName != TTexts.noBrand.tr &&
+                      controller.brandName != 'No Brand' &&
                       controller.brandName.isNotEmpty)
                     _buildChip(controller.brandName),
                 ],
@@ -90,7 +92,8 @@ class TransactionProductInfoWidget extends StatelessWidget {
       side: hasBorder
           ? const BorderSide(color: AppColors.divider)
           : BorderSide.none,
-      padding: EdgeInsets.zero,
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+      visualDensity: const VisualDensity(horizontal: -4, vertical: -4),
     );
   }
 }

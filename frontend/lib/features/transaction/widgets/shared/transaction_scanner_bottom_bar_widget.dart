@@ -57,7 +57,7 @@ class TransactionScannerBottomBarWidget extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('$totalItems món',
+                    Text('$totalItems ${TTexts.labelItemsCount.tr}',
                         style: const TextStyle(
                             fontWeight: FontWeight.w800,
                             fontSize: 14,

@@ -102,6 +102,11 @@ final Map<String, String> viTransaction = {
       "Giao dịch tự động tạo để xóa tồn kho trước khi xóa sản phẩm.",
   TTexts.outboundOverflowLimitDesc:
       "Một số sản phẩm khi cộng dồn sẽ vượt quá TỒN KHO HIỆN TẠI. Bạn muốn xử lý thế nào?",
+  TTexts.currentCart: "Giỏ hàng hiện tại",
+  TTexts.clearCartConfirmDesc:
+      "Bạn có chắc chắn muốn xóa toàn bộ sản phẩm trong giỏ hàng hiện tại không?",
+  TTexts.errorInvalidController:
+      "Không tìm thấy Controller hợp lệ (Inbound/Outbound)",
 
   // --- Transaction Item Add ---
   TTexts.loadingAddingToCart: "Đang thêm vào giao dịch...",
