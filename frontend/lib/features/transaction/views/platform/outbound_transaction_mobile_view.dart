@@ -52,10 +52,10 @@ class OutboundTransactionMobileView
                   padding: const EdgeInsets.all(AppSizes.p20),
                   physics: const BouncingScrollPhysics(),
                   children: [
-                    // 1. NÚT "THÊM NHANH" - LUÔN LUÔN HIỂN THỊ Ở ĐẦU DANH SÁCH
+                    // 1. NÚT "THÊM NHANH"
                     TransactionAddMoreCardWidget(
                       onTap: () {
-                        // TODO: Mở trang chọn hàng loạt
+                        Get.toNamed(AppRoutes.outboundProductSelection);
                       },
                     ),
 
@@ -81,6 +81,7 @@ class OutboundTransactionMobileView
                                 item: item,
                                 isOutbound: true,
                                 imageUrl: item.packageInfo?.product?.imageUrl,
+                                showDeleteButton: true,
                                 onIncrease: () => controller.updateQuantity(
                                     index, item.quantity + 1),
                                 onDecrease: () => controller.updateQuantity(
@@ -114,8 +115,7 @@ class OutboundTransactionMobileView
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Padding(
-          padding:
-              EdgeInsets.fromLTRB(AppSizes.p20, AppSizes.p10, AppSizes.p20, 16),
+          padding: EdgeInsets.fromLTRB(0, AppSizes.p10, 0, 16),
           child: Divider(color: AppColors.divider),
         ),
         Obx(() => OutboundTransactionExportTypeSelectorWidget(
@@ -127,15 +127,12 @@ class OutboundTransactionMobileView
                   controller.otherFinancialEffect.value = val,
             )),
         const SizedBox(height: 8),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSizes.p20),
-          child: TTextFormFieldWidget(
-            label: TTexts.noteLabel.tr,
-            controller: controller.noteController,
-            hintText: TTexts.noteHint.tr,
-            maxLines: 3,
-            prefixIcon: Icons.edit_note_rounded,
-          ),
+        TTextFormFieldWidget(
+          label: TTexts.noteLabel.tr,
+          controller: controller.noteController,
+          hintText: TTexts.noteHint.tr,
+          maxLines: 3,
+          prefixIcon: Icons.edit_note_rounded,
         ),
         const SizedBox(height: 40),
       ],

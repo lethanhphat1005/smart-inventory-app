@@ -912,6 +912,7 @@ class TTexts {
   static const String checkDetails = "check_details";
   static const String transactionDetails = "transaction_details";
   static const String selectExportType = "select_export_type";
+  static const String outboundOverflowLimitDesc = "outbound_overflow_limit_desc";
 
   // Specific Reasons
   static const String reasonRetailSale = "reason_retail_sale";

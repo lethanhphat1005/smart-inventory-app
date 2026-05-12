@@ -7,17 +7,16 @@ import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:frontend/core/ui/widgets/t_bottom_sheet_widget.dart';
 import 'package:frontend/core/ui/widgets/t_no_image_widget.dart';
 import 'package:frontend/core/ui/widgets/t_primary_button_widget.dart';
-import 'package:frontend/features/transaction/controllers/inbound_product_selection_controller.dart';
+import 'package:frontend/features/transaction/controllers/outbound_product_selection_controller.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 
-class InboundProductSelectionCartBottomSheetWidget
-    extends GetView<InboundProductSelectionController> {
-  const InboundProductSelectionCartBottomSheetWidget({super.key});
+class OutboundProductSelectionCartBottomSheetWidget
+    extends GetView<OutboundProductSelectionController> {
+  const OutboundProductSelectionCartBottomSheetWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // ĐÃ SỬA: Bỏ "padding: EdgeInsets.zero" để Bottom Sheet dùng khoảng cách viền mặc định đẹp mắt.
     return TBottomSheetWidget(
       child: Obx(() {
         if (controller.draftCart.isEmpty) {
@@ -30,32 +29,22 @@ class InboundProductSelectionCartBottomSheetWidget
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // ==========================================
-            // HEADER CUSTOM XỊN XÒ TƯƠNG TỰ TRANSACTION_BOTTOM_SHEET
-            // ==========================================
             Container(
               width: 72,
               height: 72,
               decoration: BoxDecoration(
-                color: AppColors.softGrey.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(AppSizes.radius16),
-              ),
+                  color: AppColors.softGrey.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(AppSizes.radius16)),
               child: const Center(
                   child: Text("📦", style: TextStyle(fontSize: 36))),
             ),
             const SizedBox(height: AppSizes.p16),
-            Text(
-              TTexts.selectedItems.tr,
-              style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.primaryText),
-              textAlign: TextAlign.center,
-            ),
-
-            // ==========================================
-            // THANH "XÓA TẤT CẢ" (Canh lề phải)
-            // ==========================================
+            Text(TTexts.selectedItems.tr,
+                style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.primaryText),
+                textAlign: TextAlign.center),
             Align(
               alignment: Alignment.centerRight,
               child: TextButton.icon(
@@ -69,11 +58,6 @@ class InboundProductSelectionCartBottomSheetWidget
                         fontWeight: FontWeight.w600)),
               ),
             ),
-
-            // ==========================================
-            // DANH SÁCH SẢN PHẨM ĐÃ CHỌN
-            // ==========================================
-            // ĐÃ SỬA: Giới hạn chiều cao cụ thể (45% màn hình) để List có thể tự vuốt trượt nếu số lượng nhiều.
             ConstrainedBox(
               constraints: BoxConstraints(maxHeight: Get.height * 0.45),
               child: ListView.separated(
@@ -88,18 +72,17 @@ class InboundProductSelectionCartBottomSheetWidget
 
                   final name =
                       inventory.productPackage?.displayName ?? 'Hàng hóa';
-                  final price = inventory.productPackage?.importPrice ?? 0.0;
+                  final price = inventory.productPackage?.sellingPrice ?? 0.0;
                   final imageUrl = inventory.productPackage?.product?.imageUrl;
 
-                  final bool isMaxed = qty >= 999999;
+                  // ĐÃ CHỈNH SỬA: Maxed khi vượt Tồn Kho
+                  final bool isMaxed = qty >= inventory.quantity;
 
                   return Container(
-                    // ĐÃ SỬA: Padding rộng rãi, thông thoáng
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(16),
-                      // ĐÃ SỬA: Chỉ giữ viền đỏ cảnh báo, bỏ phần text báo lỗi dài dòng.
                       border: Border.all(
                         color: isMaxed
                             ? Colors.red.shade400
@@ -131,8 +114,7 @@ class InboundProductSelectionCartBottomSheetWidget
                                         const TNoImageWidget(
                                             width: 46,
                                             height: 46,
-                                            borderRadius: 10),
-                                  )
+                                            borderRadius: 10))
                                 : const TNoImageWidget(
                                     width: 46, height: 46, borderRadius: 10),
                           ),
@@ -161,10 +143,9 @@ class InboundProductSelectionCartBottomSheetWidget
                         Container(
                           height: 32,
                           decoration: BoxDecoration(
-                            color: AppColors.background,
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: AppColors.divider),
-                          ),
+                              color: AppColors.background,
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(color: AppColors.divider)),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -201,14 +182,9 @@ class InboundProductSelectionCartBottomSheetWidget
                 },
               ),
             ),
-
-            // ==========================================
-            // FOOTER: TỔNG KẾT & XÁC NHẬN
-            // ==========================================
             const SizedBox(height: 16),
             const Divider(color: AppColors.divider, height: 1),
             const SizedBox(height: 16),
-
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -233,12 +209,10 @@ class InboundProductSelectionCartBottomSheetWidget
               ],
             ),
             const SizedBox(height: 24),
-
             TPrimaryButtonWidget(
-              text: TTexts.done.tr,
-              onPressed: () => controller.confirmAndAddToMainCart(),
-              fontSize: 16.0,
-            ),
+                text: TTexts.done.tr,
+                onPressed: () => controller.confirmAndAddToMainCart(),
+                fontSize: 16.0),
           ],
         );
       }),
@@ -250,9 +224,8 @@ class InboundProductSelectionCartBottomSheetWidget
       onTap: onTap,
       borderRadius: BorderRadius.circular(20),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8),
-        child: Icon(icon, size: 14, color: iconColor),
-      ),
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: Icon(icon, size: 14, color: iconColor)),
     );
   }
 }

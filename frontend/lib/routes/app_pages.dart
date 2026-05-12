@@ -60,6 +60,7 @@ import 'package:frontend/features/search/bindings/search_binding.dart';
 import 'package:frontend/features/search/views/search_view.dart';
 import 'package:frontend/features/transaction/bindings/inbound_product_selection_binding.dart';
 import 'package:frontend/features/transaction/bindings/inbound_transaction_binding.dart';
+import 'package:frontend/features/transaction/bindings/outbound_product_selection_binding.dart';
 import 'package:frontend/features/transaction/bindings/outbound_transaction_binding.dart';
 import 'package:frontend/features/transaction/bindings/inbound_transaction_item_add_binding.dart';
 import 'package:frontend/features/transaction/bindings/outbound_transaction_item_add_binding.dart';
@@ -68,6 +69,7 @@ import 'package:frontend/features/transaction/bindings/stock_adjustment_item_bin
 import 'package:frontend/features/transaction/bindings/transaction_summary_binding.dart';
 import 'package:frontend/features/transaction/views/inbound_product_selection_view.dart';
 import 'package:frontend/features/transaction/views/inbound_transaction_view.dart';
+import 'package:frontend/features/transaction/views/outbound_product_selection_view.dart';
 import 'package:frontend/features/transaction/views/outbound_transaction_item_add_view.dart';
 import 'package:frontend/features/transaction/views/outbound_transaction_view.dart';
 import 'package:frontend/features/transaction/views/inbound_transaction_item_add_view.dart';
@@ -366,6 +368,14 @@ class AppPages {
       name: AppRoutes.inboundProductSelection,
       page: () => const InboundProductSelectionView(),
       binding: InboundProductSelectionBinding(),
+      transition: Transition.cupertino,
+    ),
+
+    // -- Outbound Product Selection
+    GetPage(
+      name: AppRoutes.outboundProductSelection,
+      page: () => const OutboundProductSelectionView(),
+      binding: OutboundProductSelectionBinding(),
       transition: Transition.cupertino,
     ),
 

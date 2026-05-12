@@ -41,6 +41,7 @@ class AppRoutes {
   static const stockAdjustmentItem = '/stock_adjustment_item';
   static const transactionSummary = '/transaction_summary';
   static const inboundProductSelection = '/inbound-product-selection';
+  static const outboundProductSelection = '/outbound-product-selection';
 
   static const report = '/report';
   static const transactionDetail = '/transaction_detail';
@@ -57,5 +58,4 @@ class AppRoutes {
 
   static const resetPassword = '/reset_password';
   static const verifyOTP = '/verify_otp';
-
 }
