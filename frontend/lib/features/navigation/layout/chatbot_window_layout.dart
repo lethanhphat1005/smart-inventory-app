@@ -4,6 +4,7 @@ import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/features/navigation/controllers/chatbot_ui_controller.dart';
 import 'package:frontend/features/navigation/models/chat_message_model.dart';
 import 'package:frontend/features/navigation/wigdets/chatbot/chatbot_card_action_confirm.dart';
+import 'package:frontend/features/navigation/wigdets/chatbot/chatbot_card_audit_log.dart';
 import 'package:frontend/features/navigation/wigdets/chatbot/chatbot_card_choose_product.dart';
 import 'package:frontend/features/navigation/wigdets/chatbot/chatbot_card_low_stock.dart';
 import 'package:frontend/features/navigation/wigdets/chatbot/chatbot_card_product_info.dart';
@@ -132,6 +133,8 @@ class ChatbotWindowLayout extends StatelessWidget {
         return ChatCardLowStock(message: msg);
       case 'choose_product':
         return ChatCardChooseProduct(message: msg);
+      case 'query_audit_logs':
+        return ChatCardAuditLog(message: msg);
       default:
         return ChatbotMessage(message: msg);
     }

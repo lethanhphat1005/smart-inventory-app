@@ -22,6 +22,8 @@ import { getFriendlyReplyPrompt } from '../chatbot.prompt.js';
 import { CHAT_TOOLS } from '../tools/tool-registry.js';
 
 import type { ChatMemoryService } from './chat-memory.service.js';
+import type { ListAuditLogsQueryDto } from '../../audit-log/dto/audit-log.dto.js';
+import type { AuditLogService } from '../../audit-log/service/audit-log.service.js';
 import type { ListInventoriesQueryDto } from '../../inventories/dto/inventory.dto.js';
 import type { InventoryService } from '../../inventories/index.js';
 import type { TransactionService } from '../../transactions/transaction.service.js';
@@ -46,6 +48,7 @@ export class ChatbotService {
     private readonly redisClient: Redis,
     private readonly chatMemoryService: ChatMemoryService,
     private readonly llmProvider: LLMProvider,
+    private readonly auditLogService: AuditLogService,
   ) {}
 
   private async generateFriendlyReply(context: string): Promise<string> {
@@ -242,6 +245,7 @@ export class ChatbotService {
                   payload.message,
                 );
                 break;
+
               case 'get_product_info':
                 finalResponse = await this.handleGetProductInfo(
                   storeId,
@@ -249,6 +253,7 @@ export class ChatbotService {
                   payload.message,
                 );
                 break;
+
               case 'create_export':
                 finalResponse = await this.handleTransactionDraft(
                   storeId,
@@ -258,6 +263,7 @@ export class ChatbotService {
                   payload.message,
                 );
                 break;
+
               case 'create_import':
                 finalResponse = await this.handleTransactionDraft(
                   storeId,
@@ -267,6 +273,15 @@ export class ChatbotService {
                   payload.message,
                 );
                 break;
+
+              case 'query_audit_logs':
+                finalResponse = await this.handleQueryAuditLogs(
+                  storeId,
+                  params,
+                  payload.message,
+                );
+                break;
+
               default:
                 finalResponse = {
                   aiIntent: 'unknown',
@@ -431,6 +446,21 @@ export class ChatbotService {
 
       case 'get_low_stock':
         break;
+
+      case 'query_audit_logs':
+        if (
+          !params.keyword &&
+          !params.time_period &&
+          params.action_type?.toLowerCase() === 'all'
+        ) {
+          return {
+            isValid: false,
+            reason:
+              'Người dùng đang hỏi lịch sử chung chung quá. Hãy yêu cầu họ chỉ định rõ loại thao tác (xóa, thêm), tên sản phẩm, hoặc thời gian cụ thể.',
+          };
+        }
+        break;
+
       default:
         break;
     }
@@ -946,6 +976,227 @@ Inventory: ${firstResult.quantity} ${firstResult.productPackage.unit.name}.`;
     }
 
     return res.items as InventoryItemData[];
+  }
+
+  private async handleQueryAuditLogs(
+    storeId: string,
+    params: LLMToolParams,
+    userMessage: string,
+  ): Promise<ChatbotResponseDto> {
+    const {
+      action_type: actionType,
+      keyword,
+      time_period: timePeriod,
+    } = params;
+
+    // 1. CHUẨN HÓA QUERY & XỬ LÝ THỜI GIAN (Giờ VN)
+    const queryPayload: Record<string, unknown> = {
+      limit: 15,
+      page: 1,
+      sortBy: 'performedAt',
+      sortOrder: 'desc',
+      search: keyword,
+    };
+
+    if (actionType && actionType.toLowerCase() !== 'all') {
+      queryPayload.actionType = actionType.toLowerCase();
+    }
+
+    const timeRange = this.resolveTimePeriod(timePeriod);
+
+    Object.assign(queryPayload, timeRange);
+
+    // Gọi service với kiểu dữ liệu chuẩn
+    const { items } = await this.auditLogService.getAuditLogs(
+      storeId,
+      queryPayload as unknown as ListAuditLogsQueryDto,
+    );
+
+    if (items.length === 0) {
+      return {
+        aiIntent: 'query_audit_logs',
+        botReply: await this.generateFriendlyReply(
+          this.buildReplyContext(
+            userMessage,
+            'Không tìm thấy nhật ký thao tác nào.',
+          ),
+        ),
+      };
+    }
+
+    // 2. ĐỊNH NGHĨA INTERFACE CHI TIẾT (Thay thế Any)
+    interface AuditLogJsonDetails {
+      displayName?: string;
+      productName?: string;
+      name?: string;
+      [key: string]: unknown;
+    }
+
+    interface AuditLogWithRelations {
+      actionType: string;
+      entityType: string;
+      entityId: string;
+      note: string | null;
+      newValue: unknown;
+      performedAt: string | Date;
+      user?: { fullName: string | null } | null;
+    }
+
+    const typedItems = items as unknown as AuditLogWithRelations[];
+
+    // 3. XỬ LÝ DỮ LIỆU TRẢ VỀ UI
+    const responseData = typedItems.map((log) => {
+      let details: AuditLogJsonDetails = {};
+
+      if (typeof log.newValue === 'string') {
+        try {
+          details = JSON.parse(log.newValue);
+        } catch (e) {
+          console.error('[handleQueryAuditLogs', e);
+        }
+      } else if (log.newValue && typeof log.newValue === 'object') {
+        details = log.newValue as AuditLogJsonDetails;
+      }
+
+      let displayTarget =
+        details.displayName || details.productName || details.name || log.note;
+
+      // Xử lý fallback nếu chỉ có UUID hoặc trống
+      if (!displayTarget || /^[0-9a-fA-F-]{36}$/.test(displayTarget)) {
+        const typeMap: Record<string, string> = {
+          Product: 'sản phẩm',
+          ProductPackage: 'gói sản phẩm',
+          Inventory: 'kho hàng',
+          Category: 'danh mục',
+          Transaction: 'giao dịch',
+        };
+
+        displayTarget = `Thao tác ${typeMap[log.entityType] || 'dữ liệu'}`;
+      }
+
+      return {
+        action: log.actionType,
+        target: displayTarget,
+        userFullName: log.user?.fullName || 'Nhân viên',
+        time: new Date(log.performedAt).toLocaleString('vi-VN', {
+          timeZone: 'Asia/Ho_Chi_Minh',
+          hour: '2-digit',
+          minute: '2-digit',
+          day: '2-digit',
+          month: '2-digit',
+        }),
+        entityType: log.entityType,
+      };
+    });
+
+    // 4. BUILD CONTEXT CHO AI (Giờ VN)
+    const contextLines = responseData.map(
+      (r) => `- [${r.time}] ${r.userFullName} đã ${r.action} "${r.target}"`,
+    );
+
+    const systemContext = `Dữ liệu nhật ký thao tác (Giờ Việt Nam):
+${contextLines.join('\n')}
+
+YÊU CẦU:
+- Trả lời ngắn gọn, tổng hợp dựa trên danh sách trên.
+- TUYỆT ĐỐI KHÔNG hiển thị mã UUID.
+- Dùng tiếng Việt tự nhiên (VD: "tạo mới", "cập nhật").`;
+
+    return {
+      aiIntent: 'query_audit_logs',
+      botReply: await this.generateFriendlyReply(
+        this.buildReplyContext(userMessage, systemContext),
+      ),
+      data: responseData,
+    };
+  }
+  private resolveTimePeriod(timePeriod: string | undefined): {
+    startDate?: string;
+    endDate?: string;
+  } {
+    if (!timePeriod) {
+      return {};
+    }
+
+    // Chuẩn hóa về offset UTC+7
+    const vnNow = new Date(Date.now() + 7 * 3600_000);
+
+    const startOf = (d: Date) => {
+      const t = new Date(d);
+
+      t.setUTCHours(0, 0, 0, 0);
+
+      return new Date(t.getTime() - 7 * 3600_000).toISOString(); // back to UTC
+    };
+    const endOf = (d: Date) => {
+      const t = new Date(d);
+
+      t.setUTCHours(23, 59, 59, 999);
+
+      return new Date(t.getTime() - 7 * 3600_000).toISOString();
+    };
+
+    switch (timePeriod) {
+      case 'today':
+        return { startDate: startOf(vnNow) };
+
+      case 'yesterday': {
+        const yd = new Date(vnNow);
+
+        yd.setUTCDate(vnNow.getUTCDate() - 1);
+
+        return { startDate: startOf(yd), endDate: endOf(yd) };
+      }
+
+      case 'this_week': {
+        const day = vnNow.getUTCDay(); // 0=Sun
+        const monday = new Date(vnNow);
+
+        monday.setUTCDate(vnNow.getUTCDate() - ((day + 6) % 7));
+
+        return { startDate: startOf(monday) };
+      }
+
+      case 'last_week': {
+        const day = vnNow.getUTCDay();
+        const thisMonday = new Date(vnNow);
+
+        thisMonday.setUTCDate(vnNow.getUTCDate() - ((day + 6) % 7));
+        const lastMonday = new Date(thisMonday);
+
+        lastMonday.setUTCDate(thisMonday.getUTCDate() - 7);
+        const lastSunday = new Date(thisMonday);
+
+        lastSunday.setUTCDate(thisMonday.getUTCDate() - 1);
+
+        return { startDate: startOf(lastMonday), endDate: endOf(lastSunday) };
+      }
+
+      case 'this_month': {
+        const firstDay = new Date(vnNow);
+
+        firstDay.setUTCDate(1);
+
+        return { startDate: startOf(firstDay) };
+      }
+
+      case 'last_month': {
+        const firstOfThisMonth = new Date(vnNow);
+
+        firstOfThisMonth.setUTCDate(1);
+        const lastOfPrev = new Date(firstOfThisMonth);
+
+        lastOfPrev.setUTCDate(0);
+        const firstOfPrev = new Date(lastOfPrev);
+
+        firstOfPrev.setUTCDate(1);
+
+        return { startDate: startOf(firstOfPrev), endDate: endOf(lastOfPrev) };
+      }
+
+      default:
+        return {};
+    }
   }
 
   private buildReplyContext(userMessage: string, systemData: string): string {

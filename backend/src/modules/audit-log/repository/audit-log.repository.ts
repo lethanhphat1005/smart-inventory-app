@@ -53,6 +53,7 @@ export class AuditLogRepository {
             mode: 'insensitive',
           },
         },
+        { newValue: { string_contains: search } },
       ];
     }
     const [items, totalItems] = await this.db.$transaction([
@@ -63,6 +64,11 @@ export class AuditLogRepository {
         },
         skip: getPaginationSkip({ page, limit }),
         take: limit,
+        include: {
+          user: {
+            select: { fullName: true },
+          },
+        },
       }),
       this.db.auditLog.count({
         where,
