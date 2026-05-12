@@ -44,6 +44,7 @@ class InboundTransactionItemAddController extends GetxController
 
   // Biến nhận diện: Để biết đường lùi về màn hình Chọn nhanh
   bool fromSelectionScreen = false;
+  bool fromScanner = false;
 
   @override
   void onInit() {
@@ -56,17 +57,17 @@ class InboundTransactionItemAddController extends GetxController
         isEditing = Get.arguments['isEditing'] ?? false;
         passedQty = Get.arguments['quantity'] ?? 1;
 
-        quantityController.text = passedQty.toString();
-        itemQuantity.value = passedQty;
-
-        // BẮT LẤY CỜ TỪ MÀN CHỌN NHANH TRUYỀN SANG
         if (Get.arguments['fromSelectionScreen'] != null) {
           fromSelectionScreen = Get.arguments['fromSelectionScreen'];
+        }
+        if (Get.arguments['fromScanner'] != null) {
+          fromScanner = Get.arguments['fromScanner']; // Bắt cờ Scanner
         }
       } else {
         initialItem = Get.arguments as InventoryInsightDisplayModel;
       }
 
+      // ĐỒNG BỘ TỪ GIỎ HÀNG CHÍNH NẾU ĐÃ CÓ (Cả lúc Search thường và Scan Camera đều chạy vào đây)
       if (!fromSelectionScreen) {
         try {
           final inboundCtrl = Get.find<InboundTransactionController>();
@@ -137,6 +138,7 @@ class InboundTransactionItemAddController extends GetxController
             await _provider.getInventoryDetailByPackageId(packageId);
         freshInventoryData.value = InventoryModel.fromJson(invData);
 
+        // ĐỒNG BỘ GIÁ ĐANG CÓ Ở GIỎ
         double displayPrice =
             freshInventoryData.value?.productPackage?.importPrice ?? 0.0;
         if (isEditing && !fromSelectionScreen) {
@@ -290,8 +292,13 @@ class InboundTransactionItemAddController extends GetxController
           if (index != -1) {
             Get.find<InboundTransactionController>().removeItem(index);
           }
-          Get.until(
-              (route) => route.settings.name == AppRoutes.inboundTransaction);
+          // ĐÃ SỬA: Xử lý về đúng chỗ khi Xóa (Số lượng = 0)
+          if (fromScanner) {
+            Get.back();
+          } else {
+            Get.until(
+                (route) => route.settings.name == AppRoutes.inboundTransaction);
+          }
           return;
         } else {
           // Nếu thêm mới mà để 0 thì nhắc nhở
@@ -359,7 +366,14 @@ class InboundTransactionItemAddController extends GetxController
       );
 
       FullScreenLoaderUtils.stopLoading();
-      Get.until((route) => route.settings.name == AppRoutes.inboundTransaction);
+
+      // ĐÃ SỬA: Lùi về Camera Scanner nếu đến từ đó
+      if (fromScanner) {
+        Get.back();
+      } else {
+        Get.until(
+            (route) => route.settings.name == AppRoutes.inboundTransaction);
+      }
     } catch (e) {
       FullScreenLoaderUtils.stopLoading();
       handleError(e);

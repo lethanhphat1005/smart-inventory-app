@@ -13,12 +13,13 @@ class TBarcodeScannerLayout extends StatefulWidget {
   final Function(String code)? onScanned;
   final Widget Function(String code, VoidCallback resumeScan)?
       bottomCardBuilder;
-
+  final Widget? bottomBar;
   const TBarcodeScannerLayout({
     super.key,
     this.title = 'Bar Code Scan',
     this.onScanned,
     this.bottomCardBuilder,
+    this.bottomBar,
   });
 
   @override
@@ -67,8 +68,7 @@ class _TBarcodeScannerLayoutState extends State<TBarcodeScannerLayout>
                 children: [
                   // Icon
                   Container(
-                    padding: const EdgeInsets.all(
-                        AppSizes.p12), // Giảm padding để icon bớt to
+                    padding: const EdgeInsets.all(AppSizes.p12),
                     decoration: BoxDecoration(
                       color: AppColors.primary.withOpacity(0.08),
                       shape: BoxShape.circle,
@@ -113,7 +113,7 @@ class _TBarcodeScannerLayoutState extends State<TBarcodeScannerLayout>
                         letterSpacing: 2),
                     textAlign: TextAlign.center,
                     decoration: InputDecoration(
-                      isDense: true, // Ép mỏng Textfield
+                      isDense: true,
                       hintText: TTexts.enterBarcodeHint.tr,
                       hintStyle: const TextStyle(
                           letterSpacing: 0,
@@ -121,23 +121,22 @@ class _TBarcodeScannerLayoutState extends State<TBarcodeScannerLayout>
                           fontWeight: FontWeight.w400,
                           color: AppColors.softGrey),
                       filled: true,
-                      fillColor: AppColors.surface, // Nền xám nhạt thay vì viền
+                      fillColor: AppColors.surface,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(AppSizes.radius12),
-                        borderSide: BorderSide.none, // Bỏ viền mặc định
+                        borderSide: BorderSide.none,
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(AppSizes.radius12),
                         borderSide: const BorderSide(
-                            color: AppColors.primary,
-                            width: 1.2), // Viền focus mảnh
+                            color: AppColors.primary, width: 1.2),
                       ),
                       contentPadding: const EdgeInsets.symmetric(
                           vertical: 14, horizontal: 16),
                     ),
                     onSubmitted: (val) {
                       if (val.trim().isNotEmpty) {
-                        Get.back(); // Đóng dialog
+                        Get.back();
                         if (widget.onScanned != null) {
                           widget.onScanned!(val.trim());
                         }
@@ -151,10 +150,9 @@ class _TBarcodeScannerLayoutState extends State<TBarcodeScannerLayout>
                     width: double.infinity,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        elevation: 0, // Bỏ bóng để nút phẳng và hiện đại
+                        elevation: 0,
                         backgroundColor: AppColors.primary,
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 14), // Giảm độ dày nút
+                        padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
                             borderRadius:
                                 BorderRadius.circular(AppSizes.radius12)),
@@ -162,7 +160,7 @@ class _TBarcodeScannerLayoutState extends State<TBarcodeScannerLayout>
                       onPressed: () {
                         final val = manualController.text.trim();
                         if (val.isNotEmpty) {
-                          Get.back(); // Đóng dialog
+                          Get.back();
                           if (widget.onScanned != null) widget.onScanned!(val);
                         }
                       },
@@ -277,7 +275,7 @@ class _TBarcodeScannerLayoutState extends State<TBarcodeScannerLayout>
                     code != null &&
                     widget.bottomCardBuilder != null)
                   Positioned(
-                    bottom: 40,
+                    bottom: widget.bottomBar != null ? 100 : 40,
                     left: 20,
                     right: 20,
                     child: widget.bottomCardBuilder!(
@@ -287,7 +285,17 @@ class _TBarcodeScannerLayoutState extends State<TBarcodeScannerLayout>
             );
           }),
 
-          // 5. NÚT NHẬP MÃ THỦ CÔNG
+          // ==========================================
+          // ĐÃ THÊM: HIỂN THỊ BOTTOM BAR BÊN DƯỚI CÙNG
+          // ==========================================
+          if (widget.bottomBar != null)
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: widget.bottomBar!,
+            ),
+
           Positioned(
             top: MediaQuery.of(context).padding.top + 10,
             right: 20,

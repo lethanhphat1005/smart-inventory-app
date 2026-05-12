@@ -17,6 +17,9 @@ import 'package:get/get.dart';
 import 'package:frontend/core/infrastructure/utils/full_screen_loader_utils.dart';
 import 'package:frontend/core/ui/widgets/t_snackbars_widget.dart';
 import 'package:frontend/core/ui/widgets/t_custom_dialog_widget.dart';
+import 'package:frontend/core/state/controllers/barcode_scanner_controller.dart';
+import 'package:frontend/features/transaction/widgets/shared/transaction_scanner_bottom_bar_widget.dart';
+import 'package:frontend/features/transaction/widgets/inbound_transaction/inbound_scan_cart_bottom_sheet_widget.dart';
 
 class InboundTransactionController extends GetxController with TErrorHandler {
   final TransactionProvider _provider = TransactionProvider();
@@ -28,19 +31,111 @@ class InboundTransactionController extends GetxController with TErrorHandler {
   final TextEditingController noteController = TextEditingController();
 
   int get totalItems => cartItems.fold(0, (sum, item) => sum + item.quantity);
-
   double get totalFunds =>
       cartItems.fold(0, (sum, item) => sum + (item.quantity * item.unitPrice));
 
+  // =========================================================================
+  // MỞ MÁY QUÉT (Sử dụng Bar Nổi)
+  // =========================================================================
+  void openScanner() {
+    Get.to(
+      () => TBarcodeScannerLayout(
+        title: TTexts.scanProductBarcode.tr,
+        onScanned: (code) {
+          Get.find<BarcodeScannerController>()
+              .pauseScan(); // Tạm ngưng để load API
+          _processContinuousScannedBarcode(code);
+        },
+        bottomBar: Obx(() {
+          if (cartItems.isEmpty) return const SizedBox.shrink();
+          return TransactionScannerBottomBarWidget(
+            totalItems: totalItems,
+            totalPrice: totalFunds,
+            onCartTap: () => Get.bottomSheet(
+                const InboundScanCartBottomSheetWidget(),
+                isScrollControlled: true),
+            onConfirm: () => Get.back(), // Bấm Xong -> Thoát Scanner
+          );
+        }),
+      ),
+      transition: Transition.downToUp,
+    );
+  }
+
+  // XỬ LÝ KẾT QUẢ QUÉT
+  Future<void> _processContinuousScannedBarcode(String barcode) async {
+    try {
+      FullScreenLoaderUtils.openLoadingDialog(TTexts.searchingProduct.tr);
+      final result = await _inventoryProvider.scanBarcode(barcode);
+      FullScreenLoaderUtils.stopLoading();
+
+      final resolutionType = result['resolutionType'];
+
+      if (resolutionType == 'exact_match') {
+        final pkgJson = result['productPackage'];
+        final packageModel = ProductPackageModel.fromJson(pkgJson);
+        final productModel = pkgJson['product'] != null
+            ? ProductModel.fromJson(pkgJson['product'])
+            : null;
+
+        final invJsonMap =
+            Map<String, dynamic>.from(pkgJson['inventory'] ?? {});
+        invJsonMap['productPackageId'] = packageModel.productPackageId;
+        invJsonMap['productPackage'] = pkgJson;
+        if (invJsonMap['inventoryId'] == null) invJsonMap['inventoryId'] = '';
+        if (invJsonMap['quantity'] == null) invJsonMap['quantity'] = 0;
+        if (invJsonMap['reorderThreshold'] == null) {
+          invJsonMap['reorderThreshold'] = 0;
+        }
+
+        final inventoryModel = InventoryModel.fromJson(invJsonMap);
+
+        final displayItem = InventoryInsightDisplayModel(
+          product: productModel,
+          inventory: inventoryModel,
+        );
+
+        // ĐIỀU HƯỚNG SANG TRANG CHI TIẾT
+        Get.toNamed(AppRoutes.inboundTransactionItemAdd, arguments: {
+          'displayItem': displayItem,
+          'fromScanner': true,
+        })?.then((_) {
+          // Sau khi người dùng Xác nhận thêm hàng (hoặc ấn Back), tự động Resume Camera
+          Get.find<BarcodeScannerController>().resumeScan();
+        });
+      } else if (resolutionType == 'candidate_match') {
+        TSnackbarsWidget.warning(
+            title: TTexts.unconfirmedBarcodeTitle.tr,
+            message: TTexts.unconfirmedBarcodeMessage.tr);
+        Get.find<BarcodeScannerController>().resumeScan();
+      } else {
+        TSnackbarsWidget.warning(
+            title: TTexts.warningTitle.tr,
+            message: TTexts.barcodeNotFoundMessage.tr);
+        Get.find<BarcodeScannerController>().resumeScan();
+      }
+    } catch (e) {
+      FullScreenLoaderUtils.stopLoading();
+      TSnackbarsWidget.error(
+          title: TTexts.errorServerTitle.tr,
+          message: '${TTexts.errorProcessingBarcode.tr}: $e');
+      Get.find<BarcodeScannerController>().resumeScan();
+    }
+  }
+
+  // =========================================================================
+  // LOGIC GIỎ HÀNG CHÍNH
+  // =========================================================================
+
   void addToCart(Map<String, dynamic> productData,
       {int quantity = 1, double? customPrice, bool isReplace = false}) {
-    // ĐÃ THÊM isReplace = false
     final String? pkgId = productData['productPackageId'];
     final int stock = productData['currentStock'] ?? 0;
 
     if (pkgId == null || pkgId.isEmpty) {
       TSnackbarsWidget.error(
-          title: TTexts.errorTitle.tr, message: TTexts.errorNoPackageId.tr);
+          title: TTexts.errorTitle.tr,
+          message: TTexts.errorInvalidPackageId.tr);
       return;
     }
 
@@ -231,71 +326,6 @@ class InboundTransactionController extends GetxController with TErrorHandler {
     } catch (e) {
       FullScreenLoaderUtils.stopLoading();
       handleError(e);
-    }
-  }
-
-  void openScanner() {
-    Get.to(
-      () => TBarcodeScannerLayout(
-        title: TTexts.scanProductBarcode.tr,
-        onScanned: (code) {
-          Get.back();
-          _processScannedBarcode(code);
-        },
-      ),
-      transition: Transition.downToUp,
-    );
-  }
-
-  Future<void> _processScannedBarcode(String barcode) async {
-    try {
-      FullScreenLoaderUtils.openLoadingDialog(TTexts.searchingProduct.tr);
-      final result = await _inventoryProvider.scanBarcode(barcode);
-      FullScreenLoaderUtils.stopLoading();
-
-      final resolutionType = result['resolutionType'];
-
-      if (resolutionType == 'exact_match') {
-        final pkgJson = result['productPackage'];
-
-        final packageModel = ProductPackageModel.fromJson(pkgJson);
-        final productModel = pkgJson['product'] != null
-            ? ProductModel.fromJson(pkgJson['product'])
-            : null;
-
-        final invJsonMap =
-            Map<String, dynamic>.from(pkgJson['inventory'] ?? {});
-        invJsonMap['productPackageId'] = packageModel.productPackageId;
-        invJsonMap['productPackage'] = pkgJson;
-        if (invJsonMap['inventoryId'] == null) invJsonMap['inventoryId'] = '';
-        if (invJsonMap['quantity'] == null) invJsonMap['quantity'] = 0;
-        if (invJsonMap['reorderThreshold'] == null) {
-          invJsonMap['reorderThreshold'] = 0;
-        }
-
-        final inventoryModel = InventoryModel.fromJson(invJsonMap);
-
-        final displayItem = InventoryInsightDisplayModel(
-          product: productModel,
-          inventory: inventoryModel,
-        );
-
-        Get.toNamed(AppRoutes.inboundTransactionItemAdd,
-            arguments: displayItem);
-      } else if (resolutionType == 'candidate_match') {
-        TSnackbarsWidget.warning(
-            title: TTexts.unconfirmedBarcodeTitle.tr,
-            message: TTexts.unconfirmedBarcodeMessage.tr);
-      } else {
-        TSnackbarsWidget.warning(
-            title: TTexts.warningTitle.tr,
-            message: TTexts.barcodeNotFoundMessage.tr);
-      }
-    } catch (e) {
-      FullScreenLoaderUtils.stopLoading();
-      TSnackbarsWidget.error(
-          title: TTexts.errorServerTitle.tr,
-          message: '${TTexts.errorProcessingBarcode.tr}: $e');
     }
   }
 
