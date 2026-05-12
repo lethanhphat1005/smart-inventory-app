@@ -14,12 +14,12 @@ final Map<String, String> viHome = {
 
   // Revenue Chart
   TTexts.homeTodaysRevenue: "Doanh Thu Hôm Nay",
-  TTexts.homeProfitLossWeek: "Lợi Nhuận/Thua Lỗ (Tuần)",
+  TTexts.homeProfitLossWeek: "Lợi Nhuận/Thất Thoát (Tuần)",
   TTexts.homeVsYesterday: "so với hôm qua",
   TTexts.homeThisWeek: "tuần này",
   TTexts.homeRevenueTitle: 'Phân Tích Doanh Thu',
   TTexts.homeProfit: 'Lợi Nhuận',
-  TTexts.homeLoss: 'Thua Lỗ',
+  TTexts.homeLoss: 'Thất Thoát',
 
   // Inventory Overview
   TTexts.homeInventoryOverview: "Tổng Quan Kho Hàng",

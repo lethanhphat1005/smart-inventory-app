@@ -154,7 +154,7 @@ final Map<String, String> viInventory = {
   TTexts.packageCreatedSuccess: 'Tạo gói thành công.',
   TTexts.variantLabel: 'Tên Biến Thể',
   TTexts.variantHint: 'ví dụ: 330ml, Đỏ, Lớn...',
-  TTexts.enterBarcodeHint: 'Nhập mã vạch và nhấn Enter hoặc Quét',
+  TTexts.enterBarcodeHint: 'Nhập mã vạch và nhấn Xác nhận',
   TTexts.barcodeTooShort: 'Mã vạch phải có ít nhất 5 ký tự',
   TTexts.barcodeDuplicate: 'Mã vạch này đã tồn tại',
   TTexts.barcodeAdded: 'Đã thêm mã vạch thành công',

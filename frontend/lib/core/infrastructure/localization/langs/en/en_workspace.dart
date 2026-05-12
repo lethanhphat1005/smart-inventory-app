@@ -59,7 +59,7 @@ final Map<String, String> enWorkspace = {
 
   TTexts.joinWorkspaceTitle: "Join Workspace",
   TTexts.joinWorkspaceSubtitle:
-      "Enter the invite code provided by your Manager to connect to the system.",
+      "Enter the invite code provided by your Owner to connect to the system.",
   TTexts.enterInviteCodeLabel: "Invite Code",
   TTexts.enterInviteCodeHint: "e.g., ABCD-EFGH",
   TTexts.joinBtn: "Join Now",

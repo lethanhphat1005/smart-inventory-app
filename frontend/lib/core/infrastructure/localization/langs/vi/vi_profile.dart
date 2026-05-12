@@ -83,7 +83,7 @@ final Map<String, String> viProfile = {
 
   //Edit Store
   TTexts.editStoreTitle: 'Cửa Hàng Của Tôi',
-  TTexts.editStoreSubtitle: 'Quản lý và chỉnh sửa cửa hàng của bạn',
+  TTexts.editStoreSubtitle: 'Quản lý và chỉnh sửa thông tin cửa hàng của bạn',
   TTexts.editStoreNameLabel: 'Tên Cửa Hàng',
   TTexts.editStoreNameHint: 'Nhập tên cửa hàng',
   TTexts.editStoreAddressLabel: 'Địa Chỉ *',
