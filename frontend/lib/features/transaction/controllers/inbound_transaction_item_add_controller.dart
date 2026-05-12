@@ -42,6 +42,9 @@ class InboundTransactionItemAddController extends GetxController
 
   bool isEditing = false;
 
+  // BIẾN NHẬN DIỆN LUỒNG: Để biết đường lùi về màn hình Chọn nhanh
+  bool fromSelectionScreen = false;
+
   @override
   void onInit() {
     super.onInit();
@@ -53,6 +56,11 @@ class InboundTransactionItemAddController extends GetxController
 
         quantityController.text = passedQty.toString();
         itemQuantity.value = passedQty;
+
+        // BẮT LẤY CỜ TỪ MÀN CHỌN NHANH TRUYỀN SANG
+        if (Get.arguments['fromSelectionScreen'] != null) {
+          fromSelectionScreen = Get.arguments['fromSelectionScreen'];
+        }
       } else {
         initialItem = Get.arguments as InventoryInsightDisplayModel;
       }
@@ -141,7 +149,7 @@ class InboundTransactionItemAddController extends GetxController
               await _provider.getProductById(targetProductId);
           fetchedBrandName.value =
               productFullData['brand'] ?? TTexts.noBrand.tr;
-  
+
           fetchedCategoryName.value = productFullData['categoryName'] ??
               productFullData['category']?['name'] ??
               TTexts.uncategorized.tr;
@@ -167,6 +175,9 @@ class InboundTransactionItemAddController extends GetxController
       TBottomSheetWidget.show(
         child: InventoryBarcodeListBottomSheetWidget(package: updatedPackage),
       );
+    } else {
+      TSnackbarsWidget.warning(
+          title: TTexts.warningTitle.tr, message: TTexts.noBarcodesFound.tr);
     }
   }
 
@@ -216,8 +227,8 @@ class InboundTransactionItemAddController extends GetxController
   }
 
   void decrementQuantity() {
-    final current = int.tryParse(quantityController.text) ?? 1;
-    if (current > 1) {
+    final current = int.tryParse(quantityController.text) ?? 0;
+    if (current > 0) {
       quantityController.text = (current - 1).toString();
     }
   }
@@ -225,12 +236,33 @@ class InboundTransactionItemAddController extends GetxController
   void confirmAndAddToCart() {
     try {
       final qty = int.tryParse(quantityController.text) ?? 0;
-      if (qty <= 0) {
-        TSnackbarsWidget.warning(
-            title: TTexts.warningTitle.tr,
-            message: TTexts.quantityGreaterThanZero.tr);
+      if (fromSelectionScreen) {
+        Get.back(result: {'quantity': qty});
         return;
       }
+
+      if (qty <= 0) {
+        // Nếu đang ở mode Edit mà chỉnh về 0, tiến hành xóa
+        if (isEditing) {
+          final index = Get.find<InboundTransactionController>()
+              .cartItems
+              .indexWhere((item) =>
+                  item.productPackageId == _activeInventory.productPackageId);
+          if (index != -1) {
+            Get.find<InboundTransactionController>().removeItem(index);
+          }
+          Get.until(
+              (route) => route.settings.name == AppRoutes.inboundTransaction);
+          return;
+        } else {
+          // Nếu thêm mới mà để 0 thì nhắc nhở
+          TSnackbarsWidget.warning(
+              title: TTexts.warningTitle.tr,
+              message: TTexts.quantityGreaterThanZero.tr);
+          return;
+        }
+      }
+
       FullScreenLoaderUtils.openLoadingDialog(TTexts.loadingAddingToCart.tr);
 
       final package = _activeInventory.productPackage ??
@@ -245,13 +277,13 @@ class InboundTransactionItemAddController extends GetxController
       if (realPkgId.isEmpty || realPkgId == 'null') {
         FullScreenLoaderUtils.stopLoading();
         TSnackbarsWidget.error(
-            title: TTexts.errorTitle.tr, message: TTexts.errorNoPackageId.tr);
+            title: TTexts.errorTitle.tr,
+            message: TTexts.errorInvalidPackageId.tr);
         return;
       }
 
       ProductModel finalProduct;
       if (initialItem.product != null) {
-        // ĐÃ SỬA LỖI CATEGORY: Truyền thêm categoryName vào copyWith
         finalProduct = initialItem.product!.copyWith(
           imageUrl: fetchedImageUrl.value,
           categoryName: fetchedCategoryName.value,
@@ -262,7 +294,6 @@ class InboundTransactionItemAddController extends GetxController
           'name': displayName,
           'imageUrl': fetchedImageUrl.value,
           'brand': fetchedBrandName.value,
-          // ĐÃ SỬA LỖI CATEGORY: Truyền categoryName vào Json
           'categoryName': fetchedCategoryName.value,
         });
       }
@@ -280,6 +311,7 @@ class InboundTransactionItemAddController extends GetxController
         'reorderThreshold': threshold,
       };
 
+      // Đẩy vào màn hình Inbound Giỏ Hàng Chính (Tìm kiếm thông thường)
       Get.find<InboundTransactionController>().addToCart(
         cartData,
         quantity: qty,

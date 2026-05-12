@@ -40,6 +40,7 @@ class AppRoutes {
   static const stockAdjustment = '/stock_adjustment';
   static const stockAdjustmentItem = '/stock_adjustment_item';
   static const transactionSummary = '/transaction_summary';
+  static const inboundProductSelection = '/inbound-product-selection';
 
   static const report = '/report';
   static const transactionDetail = '/transaction_detail';
@@ -50,7 +51,7 @@ class AppRoutes {
   static const changePassword = '/change_password';
   static const editStore = '/edit_store';
   static const assignsRole = '/assign_role';
-  static const settings = '/settings'; 
+  static const settings = '/settings';
 
   static const reorderSuggestion = '/reorder_suggestion';
 

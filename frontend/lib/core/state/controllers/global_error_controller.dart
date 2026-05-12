@@ -59,7 +59,6 @@ class GlobalErrorController extends GetxController {
   void _showCrashPreventDialog(String errorDetail) {
     if (_isCrashDialogOpen) return;
     _isCrashDialogOpen = true;
-
     Get.dialog(
       PopScope(
         canPop: false,

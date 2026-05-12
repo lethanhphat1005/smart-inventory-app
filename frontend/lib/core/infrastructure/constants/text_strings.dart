@@ -812,7 +812,26 @@ class TTexts {
   static const String removeProductDesc = "remove_product_desc";
   static const String maxQuantityReached = "max_quantity_reached";
   static const String maxStockReached = "max_stock_reached";
-  
+  static const String quickAddProducts = "quick_add_products";
+  static const String quickAddProductsSubtitle = "quick_add_products_subtitle";
+  static const String selectProductsTitle = "select_products_title";
+  static const String searchProductNameHint = "search_product_name_hint";
+  static const String discardSelectionTitle = "discard_selection_title";
+  static const String discardSelectionDesc = "discard_selection_desc";
+  static const String selectedItems = "selected_items";
+  static const String confirmSelection = "confirm_selection";
+  static const String searchStandardHint = "search_standard_hint";
+  static const String labelItemsCount = "label_items_count";  
+  static const String errorInvalidPackageId = "error_invalid_package_id";
+  static const String productBarcodes = "product_barcodes";
+  static const String noBarcodesFound = "no_barcodes_found";
+  static const String absoluteMaxQuantity = "absolute_max_quantity";
+  static const String overflowLimitTitle = "overflow_limit_title";
+  static const String overflowLimitDesc = "overflow_limit_desc";
+  static const String capAtMaxBtn = "cap_at_max_btn";
+  static const String addValidOnlyBtn = "add_valid_only_btn";
+  static const String reviewAgainBtn = "review_again_btn";
+
   // --- Inbound ---
   static const String inboundTransaction = "inbound_transaction";
   static const String emptyInboundCartTitle = "empty_inbound_cart_title";

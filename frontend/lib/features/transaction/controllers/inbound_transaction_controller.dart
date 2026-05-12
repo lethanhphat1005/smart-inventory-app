@@ -74,26 +74,26 @@ class InboundTransactionController extends GetxController with TErrorHandler {
   }
 
   void updateQuantity(int index, int newQuantity) {
-    if (newQuantity <= 0) {
-      removeItem(index);
-    } else {
-      final item = cartItems[index];
-      cartItems[index] = TransactionDetailModel(
-        productPackageId: item.productPackageId,
-        quantity: newQuantity,
-        unitPrice: item.unitPrice,
-        packageInfo: item.packageInfo,
-        currentStock: item.currentStock,
-        reorderThreshold: item.reorderThreshold,
-      );
+    if (index >= 0 && index < cartItems.length) {
+      if (newQuantity <= 0) {
+        removeItem(index);
+      } else {
+        cartItems[index] = cartItems[index].copyWith(quantity: newQuantity);
+        cartItems.refresh();
+      }
     }
   }
 
-  void updateItemQuantity(String packageId, int newQuantity) {
-    final index =
-        cartItems.indexWhere((item) => item.productPackageId == packageId);
-    if (index != -1 && newQuantity > 0) {
-      cartItems[index] = cartItems[index].copyWith(quantity: newQuantity);
+  void updateItemQuantity(String productPackageId, int newQuantity) {
+    final index = cartItems
+        .indexWhere((item) => item.productPackageId == productPackageId);
+    if (index != -1) {
+      if (newQuantity <= 0) {
+        removeItem(index);
+      } else {
+        cartItems[index] = cartItems[index].copyWith(quantity: newQuantity);
+        cartItems.refresh();
+      }
     }
   }
 

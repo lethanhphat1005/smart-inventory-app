@@ -4,6 +4,7 @@ import 'package:frontend/core/ui/widgets/t_app_bar_widget.dart';
 import 'package:frontend/features/transaction/controllers/outbound_transaction_controller.dart';
 import 'package:frontend/features/transaction/widgets/outbound_transaction/outbound_transaction_bottom_bar_widget.dart';
 import 'package:frontend/features/transaction/widgets/outbound_transaction/outbound_transaction_export_type_selector_widget.dart';
+import 'package:frontend/features/transaction/widgets/shared/transaction_add_more_card_widget.dart';
 import 'package:frontend/features/transaction/widgets/shared/transaction_cart_item_widget.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/features/transaction/widgets/shared/transaction_empty_widget.dart';
@@ -47,45 +48,60 @@ class OutboundTransactionMobileView
                 ),
               ),
               Expanded(
-                child: Obx(() {
-                  if (controller.cartItems.isEmpty) {
-                    return const TransactionEmptyWidget();
-                  }
+                child: ListView(
+                  padding: const EdgeInsets.all(AppSizes.p20),
+                  physics: const BouncingScrollPhysics(),
+                  children: [
+                    // 1. NÚT "THÊM NHANH" - LUÔN LUÔN HIỂN THỊ Ở ĐẦU DANH SÁCH
+                    TransactionAddMoreCardWidget(
+                      onTap: () {
+                        // TODO: Mở trang chọn hàng loạt
+                      },
+                    ),
 
-                  return ListView(
-                    children: [
-                      ListView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: controller.cartItems.length,
-                        itemBuilder: (context, index) {
-                          final item = controller.cartItems[index];
+                    // 2. KHU VỰC HIỂN THỊ GIỎ HÀNG HOẠT EMPTY STATE
+                    Obx(() {
+                      if (controller.cartItems.isEmpty) {
+                        return const Padding(
+                          padding: EdgeInsets.only(top: 60),
+                          child: TransactionEmptyWidget(),
+                        );
+                      }
 
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: AppSizes.p20),
-                            child: TransactionCartItemWidget(
-                              item: item,
-                              isOutbound: true,
-                              imageUrl: item.packageInfo?.product?.imageUrl,
-                              onIncrease: () => controller.updateQuantity(
-                                  index, item.quantity + 1),
-                              onDecrease: () => controller.updateQuantity(
-                                  index, item.quantity - 1),
-                              onQuantityChanged: (newQty) {
-                                controller.updateItemQuantity(
-                                    item.productPackageId!, newQty);
-                              },
-                              onDelete: () =>
-                                  controller.confirmRemoveItem(index),
-                            ),
-                          );
-                        },
-                      ),
-                      _buildReasonAndNoteSection(),
-                    ],
-                  );
-                }),
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ListView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: controller.cartItems.length,
+                            itemBuilder: (context, index) {
+                              final item = controller.cartItems[index];
+                              return TransactionCartItemWidget(
+                                item: item,
+                                isOutbound: true,
+                                imageUrl: item.packageInfo?.product?.imageUrl,
+                                onIncrease: () => controller.updateQuantity(
+                                    index, item.quantity + 1),
+                                onDecrease: () => controller.updateQuantity(
+                                    index, item.quantity - 1),
+                                onQuantityChanged: (newQty) {
+                                  controller.updateItemQuantity(
+                                      item.productPackageId!, newQty);
+                                },
+                                onDelete: () =>
+                                    controller.confirmRemoveItem(index),
+                              );
+                            },
+                          ),
+
+                          // Hiển thị khung lý do và ghi chú
+                          _buildReasonAndNoteSection(),
+                        ],
+                      );
+                    }),
+                  ],
+                ),
               ),
             ],
           ),

@@ -36,6 +36,29 @@ final Map<String, String> enTransaction = {
       "Are you sure you want to remove this product from the transaction?",
   TTexts.maxQuantityReached: "Maximum quantity reached",
   TTexts.maxStockReached: "Maximum current stock reached",
+  TTexts.quickAddProducts: "Quick Add Products",
+  TTexts.quickAddProductsSubtitle:
+      "Select multiple products from catalog to save your time.",
+  TTexts.selectProductsTitle: "Quick Select Products",
+  TTexts.searchProductNameHint: "Search by product name...",
+  TTexts.allItems: "All Items",
+  TTexts.discardSelectionTitle: "Discard Selection?",
+  TTexts.discardSelectionDesc:
+      "You have selected some items. If you exit now, they will not be added to the transaction. Exit anyway?",
+  TTexts.selectedItems: "Selected Items",
+  TTexts.confirmSelection: "Confirm Selection",
+  TTexts.searchStandardHint: "Type product name to search...",
+  TTexts.labelItemsCount: "items",
+  TTexts.errorInvalidPackageId: "Invalid Product Package ID not found.",
+  TTexts.productBarcodes: "Product Barcodes",
+  TTexts.noBarcodesFound: "This product currently has no barcodes.",
+  TTexts.absoluteMaxQuantity: "Maximum quantity is 999,999",
+  TTexts.overflowLimitTitle: "Limit Exceeded",
+  TTexts.overflowLimitDesc:
+      "Some items will exceed the 999,999 limit when added to your cart. How would you like to proceed?",
+  TTexts.capAtMaxBtn: "Add up to maximum",
+  TTexts.addValidOnlyBtn: "Add valid items only",
+  TTexts.reviewAgainBtn: "Review again",
 
   // -- Inbound
   TTexts.inboundTransaction: "Inbound Transaction",

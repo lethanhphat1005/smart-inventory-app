@@ -32,9 +32,33 @@ final Map<String, String> viTransaction = {
   TTexts.priceFluctuationDesc: "Các sản phẩm sau có thay đổi về giá.",
   TTexts.andMore: "và nhiều hơn nữa...",
   TTexts.removeProductTitle: "Xóa Sản Phẩm",
-  TTexts.removeProductDesc: "Bạn có chắc chắn muốn xóa sản phẩm này khỏi giao dịch không?",
+  TTexts.removeProductDesc:
+      "Bạn có chắc chắn muốn xóa sản phẩm này khỏi giao dịch không?",
   TTexts.maxQuantityReached: "Đã đạt giới hạn số lượng tối đa",
   TTexts.maxStockReached: "Đã đạt giới hạn tồn kho hiện tại",
+  TTexts.quickAddProducts: "Thêm nhanh sản phẩm",
+  TTexts.quickAddProductsSubtitle:
+      "Chọn hàng loạt sản phẩm từ danh mục có sẵn để tiết kiệm thời gian.",
+  TTexts.selectProductsTitle: "Chọn Nhanh Sản Phẩm",
+  TTexts.searchProductNameHint: "Tìm kiếm theo tên sản phẩm...",
+  TTexts.allItems: "Tất cả",
+  TTexts.discardSelectionTitle: "Hủy bỏ lựa chọn?",
+  TTexts.discardSelectionDesc:
+      "Bạn đã chọn một số sản phẩm. Nếu thoát bây giờ, các sản phẩm này sẽ không được thêm vào giỏ hàng. Thoát?",
+  TTexts.selectedItems: "Hàng hóa đã chọn",
+  TTexts.confirmSelection: "Xác Nhận",
+  TTexts.searchStandardHint: "Nhập tên sản phẩm để tìm kiếm...",
+  TTexts.labelItemsCount: "món",
+  TTexts.errorInvalidPackageId:
+      "Không tìm thấy mã lô hàng (Package ID) hợp lệ.",
+  TTexts.productBarcodes: "Mã vạch sản phẩm",
+  TTexts.noBarcodesFound: "Sản phẩm này hiện chưa có mã vạch nào.",
+  TTexts.absoluteMaxQuantity: "Số lượng tối đa là 999,999",
+  TTexts.overflowLimitTitle: "Vượt quá giới hạn",
+  TTexts.overflowLimitDesc: "Một số sản phẩm khi cộng dồn với giỏ hàng sẽ vượt mức tối đa 999,999. Bạn muốn xử lý thế nào?",
+  TTexts.capAtMaxBtn: "Cộng đến mức tối đa",
+  TTexts.addValidOnlyBtn: "Chỉ thêm sản phẩm hợp lệ",
+  TTexts.reviewAgainBtn: "Quay lại kiểm tra",
 
   // -- Inbound
   TTexts.inboundTransaction: "Giao Dịch Nhập Kho",
