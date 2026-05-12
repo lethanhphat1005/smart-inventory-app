@@ -18,6 +18,7 @@ final Map<String, String> enProfile = {
   TTexts.profilePhoneNumberBottomSheet: 'Phone number',
   TTexts.profileEmailBottomSheet: 'Email',
   TTexts.profileAddressBottomSheet: 'Address',
+  TTexts.profileMemberInfo: 'Member Information',
   //--Section
   TTexts.profileAccount: "Account",
   TTexts.profileManagement: "Management",
@@ -85,6 +86,7 @@ final Map<String, String> enProfile = {
   TTexts.editStoreBtnEdit: 'Edit',
   TTexts.profileUpdateStoreSuccess: 'Store updated successfully',
   TTexts.profileUpdateSuccess: 'Profile updated successfully',
+  TTexts.profileStatusNotUpdatedYet: 'Not updated yet',
   TTexts.loadingTitle: 'Loading',
   TTexts.editStoreCurrentStore: 'Current Store',
   TTexts.profileNoStoreSelected: 'No store selected',

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
+import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 
 class StoreItemWidget extends StatelessWidget {
@@ -19,7 +21,7 @@ class StoreItemWidget extends StatelessWidget {
 
   // Lấy màu sắc dựa trên role
   Color getRoleColor() {
-    switch (role.toLowerCase()) {
+    switch (role.trim().toLowerCase()) {
       case 'owner':
         return AppColors.gradientOrangeStart;
       case 'manager':
@@ -44,13 +46,30 @@ class StoreItemWidget extends StatelessWidget {
     }
   }
 
-  String get displayName => name.trim().isEmpty ? 'Unknown User' : name.trim();
-
   String get displayRole {
-    final value = role.trim();
-    if (value.isEmpty) return 'Staff';
-    return value[0].toUpperCase() + value.substring(1).toLowerCase();
+    switch (role.trim().toLowerCase()) {
+      case 'owner':
+        return TTexts.roleOwner.tr;
+
+      case 'manager':
+        return TTexts.roleManager.tr;
+
+      case 'staff':
+        return TTexts.roleStaff.tr;
+
+      default:
+        return role;
+    }
   }
+
+  String get displayName =>
+      name.trim().isEmpty ? TTexts.unknownUser.tr : name.trim();
+
+  // String get displayRole {
+  //   final value = role.trim();
+  //   if (value.isEmpty) return TTexts.roleStaff.tr;
+  //   return value[0].toUpperCase() + value.substring(1).toLowerCase();
+  // }
 
   @override
   Widget build(BuildContext context) {
