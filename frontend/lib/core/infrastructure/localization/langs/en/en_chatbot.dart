@@ -3,7 +3,6 @@ import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 final Map<String, String> enChatbot = {
   TTexts.chatbotName: 'Tori',
   TTexts.chatbotOnline: 'Online',
-  TTexts.chatbotInputHint: 'Type a message...',
   TTexts.chatbotWelcomeMsg:
       'Hello! I am your AI assistant. How can I help you manage your inventory today?',
   TTexts.chatbotErrorTitle: 'Chat Error',
@@ -50,10 +49,6 @@ final Map<String, String> enChatbot = {
   TTexts.chatbotQuickActionLowStock: 'Low stock',
   TTexts.chatbotQuickActionImport: 'Import',
   TTexts.chatbotQuickActionExport: 'Export',
-  TTexts.chatbotPromptLowStockSub: 'Send now',
-  TTexts.chatbotPromptCheckInfoSub: 'Enter product name',
-  TTexts.chatbotPromptImportSub: 'Enter name + quantity',
-  TTexts.chatbotPromptExportSub: 'Enter name + quantity',
   TTexts.chatbotSellingPrice: 'Selling price',
   TTexts.chatbotImportPrice: 'Import price',
   TTexts.chatbotViewDetail: 'View inventory detail',
@@ -66,4 +61,20 @@ final Map<String, String> enChatbot = {
   TTexts.chatbotCmdCheckInfo: 'Check info of',
   TTexts.chatbotCmdImport: 'Import',
   TTexts.chatbotCmdExport: 'Export',
+  TTexts.chatbotInputHint: 'Ask to import, check stock, view logs...',
+  TTexts.chatbotPromptAuditLog: 'Action History Today',
+  TTexts.chatbotPromptHelp: 'Bot Guide',
+  TTexts.chatbotWelcomeDetailed:
+      'Hello! I am Tori, your AI assistant. 🦉\n\nI can help you with:\n📦 Create Import/Export transactions\n🔍 Check stock levels & alerts\n🕒 View system action history\n\nHow can I assist you today?',
+  // Thêm 3 dòng này vào enChatbot map
+  TTexts.chatbotQuickActionInfo: 'Info',
+  TTexts.chatbotQuickActionHistory: 'History',
+  TTexts.chatbotQuickActionHelp: 'Help',
+  TTexts.chatbotPromptLowStockSub: 'View items running out',
+  TTexts.chatbotPromptCheckInfoSub: 'Search by product name',
+  TTexts.chatbotPromptImportSub: 'Enter name & qty',
+  TTexts.chatbotPromptExportSub: 'Enter name & qty',
+  TTexts.chatbotPromptAuditLogSub: 'View recent actions',
+  TTexts.chatbotPromptHelpSub: 'How to use Tori',
+  TTexts.chatbotMessageTooLong: 'Message is too long (max 100 characters).',
 };

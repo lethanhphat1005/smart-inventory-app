@@ -314,7 +314,7 @@ export class ChatbotService {
             this.buildReplyContext(
               payload.message,
               `SYSTEM MODERATION: 
-               - If the user's message is a greeting or general system question -> Reply friendly as Tori.
+               - If the user's message is a greeting or asks for help/guide/features -> Reply friendly as Tori and EXPLICITLY LIST your capabilities: 1) Create Import/Export, 2) Check product info & low stock, 3) View Audit Logs.
                - If the message is OUT OF DOMAIN (e.g. coding, math, weather, history, gossip...) -> REFUSE to answer. Strictly reply with exactly this message: "${STATIC_REJECTION_REPLY}"`,
             ),
           ),
@@ -375,10 +375,9 @@ export class ChatbotService {
       return {
         isValid: false,
         reason:
-          'Users are simply asking how to use the system or about its functionality, not requesting execution. Explain the functionality to them; ABSOLUTELY DO NOT fabricate data.',
+          'Users are asking how to use the system. Explain friendly that you can: 1) Create Import/Export transactions, 2) Check product info & low stock, 3) Query action history (Audit Logs). ABSOLUTELY DO NOT fabricate any other features.',
       };
     }
-
     // 2. Validate từng intent cụ thể
     switch (intent) {
       case 'get_product_info':

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/infrastructure/utils/error_handler_utils.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/widgets/t_snackbars_widget.dart';
 import 'package:frontend/features/home/controllers/home_controller.dart';
 import 'package:frontend/features/inventory/controllers/inventory_controller.dart';
 import 'package:frontend/features/navigation/providers/chatbot_provider.dart';
@@ -46,6 +47,12 @@ class ChatbotUiController extends GetxController with TErrorHandler {
 
     final text = textController.text.trim();
     if (text.isEmpty) return;
+
+    if (text.length > 100) {
+      TSnackbarsWidget.warning(
+          title: TTexts.chatbotMessageTooLong.tr, message: '');
+      return;
+    }
 
     messages.add(ChatMessage(text: text, isUser: true));
     textController.clear();
@@ -117,13 +124,7 @@ class ChatbotUiController extends GetxController with TErrorHandler {
           ),
           ElevatedButton(
             onPressed: () async {
-              // Xóa history ở BE trước để tránh context cũ ảnh hưởng lượt chat tiếp
-              try {
-                await _apiClient.delete('/api/chat-bot/history');
-              } catch (_) {
-                // Không block user nếu API lỗi — FE vẫn clear local
-              }
-              messages.clear();
+              await clearChatData();
               Get.back(); // đóng dialog
               Get.back(); // đóng chatbot
             },
@@ -236,12 +237,11 @@ class ChatbotUiController extends GetxController with TErrorHandler {
 
   Future<void> clearChatData() async {
     try {
+      await _apiClient.delete('/api/chat-bot/history');
+    } catch (_) {
+    } finally {
       messages.clear();
       isChatOpen.value = false;
-
-      await _apiClient.delete('/api/chat-bot/history');
-    } catch (e) {
-      debugPrint('Lỗi khi xóa lịch sử chat: $e');
     }
   }
 

@@ -28,7 +28,6 @@ class ChatbotInputAreaWidget extends StatelessWidget {
         top: false,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-          // Dùng Obx để lắng nghe trạng thái isTyping
           child: Obx(() {
             final bool isTyping = controller.isTyping.value;
 
@@ -38,7 +37,7 @@ class ChatbotInputAreaWidget extends StatelessWidget {
                 const ChatbotInputActionMenuWidget(),
                 const SizedBox(width: 4),
 
-                // Ô NHẬP TEXT
+                // TEXT INPUT AREA
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
@@ -52,7 +51,7 @@ class ChatbotInputAreaWidget extends StatelessWidget {
                     child: TextField(
                       controller: controller.textController,
                       focusNode: controller.focusNode,
-                      readOnly: isTyping, // 🛑 Khóa bàn phím khi bot đang rep
+                      readOnly: isTyping,
                       maxLines: 4,
                       minLines: 1,
                       cursorColor: const Color(0xFFF08D9B),
@@ -64,12 +63,12 @@ class ChatbotInputAreaWidget extends StatelessWidget {
                             ? AppColors.subText
                             : AppColors.primaryText,
                       ),
-                      // 🛑 Chặn submit từ bàn phím
                       onSubmitted:
                           isTyping ? null : (_) => controller.sendMessage(),
                       decoration: InputDecoration(
+                        // Sửa hardcode tiếng Việt thành TTexts.chatbotTyping.tr
                         hintText: isTyping
-                            ? 'Tori đang gõ...'
+                            ? TTexts.chatbotTyping.tr
                             : TTexts.chatbotInputHint.tr,
                         hintStyle: TextStyle(
                             color: AppColors.subText,
@@ -84,9 +83,8 @@ class ChatbotInputAreaWidget extends StatelessWidget {
                 ),
                 const SizedBox(width: 12),
 
-                // NÚT SEND
+                // SEND BUTTON
                 GestureDetector(
-                  // 🛑 Chặn tap khi đang typing
                   onTap: isTyping ? null : controller.sendMessage,
                   child: Container(
                     height: 48,
@@ -94,7 +92,6 @@ class ChatbotInputAreaWidget extends StatelessWidget {
                     margin: const EdgeInsets.only(bottom: 2),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      // Nếu đang typing thì nút chuyển màu xám mờ, ngược lại hiện dải màu gradient
                       color: isTyping ? Colors.grey.shade300 : null,
                       gradient: isTyping
                           ? null

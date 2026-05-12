@@ -519,6 +519,12 @@ class TTexts {
   static const String chatbotPromptCheckInfoSub = 'chatbotPromptCheckInfoSub';
   static const String chatbotPromptImportSub = 'chatbotPromptImportSub';
   static const String chatbotPromptExportSub = 'chatbotPromptExportSub';
+  static const String chatbotPromptAuditLogSub = 'chatbotPromptAuditLogSub'; // Mới
+  static const String chatbotPromptHelpSub = 'chatbotPromptHelpSub'; // Mới
+  static const String chatbotPromptAuditLog = "chatbot_prompt_audit_log";
+  static const String chatbotPromptHelp = "chatbot_prompt_help";
+  static const String chatbotWelcomeDetailed = "chatbot_welcome_detailed";
+  static const String chatbotMessageTooLong = "chatbot_message_too_long";
 
 // Product Info Card — nhãn giá
   static const String chatbotSellingPrice = 'chatbotSellingPrice';
@@ -542,6 +548,12 @@ class TTexts {
   static const String chatbotCmdCheckInfo = 'chatbotCmdCheckInfo';
   static const String chatbotCmdImport = 'chatbotCmdImport';
   static const String chatbotCmdExport = 'chatbotCmdExport';
+
+  // -- Quick Actions Labels
+  static const String chatbotQuickActionInfo = "chatbot_quick_action_info";
+  static const String chatbotQuickActionHistory =
+      "chatbot_quick_action_history";
+  static const String chatbotQuickActionHelp = "chatbot_quick_action_help";
 
   // -- Customize Catalog
   static const String customizeCatalog = "customize_catalog";

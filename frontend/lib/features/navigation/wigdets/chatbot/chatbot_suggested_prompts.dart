@@ -17,8 +17,7 @@ class ChatbotSuggestedPrompts extends StatelessWidget {
         iconBg: const Color(0xFFFCEBEB),
         iconColor: const Color(0xFFA32D2D),
         label: TTexts.chatbotPromptLowStock.tr,
-        // sub: TTexts.chatbotPromptLowStockSub.tr,
-        sub: "",
+        sub: TTexts.chatbotPromptLowStockSub.tr,
         autoSend: true,
       ),
       _PromptItem(
@@ -26,8 +25,7 @@ class ChatbotSuggestedPrompts extends StatelessWidget {
         iconBg: const Color(0xFFE6F1FB),
         iconColor: const Color(0xFF185FA5),
         label: TTexts.chatbotPromptCheckInfo.tr,
-        // sub: TTexts.chatbotPromptCheckInfoSub.tr,
-        sub: "",
+        sub: TTexts.chatbotPromptCheckInfoSub.tr,
         autoSend: false,
       ),
       _PromptItem(
@@ -35,8 +33,7 @@ class ChatbotSuggestedPrompts extends StatelessWidget {
         iconBg: const Color(0xFFEAF3DE),
         iconColor: const Color(0xFF3B6D11),
         label: TTexts.chatbotPromptImport.tr,
-        // sub: TTexts.chatbotPromptImportSub.tr,
-        sub: "",
+        sub: TTexts.chatbotPromptImportSub.tr,
         autoSend: false,
       ),
       _PromptItem(
@@ -44,9 +41,24 @@ class ChatbotSuggestedPrompts extends StatelessWidget {
         iconBg: const Color(0xFFFAEEDA),
         iconColor: const Color(0xFF854F0B),
         label: TTexts.chatbotPromptExport.tr,
-        // sub: TTexts.chatbotPromptExportSub.tr,
-        sub: "",
+        sub: TTexts.chatbotPromptExportSub.tr,
         autoSend: false,
+      ),
+      _PromptItem(
+        icon: Iconsax.clock,
+        iconBg: const Color(0xFFEBEBFC),
+        iconColor: const Color(0xFF4A4A9C),
+        label: TTexts.chatbotPromptAuditLog.tr,
+        sub: TTexts.chatbotPromptAuditLogSub.tr,
+        autoSend: false, // Dựa theo thay đổi bạn muốn ở bước trước
+      ),
+      _PromptItem(
+        icon: Iconsax.info_circle,
+        iconBg: const Color(0xFFEBF7FC),
+        iconColor: const Color(0xFF2D82A3),
+        label: TTexts.chatbotPromptHelp.tr,
+        sub: TTexts.chatbotPromptHelpSub.tr,
+        autoSend: true,
       ),
     ];
 
@@ -97,16 +109,16 @@ class ChatbotSuggestedPrompts extends StatelessWidget {
                   height: 1.5,
                 ),
               ),
-              const SizedBox(height: 28),
 
-              // Grid 2×2
+              // Grid 2×2 -> 2x3
               GridView.count(
                 crossAxisCount: 2,
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 crossAxisSpacing: 12,
                 mainAxisSpacing: 12,
-                childAspectRatio: 1.45,
+                childAspectRatio:
+                    1.4, // Đã điều chỉnh lại tỉ lệ để vừa chứa sub-text
                 children: prompts.map((p) => _buildPromptCard(p)).toList(),
               ),
             ],
@@ -148,10 +160,10 @@ class ChatbotSuggestedPrompts extends StatelessWidget {
             const Spacer(),
             Text(
               p.label,
-              maxLines: 1,
+              maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
-                fontSize: 13,
+                fontSize: 13.5,
                 fontWeight: FontWeight.w600,
                 color: AppColors.primaryText,
                 fontFamily: 'Poppins',
@@ -159,7 +171,7 @@ class ChatbotSuggestedPrompts extends StatelessWidget {
             ),
             const SizedBox(height: 2),
             Text(
-              p.sub ?? "",
+              p.sub,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
@@ -180,7 +192,7 @@ class _PromptItem {
   final Color iconBg;
   final Color iconColor;
   final String label;
-  final String? sub;
+  final String sub;
   final bool autoSend;
 
   const _PromptItem({
