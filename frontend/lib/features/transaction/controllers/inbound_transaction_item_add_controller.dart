@@ -42,17 +42,19 @@ class InboundTransactionItemAddController extends GetxController
 
   bool isEditing = false;
 
-  // BIẾN NHẬN DIỆN LUỒNG: Để biết đường lùi về màn hình Chọn nhanh
+  // Biến nhận diện: Để biết đường lùi về màn hình Chọn nhanh
   bool fromSelectionScreen = false;
 
   @override
   void onInit() {
     super.onInit();
     if (Get.arguments != null) {
+      int passedQty = 1;
+
       if (Get.arguments is Map) {
         initialItem = Get.arguments['displayItem'];
         isEditing = Get.arguments['isEditing'] ?? false;
-        final int passedQty = Get.arguments['quantity'] ?? 1;
+        passedQty = Get.arguments['quantity'] ?? 1;
 
         quantityController.text = passedQty.toString();
         itemQuantity.value = passedQty;
@@ -64,6 +66,32 @@ class InboundTransactionItemAddController extends GetxController
       } else {
         initialItem = Get.arguments as InventoryInsightDisplayModel;
       }
+
+      if (!fromSelectionScreen) {
+        try {
+          final inboundCtrl = Get.find<InboundTransactionController>();
+          String pkgId = initialItem.inventory.productPackageId;
+          if (pkgId.isEmpty) {
+            pkgId =
+                initialItem.inventory.productPackage?.productPackageId ?? '';
+          }
+
+          if (pkgId.isNotEmpty) {
+            final existingIndex = inboundCtrl.cartItems
+                .indexWhere((item) => item.productPackageId == pkgId);
+            if (existingIndex != -1) {
+              final existingItem = inboundCtrl.cartItems[existingIndex];
+              passedQty = existingItem.quantity;
+              isEditing = true;
+            }
+          }
+        } catch (e) {
+          debugPrint('InboundTransactionController not found: $e');
+        }
+      }
+
+      quantityController.text = passedQty.toString();
+      itemQuantity.value = passedQty;
 
       fetchedCategoryName.value = initialItem.product?.categoryName ??
           initialItem.inventory.productPackage?.product?.categoryName ??
@@ -108,9 +136,20 @@ class InboundTransactionItemAddController extends GetxController
         final invData =
             await _provider.getInventoryDetailByPackageId(packageId);
         freshInventoryData.value = InventoryModel.fromJson(invData);
-        priceController.text =
-            (freshInventoryData.value!.productPackage?.importPrice ?? 0.0)
-                .toStringAsFixed(2);
+
+        double displayPrice =
+            freshInventoryData.value?.productPackage?.importPrice ?? 0.0;
+        if (isEditing && !fromSelectionScreen) {
+          try {
+            final inboundCtrl = Get.find<InboundTransactionController>();
+            final existingIndex = inboundCtrl.cartItems
+                .indexWhere((item) => item.productPackageId == packageId);
+            if (existingIndex != -1) {
+              displayPrice = inboundCtrl.cartItems[existingIndex].unitPrice;
+            }
+          } catch (_) {}
+        }
+        priceController.text = displayPrice.toStringAsFixed(2);
 
         if (targetProductId == null || targetProductId.isEmpty) {
           targetProductId = freshInventoryData.value?.productPackage?.productId;
