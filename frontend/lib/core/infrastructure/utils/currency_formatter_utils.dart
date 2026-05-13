@@ -1,4 +1,4 @@
-import 'package:get_storage/get_storage.dart';
+// import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:frontend/core/infrastructure/utils/number_formatter_utils.dart';
 
@@ -13,7 +13,9 @@ class CurrencyFormatterUtils {
 
   /// Format tiền tệ dạng rút gọn (VD biểu đồ: $1.2M, 500đ)
   static String formatCompact(double value) {
-    final symbol = GetStorage().read('app_currency_symbol') ?? '\$';
+    // TẠM KHÓA: Ép cứng dùng $ thay vì đọc từ Storage
+    // final symbol = GetStorage().read('app_currency_symbol') ?? '\$';
+    const symbol = '\$';
 
     // Gọi NumberUtils để lấy con số đã rút gọn (VD: "-1.2M")
     String compactNumber = NumberFormatterUtils.formatCompactNumber(value);
@@ -31,8 +33,11 @@ class CurrencyFormatterUtils {
 
   /// Format tiền tệ đầy đủ có dấu phẩy (VD hóa đơn: $1,250,000.00 hoặc 1,250,000đ)
   static String formatFull(double value) {
-    final symbol = GetStorage().read('app_currency_symbol') ?? '\$';
-    final code = GetStorage().read('app_currency_code') ?? 'USD';
+    // TẠM KHÓA: Ép cứng dùng $ và USD thay vì đọc từ Storage
+    // final symbol = GetStorage().read('app_currency_symbol') ?? '\$';
+    // final code = GetStorage().read('app_currency_code') ?? 'USD';
+    const symbol = '\$';
+    const code = 'USD';
 
     String sign = value < 0 ? '-' : '';
 
