@@ -37,6 +37,7 @@ class _SearchFilterBottomSheetWidgetState
   Future<void> _pickDateRange() async {
     final picked = await showDateRangePicker(
       context: context,
+      locale: Get.locale,
       firstDate: DateTime(2020),
       lastDate: DateTime.now(),
       initialDateRange: selectedDateRange,

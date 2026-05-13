@@ -131,7 +131,7 @@ class TransactionSummaryDetailsBottomSheetWidget
                   const Icon(Icons.edit_note_rounded,
                       size: 18, color: AppColors.subText),
                   const SizedBox(width: 4),
-                  Text(TTexts.noteLabel.tr,
+                  Text(TTexts.note.tr,
                       style: const TextStyle(
                           fontWeight: FontWeight.w500,
                           fontSize: 12,

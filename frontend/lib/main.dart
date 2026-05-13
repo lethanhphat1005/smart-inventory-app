@@ -5,6 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:frontend/core/infrastructure/constants/app_constants.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/infrastructure/localization/app_translations.dart';
@@ -22,8 +23,6 @@ import 'package:device_preview/device_preview.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/ui/theme/app_theme.dart';
-
-// ĐÃ SỬA IMPORT Ở ĐÂY: Dùng local thay vì file
 import 'package:intl/date_symbol_data_local.dart';
 
 @pragma('vm:entry-point')
@@ -143,6 +142,16 @@ class App extends StatelessWidget {
     return GetMaterialApp(
       title: 'Storix',
       debugShowCheckedModeBanner: false,
+
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('en', 'US'),
+        Locale('vi', 'VN'), 
+      ],
 
       // builder: (context, child) {
       //   final devicePreviewChild = DevicePreview.appBuilder(

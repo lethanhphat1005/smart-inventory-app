@@ -93,6 +93,7 @@ class TTexts {
   static const String filterNone = "filter_none";
   static const String supplier = "supplier";
   static const String customer = "customer";
+  static const String scrollDownToLoadMore = "scroll_down_to_load_more";
 
   // -- Network Error Dialog
   static const String netErrorTitle = "net_error_title";
@@ -1071,6 +1072,7 @@ class TTexts {
   static const String exportDailyReportDesc = 'export_daily_report_desc';
   static const String exportSingleTransactionDesc =
       'export_single_transaction_desc';
+  static const String productList = "product_list";
 
   // -- Notifications
   static const String notificationTitle = "notification_title";

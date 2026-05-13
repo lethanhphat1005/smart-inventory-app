@@ -71,7 +71,7 @@ class ReportTransactionDetailView
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(
                       AppSizes.p20, 32, AppSizes.p20, 16),
-                  child: Text(TTexts.items.tr,
+                  child: Text(TTexts.productList.tr,
                       style: TextStyle(
                           fontFamily: AppFonts.mainFont,
                           fontSize: 18,

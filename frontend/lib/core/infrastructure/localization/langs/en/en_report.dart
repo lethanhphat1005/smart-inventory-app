@@ -34,4 +34,5 @@ final Map<String, String> enReport = {
   TTexts.exportSingleTransactionDesc:
       'Generate an Excel report for this transaction?',
   TTexts.amount: 'Amount',
+  TTexts.productList: "Product List",
 };

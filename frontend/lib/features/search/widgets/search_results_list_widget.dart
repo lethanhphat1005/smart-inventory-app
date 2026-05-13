@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/infrastructure/utils/day_formatter_utils.dart';
 import 'package:frontend/features/search/widgets/search_filter_chips_widget.dart';
 import 'package:frontend/features/report/widgets/report/report_transaction_card_widget.dart';
 import 'package:get/get.dart';
@@ -136,12 +137,42 @@ class SearchResultsListWidget extends GetView<TSearchController> {
                             color: AppColors.surface),
                     itemBuilder: (context, index) {
                       if (index == listLength) {
-                        return controller.isLoadingMore.value
-                            ? const Padding(
-                                padding: EdgeInsets.all(20),
-                                child:
-                                    Center(child: CircularProgressIndicator()))
-                            : const SizedBox(height: 80);
+                        // 1. Đã tải hết sạch dữ liệu -> Ẩn hint, chỉ giữ khoảng trống cho List
+                        if (!controller.hasMore.value) {
+                          return const SizedBox(height: 80);
+                        }
+
+                        // 2. Đang tải -> Hiện Vòng xoay
+                        if (controller.isLoadingMore.value) {
+                          return const Padding(
+                            padding: EdgeInsets.all(20),
+                            child: Center(
+                                child: CircularProgressIndicator(
+                                    color: AppColors.primary)),
+                          );
+                        }
+
+                        // 3. Vẫn còn dữ liệu nhưng chưa cuộn tới -> Hiện Hint Text kêu gọi cuộn
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 16, bottom: 80),
+                          child: Center(
+                            child: Column(
+                              children: [
+                                const Icon(Icons.keyboard_arrow_down_rounded,
+                                    color: AppColors.softGrey, size: 20),
+                                const SizedBox(height: 4),
+                                Text(
+                                  TTexts.scrollDownToLoadMore.tr,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: AppColors.subText,
+                                    fontStyle: FontStyle.italic,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
                       }
 
                       // --- RENDER GIAO DỊCH ---
@@ -150,20 +181,21 @@ class SearchResultsListWidget extends GetView<TSearchController> {
                         final String typeLower = tx.type.toLowerCase();
 
                         Color themeColor = AppColors.primaryText;
-                        String bottomLabel = 'Total Items / Transaction';
+
+                        String bottomLabel = TTexts.totalItemsTransaction.tr;
+                        String displayType = TTexts.na.tr;
 
                         if (typeLower == 'import') {
                           themeColor = AppColors.stockIn;
+                          displayType = TTexts.inbound.tr;
                         } else if (typeLower == 'export') {
                           themeColor = AppColors.stockOut;
+                          displayType = TTexts.outbound.tr;
                         } else {
                           themeColor = const Color(0xFFFF9900);
-                          bottomLabel = 'Check Items / Stock Stats';
+                          bottomLabel = TTexts.checkItemsStats.tr;
+                          displayType = TTexts.stockAdjustment.tr;
                         }
-
-                        final String displayType = tx.type.isNotEmpty
-                            ? '${tx.type[0].toUpperCase()}${tx.type.substring(1).toLowerCase()}'
-                            : TTexts.na.tr;
 
                         final String itemCountDisplay =
                             "${tx.itemCount} ${TTexts.items.tr}";
@@ -172,9 +204,7 @@ class SearchResultsListWidget extends GetView<TSearchController> {
                           onTap: () => controller.handleItemTap(tx),
                           child: ReportTransactionCardWidget(
                             transactionId: tx.transactionId ?? TTexts.na.tr,
-                            dateStr: tx.createdAt != null
-                                ? '${tx.createdAt!.day}/${tx.createdAt!.month}/${tx.createdAt!.year}'
-                                : TTexts.na.tr,
+                            dateStr: DayFormatterUtils.formatDate(tx.createdAt),
                             typeDisplay: displayType,
                             typeColor: themeColor,
                             leftBottomLabel: bottomLabel,
