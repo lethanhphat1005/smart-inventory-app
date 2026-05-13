@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/infrastructure/utils/error_handler_utils.dart';
+import 'package:frontend/core/state/services/store_service.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/core/ui/widgets/t_snackbars_widget.dart';
 import 'package:frontend/features/home/controllers/home_controller.dart';
@@ -164,10 +165,8 @@ class ChatbotUiController extends GetxController with TErrorHandler {
         data: {'draftActionId': draftActionId, 'isConfirmed': true},
       );
 
-      // Dùng message từ BE thay vì hardcode — BE có thể trả về lỗi nghiệp vụ
       final serverMessage = response.data['data']?['message'] as String?;
 
-      // Đánh dấu card đã resolve với trạng thái "confirmed"
       (message.data as Map<String, dynamic>)['wasConfirmed'] = true;
       message.isResolved = true;
       messages.refresh();
@@ -177,7 +176,6 @@ class ChatbotUiController extends GetxController with TErrorHandler {
         isUser: false,
       ));
 
-      // Refresh các màn hình liên quan
       if (Get.isRegistered<HomeController>()) {
         Get.find<HomeController>().loadAllHomeData();
       }
@@ -212,13 +210,11 @@ class ChatbotUiController extends GetxController with TErrorHandler {
         data: {'draftActionId': draftActionId, 'isConfirmed': false},
       );
 
-      // Đánh dấu card đã resolve với trạng thái "cancelled"
       (message.data as Map<String, dynamic>)['wasConfirmed'] = false;
       message.isResolved = true;
       messages.refresh();
 
       messages.add(
-        // Fix: dùng TTexts thay vì hardcode tiếng Việt
         ChatMessage(text: TTexts.chatbotTransactionCancelled.tr, isUser: false),
       );
     } catch (e) {
@@ -256,6 +252,13 @@ class ChatbotUiController extends GetxController with TErrorHandler {
         );
       }
     });
+  }
+
+  /// Kiểm tra xem user hiện tại có quyền xem lịch sử thao tác không
+  bool get canViewAuditLog {
+    if (!Get.isRegistered<StoreService>()) return false;
+    final role = Get.find<StoreService>().currentRole.value.toLowerCase();
+    return role == 'owner' || role == 'manager';
   }
 
   @override

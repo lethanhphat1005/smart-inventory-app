@@ -182,10 +182,12 @@ class _ChatbotInputActionMenuWidgetState
                       text: TTexts.chatbotQuickActionExport.tr,
                       onTap: () =>
                           _handleAction(TTexts.chatbotPromptExport.tr, false)),
-                  _buildMenuItem(
-                      text: TTexts.chatbotQuickActionHistory.tr,
-                      onTap: () =>
-                          _handleAction(TTexts.chatbotPromptAuditLog.tr, false)),
+
+                  if (Get.find<ChatbotUiController>().canViewAuditLog)
+                    _buildMenuItem(
+                        text: TTexts.chatbotQuickActionHistory.tr,
+                        onTap: () => _handleAction(
+                            TTexts.chatbotPromptAuditLog.tr, false)),
                   _buildMenuItem(
                       text: TTexts.chatbotQuickActionHelp.tr,
                       onTap: () =>
