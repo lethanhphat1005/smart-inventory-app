@@ -42,7 +42,14 @@ class TTexts {
       "language_select_select_language";
   static const String settingsVietnameseSub = "settings_vietnamese_sub";
   static const String settingsEnglishSub = "settings_english_sub";
-
+  static const String currencyUSD = "currency_usd";
+  static const String currencyVND = "currency_vnd";
+  static const String currencyEUR = "currency_eur";
+  static const String currencyGBP = "currency_gbp";
+  static const String currencyJPY = "currency_jpy";
+  static const String currencyCNY = "currency_cny";
+  static const String currencyKRW = "currency_krw";
+  static const String currencyLabel = "currency_label";
   // -- Search
   static const String searchHint = "search_hint";
   static const String recentSearches = "recent_searches";
@@ -530,17 +537,27 @@ class TTexts {
   static const String chatbotMessageTooLong = "chatbot_message_too_long";
 
   // -- Smart AI Analysis (Thêm vào phần Chatbot)
-  static const String chatbotAnalyzeCrossSellTitle = "chatbot_analyze_cross_sell_title";
-  static const String chatbotAnalyzeRestockTitle = "chatbot_analyze_restock_title";
-  static const String chatbotAnalyzeOptimalStock = "chatbot_analyze_optimal_stock";
-  static const String chatbotAnalyzeCurrentStock = "chatbot_analyze_current_stock";
-  static const String chatbotAnalyzeBoughtTogether = "chatbot_analyze_bought_together";
-  static const String chatbotAnalyzeFrequencyUnit = "chatbot_analyze_frequency_unit";
-  static const String chatbotPromptAnalyzeRestock = "chatbot_prompt_analyze_restock";
-  static const String chatbotPromptAnalyzeRestockSub = "chatbot_prompt_analyze_restock_sub";
+  static const String chatbotAnalyzeCrossSellTitle =
+      "chatbot_analyze_cross_sell_title";
+  static const String chatbotAnalyzeRestockTitle =
+      "chatbot_analyze_restock_title";
+  static const String chatbotAnalyzeOptimalStock =
+      "chatbot_analyze_optimal_stock";
+  static const String chatbotAnalyzeCurrentStock =
+      "chatbot_analyze_current_stock";
+  static const String chatbotAnalyzeBoughtTogether =
+      "chatbot_analyze_bought_together";
+  static const String chatbotAnalyzeFrequencyUnit =
+      "chatbot_analyze_frequency_unit";
+  static const String chatbotPromptAnalyzeRestock =
+      "chatbot_prompt_analyze_restock";
+  static const String chatbotPromptAnalyzeRestockSub =
+      "chatbot_prompt_analyze_restock_sub";
   static const String chatbotPromptCrossSell = "chatbot_prompt_cross_sell";
-  static const String chatbotPromptCrossSellSub = "chatbot_prompt_cross_sell_sub";
-  static const String chatbotQuickActionAnalyze = "chatbot_quick_action_analyze";
+  static const String chatbotPromptCrossSellSub =
+      "chatbot_prompt_cross_sell_sub";
+  static const String chatbotQuickActionAnalyze =
+      "chatbot_quick_action_analyze";
 
 // Product Info Card — nhãn giá
   static const String chatbotSellingPrice = 'chatbotSellingPrice';

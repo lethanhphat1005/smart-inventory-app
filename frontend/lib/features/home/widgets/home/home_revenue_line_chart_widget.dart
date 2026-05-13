@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:frontend/core/infrastructure/utils/number_formatter_utils.dart';
+import 'package:frontend/core/infrastructure/utils/currency_formatter_utils.dart';
 import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:get/get.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
@@ -36,25 +36,6 @@ class _HomeRevenueLineChartWidgetState extends State<HomeRevenueLineChartWidget>
     super.dispose();
   }
 
-  // Tự động quy đổi M (triệu), k (ngàn) và bỏ chữ k nếu dưới 1000
-  String _formatCurrency(double value) {
-    final isVi = Get.locale?.languageCode == 'vi';
-    final suffixM = isVi ? 'Tr' : 'M';
-    const suffixK = 'k';
-
-    double absVal = value.abs();
-    // Giữ lại dấu trừ nếu là số âm
-    String sign = value < 0 ? '-' : '';
-
-    if (absVal >= 1000000) {
-      return '$sign\$${(absVal / 1000000).toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '')}$suffixM';
-    } else if (absVal >= 1000) {
-      return '$sign\$${(absVal / 1000).toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '')}$suffixK';
-    } else {
-      return '$sign\$${absVal.toInt()}';
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Obx(() {
@@ -85,7 +66,7 @@ class _HomeRevenueLineChartWidgetState extends State<HomeRevenueLineChartWidget>
                   getTooltipColor: (_) => AppColors.primary,
                   getTooltipItems: (touchedSpots) => touchedSpots.map((s) {
                     return LineTooltipItem(
-                      _formatCurrency(s.y),
+                      CurrencyFormatterUtils.formatCompact(s.y),
                       const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -133,8 +114,7 @@ class _HomeRevenueLineChartWidgetState extends State<HomeRevenueLineChartWidget>
                       return Padding(
                         padding: const EdgeInsets.only(right: 20),
                         child: Text(
-                          NumberFormatterUtils.formatCompactNumber(value,
-                              isCurrency: true),
+                          CurrencyFormatterUtils.formatCompact(value),
                           maxLines: 1,
                           softWrap: false,
                           style: TextStyle(

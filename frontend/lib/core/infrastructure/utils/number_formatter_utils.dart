@@ -22,8 +22,6 @@ class NumberFormatterUtils {
     // 2. Xử lý phần định dạng số
     double absVal = value.abs();
     String sign = value < 0 ? '-' : '';
-    String prefix =
-        isCurrency ? '\$' : ''; // Có thể mở rộng để đổi $ thành đ nếu cần
 
     String formattedValue;
     if (absVal >= 1000000) {
@@ -37,6 +35,6 @@ class NumberFormatterUtils {
     }
 
     // Kết quả trả ra luôn có dạng: Dấu âm (nếu có) + Ký hiệu tiền (nếu có) + Số rút gọn
-    return '$sign$prefix$formattedValue';
+    return '$sign$formattedValue';
   }
 }

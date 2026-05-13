@@ -10,15 +10,28 @@ class SettingsController extends GetxController {
   final currencyController = TextEditingController();
   final storage = GetStorage();
 
-  // Dùng getter (=>) để mỗi khi GetX rebuild app (khi đổi ngôn ngữ),
-  // nó sẽ tự động lấy bản dịch .tr mới nhất.
+  final RxString currentCurrencySymbol = '\$'.obs;
+  final RxString currentCurrencyCode = 'USD'.obs;
+
   List<LanguageModel> get supportedLanguages => [
         LanguageModel('vi', 'VN', TTexts.settingsVietnamese.tr, '🇻🇳'),
         LanguageModel('en', 'US', TTexts.settingsEnglish.tr, '🇺🇸'),
       ];
 
-  // Nếu chưa cấu hình TTexts cho tiền tệ, tạm thời mình để hardcode VND/USD
-  final List<String> supportedCurrencies = ['VND', 'USD'];
+  // ĐÃ SỬA: Bổ sung thêm EUR, GBP, JPY, CNY, KRW
+  List<Map<String, String>> get supportedCurrencies => [
+        {'code': 'USD', 'symbol': '\$', 'name': TTexts.currencyUSD.tr},
+        {'code': 'VND', 'symbol': 'đ', 'name': TTexts.currencyVND.tr},
+        {'code': 'EUR', 'symbol': '€', 'name': TTexts.currencyEUR.tr},
+        {'code': 'GBP', 'symbol': '£', 'name': TTexts.currencyGBP.tr},
+        {'code': 'JPY', 'symbol': '¥', 'name': TTexts.currencyJPY.tr},
+        {
+          'code': 'CNY',
+          'symbol': '¥',
+          'name': TTexts.currencyCNY.tr
+        }, // CNY và JPY đều dùng chung icon ¥
+        {'code': 'KRW', 'symbol': '₩', 'name': TTexts.currencyKRW.tr},
+      ];
 
   @override
   void onInit() {
@@ -27,7 +40,7 @@ class SettingsController extends GetxController {
   }
 
   void _loadCurrentSettings() {
-    // Lấy ngôn ngữ từ Local Storage, mặc định nếu không có là 'en'
+    // 1. Load Language
     String? savedLang = storage.read('app_language');
 
     if (savedLang == 'vi') {
@@ -35,6 +48,18 @@ class SettingsController extends GetxController {
     } else {
       languageController.text = TTexts.settingsEnglish.tr;
     }
+
+    // 2. Load Currency (Mặc định là USD nếu chưa có)
+    String savedCurrencyCode = storage.read('app_currency_code') ?? 'USD';
+    String savedCurrencySymbol = storage.read('app_currency_symbol') ?? '\$';
+
+    currentCurrencyCode.value = savedCurrencyCode;
+    currentCurrencySymbol.value = savedCurrencySymbol;
+
+    final currency = supportedCurrencies.firstWhere(
+        (c) => c['code'] == savedCurrencyCode,
+        orElse: () => supportedCurrencies[0]);
+    currencyController.text = currency['name']!;
   }
 
   Future<void> changeLanguage(LanguageModel lang) async {
@@ -56,12 +81,35 @@ class SettingsController extends GetxController {
       // 5. Lưu vào bộ nhớ
       storage.write('app_language', lang.code);
 
-      // 6. Tắt loader - Lúc này UI đã ổn định hoàn toàn với font mới
+      // Cập nhật lại tên tiền tệ hiển thị trên Input ngay khi đổi ngôn ngữ
+      final currency = supportedCurrencies.firstWhere(
+          (c) => c['code'] == currentCurrencyCode.value,
+          orElse: () => supportedCurrencies[0]);
+      currencyController.text = currency['name']!;
+
       FullScreenLoaderUtils.stopLoading();
     } catch (e) {
       FullScreenLoaderUtils.stopLoading();
       // Sử dụng TErrorHandler nếu bạn đã mixin nó vào
       debugPrint("Lỗi đổi ngôn ngữ: $e");
+    }
+  }
+
+  Future<void> changeCurrency(Map<String, String> currency) async {
+    try {
+      FullScreenLoaderUtils.openLoadingDialog(TTexts.loading.tr);
+
+      currencyController.text = currency['name']!;
+      currentCurrencyCode.value = currency['code']!;
+      currentCurrencySymbol.value = currency['symbol']!;
+
+      storage.write('app_currency_code', currency['code']);
+      storage.write('app_currency_symbol', currency['symbol']);
+
+      await Future.delayed(const Duration(milliseconds: 300));
+      FullScreenLoaderUtils.stopLoading();
+    } catch (e) {
+      FullScreenLoaderUtils.stopLoading();
     }
   }
 

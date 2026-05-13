@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:frontend/core/infrastructure/utils/number_formatter_utils.dart';
+import 'package:frontend/core/infrastructure/utils/currency_formatter_utils.dart';
 import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:get/get.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
@@ -45,7 +45,7 @@ class _HomeRevenueBarChartWidgetState extends State<HomeRevenueBarChartWidget> {
           barTouchData: BarTouchData(
             touchTooltipData: BarTouchTooltipData(
               getTooltipItem: (group, x, rod, y) => BarTooltipItem(
-                '${rod.toY.toStringAsFixed(1)}k\$',
+                CurrencyFormatterUtils.formatCompact(rod.toY * 1000),
                 const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -81,8 +81,7 @@ class _HomeRevenueBarChartWidgetState extends State<HomeRevenueBarChartWidget> {
                   return Padding(
                     padding: const EdgeInsets.only(right: 20),
                     child: Text(
-                      NumberFormatterUtils.formatCompactNumber(realValue,
-                          isCurrency: true),
+                      CurrencyFormatterUtils.formatCompact(realValue),
                       maxLines: 1,
                       softWrap: false,
                       style: TextStyle(

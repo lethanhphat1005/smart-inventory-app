@@ -128,4 +128,13 @@ final Map<String, String> enProfile = {
   //Exceptions
   TTexts.userNotFound: 'User information not found',
   TTexts.userIdNotFound: 'User ID not found for profile update',
+
+  TTexts.currencyUSD: "US Dollar (USD)",
+  TTexts.currencyVND: "Vietnamese Dong (VND)",
+  TTexts.currencyEUR: "Euro (EUR)",
+  TTexts.currencyGBP: "British Pound (GBP)",
+  TTexts.currencyJPY: "Japanese Yen (JPY)",
+  TTexts.currencyCNY: "Chinese Yuan (CNY)",
+  TTexts.currencyKRW: "South Korean Won (KRW)",
+  TTexts.currencyLabel: "Currency",
 };
