@@ -9,7 +9,6 @@ import 'package:frontend/features/inventory/models/inventory_insight_display_mod
 import 'package:frontend/core/ui/widgets/t_snackbars_widget.dart';
 import 'package:frontend/features/transaction/widgets/inbound_product_selection/inbound_product_selection_overflow_dialog_widget.dart';
 import 'package:frontend/routes/app_routes.dart';
-import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:get/get.dart';
 
 class InboundProductSelectionController extends GetxController
@@ -358,8 +357,7 @@ class InboundProductSelectionController extends GetxController
         TCustomDialogWidget(
           title: TTexts.discardSelectionTitle.tr,
           description: TTexts.discardSelectionDesc.tr,
-          icon: const Icon(Iconsax.warning_2_copy,
-              color: Colors.orange, size: 36),
+          icon: const Text('️⚠️', style: TextStyle(fontSize: 40)),
           primaryButtonText: TTexts.exitAnyway.tr,
           onPrimaryPressed: () {
             Get.back();

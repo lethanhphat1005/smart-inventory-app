@@ -13,6 +13,7 @@ import 'package:get/get.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
+import 'package:frontend/features/transaction/widgets/inbound_transaction/inbound_transaction_end_drawer_widget.dart';
 
 class InboundTransactionMobileView
     extends GetView<InboundTransactionController> {
@@ -28,9 +29,26 @@ class InboundTransactionMobileView
         },
         child: Scaffold(
           backgroundColor: AppColors.background,
+
+          // Gắn Drawer trượt từ bên phải
+          endDrawer: const InboundTransactionEndDrawerWidget(),
+
           appBar: TAppBarWidget(
             title: TTexts.inboundTransaction.tr,
             onBackPress: controller.handleExit,
+            // Nút Hamburger trên App Bar
+            actions: [
+              Builder(
+                builder: (context) => IconButton(
+                  icon: const Icon(Iconsax.menu_1_copy,
+                      color: AppColors.primaryText),
+                  onPressed: () {
+                    // Mở Drawer bên phải
+                    Scaffold.of(context).openEndDrawer();
+                  },
+                ),
+              ),
+            ],
           ),
           body: Column(
             children: [
@@ -52,14 +70,14 @@ class InboundTransactionMobileView
                   padding: const EdgeInsets.all(AppSizes.p20),
                   physics: const BouncingScrollPhysics(),
                   children: [
-                    // 1. NÚT "THÊM NHANH" - LUÔN LUÔN HIỂN THỊ Ở ĐẦU DANH SÁCH
+                    // Nút thêm nhanh
                     TransactionAddMoreCardWidget(
                       onTap: () {
                         Get.toNamed(AppRoutes.inboundProductSelection);
                       },
                     ),
 
-                    // 2. KHU VỰC HIỂN THỊ GIỎ HÀNG HOẠT EMPTY STATE
+                    // Khu vực giỏ hàng
                     Obx(() {
                       if (controller.cartItems.isEmpty) {
                         return const Padding(

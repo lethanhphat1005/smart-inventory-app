@@ -821,7 +821,7 @@ class TTexts {
   static const String selectedItems = "selected_items";
   static const String confirmSelection = "confirm_selection";
   static const String searchStandardHint = "search_standard_hint";
-  static const String labelItemsCount = "label_items_count";  
+  static const String labelItemsCount = "label_items_count";
   static const String errorInvalidPackageId = "error_invalid_package_id";
   static const String productBarcodes = "product_barcodes";
   static const String noBarcodesFound = "no_barcodes_found";
@@ -912,10 +912,25 @@ class TTexts {
   static const String checkDetails = "check_details";
   static const String transactionDetails = "transaction_details";
   static const String selectExportType = "select_export_type";
-  static const String outboundOverflowLimitDesc = "outbound_overflow_limit_desc";
+  static const String outboundOverflowLimitDesc =
+      "outbound_overflow_limit_desc";
   static const String currentCart = "current_cart";
   static const String clearCartConfirmDesc = "clear_cart_confirm_desc";
   static const String errorInvalidController = "error_invalid_controller";
+  static const String recentActivities = "recent_activities";
+  static const String priorityList = "priority_list";
+  static const String addAllPriority = "add_all_priority";
+  static const String scanBarcodeShortcut = "scan_barcode_shortcut";
+  static const String allProducts = "all_products";
+  static const String stableInventoryMsg = "stable_inventory_msg";
+  static const String addedPrioritySuccessMsg = "added_priority_success_msg";
+  static const String allPriorityInCartMsg = "all_priority_in_cart_msg";
+  static const String selectedText = "selected_text";
+  static const String checkingInventory = "checking_inventory";
+  static const String options = "options";
+  static const String confirmAddPriorityTitle = "confirm_add_priority_title";
+  static const String confirmAddPriorityDesc = "confirm_add_priority_desc";
+  static const String allPrioritySatisfied = "all_priority_satisfied";
 
   // Specific Reasons
   static const String reasonRetailSale = "reason_retail_sale";
