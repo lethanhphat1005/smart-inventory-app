@@ -10,7 +10,6 @@ import {
   FRIENDLY_REPLY_MODEL,
   FRIENDLY_REPLY_TEMPERATURE,
   LOCK_TTL_SECONDS,
-  STATIC_REJECTION_REPLY,
 } from '../chatbot.constants.js';
 import {
   buildChatDraftKey,
@@ -23,6 +22,7 @@ import { getFriendlyReplyPrompt } from '../chatbot.prompt.js';
 import { CHAT_TOOLS } from '../tools/tool-registry.js';
 
 import type { ChatMemoryService } from './chat-memory.service.js';
+import type { SmartDecisionService } from '../../alerts/services/smart-decision.service.js';
 import type { ListAuditLogsQueryDto } from '../../audit-log/dto/audit-log.dto.js';
 import type { AuditLogService } from '../../audit-log/service/audit-log.service.js';
 import type { ListInventoriesQueryDto } from '../../inventories/dto/inventory.dto.js';
@@ -52,6 +52,7 @@ export class ChatbotService {
     private readonly llmProvider: LLMProvider,
     private readonly auditLogService: AuditLogService,
     private readonly storeMemberRepository: StoreMemberRepository,
+    private readonly smartDecisionService: SmartDecisionService,
   ) {}
 
   private async generateFriendlyReply(context: string): Promise<string> {
@@ -280,7 +281,6 @@ export class ChatbotService {
                 break;
 
               case 'query_audit_logs': {
-                // 1. Lấy thông tin thành viên thực tế từ Database
                 const member =
                   await this.storeMemberRepository.findByIdsWithStore(
                     userId,
@@ -308,6 +308,14 @@ export class ChatbotService {
                 }
                 break;
               }
+
+              case 'analyze_restock':
+                finalResponse = await this.handleAnalyzeRestock(
+                  storeId,
+                  params,
+                  payload.message,
+                );
+                break;
 
               default:
                 finalResponse = {
@@ -341,8 +349,8 @@ export class ChatbotService {
             this.buildReplyContext(
               payload.message,
               `SYSTEM MODERATION: 
-               - If the user's message is a greeting or asks for help/guide/features -> Reply friendly as Tori and EXPLICITLY LIST your capabilities: 1) Create Import/Export, 2) Check product info & low stock, 3) View Audit Logs.
-               - If the message is OUT OF DOMAIN (e.g. coding, math, weather, history, gossip...) -> REFUSE to answer. Strictly reply with exactly this message: "${STATIC_REJECTION_REPLY}"`,
+         - If the user's message is a greeting or asks for help/guide/features -> Reply friendly as Tori and EXPLICITLY LIST your capabilities: 1) Create Import/Export, 2) Check product info & low stock, 3) View Audit Logs, 4) Smart Analysis & Restock Suggestions.
+         - If the message is OUT OF DOMAIN (e.g. coding, math, weather, history, gossip...) -> Politely refuse to answer in the same language as the user. Explain that you are a specialized assistant for Storix and can only assist with store and inventory management tasks.`,
             ),
           ),
         };
@@ -429,8 +437,6 @@ export class ChatbotService {
           };
         }
 
-        // 2. GUARDRAIL THÉP: Kiểm tra xem người dùng CÓ THỰC SỰ GÕ SỐ lượng vào tin nhắn không!
-        // Quét các chữ số (0-9) hoặc các chữ cái chỉ số lượng cơ bản tiếng Anh/Việt
         const hasNumberInMessage =
           /\d/.test(normalizedMessage) ||
           // eslint-disable-next-line max-len
@@ -705,7 +711,7 @@ Inventory: ${firstResult.quantity} ${firstResult.productPackage.unit.name}.`;
       botReply: await this.generateFriendlyReply(
         this.buildReplyContext(
           userMessage,
-          `The system found multiple results for "${productName}". PLEASE SAY IN SHORT: "Tori found several similar products. Please select the exact one from the list below 👇". DO NOT list products yourself.`,
+          `Task: The system found multiple results for "${productName}". Inform the user to select the exact product from the interface below 👇. Keep it very short (1 sentence) and DO NOT list the products yourself.`,
         ),
       ),
       data: { originalIntent: 'get_product_info', items: searchResult },
@@ -790,7 +796,7 @@ Inventory: ${firstResult.quantity} ${firstResult.productPackage.unit.name}.`;
           botReply: await this.generateFriendlyReply(
             this.buildReplyContext(
               userMessage,
-              `Error: "${item.product_name}" was not found. Previous items (if any) have been saved to the cart.`,
+              `Task: Inform the user that "${item.product_name}" was not found in the inventory. Also let them know that previous valid items (if any) have been saved to the draft cart.`,
             ),
           ),
         });
@@ -844,7 +850,7 @@ Inventory: ${firstResult.quantity} ${firstResult.productPackage.unit.name}.`;
           botReply: await this.generateFriendlyReply(
             this.buildReplyContext(
               userMessage,
-              `Error: Insufficient stock. The inventory has ${targetItem.quantity}, but you want to export a total of ${newQuantity}.`,
+              `Task: Inform the user that there is insufficient stock. The inventory only has ${targetItem.quantity}, but they want to export ${newQuantity}.`,
             ),
           ),
         });
@@ -1258,6 +1264,121 @@ Task: Answer the user's query accurately using ONLY the logs provided above. Do 
     }
   }
 
+  private async handleAnalyzeRestock(
+    storeId: string,
+    params: LLMToolParams,
+    userMessage: string,
+  ): Promise<ChatbotResponseDto> {
+    // TRƯỜNG HỢP 1: PHÂN TÍCH BÁN CHÉO (MARKET BASKET ANALYSIS)
+    // Người dùng hỏi: "Khách mua Bia Tiger thường mua kèm gì?"
+    if (params.product_name) {
+      const searchResult = await this.searchInventory(
+        storeId,
+        params.product_name,
+      );
+
+      if (searchResult.length === 0) {
+        return {
+          aiIntent: 'analyze_restock',
+          botReply: await this.generateFriendlyReply(
+            this.buildReplyContext(
+              userMessage,
+              `Không tìm thấy sản phẩm "${params.product_name}" trong hệ thống để phân tích.`,
+            ),
+          ),
+        };
+      }
+
+      const targetItem =
+        findExactInventoryMatch(searchResult, params.product_name) ||
+        searchResult[0];
+      const packageId = targetItem!.productPackage.productPackageId;
+      const displayName = targetItem!.productPackage.displayName;
+
+      const crossSellItems =
+        await this.transactionService.getCrossSellSuggestions(
+          storeId,
+          packageId,
+          3,
+        );
+
+      if (crossSellItems.length === 0) {
+        return {
+          aiIntent: 'analyze_restock',
+          botReply: await this.generateFriendlyReply(
+            this.buildReplyContext(
+              userMessage,
+              `Hiện tại chưa có đủ dữ liệu giao dịch để phân tích các sản phẩm thường được mua kèm với ${displayName}.`,
+            ),
+          ),
+        };
+      }
+
+      // Format dữ liệu để nhồi vào prompt cho AI
+      const crossSellText = crossSellItems
+        .map(
+          (item: {
+            associatedPackageId: string;
+            frequency: number;
+            productName?: string;
+          }) =>
+            `- Sản phẩm: ${item.productName || 'N/A'} (Mã tham chiếu: ${item.associatedPackageId}, Tần suất mua cùng: ${item.frequency} lần)`,
+        )
+        .join('\n');
+
+      const systemContext = `Data Analysis: Customers who bought "${displayName}" often buy these items together:\n${crossSellText}\nTask: Explain this insight to the user naturally using Product Names. Suggest they might want to import or display these items close to each other.`;
+
+      return {
+        aiIntent: 'analyze_restock',
+        botReply: await this.generateFriendlyReply(
+          this.buildReplyContext(userMessage, systemContext),
+        ),
+        data: {
+          type: 'cross_sell',
+          targetProduct: displayName,
+          crossSellItems,
+        },
+      };
+    }
+
+    const suggestions =
+      await this.smartDecisionService.getStoreReorderSuggestions(storeId);
+
+    if (suggestions.length === 0) {
+      return {
+        aiIntent: 'analyze_restock',
+        botReply: await this.generateFriendlyReply(
+          this.buildReplyContext(
+            userMessage,
+            'Kho hàng của bạn hiện đang ở trạng thái tối ưu. Dựa trên tốc độ bán hàng hiện tại, chưa có sản phẩm nào chạm ngưỡng cần phải nhập thêm ngay lập tức.',
+          ),
+        ),
+        data: { type: 'general_restock', suggestions: [] },
+      };
+    }
+
+    const displaySuggestions = suggestions.slice(0, 5);
+    const suggestionsText = displaySuggestions
+      .map(
+        (s) =>
+          `- ${s.productName}: Kho còn ${s.currentStock}. Vận tốc bán hàng dự báo cạn kho sớm. Đề xuất nhập thêm: ${s.suggestedQuantity} đơn vị.`,
+      )
+      .join('\n');
+
+    const total = suggestions.length;
+    const moreText = total > 5 ? ` (Và ${total - 5} mặt hàng khác)` : '';
+
+    const systemContext = `Restock Analysis Results:\n${suggestionsText}\n${moreText}\nTask: Act as a proactive operation manager. Present these restock suggestions to the user clearly. You can ask if they want you to automatically draft an Import Transaction for these items.`;
+
+    return {
+      aiIntent: 'analyze_restock',
+      botReply: await this.generateFriendlyReply(
+        this.buildReplyContext(userMessage, systemContext),
+      ),
+      data: { type: 'general_restock', suggestions },
+    };
+  }
+
   private buildReplyContext(userMessage: string, systemData: string): string {
     return `You are Tori, a helpful AI assistant for Storix.
 
@@ -1268,10 +1389,14 @@ USER MESSAGE:
 "${userMessage}"
 
 STRICT INSTRUCTIONS:
-- IF the USER MESSAGE is in English -> You MUST reply ONLY in English.
-- IF the USER MESSAGE is in Vietnamese -> You MUST reply ONLY in Vietnamese.
+- ALWAYS reply in the EXACT SAME LANGUAGE as the USER MESSAGE.
+- If the user switches languages, you switch your language accordingly.
 - NEVER explain your language detection. NEVER output lines like "The language is..." or "Ngôn ngữ là...".
 - Respond directly with the conversational text based ONLY on the SYSTEM FACTS.
-- CRITICAL: DO NOT output any prefixes like "[REPLY]", "Reply:", or explain your thoughts. Output ONLY the final conversational response.`;
+- CRITICAL: DO NOT output any prefixes like "[REPLY]", "Reply:", or explain your thoughts. Output ONLY the final conversational response.
+- 🛑 DATA PRESENTATION RULES:
+  - NEVER display raw IDs or UUIDs (e.g., '22222222-2222...') in your conversation.
+  - ALWAYS use the Product Name (DisplayName) provided in the facts to refer to items.
+  - If a Product Name is available, ignore its ID in the final reply.`;
   }
 }

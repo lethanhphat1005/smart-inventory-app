@@ -165,4 +165,39 @@ export class TransactionRepository {
       totalPrice: transaction.totalPrice.toNumber(),
     };
   }
+
+  async getFrequentlyBoughtTogether(
+    storeId: string,
+    productPackageId: string,
+    limit: number = 3,
+  ): Promise<
+    { associatedPackageId: string; frequency: number; productName: string }[]
+  > {
+    const result = await this.db.$queryRaw<
+      { associatedPackageId: string; frequency: bigint; productName: string }[]
+    >`
+      SELECT 
+        td2."product_package_id" AS "associatedPackageId",
+        pp."display_name" AS "productName", -- Lấy thêm tên sản phẩm ở đây
+        COUNT(td2."transaction_id") AS "frequency"
+      FROM "TransactionDetail" td1
+      JOIN "TransactionDetail" td2 ON td1."transaction_id" = td2."transaction_id"
+      JOIN "ProductPackage" pp ON td2."product_package_id" = pp."product_package_id" -- Join thêm bảng Package
+      JOIN "Transaction" t ON td1."transaction_id" = t."transaction_id"
+      WHERE td1."product_package_id" = ${productPackageId}
+        AND td1."product_package_id" != td2."product_package_id"
+        AND t."type" = 'export'
+        AND t."store_id" = ${storeId}
+        AND t."status" = 'completed'
+      GROUP BY td2."product_package_id", pp."display_name" -- Group thêm theo tên
+      ORDER BY "frequency" DESC
+      LIMIT ${limit};
+    `;
+
+    return result.map((item) => ({
+      associatedPackageId: item.associatedPackageId,
+      frequency: Number(item.frequency),
+      productName: item.productName,
+    }));
+  }
 }

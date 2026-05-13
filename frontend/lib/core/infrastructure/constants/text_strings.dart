@@ -528,6 +528,19 @@ class TTexts {
   static const String chatbotWelcomeDetailed = "chatbot_welcome_detailed";
   static const String chatbotMessageTooLong = "chatbot_message_too_long";
 
+  // -- Smart AI Analysis (Thêm vào phần Chatbot)
+  static const String chatbotAnalyzeCrossSellTitle = "chatbot_analyze_cross_sell_title";
+  static const String chatbotAnalyzeRestockTitle = "chatbot_analyze_restock_title";
+  static const String chatbotAnalyzeOptimalStock = "chatbot_analyze_optimal_stock";
+  static const String chatbotAnalyzeCurrentStock = "chatbot_analyze_current_stock";
+  static const String chatbotAnalyzeBoughtTogether = "chatbot_analyze_bought_together";
+  static const String chatbotAnalyzeFrequencyUnit = "chatbot_analyze_frequency_unit";
+  static const String chatbotPromptAnalyzeRestock = "chatbot_prompt_analyze_restock";
+  static const String chatbotPromptAnalyzeRestockSub = "chatbot_prompt_analyze_restock_sub";
+  static const String chatbotPromptCrossSell = "chatbot_prompt_cross_sell";
+  static const String chatbotPromptCrossSellSub = "chatbot_prompt_cross_sell_sub";
+  static const String chatbotQuickActionAnalyze = "chatbot_quick_action_analyze";
+
 // Product Info Card — nhãn giá
   static const String chatbotSellingPrice = 'chatbotSellingPrice';
   static const String chatbotImportPrice = 'chatbotImportPrice';

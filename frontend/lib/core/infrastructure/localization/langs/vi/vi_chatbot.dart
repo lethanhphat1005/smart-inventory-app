@@ -76,5 +76,20 @@ final Map<String, String> viChatbot = {
   TTexts.chatbotPromptAuditLogSub: 'Xem thao tác gần đây (Beta)',
   TTexts.chatbotPromptHelpSub: 'Cách sử dụng Tori',
   TTexts.chatbotMessageTooLong: 'Tin nhắn quá dài (tối đa 100 ký tự).',
-  TTexts.chatbotCoppiedSnackbar: "Sao chép vào bộ nhớ tạm thành công!"
+  TTexts.chatbotCoppiedSnackbar: "Sao chép vào bộ nhớ tạm thành công!",
+
+  // Smart AI Analysis
+  TTexts.chatbotAnalyzeCrossSellTitle: 'Phân tích mua kèm',
+  TTexts.chatbotAnalyzeRestockTitle: 'Dự báo nhập hàng',
+  TTexts.chatbotAnalyzeOptimalStock:
+      'Dữ liệu kho đang rất tốt. Chưa có sản phẩm nào chạm ngưỡng hết hàng.',
+  TTexts.chatbotAnalyzeCurrentStock: 'Tồn hiện tại: ',
+  TTexts.chatbotAnalyzeBoughtTogether:
+      'Khách mua @target thường mua kèm:', // Dùng @target để replace
+  TTexts.chatbotAnalyzeFrequencyUnit: 'lượt',
+  TTexts.chatbotPromptAnalyzeRestock: 'Tư vấn nhập hàng',
+  TTexts.chatbotPromptAnalyzeRestockSub: 'Gợi ý nhập hàng thông minh',
+  TTexts.chatbotPromptCrossSell: 'Phân tích mua kèm',
+  TTexts.chatbotPromptCrossSellSub: 'Sản phẩm hay mua chung',
+  TTexts.chatbotQuickActionAnalyze: 'Phân tích',
 };

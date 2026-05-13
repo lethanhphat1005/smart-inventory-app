@@ -76,5 +76,20 @@ final Map<String, String> enChatbot = {
   TTexts.chatbotPromptAuditLogSub: 'View recent actions (Beta)',
   TTexts.chatbotPromptHelpSub: 'How to use Tori',
   TTexts.chatbotMessageTooLong: 'Message is too long (max 100 characters).',
-  TTexts.chatbotCoppiedSnackbar: "Copy to clipboard was successful!"
+  TTexts.chatbotCoppiedSnackbar: "Copy to clipboard was successful!",
+
+  // Smart AI Analysis
+  TTexts.chatbotAnalyzeCrossSellTitle: 'Cross-sell Analysis',
+  TTexts.chatbotAnalyzeRestockTitle: 'Restock Forecast',
+  TTexts.chatbotAnalyzeOptimalStock:
+      'Inventory data is currently optimal. No urgent restock needed.',
+  TTexts.chatbotAnalyzeCurrentStock: 'Current stock: ',
+  TTexts.chatbotAnalyzeBoughtTogether:
+      'Customers who bought @target often buy:', // Dùng @target để replace
+  TTexts.chatbotAnalyzeFrequencyUnit: 'times',
+  TTexts.chatbotPromptAnalyzeRestock: 'Restock advice',
+  TTexts.chatbotPromptAnalyzeRestockSub: 'Smart import suggestions',
+  TTexts.chatbotPromptCrossSell: 'Cross-sell analysis',
+  TTexts.chatbotPromptCrossSellSub: 'Frequently bought together',
+  TTexts.chatbotQuickActionAnalyze: 'Analysis',
 };

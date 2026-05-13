@@ -43,6 +43,13 @@ class ChatbotSuggestedPrompts extends StatelessWidget {
         sub: TTexts.chatbotPromptExportSub.tr,
         autoSend: false,
       ),
+      _PromptItem(
+        icon: Iconsax.status_up, // Dùng icon biểu đồ tăng trưởng
+        iconColor: const Color(0xFFD97706), // Màu cam
+        label: TTexts.chatbotPromptAnalyzeRestock.tr,
+        sub: TTexts.chatbotPromptAnalyzeRestockSub.tr,
+        autoSend: true, // Nhấn vào là bot tự động chạy phân tích ngay
+      ),
       if (controller.canViewAuditLog)
         _PromptItem(
           icon: Iconsax.clock,
