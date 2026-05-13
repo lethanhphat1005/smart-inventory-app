@@ -22,7 +22,7 @@ class ChatbotMessage extends StatelessWidget {
         onLongPress: () async {
           await Clipboard.setData(ClipboardData(text: message.text));
           Get.rawSnackbar(
-            message: TTexts.barcodeCopied.tr,
+            message: TTexts.chatbotCoppiedSnackbar.tr,
             snackPosition: SnackPosition.TOP,
             backgroundColor: AppColors.primaryText.withOpacity(0.8),
             borderRadius: 12,

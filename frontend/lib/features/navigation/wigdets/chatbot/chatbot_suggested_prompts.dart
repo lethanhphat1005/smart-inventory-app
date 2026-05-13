@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/features/navigation/controllers/chatbot_ui_controller.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:get/get.dart';
 
@@ -11,6 +12,8 @@ class ChatbotSuggestedPrompts extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final controller = Get.find<ChatbotUiController>();
+
     final prompts = [
       _PromptItem(
         icon: Iconsax.warning_2,
@@ -40,13 +43,14 @@ class ChatbotSuggestedPrompts extends StatelessWidget {
         sub: TTexts.chatbotPromptExportSub.tr,
         autoSend: false,
       ),
-      _PromptItem(
-        icon: Iconsax.clock,
-        iconColor: const Color(0xFF4A4A9C),
-        label: TTexts.chatbotPromptAuditLog.tr,
-        sub: TTexts.chatbotPromptAuditLogSub.tr,
-        autoSend: true,
-      ),
+      if (controller.canViewAuditLog)
+        _PromptItem(
+          icon: Iconsax.clock,
+          iconColor: const Color(0xFF4A4A9C),
+          label: TTexts.chatbotPromptAuditLog.tr,
+          sub: TTexts.chatbotPromptAuditLogSub.tr,
+          autoSend: true,
+        ),
       _PromptItem(
         icon: Iconsax.info_circle,
         iconColor: const Color(0xFF2D82A3),

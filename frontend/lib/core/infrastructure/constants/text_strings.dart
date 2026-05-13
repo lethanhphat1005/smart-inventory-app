@@ -513,13 +513,15 @@ class TTexts {
       "chatbot_quick_action_low_stock";
   static const String chatbotQuickActionImport = "chatbot_quick_action_import";
   static const String chatbotQuickActionExport = "chatbot_quick_action_export";
+  static const String chatbotCoppiedSnackbar = "chatbot_coppied_snackbar";
 
   // Suggested prompts — sub-text hướng dẫn
   static const String chatbotPromptLowStockSub = 'chatbotPromptLowStockSub';
   static const String chatbotPromptCheckInfoSub = 'chatbotPromptCheckInfoSub';
   static const String chatbotPromptImportSub = 'chatbotPromptImportSub';
   static const String chatbotPromptExportSub = 'chatbotPromptExportSub';
-  static const String chatbotPromptAuditLogSub = 'chatbotPromptAuditLogSub'; // Mới
+  static const String chatbotPromptAuditLogSub =
+      'chatbotPromptAuditLogSub'; // Mới
   static const String chatbotPromptHelpSub = 'chatbotPromptHelpSub'; // Mới
   static const String chatbotPromptAuditLog = "chatbot_prompt_audit_log";
   static const String chatbotPromptHelp = "chatbot_prompt_help";
@@ -1123,7 +1125,8 @@ class TTexts {
   static const String profileDialogDescriptionLogout =
       'profile_dialog_description_logout';
   static const String profileDialogBtnLogout = 'profile_dialog_btn_logout';
-  static const String profileStatusNotUpdatedYet = 'profile_status_not_updated_yet';
+  static const String profileStatusNotUpdatedYet =
+      'profile_status_not_updated_yet';
   static const String profileMemberInfo = 'profile_member_info';
   static const String errorLoadingData = "error_loading_data";
   static const String verifyingData = "verifying_data";

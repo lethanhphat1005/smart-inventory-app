@@ -66,7 +66,6 @@ final Map<String, String> enChatbot = {
   TTexts.chatbotPromptHelp: 'Bot Guide',
   TTexts.chatbotWelcomeDetailed:
       'Hello! I am Tori, your AI assistant. 🦉\n\nI can help you with:\n📦 Create Import/Export transactions\n🔍 Check stock levels & alerts\n🕒 View system action history\n\nHow can I assist you today?',
-  // Thêm 3 dòng này vào enChatbot map
   TTexts.chatbotQuickActionInfo: 'Info',
   TTexts.chatbotQuickActionHistory: 'History',
   TTexts.chatbotQuickActionHelp: 'Help',
@@ -77,4 +76,5 @@ final Map<String, String> enChatbot = {
   TTexts.chatbotPromptAuditLogSub: 'View recent actions (Beta)',
   TTexts.chatbotPromptHelpSub: 'How to use Tori',
   TTexts.chatbotMessageTooLong: 'Message is too long (max 100 characters).',
+  TTexts.chatbotCoppiedSnackbar: "Copy to clipboard was successful!"
 };

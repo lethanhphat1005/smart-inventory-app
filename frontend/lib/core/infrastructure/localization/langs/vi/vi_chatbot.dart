@@ -76,4 +76,5 @@ final Map<String, String> viChatbot = {
   TTexts.chatbotPromptAuditLogSub: 'Xem thao tác gần đây (Beta)',
   TTexts.chatbotPromptHelpSub: 'Cách sử dụng Tori',
   TTexts.chatbotMessageTooLong: 'Tin nhắn quá dài (tối đa 100 ký tự).',
+  TTexts.chatbotCoppiedSnackbar: "Sao chép vào bộ nhớ tạm thành công!"
 };

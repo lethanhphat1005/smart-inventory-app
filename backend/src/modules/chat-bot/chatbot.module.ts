@@ -6,19 +6,20 @@ import { ChatbotService } from './services/chatbot.service.js';
 import { redisClient } from '../../db/redis.js';
 import { auditLogService } from '../audit-log/audit-log.module.js';
 import { inventoryService } from '../inventories/index.js';
+import { storeMemberRepository } from '../store-member/store-member.module.js';
 import { transactionService } from '../transactions/index.js';
 
 const chatMemoryService = new ChatMemoryService(redisClient);
 const llmProvider = new OpenAIProvider();
 
-// 2. Đảm bảo tham số thứ 6 truyền vào là instance đã được import ở trên
 const chatService = new ChatbotService(
   inventoryService,
   transactionService,
   redisClient,
   chatMemoryService,
   llmProvider,
-  auditLogService, // Bây giờ biến này đã có giá trị thay vì undefined
+  auditLogService,
+  storeMemberRepository,
 );
 
 const chatController = new ChatbotController(chatService);

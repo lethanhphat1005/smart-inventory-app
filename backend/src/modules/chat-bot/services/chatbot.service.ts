@@ -2,6 +2,7 @@ import { StatusCodes } from 'http-status-codes';
 import { v4 as uuidv4 } from 'uuid';
 
 import { CustomError } from '../../../common/errors/index.js';
+import { ROLE } from '../../access-control/role-permission.constant.js';
 import {
   COORDINATOR_MODEL,
   COORDINATOR_TEMPERATURE,
@@ -26,6 +27,7 @@ import type { ListAuditLogsQueryDto } from '../../audit-log/dto/audit-log.dto.js
 import type { AuditLogService } from '../../audit-log/service/audit-log.service.js';
 import type { ListInventoriesQueryDto } from '../../inventories/dto/inventory.dto.js';
 import type { InventoryService } from '../../inventories/index.js';
+import type { StoreMemberRepository } from '../../store-member/repository/store-member.repository.js';
 import type { TransactionService } from '../../transactions/transaction.service.js';
 import type { ChatbotRequestDto, ChatbotResponseDto } from '../chatbot.dto.js';
 import type {
@@ -49,6 +51,7 @@ export class ChatbotService {
     private readonly chatMemoryService: ChatMemoryService,
     private readonly llmProvider: LLMProvider,
     private readonly auditLogService: AuditLogService,
+    private readonly storeMemberRepository: StoreMemberRepository,
   ) {}
 
   private async generateFriendlyReply(context: string): Promise<string> {
@@ -276,13 +279,35 @@ export class ChatbotService {
                 );
                 break;
 
-              case 'query_audit_logs':
-                finalResponse = await this.handleQueryAuditLogs(
-                  storeId,
-                  params,
-                  payload.message,
-                );
+              case 'query_audit_logs': {
+                // 1. Lấy thông tin thành viên thực tế từ Database
+                const member =
+                  await this.storeMemberRepository.findByIdsWithStore(
+                    userId,
+                    storeId,
+                  );
+
+                const userRole = member?.role?.toUpperCase() || ROLE.STAFF;
+
+                if (userRole === ROLE.STAFF) {
+                  finalResponse = {
+                    aiIntent: 'unauthorized',
+                    botReply: await this.generateFriendlyReply(
+                      this.buildReplyContext(
+                        payload.message,
+                        "System: The user is trying to view the Audit Logs, but their role is 'Staff'. They DO NOT have permission. Task: Politely refuse and state that only Managers or Owners can view the system history.",
+                      ),
+                    ),
+                  };
+                } else {
+                  finalResponse = await this.handleQueryAuditLogs(
+                    storeId,
+                    params,
+                    payload.message,
+                  );
+                }
                 break;
+              }
 
               default:
                 finalResponse = {
@@ -1040,10 +1065,7 @@ Inventory: ${firstResult.quantity} ${firstResult.productPackage.unit.name}.`;
       return {
         aiIntent: 'query_audit_logs',
         botReply: await this.generateFriendlyReply(
-          this.buildReplyContext(
-            userMessage,
-            'No action history found.',
-          ),
+          this.buildReplyContext(userMessage, 'No action history found.'),
         ),
       };
     }
