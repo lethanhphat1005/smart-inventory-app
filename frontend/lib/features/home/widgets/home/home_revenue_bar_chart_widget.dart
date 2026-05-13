@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:frontend/core/infrastructure/utils/number_formatter_utils.dart';
 import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:get/get.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
@@ -76,24 +77,12 @@ class _HomeRevenueBarChartWidgetState extends State<HomeRevenueBarChartWidget> {
                 interval: limits['interval'],
                 getTitlesWidget: (value, meta) {
                   double realValue = value * 1000;
-                  double absVal = realValue.abs();
-                  String sign = realValue < 0 ? '-' : '';
-
-                  String label;
-                  if (absVal >= 1000000) {
-                    label =
-                        '$sign\$${(absVal / 1000000).toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '')}M';
-                  } else if (absVal >= 1000) {
-                    label =
-                        '$sign\$${(absVal / 1000).toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '')}k';
-                  } else {
-                    label = '$sign\$${absVal.toInt()}';
-                  }
 
                   return Padding(
                     padding: const EdgeInsets.only(right: 20),
                     child: Text(
-                      label,
+                      NumberFormatterUtils.formatCompactNumber(realValue,
+                          isCurrency: true),
                       maxLines: 1,
                       softWrap: false,
                       style: TextStyle(

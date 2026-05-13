@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:frontend/core/infrastructure/utils/number_formatter_utils.dart';
 import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:get/get.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
@@ -37,14 +38,18 @@ class _HomeRevenueLineChartWidgetState extends State<HomeRevenueLineChartWidget>
 
   // Tự động quy đổi M (triệu), k (ngàn) và bỏ chữ k nếu dưới 1000
   String _formatCurrency(double value) {
+    final isVi = Get.locale?.languageCode == 'vi';
+    final suffixM = isVi ? 'Tr' : 'M';
+    const suffixK = 'k';
+
     double absVal = value.abs();
     // Giữ lại dấu trừ nếu là số âm
     String sign = value < 0 ? '-' : '';
 
     if (absVal >= 1000000) {
-      return '$sign\$${(absVal / 1000000).toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '')}M';
+      return '$sign\$${(absVal / 1000000).toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '')}$suffixM';
     } else if (absVal >= 1000) {
-      return '$sign\$${(absVal / 1000).toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '')}k';
+      return '$sign\$${(absVal / 1000).toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '')}$suffixK';
     } else {
       return '$sign\$${absVal.toInt()}';
     }
@@ -128,7 +133,8 @@ class _HomeRevenueLineChartWidgetState extends State<HomeRevenueLineChartWidget>
                       return Padding(
                         padding: const EdgeInsets.only(right: 20),
                         child: Text(
-                          _formatCurrency(value),
+                          NumberFormatterUtils.formatCompactNumber(value,
+                              isCurrency: true),
                           maxLines: 1,
                           softWrap: false,
                           style: TextStyle(

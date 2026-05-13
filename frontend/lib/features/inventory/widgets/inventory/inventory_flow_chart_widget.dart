@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:frontend/core/infrastructure/utils/number_formatter_utils.dart';
 import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:get/get.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
@@ -56,12 +57,18 @@ class InventoryFlowChartWidget extends GetView<InventoryController> {
             children: [
               Obx(() => _buildBottomStat(
                   TTexts.totalItemsTransaction.tr,
-                  "${controller.totalActiveProducts.value}",
+                  NumberFormatterUtils.formatCompactNumber(
+                      controller.totalActiveProducts.value.toDouble(),
+                      isCurrency: false),
                   AppColors.primaryText)),
-              Obx(() => _buildBottomStat(TTexts.flowIn.tr,
-                  "+${controller.weeklyInbound.value}", AppColors.stockIn)),
-              Obx(() => _buildBottomStat(TTexts.flowOut.tr,
-                  "-${controller.weeklyOutbound.value}", AppColors.stockOut)),
+              Obx(() => _buildBottomStat(
+                  TTexts.flowIn.tr,
+                  "+${NumberFormatterUtils.formatCompactNumber(controller.weeklyInbound.value.toDouble(), isCurrency: false)}",
+                  AppColors.stockIn)),
+              Obx(() => _buildBottomStat(
+                  TTexts.flowOut.tr,
+                  "-${NumberFormatterUtils.formatCompactNumber(controller.weeklyOutbound.value.toDouble(), isCurrency: false)}",
+                  AppColors.stockOut)),
             ],
           )
         ],
@@ -138,15 +145,13 @@ class InventoryFlowChartWidget extends GetView<InventoryController> {
                 reservedSize: 24,
                 getTitlesWidget: (value, meta) {
                   final now = DateTime.now();
-                  final days = [
-                    'Mon',
-                    'Tue',
-                    'Wed',
-                    'Thu',
-                    'Fri',
-                    'Sat',
-                    'Sun'
-                  ];
+
+                  // ĐÃ SỬA: Tự động đổi ngày theo ngôn ngữ App
+                  final isVi = Get.locale?.languageCode == 'vi';
+                  final days = isVi
+                      ? ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN']
+                      : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
                   final labels = <String>[];
                   for (int i = 6; i >= 0; i--) {
                     final date = now.subtract(Duration(days: i));
@@ -170,13 +175,25 @@ class InventoryFlowChartWidget extends GetView<InventoryController> {
             leftTitles: AxisTitles(
               sideTitles: SideTitles(
                 showTitles: true,
-                reservedSize: 32,
+                reservedSize: 40,
                 interval: chartMaxY > 50 ? (chartMaxY / 4).roundToDouble() : 10,
                 getTitlesWidget: (value, meta) {
                   if (value == 0) return const SizedBox.shrink();
-                  return Text("${value.toInt()}",
+
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: Text(
+                      NumberFormatterUtils.formatCompactNumber(value,
+                          isCurrency: false),
+                      maxLines: 1,
+                      softWrap: false,
+                      textAlign: TextAlign.right,
                       style: const TextStyle(
-                          fontSize: 10, color: AppColors.softGrey));
+                        fontSize: 10,
+                        color: AppColors.softGrey,
+                      ),
+                    ),
+                  );
                 },
               ),
             ),
