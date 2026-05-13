@@ -13,7 +13,6 @@ export interface LLMToolParams {
   product_name?: string;
   quantity?: number;
   products?: LLMProductItem[];
-
   action_type?: string;
   keyword?: string;
   time_period?: string;

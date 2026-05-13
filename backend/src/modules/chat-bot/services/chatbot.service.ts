@@ -23,6 +23,7 @@ import { getFriendlyReplyPrompt } from '../chatbot.prompt.js';
 import { CHAT_TOOLS } from '../tools/tool-registry.js';
 
 import type { ChatMemoryService } from './chat-memory.service.js';
+import type { SmartDecisionService } from '../../alerts/services/smart-decision.service.js';
 import type { ListAuditLogsQueryDto } from '../../audit-log/dto/audit-log.dto.js';
 import type { AuditLogService } from '../../audit-log/service/audit-log.service.js';
 import type { ListInventoriesQueryDto } from '../../inventories/dto/inventory.dto.js';
@@ -52,6 +53,7 @@ export class ChatbotService {
     private readonly llmProvider: LLMProvider,
     private readonly auditLogService: AuditLogService,
     private readonly storeMemberRepository: StoreMemberRepository,
+    private readonly smartDecisionService: SmartDecisionService,
   ) {}
 
   private async generateFriendlyReply(context: string): Promise<string> {
@@ -280,7 +282,6 @@ export class ChatbotService {
                 break;
 
               case 'query_audit_logs': {
-                // 1. Lấy thông tin thành viên thực tế từ Database
                 const member =
                   await this.storeMemberRepository.findByIdsWithStore(
                     userId,
@@ -308,6 +309,14 @@ export class ChatbotService {
                 }
                 break;
               }
+
+              case 'analyze_restock':
+                finalResponse = await this.handleAnalyzeRestock(
+                  storeId,
+                  params,
+                  payload.message,
+                );
+                break;
 
               default:
                 finalResponse = {
@@ -1256,6 +1265,123 @@ Task: Answer the user's query accurately using ONLY the logs provided above. Do 
       default:
         return {};
     }
+  }
+
+  private async handleAnalyzeRestock(
+    storeId: string,
+    params: LLMToolParams,
+    userMessage: string,
+  ): Promise<ChatbotResponseDto> {
+    // TRƯỜNG HỢP 1: PHÂN TÍCH BÁN CHÉO (MARKET BASKET ANALYSIS)
+    // Người dùng hỏi: "Khách mua Bia Tiger thường mua kèm gì?"
+    if (params.product_name) {
+      const searchResult = await this.searchInventory(
+        storeId,
+        params.product_name,
+      );
+
+      if (searchResult.length === 0) {
+        return {
+          aiIntent: 'analyze_restock',
+          botReply: await this.generateFriendlyReply(
+            this.buildReplyContext(
+              userMessage,
+              `Không tìm thấy sản phẩm "${params.product_name}" trong hệ thống để phân tích.`,
+            ),
+          ),
+        };
+      }
+
+      // Lấy sản phẩm khớp nhất (tương tự logic get_product_info)
+      const targetItem =
+        findExactInventoryMatch(searchResult, params.product_name) ||
+        searchResult[0];
+      const packageId = targetItem!.productPackage.productPackageId;
+      const displayName = targetItem!.productPackage.displayName;
+
+      // Gọi hàm Raw SQL trong TransactionRepository (thông qua TransactionService)
+      // Lưu ý: Bạn cần tạo method getCrossSellSuggestions trong
+      // TransactionService để gọi sang Repo nhé.
+      const crossSellItems =
+        await this.transactionService.getCrossSellSuggestions(
+          storeId,
+          packageId,
+          3,
+        );
+
+      if (crossSellItems.length === 0) {
+        return {
+          aiIntent: 'analyze_restock',
+          botReply: await this.generateFriendlyReply(
+            this.buildReplyContext(
+              userMessage,
+              `Hiện tại chưa có đủ dữ liệu giao dịch để phân tích các sản phẩm thường được mua kèm với ${displayName}.`,
+            ),
+          ),
+        };
+      }
+
+      // Format dữ liệu để nhồi vào prompt cho AI
+      const crossSellText = crossSellItems
+        .map(
+          (item: { associatedPackageId: string; frequency: number }) =>
+            `- Sản phẩm ID [${item.associatedPackageId}] (Tần suất xuất hiện cùng lúc: ${item.frequency} lần)`,
+        )
+        .join('\n');
+
+      const systemContext = `Data Analysis: Customers who bought "${displayName}" often buy these items together:\n${crossSellText}\nTask: Explain this insight to the user naturally and suggest they might want to import or display these items close to each other.`;
+
+      return {
+        aiIntent: 'analyze_restock',
+        botReply: await this.generateFriendlyReply(
+          this.buildReplyContext(userMessage, systemContext),
+        ),
+        data: {
+          type: 'cross_sell',
+          targetProduct: displayName,
+          crossSellItems,
+        },
+      };
+    }
+
+    // TRƯỜNG HỢP 2: DỰ BÁO NHẬP HÀNG CHUNG (PREDICTIVE RESTOCKING)
+    // Người dùng hỏi: "Tư vấn cho tôi nên nhập hàng gì hôm nay?"
+    const suggestions =
+      await this.smartDecisionService.getStoreReorderSuggestions(storeId);
+
+    if (suggestions.length === 0) {
+      return {
+        aiIntent: 'analyze_restock',
+        botReply: await this.generateFriendlyReply(
+          this.buildReplyContext(
+            userMessage,
+            'Kho hàng của bạn hiện đang ở trạng thái tối ưu. Dựa trên tốc độ bán hàng hiện tại, chưa có sản phẩm nào chạm ngưỡng cần phải nhập thêm ngay lập tức.',
+          ),
+        ),
+        data: { type: 'general_restock', suggestions: [] },
+      };
+    }
+
+    const displaySuggestions = suggestions.slice(0, 5); // Lấy top 5 cảnh báo khẩn cấp nhất
+    const suggestionsText = displaySuggestions
+      .map(
+        (s) =>
+          `- ${s.productName}: Kho còn ${s.currentStock}. Vận tốc bán hàng dự báo cạn kho sớm. Đề xuất nhập thêm: ${s.suggestedQuantity} đơn vị.`,
+      )
+      .join('\n');
+
+    const total = suggestions.length;
+    const moreText = total > 5 ? ` (Và ${total - 5} mặt hàng khác)` : '';
+
+    const systemContext = `Restock Analysis Results:\n${suggestionsText}\n${moreText}\nTask: Act as a proactive operation manager. Present these restock suggestions to the user clearly. You can ask if they want you to automatically draft an Import Transaction for these items.`;
+
+    return {
+      aiIntent: 'analyze_restock',
+      botReply: await this.generateFriendlyReply(
+        this.buildReplyContext(userMessage, systemContext),
+      ),
+      data: { type: 'general_restock', suggestions },
+    };
   }
 
   private buildReplyContext(userMessage: string, systemData: string): string {

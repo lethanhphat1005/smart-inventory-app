@@ -165,4 +165,37 @@ export class TransactionRepository {
       totalPrice: transaction.totalPrice.toNumber(),
     };
   }
+
+  async getFrequentlyBoughtTogether(
+    storeId: string,
+    productPackageId: string,
+    limit: number = 3,
+  ): Promise<{ associatedPackageId: string; frequency: number }[]> {
+    const result = await this.db.$queryRaw<
+      { associatedPackageId: string; frequency: number | bigint }[]
+    >`
+      SELECT 
+        td2."product_package_id" AS "associatedPackageId",
+        COUNT(td2."transaction_id") AS "frequency"
+      FROM "TransactionDetail" td1
+      JOIN "TransactionDetail" td2 
+        ON td1."transaction_id" = td2."transaction_id"
+      JOIN "Transaction" t 
+        ON td1."transaction_id" = t."transaction_id"
+      WHERE td1."product_package_id" = ${productPackageId}
+        AND td1."product_package_id" != td2."product_package_id" -- Loại trừ chính nó
+        AND t."type" = 'export' -- Chỉ tính các giao dịch bán ra/xuất kho
+        AND t."store_id" = ${storeId}
+        AND t."status" = 'completed'
+      GROUP BY td2."product_package_id"
+      ORDER BY "frequency" DESC
+      LIMIT ${limit};
+    `;
+
+    // Convert bigint từ COUNT của PostgreSQL về number
+    return result.map((item) => ({
+      associatedPackageId: item.associatedPackageId,
+      frequency: Number(item.frequency),
+    }));
+  }
 }
