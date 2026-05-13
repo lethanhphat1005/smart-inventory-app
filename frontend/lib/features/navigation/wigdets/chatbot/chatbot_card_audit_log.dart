@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/infrastructure/constants/text_strings.dart';
+import 'package:frontend/features/navigation/controllers/chatbot_ui_controller.dart';
+import 'package:frontend/features/navigation/controllers/navigation_controller.dart';
 import 'package:frontend/features/navigation/models/chat_message_model.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/features/navigation/wigdets/chatbot/chatbot_message_widget.dart';
+import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 
 // ---------------------------------------------------------------------------
@@ -152,6 +156,37 @@ class _ChatCardAuditLogState extends State<ChatCardAuditLog> {
             const SizedBox(height: 4),
             _buildPagination(),
           ],
+
+          const SizedBox(height: 8),
+          Center(
+            child: InkWell(
+              onTap: () {
+                // 1. Đóng khung Chatbot
+                if (Get.isRegistered<ChatbotUiController>()) {
+                  Get.find<ChatbotUiController>().closeChat();
+                }
+
+                // 2. Chuyển sang Tab số 3 (ReportView)
+                if (Get.isRegistered<NavigationController>()) {
+                  Get.find<NavigationController>().selectedIndex.value = 3;
+                }
+              },
+              borderRadius: BorderRadius.circular(8),
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Text(
+                  TTexts.chatbotViewFullList.tr,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.primary,
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );

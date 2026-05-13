@@ -74,7 +74,7 @@ final Map<String, String> enChatbot = {
   TTexts.chatbotPromptCheckInfoSub: 'Search by product name',
   TTexts.chatbotPromptImportSub: 'Enter name & qty',
   TTexts.chatbotPromptExportSub: 'Enter name & qty',
-  TTexts.chatbotPromptAuditLogSub: 'View recent actions',
+  TTexts.chatbotPromptAuditLogSub: 'View recent actions (Beta)',
   TTexts.chatbotPromptHelpSub: 'How to use Tori',
   TTexts.chatbotMessageTooLong: 'Message is too long (max 100 characters).',
 };

@@ -172,7 +172,7 @@ class ChatbotSuggestedPrompts extends StatelessWidget {
             const SizedBox(height: 2),
             Text(
               p.sub,
-              maxLines: 1,
+              maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontSize: 11.5,

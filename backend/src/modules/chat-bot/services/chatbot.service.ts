@@ -177,16 +177,18 @@ export class ChatbotService {
                 const draft = JSON.parse(draftData) as DraftAction;
 
                 if (intent !== draft.type) {
-                  const draftTypeVN =
-                    draft.type === 'create_import' ? 'NHẬP' : 'XUẤT';
-                  const conflictReply = `Tori phát hiện bạn đang có một phiếu ${draftTypeVN} kho chưa hoàn tất. Bạn không thể tạo phiếu ${draftTypeVN === 'NHẬP' ? 'XUẤT' : 'NHẬP'} lúc này. Vui lòng Xác nhận hoặc Hủy phiếu cũ ở thẻ bên dưới nhé! 📦⚠️`;
+                  const systemInstruction = `CẢNH BÁO HỆ THỐNG: Người dùng đang có một phiếu ${draft.type === 'create_import' ? 'NHẬP' : 'XUẤT'} kho đang chờ xử lý. Yêu cầu người dùng Xác nhận hoặc Hủy phiếu cũ ở thẻ bên dưới trước khi tạo mới.`;
+
+                  const botReply = await this.generateFriendlyReply(
+                    this.buildReplyContext(payload.message, systemInstruction),
+                  );
 
                   await this.chatMemoryService.saveChatHistory(
                     storeId,
                     userId,
                     [
                       { role: 'user', content: payload.message },
-                      { role: 'assistant', content: conflictReply },
+                      { role: 'assistant', content: botReply },
                     ],
                   );
 
@@ -195,7 +197,7 @@ export class ChatbotService {
                       draft.type === 'create_import'
                         ? 'confirm_import'
                         : 'confirm_export',
-                    botReply: conflictReply,
+                    botReply: botReply,
                     data: { draftActionId: pendingDraftId },
                   };
                 }
@@ -375,7 +377,7 @@ export class ChatbotService {
       return {
         isValid: false,
         reason:
-          'Users are asking how to use the system. Explain friendly that you can: 1) Create Import/Export transactions, 2) Check product info & low stock, 3) Query action history (Audit Logs). ABSOLUTELY DO NOT fabricate any other features.',
+          '[SYSTEM INSTRUCTION]: Inform the user that their history query is too general. Ask them to specify the action type, product name, or a specific time period.',
       };
     }
     // 2. Validate từng intent cụ thể
@@ -438,7 +440,11 @@ export class ChatbotService {
         );
 
         if (hasInvalidQuantity) {
-          return { isValid: false, reason: 'Số lượng phải lớn hơn 0.' };
+          return {
+            isValid: false,
+            reason:
+              '[SYSTEM INSTRUCTION]: Inform the user that the quantity must be greater than 0.',
+          };
         }
         break;
       }
@@ -497,6 +503,17 @@ export class ChatbotService {
 
     const refKey = buildUserDraftRefKey(draft.storeId, draft.userId);
 
+    const history = await this.chatMemoryService.getChatHistory(
+      draft.storeId,
+      draft.userId,
+    );
+    const lastMessage = history.reverse().find((m) => m.role === 'user');
+
+    const lastUserMessage =
+      typeof lastMessage?.content === 'string'
+        ? lastMessage.content
+        : 'Xác nhận';
+
     try {
       if (!isConfirmed) {
         await this.chatMemoryService.clearChatHistory(
@@ -510,8 +527,8 @@ export class ChatbotService {
 
         return await this.generateFriendlyReply(
           this.buildReplyContext(
-            'I want to cancel the transaction.',
-            'The operation has been cancelled.',
+            lastUserMessage,
+            '[SYSTEM]: The transaction operation has been cancelled by the user. Inform them friendly.',
           ),
         );
       }
@@ -542,12 +559,11 @@ export class ChatbotService {
 
       return await this.generateFriendlyReply(
         this.buildReplyContext(
-          'Confirmation successful',
-          'Great! The transaction has been recorded.',
+          lastUserMessage,
+          '[SYSTEM]: The transaction has been recorded successfully. Congratulate the user.',
         ),
       );
     } finally {
-      // LUÔN LUÔN xóa key để giải phóng người dùng dù thành công hay thất bại
       await this.redisClient.del(draftKey);
       await this.redisClient.del(refKey);
     }
@@ -577,12 +593,12 @@ export class ChatbotService {
     const displayItems = allLowStockItems.slice(0, 5);
 
     const productListStr = displayItems
-      .map((i) => `${i.productPackage.displayName} (${i.quantity} left)`)
-      .join(', ');
+      .map((i) => `\n- ${i.productPackage.displayName}: ${i.quantity} in stock`)
+      .join('');
 
     let systemContext =
       totalCount > 0
-        ? `There are a total of ${totalCount} products that have reached the warning level. List of the 5 most depleted products: ${productListStr}. DO NOT invent or add any other numbers.`
+        ? `There are a total of ${totalCount} products that have reached the warning level. List of the 5 most depleted products: ${productListStr}\nDO NOT invent or add any other numbers.`
         : 'Great, no products are currently at the warning level!';
 
     if (res.items.length >= 100) {
@@ -610,7 +626,7 @@ export class ChatbotService {
         botReply: await this.generateFriendlyReply(
           this.buildReplyContext(
             userMessage,
-            'Please ask the user to provide the name of the product they are looking for.',
+            `Task: Inform the user that you found multiple products matching "${productName}". Ask them to select the exact one from the interface below 👇. (Strict rule: Output only 1-2 sentences. No bullet points, no product examples).`,
           ),
         ),
       };
@@ -699,7 +715,6 @@ Inventory: ${firstResult.quantity} ${firstResult.productPackage.unit.name}.`;
     }
 
     const isExport = intent === 'create_export';
-    // const actionText = isExport ? 'XUẤT KHO' : 'NHẬP KHO';
 
     // 1. LẤY GIỎ HÀNG HIỆN TẠI (hoặc tạo mới)
     let cart = await this.chatMemoryService.getCartSession(storeId, userId);
@@ -710,29 +725,40 @@ Inventory: ${firstResult.quantity} ${firstResult.productPackage.unit.name}.`;
 
     // Tạo bản sao sâu (deep clone) để tính toán an toàn
     const tempCartItems: CartItem[] = cart.items.map((item) => ({ ...item }));
-
     const newlyAddedItems: string[] = [];
 
-    for (const item of itemsToProcess) {
+    // BƯỚC QUAN TRỌNG: TỐI ƯU HÓA TRUY VẤN N+1
+    // Tìm kiếm tất cả sản phẩm dưới DB song song cùng một lúc
+    const searchPromises = itemsToProcess.map(async (item) => {
       if (!item.product_name || !item.quantity) {
-        continue;
+        return null;
       }
-
       const searchResult = await this.searchInventory(
         storeId,
         item.product_name,
       );
 
-      // NẾU LỖI: Cần lưu lại những món ĐÃ THÀNH CÔNG trước đó vào Redis trước khi thoát
-      const saveProgressAndReturn = async (
-        returnPayload: ChatbotResponseDto,
-      ) => {
-        cart!.items = tempCartItems; // Gán phần đã xử lý được
-        await this.chatMemoryService.saveCartSession(storeId, userId, cart!);
+      return { item, searchResult };
+    });
 
-        return returnPayload;
-      };
+    // Chờ tất cả kết quả trả về, loại bỏ các giá trị null
+    const resolvedSearchResults = (await Promise.all(searchPromises)).filter(
+      (res) => res !== null,
+    ) as {
+      item: { product_name: string; quantity: number | string };
+      searchResult: InventoryItemData[];
+    }[];
 
+    // Hàm tiện ích: Lưu lại giỏ hàng nếu gặp lỗi giữa chừng
+    const saveProgressAndReturn = async (returnPayload: ChatbotResponseDto) => {
+      cart!.items = tempCartItems; // Gán phần đã xử lý được
+      await this.chatMemoryService.saveCartSession(storeId, userId, cart!);
+
+      return returnPayload;
+    };
+
+    // 2. DUYỆT QUA KẾT QUẢ TÌM KIẾM ĐỂ XỬ LÝ LOGIC GIỎ HÀNG
+    for (const { item, searchResult } of resolvedSearchResults) {
       if (searchResult.length === 0) {
         return saveProgressAndReturn({
           aiIntent: intent,
@@ -756,13 +782,12 @@ Inventory: ${firstResult.quantity} ${firstResult.productPackage.unit.name}.`;
       } else if (searchResult.length === 1) {
         targetItem = searchResult[0]!;
       } else {
-        // Có nhiều kết quả -> Yêu cầu user chọn -> Vẫn phải lưu tiến độ các món trước đó
         return saveProgressAndReturn({
           aiIntent: 'choose_product',
           botReply: await this.generateFriendlyReply(
             this.buildReplyContext(
               userMessage,
-              `Many items similar to "${item.product_name}" were found. PLEASE SAY THIS IN SHORT: "There are several products with the same name, please click to select the correct type you want to ${isExport ? 'export' : 'import'} below 👇". ABSOLUTELY DO NOT list items yourself.`,
+              `Task: Inform the user that you found multiple products matching "${item.product_name}". Ask them to select the exact one they want to ${isExport ? 'export' : 'import'} from the interface below 👇. (Strict rule: Output only 1-2 sentences. No bullet points, no product examples).`,
             ),
           ),
           data: {
@@ -779,7 +804,7 @@ Inventory: ${firstResult.quantity} ${firstResult.productPackage.unit.name}.`;
         ? Number(pkg.sellingPrice)
         : Number(pkg.importPrice);
 
-      // 2. LOGIC CỘNG DỒN GIỎ HÀNG (Vào biến tạm)
+      // LOGIC CỘNG DỒN GIỎ HÀNG (Vào biến tạm)
       const existingItem = tempCartItems.find(
         (i) => i.productPackageId === pkg.productPackageId,
       );
@@ -1060,23 +1085,33 @@ Inventory: ${firstResult.quantity} ${firstResult.productPackage.unit.name}.`;
       let displayTarget =
         details.displayName || details.productName || details.name || log.note;
 
-      // Xử lý fallback nếu chỉ có UUID hoặc trống
       if (!displayTarget || /^[0-9a-fA-F-]{36}$/.test(displayTarget)) {
         const typeMap: Record<string, string> = {
-          Product: 'sản phẩm',
-          ProductPackage: 'gói sản phẩm',
-          Inventory: 'kho hàng',
-          Category: 'danh mục',
-          Transaction: 'giao dịch',
+          Product: 'Product',
+          ProductPackage: 'Product Package',
+          Inventory: 'Inventory',
+          Category: 'Category',
+          Transaction: 'Transaction', // Để tiếng Anh cho AI dễ hiểu
         };
 
-        displayTarget = `Thao tác ${typeMap[log.entityType] || 'dữ liệu'}`;
+        displayTarget = typeMap[log.entityType] || 'System Data';
+      }
+
+      // ĐẶC BIỆT: Nếu là giao dịch, cố gắng phân biệt Nhập hay Xuất dựa vào note
+      if (log.entityType === 'Transaction') {
+        const noteLower = (log.note || '').toLowerCase();
+
+        if (noteLower.includes('xuất') || noteLower.includes('export')) {
+          displayTarget = 'Export Transaction';
+        } else if (noteLower.includes('nhập') || noteLower.includes('import')) {
+          displayTarget = 'Import Transaction';
+        }
       }
 
       return {
         action: log.actionType,
         target: displayTarget,
-        userFullName: log.user?.fullName || 'Nhân viên',
+        userFullName: log.user?.fullName || 'User',
         time: new Date(log.performedAt).toLocaleString('vi-VN', {
           timeZone: 'Asia/Ho_Chi_Minh',
           hour: '2-digit',
@@ -1088,18 +1123,21 @@ Inventory: ${firstResult.quantity} ${firstResult.productPackage.unit.name}.`;
       };
     });
 
-    // 4. BUILD CONTEXT CHO AI (Giờ VN)
     const contextLines = responseData.map(
-      (r) => `- [${r.time}] ${r.userFullName} đã ${r.action} "${r.target}"`,
+      (r) =>
+        `- [${r.time}] User ${r.userFullName} performed "${r.action}" on "${r.target}"`,
     );
 
-    const systemContext = `Dữ liệu nhật ký thao tác (Giờ Việt Nam):
+    // LẤY NGÀY GIỜ HIỆN TẠI BƠM VÀO PROMPT
+    const today = new Date().toLocaleString('en-US', {
+      timeZone: 'Asia/Ho_Chi_Minh',
+    });
+
+    const systemContext = `Current System Time: ${today}
+Below is the audit log data:
 ${contextLines.join('\n')}
 
-YÊU CẦU:
-- Trả lời ngắn gọn, tổng hợp dựa trên danh sách trên.
-- TUYỆT ĐỐI KHÔNG hiển thị mã UUID.
-- Dùng tiếng Việt tự nhiên (VD: "tạo mới", "cập nhật").`;
+Task: Answer the user's query accurately using ONLY the logs provided above. Do not hallucinate dates or data.`;
 
     return {
       aiIntent: 'query_audit_logs',
@@ -1199,6 +1237,19 @@ YÊU CẦU:
   }
 
   private buildReplyContext(userMessage: string, systemData: string): string {
-    return `[USER MESSAGE]: ${userMessage}\n[SYSTEM DATA]: ${systemData}\n[INSTRUCTION]: Reply to the user in the language they used above.`;
+    return `You are Tori, a helpful AI assistant for Storix.
+
+SYSTEM FACTS / TASKS:
+${systemData}
+
+USER MESSAGE:
+"${userMessage}"
+
+STRICT INSTRUCTIONS:
+- IF the USER MESSAGE is in English -> You MUST reply ONLY in English.
+- IF the USER MESSAGE is in Vietnamese -> You MUST reply ONLY in Vietnamese.
+- NEVER explain your language detection. NEVER output lines like "The language is..." or "Ngôn ngữ là...".
+- Respond directly with the conversational text based ONLY on the SYSTEM FACTS.
+- CRITICAL: DO NOT output any prefixes like "[REPLY]", "Reply:", or explain your thoughts. Output ONLY the final conversational response.`;
   }
 }

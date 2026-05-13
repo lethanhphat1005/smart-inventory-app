@@ -241,7 +241,7 @@ class ChatbotUiController extends GetxController with TErrorHandler {
     } catch (_) {
     } finally {
       messages.clear();
-      isChatOpen.value = false;
+      isChatOpen.value = true;
     }
   }
 
