@@ -13,5 +13,5 @@ class AppConstants {
   static String get serverClientId => dotenv.env['SERVER_CLIENT_ID'] ?? "";
 
   static const int connectionTimeout = 15000;
-  static const int receiveTimeout = 15000;
+  static const int receiveTimeout = 45000;
 }

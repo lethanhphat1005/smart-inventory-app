@@ -13,6 +13,10 @@ export interface LLMToolParams {
   product_name?: string;
   quantity?: number;
   products?: LLMProductItem[];
+
+  action_type?: string;
+  keyword?: string;
+  time_period?: string;
 }
 
 export interface TransactionItemPayload {
@@ -60,4 +64,11 @@ export interface CartItem {
 export interface CartSession {
   type: DraftActionType;
   items: CartItem[];
+}
+
+export interface AuditLogItemData {
+  action: string; // 'CREATE', 'UPDATE', 'DELETE'
+  target: string; // Tên sản phẩm, mã phiếu...
+  userFullName: string; // Tên nhân viên thao tác
+  time: string; // Thời gian (đã format)
 }

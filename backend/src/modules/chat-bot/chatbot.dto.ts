@@ -7,5 +7,12 @@ export type ChatbotRequestDto = {
 export type ChatbotResponseDto = {
   aiIntent: string;
   botReply: string;
-  data?: InventoryItemData | unknown;
+  data?: InventoryItemData | InventoryItemData[] | AuditLogItemData[] | unknown;
+};
+
+export type AuditLogItemData = {
+  action: string;
+  target: string;
+  userFullName: string;
+  time: string;
 };

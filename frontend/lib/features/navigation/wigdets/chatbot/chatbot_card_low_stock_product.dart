@@ -20,100 +20,153 @@ class ChatCardLowStockProduct extends StatelessWidget {
 
     final displayName =
         pkg['displayName'] ?? product?['name'] ?? TTexts.unknownProduct.tr;
-    final quantity = (itemData['quantity'] ?? pkg['quantity'] ?? 0) as int;
+    final quantity = (itemData['quantity'] ?? pkg['quantity'] ?? 0) as num;
     final unitName = pkg['unit']?['name'] ?? '';
 
-    final threshold =
-        int.tryParse(itemData['reorder_threshold']?.toString() ?? '20') ?? 20;
+    final threshold = (int.tryParse(
+              itemData['reorder_threshold']?.toString() ??
+                  itemData['reorderThreshold']?.toString() ??
+                  '10',
+            ) ??
+            10)
+        .toDouble();
 
-    final String rawUrl =
-        product?['imageUrl']?.toString() ?? pkg?['imageUrl']?.toString() ?? '';
+    final String rawUrl = product?['imageUrl']?.toString() ??
+        pkg?['imageUrl']?.toString() ??
+        itemData['imageUrl']?.toString() ??
+        '';
     final String finalImageUrl = UrlHelperUtils.normalizeImageUrl(rawUrl) ?? '';
 
     final productId = product?['productId'] ?? pkg['productId'];
     final packageId = pkg['productPackageId'];
     final barcode = pkg['barcodeValue'] ?? '';
 
-    double progress = threshold > 0 ? quantity / threshold : 0.0;
-    if (progress > 1.0) progress = 1.0;
+    // Progress ratio: tồn kho / ngưỡng tối đa ước tính (2× threshold = đầy đủ)
+    final double maxExpected = threshold * 2;
+    final double ratio = (quantity.toDouble() / maxExpected).clamp(0.0, 1.0);
+
+    Color stockColor;
+    String stockText;
+    IconData stockIcon;
+
+    if (quantity == 0) {
+      stockColor = AppColors.stockOut;
+      stockText = TTexts.chatbotOutOfStock.tr;
+      stockIcon = Iconsax.close_circle;
+    } else if (quantity <= threshold) {
+      stockColor = AppColors.primary;
+      stockText = '${quantity.toInt()} / ${threshold.toInt()} $unitName'.trim();
+      stockIcon = Iconsax.warning_2;
+    } else {
+      stockColor = AppColors.stockIn;
+      stockText =
+          '${TTexts.chatbotLeftPrefix.tr} ${quantity.toInt()} $unitName'.trim();
+      stockIcon = Iconsax.tick_circle;
+    }
 
     return GestureDetector(
       onTap: () {
         if (productId != null) {
-          Get.toNamed(AppRoutes.inventoryDetail,
-              arguments: productId,
-              parameters: {
-                'packageId': packageId?.toString() ?? '',
-                'barcode': barcode?.toString() ?? ''
-              });
+          Get.toNamed(
+            AppRoutes.inventoryDetail,
+            arguments: productId,
+            parameters: {
+              'packageId': packageId?.toString() ?? '',
+              'barcode': barcode?.toString() ?? '',
+            },
+          );
         }
       },
       child: Container(
-        width: Get.width * 0.82,
         margin: const EdgeInsets.only(bottom: 10),
-        padding: const EdgeInsets.all(10),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.grey.shade200),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Row(
           children: [
-            Container(
-              width: 52,
-              height: 52,
-              decoration: BoxDecoration(
-                  color: const Color(0xFFF8F9FA),
-                  borderRadius: BorderRadius.circular(10)),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
+            // Thumbnail
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Container(
+                width: 52,
+                height: 52,
+                color: const Color(0xFFF4F5F7),
                 child: finalImageUrl.isNotEmpty
                     ? CachedNetworkImage(
                         imageUrl: finalImageUrl,
                         fit: BoxFit.cover,
-                        errorWidget: (context, url, error) =>
-                            _buildImagePlaceholder())
+                        errorWidget: (_, __, ___) => _buildImagePlaceholder(),
+                      )
                     : _buildImagePlaceholder(),
               ),
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: 12),
+
+            // Info + progress
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(displayName,
-                      style: const TextStyle(
-                          fontWeight: FontWeight.w500,
-                          fontSize: 13,
-                          color: AppColors.primaryText),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis),
+                  Text(
+                    displayName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.primaryText,
+                      fontFamily: 'Poppins',
+                    ),
+                  ),
                   const SizedBox(height: 6),
                   Row(
                     children: [
+                      // Stock badge
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 2),
+                            horizontal: 8, vertical: 3),
                         decoration: BoxDecoration(
-                            color: const Color(0xFFFAEEDA),
-                            borderRadius: BorderRadius.circular(100)),
-                        child: Text("$quantity / $threshold $unitName",
-                            style: const TextStyle(
-                                color: Color(0xFF854F0B),
-                                fontSize: 10,
-                                fontWeight: FontWeight.w600)),
+                          color: stockColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(100),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(stockIcon, size: 12, color: stockColor),
+                            const SizedBox(width: 4),
+                            Text(
+                              stockText,
+                              style: TextStyle(
+                                color: stockColor,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                       const SizedBox(width: 8),
+
+                      // Progress bar
                       Expanded(
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(4),
                           child: LinearProgressIndicator(
-                            value: progress,
+                            value: ratio,
                             minHeight: 4,
-                            backgroundColor: Colors.grey.shade200,
-                            valueColor: const AlwaysStoppedAnimation<Color>(
-                                Color(0xFFEF9F27)),
+                            backgroundColor: Colors.grey.shade100,
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(stockColor),
                           ),
                         ),
                       ),
@@ -122,13 +175,18 @@ class ChatCardLowStockProduct extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(width: 6),
-            Icon(Iconsax.arrow_right_3, size: 16, color: Colors.grey.shade400)
+
+            const SizedBox(width: 8),
+            Icon(
+              Iconsax.arrow_right_3,
+              size: 16,
+              color: Colors.grey.shade400,
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildImagePlaceholder() => const TNoImageWidget(iconSize: 20);
+  Widget _buildImagePlaceholder() => const TNoImageWidget(iconSize: 24);
 }

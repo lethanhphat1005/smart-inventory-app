@@ -133,16 +133,43 @@ class LoginController extends GetxController {
 
   void _handleLoginError(dynamic e) {
     FullScreenLoaderUtils.stopLoading();
+
     if (e is AuthException) {
+      String errorMessage = TTexts.errorUnknownMessage.tr;
+
+      final errorStr = e.message.toLowerCase();
+
+      if (errorStr.contains('invalid login credentials')) {
+        errorMessage = TTexts.loginErrorInvalidCredentialsMessage.tr;
+      } else if (errorStr.contains('email not confirmed')) {
+        errorMessage = TTexts.loginWarningUnverifiedMessage.tr;
+      } else if (errorStr.contains('user not found')) {
+        errorMessage = TTexts.userNotFound.tr;
+      } else if (errorStr.contains('too many requests') ||
+          errorStr.contains('rate limit')) {
+        errorMessage = TTexts.errorTooManyRequestsMessage.tr;
+      } else if (errorStr.contains('network') ||
+          errorStr.contains('connection')) {
+        errorMessage = TTexts.netErrorDescription.tr;
+      } else {
+        errorMessage = e.message;
+      }
+
       TSnackbarsWidget.error(
-          title: TTexts.loginFailedTitle.tr, message: e.message);
+        title: TTexts.loginFailedTitle.tr,
+        message: errorMessage,
+      );
     } else if (e is TimeoutException) {
       TSnackbarsWidget.error(
-          title: TTexts.errorTimeoutTitle.tr,
-          message: TTexts.errorTimeoutMessage.tr);
+        title: TTexts.errorTimeoutTitle.tr,
+        message: TTexts.errorTimeoutMessage.tr,
+      );
     } else {
       TSnackbarsWidget.error(
-          title: TTexts.errorTitle.tr, message: e.toString());
+        title: TTexts.errorTitle.tr,
+        message: TTexts
+            .errorUnknownMessage.tr, // Tránh quăng e.toString() thô ra màn hình
+      );
     }
   }
 }

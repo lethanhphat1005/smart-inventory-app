@@ -21,11 +21,25 @@ export const buildCoordinatorMessages = (
   userId: string,
   previousHistory: ChatHistoryMessage[],
   userMessage: string,
-): ChatHistoryMessage[] => [
-  { role: 'system', content: getCoordinatorPrompt(storeId, userId) },
-  ...previousHistory,
-  { role: 'user', content: userMessage },
-];
+): ChatHistoryMessage[] => {
+  // Lấy thời gian thực tại múi giờ Việt Nam
+  const currentDate = new Date().toLocaleString('vi-VN', {
+    timeZone: 'Asia/Ho_Chi_Minh',
+    dateStyle: 'full',
+    timeStyle: 'medium',
+  });
+
+  return [
+    {
+      role: 'system',
+      content:
+        getCoordinatorPrompt(storeId, userId) +
+        `\n\n[SYSTEM TIME CONTEXT]: Thời gian hiện tại của hệ thống là ${currentDate}. BẠN PHẢI dùng mốc thời gian này để tính toán ngày tháng chính xác khi người dùng dùng các từ chỉ thời gian tương đối (hôm qua, hôm nay, tuần trước, tháng này...).`,
+    },
+    ...previousHistory,
+    { role: 'user', content: userMessage },
+  ];
+};
 
 export const normalizeInventoryName = (str?: string | null): string =>
   (str || '').toLowerCase().replace(/[\s()-]/g, '');

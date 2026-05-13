@@ -4,6 +4,7 @@ import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/features/navigation/controllers/chatbot_ui_controller.dart';
 import 'package:frontend/features/navigation/models/chat_message_model.dart';
 import 'package:frontend/features/navigation/wigdets/chatbot/chatbot_card_action_confirm.dart';
+import 'package:frontend/features/navigation/wigdets/chatbot/chatbot_card_audit_log.dart';
 import 'package:frontend/features/navigation/wigdets/chatbot/chatbot_card_choose_product.dart';
 import 'package:frontend/features/navigation/wigdets/chatbot/chatbot_card_low_stock.dart';
 import 'package:frontend/features/navigation/wigdets/chatbot/chatbot_card_product_info.dart';
@@ -64,6 +65,9 @@ class ChatbotWindowLayout extends StatelessWidget {
                         !controller.isTyping.value) {
                       return ChatbotSuggestedPrompts(
                         onAction: (text, autoSend) {
+                          // 🛑 CHỐNG SPAM: Ngăn double-tap siêu tốc vào nút gợi ý
+                          if (controller.isTyping.value) return;
+
                           if (autoSend) {
                             controller.textController.text = text;
                             controller.sendMessage();
@@ -79,18 +83,28 @@ class ChatbotWindowLayout extends StatelessWidget {
                       );
                     }
 
-                    return ListView.builder(
-                      controller: controller.scrollController,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 24),
-                      itemCount: controller.messages.length +
-                          (controller.isTyping.value ? 1 : 0),
-                      itemBuilder: (context, index) {
-                        if (index == controller.messages.length) {
-                          return const ChatTypingIndicator();
-                        }
-                        return _buildMessageRouter(controller.messages[index]);
+                    // 🛑 CẢI THIỆN UX: Chạm vào vùng chat trống để ẩn bàn phím ngay lập tức
+                    return GestureDetector(
+                      onTap: () {
+                        controller.focusNode.unfocus();
+                        FocusManager.instance.primaryFocus?.unfocus();
                       },
+                      child: ListView.builder(
+                        controller: controller.scrollController,
+                        // Thêm physics này để vùng trống cũng bắt được sự kiện vuốt/chạm
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 24),
+                        itemCount: controller.messages.length +
+                            (controller.isTyping.value ? 1 : 0),
+                        itemBuilder: (context, index) {
+                          if (index == controller.messages.length) {
+                            return const ChatTypingIndicator();
+                          }
+                          return _buildMessageRouter(
+                              controller.messages[index]);
+                        },
+                      ),
                     );
                   }),
                 ),
@@ -119,6 +133,8 @@ class ChatbotWindowLayout extends StatelessWidget {
         return ChatCardLowStock(message: msg);
       case 'choose_product':
         return ChatCardChooseProduct(message: msg);
+      case 'query_audit_logs':
+        return ChatCardAuditLog(message: msg);
       default:
         return ChatbotMessage(message: msg);
     }

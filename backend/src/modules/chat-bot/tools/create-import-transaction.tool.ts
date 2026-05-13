@@ -5,11 +5,11 @@ export const CREATE_IMPORT_TRANSACTION = {
   function: {
     name: 'create_import',
     description:
-      'MANDATORY: Gọi tool này để tạo phiếu nhập hàng vào kho. Bạn PHẢI trích xuất TÊN SẢN PHẨM và SỐ LƯỢNG từ câu nói của người dùng. ' +
-      'Luôn luôn trả về tham số "products" dưới dạng MẢNG (Array) chứa các object, tuyệt đối không trả về object đơn lẻ. ' +
-      'Nếu người dùng không nói rõ số lượng, mặc định quantity là 1. ' +
-      'Nếu người dùng dùng đại từ (nó, cái đó, sản phẩm vừa rồi...), hãy xem lịch sử chat để tự nội suy ra tên sản phẩm thực tế.' +
-      'CHÚ Ý QUAN TRỌNG: CHỈ trích xuất các sản phẩm MỚI được yêu cầu trong câu nói HIỆN TẠI. TUYỆT ĐỐI KHÔNG lặp lại các sản phẩm đã được thêm vào ở các lượt chat trước đó.',
+      'MANDATORY: Gọi tool này để tạo phiếu NHẬP HÀNG vào kho. ' +
+      'LUẬT QUAN TRỌNG: ' +
+      '1. Luôn trả về tham số "products" là một MẢNG (Array). ' +
+      '2. CHỈ trích xuất các sản phẩm MỚI được yêu cầu trong câu nói HIỆN TẠI. TUYỆT ĐỐI KHÔNG lặp lại các sản phẩm đã được xử lý ở các lượt chat trước. ' +
+      '3. Nếu người dùng dùng đại từ (nó, cái đó, loại này...), BẠN PHẢI xem lịch sử chat để nội suy ra tên sản phẩm thực tế.',
     parameters: {
       type: 'object',
       properties: {
@@ -20,15 +20,16 @@ export const CREATE_IMPORT_TRANSACTION = {
             properties: {
               product_name: {
                 type: 'string',
-                description: 'Tên sản phẩm đầy đủ cần nhập',
+                description:
+                  'Tên sản phẩm đầy đủ cần nhập (ví dụ: Coca Cola 500ml).',
               },
               quantity: {
                 type: 'number',
                 description:
-                  'Số lượng sản phẩm cần nhập (chỉ ghi số nguyên, mặc định là 1)',
+                  'Số lượng cần nhập. CHỈ điền con số nếu người dùng ĐÃ NÊU RÕ. NẾU NGƯỜI DÙNG KHÔNG CUNG CẤP SỐ LƯỢNG, TUYỆT ĐỐI BỎ TRỐNG (KHÔNG tự đoán, KHÔNG mặc định là 1).',
               },
             },
-            required: ['product_name', 'quantity'],
+            required: ['product_name'],
           },
           description: 'Danh sách các sản phẩm cần nhập',
         },
