@@ -1032,6 +1032,9 @@ class TTexts {
   static const String qty = "qty";
   static const String modifiedProducts = 'modified_products';
   static const String adjustmentSummaryBrief = "adjustment_summary_brief";
+  static const String createAnotherInbound = "create_another_inbound";
+  static const String createAnotherOutbound = "create_another_outbound";
+  static const String createAnotherAdjustment = "create_another_adjustment";
 
   // -- Report
   static const String reportTabToday = 'report_tab_today';

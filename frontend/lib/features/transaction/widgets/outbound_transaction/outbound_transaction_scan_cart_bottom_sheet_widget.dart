@@ -6,6 +6,7 @@ import 'package:frontend/core/ui/widgets/t_primary_button_widget.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/features/transaction/controllers/outbound_transaction_controller.dart';
 import 'package:frontend/features/transaction/widgets/shared/transaction_cart_item_widget.dart';
+import 'package:frontend/routes/app_routes.dart';
 import 'package:get/get.dart';
 
 class OutboundScanCartBottomSheetWidget
@@ -58,7 +59,7 @@ class OutboundScanCartBottomSheetWidget
                     item: item,
                     isOutbound: true,
                     imageUrl: item.packageInfo?.product?.imageUrl,
-                    showDeleteButton: true,
+                    showDeleteButton: false,
                     onIncrease: () =>
                         controller.updateQuantity(index, item.quantity + 1),
                     onDecrease: () =>
@@ -99,7 +100,9 @@ class OutboundScanCartBottomSheetWidget
             const SizedBox(height: 24),
             TPrimaryButtonWidget(
               text: TTexts.done.tr,
-              onPressed: () => Get.back(),
+              // ĐÃ SỬA: Đóng Bottom Sheet và lùi thẳng về trang Outbound
+              onPressed: () => Get.until((route) =>
+                  route.settings.name == AppRoutes.outboundTransaction),
               fontSize: 16.0,
             ),
           ],

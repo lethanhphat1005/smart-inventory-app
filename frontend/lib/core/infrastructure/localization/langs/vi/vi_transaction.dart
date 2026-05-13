@@ -72,8 +72,10 @@ final Map<String, String> viTransaction = {
   TTexts.checkingInventory: "Đang kiểm tra kho...",
   TTexts.options: "Tùy chọn",
   TTexts.confirmAddPriorityTitle: "Xác nhận thêm ưu tiên",
-  TTexts.confirmAddPriorityDesc: "Hệ thống sẽ tự động tính toán và thêm các sản phẩm đang dưới ngưỡng an toàn vào giỏ hàng. Bạn có chắc chắn muốn thực hiện?",
-  TTexts.allPrioritySatisfied: "Tất cả sản phẩm ưu tiên đã có trong giỏ hàng hoặc đạt mức an toàn.",
+  TTexts.confirmAddPriorityDesc:
+      "Hệ thống sẽ tự động tính toán và thêm các sản phẩm đang dưới ngưỡng an toàn vào giỏ hàng. Bạn có chắc chắn muốn thực hiện?",
+  TTexts.allPrioritySatisfied:
+      "Tất cả sản phẩm ưu tiên đã có trong giỏ hàng hoặc đạt mức an toàn.",
   TTexts.recentOutboundItems: "Sản phẩm đã xuất gần đây",
   TTexts.lowStockPriority: "Cảnh báo sắp hết hàng",
 
@@ -173,4 +175,8 @@ final Map<String, String> viTransaction = {
   TTexts.deleteSearchTitle: "Xóa Lịch Sử Tìm Kiếm",
   TTexts.deleteSearchMessage:
       "Bạn có chắc muốn xóa từ khóa tìm kiếm này không?",
+
+  TTexts.createAnotherInbound: "Tạo đơn Nhập kho mới",
+  TTexts.createAnotherOutbound: "Tạo đơn Xuất kho mới",
+  TTexts.createAnotherAdjustment: "Tạo phiếu Điều chỉnh mới",
 };

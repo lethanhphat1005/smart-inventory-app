@@ -80,13 +80,44 @@ class TransactionSummaryMobileView
           ],
         ),
       ),
+
+      // ==========================================
+      // BOTTOM NAV: Nút Tạo mới
+      // ==========================================
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(AppSizes.p24),
-          child: TPrimaryButtonWidget(
-            text: TTexts.backToHome.tr,
-            customIcon: const Icon(Icons.home_filled, color: Colors.white),
-            onPressed: controller.goToHome,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // 1. NÚT TẠO GIAO DỊCH MỚI
+              SizedBox(
+                width: double.infinity,
+                child: TPrimaryButtonWidget(
+                  text: controller.createAnotherText,
+                  customIcon: const Icon(Icons.shopping_bag,
+                      color: Colors.white, size: 20),
+                  onPressed: controller.createAnotherTransaction,
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              // 2. NÚT VỀ TRANG CHỦ
+              SizedBox(
+                width: double.infinity,
+                child: TPrimaryButtonWidget(
+                  text: TTexts.backToHome.tr,
+                  // Sử dụng màu xám nhạt cho nền
+                  backgroundColor: AppColors.softGrey.withOpacity(0.1),
+                  // Chữ đen (PrimaryText) để tạo sự tương phản rõ ràng
+                  textColor: AppColors.primaryText,
+                  customIcon: const Icon(Icons.home_filled,
+                      color: AppColors.primaryText, size: 20),
+                  onPressed: controller.goToHome,
+                ),
+              ),
+            ],
           ),
         ),
       ),

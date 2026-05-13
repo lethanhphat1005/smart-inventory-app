@@ -99,7 +99,7 @@ class InboundTransactionMobileView
                                 item: item,
                                 isOutbound: false,
                                 imageUrl: item.packageInfo?.product?.imageUrl,
-                                showDeleteButton: true,
+                                showDeleteButton: false,
                                 onIncrease: () => controller.updateQuantity(
                                     index, item.quantity + 1),
                                 onDecrease: () => controller.updateQuantity(

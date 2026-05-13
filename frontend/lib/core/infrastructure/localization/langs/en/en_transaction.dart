@@ -71,8 +71,10 @@ final Map<String, String> enTransaction = {
   TTexts.checkingInventory: "Checking inventory...",
   TTexts.options: "Options",
   TTexts.confirmAddPriorityTitle: "Confirm Add Priority",
-  TTexts.confirmAddPriorityDesc: "System will automatically calculate and add products below safety stock to the cart. Are you sure?",
-  TTexts.allPrioritySatisfied: "All priority items are already in cart or have reached safe levels.",
+  TTexts.confirmAddPriorityDesc:
+      "System will automatically calculate and add products below safety stock to the cart. Are you sure?",
+  TTexts.allPrioritySatisfied:
+      "All priority items are already in cart or have reached safe levels.",
   TTexts.recentOutboundItems: "Recently Exported Items",
   TTexts.lowStockPriority: "Low Stock Warning",
 
@@ -303,4 +305,7 @@ final Map<String, String> enTransaction = {
   TTexts.modifiedProducts: "Modified Products",
   TTexts.adjustmentSummaryBrief:
       "This is a brief summary of the stock adjustment. To view the detailed list of adjusted items, please check the Transaction History.",
+  TTexts.createAnotherInbound: "Create another Inbound",
+  TTexts.createAnotherOutbound: "Create another Outbound",
+  TTexts.createAnotherAdjustment: "Create another Adjustment",
 };

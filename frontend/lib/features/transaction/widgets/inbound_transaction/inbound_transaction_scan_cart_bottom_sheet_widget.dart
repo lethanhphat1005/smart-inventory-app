@@ -6,6 +6,7 @@ import 'package:frontend/core/ui/widgets/t_primary_button_widget.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/features/transaction/controllers/inbound_transaction_controller.dart';
 import 'package:frontend/features/transaction/widgets/shared/transaction_cart_item_widget.dart';
+import 'package:frontend/routes/app_routes.dart';
 import 'package:get/get.dart';
 
 class InboundTransactionScanCartBottomSheetWidget
@@ -53,19 +54,18 @@ class InboundTransactionScanCartBottomSheetWidget
             // DANH SÁCH GIỎ HÀNG (Có scroll)
             // ==========================================
             ConstrainedBox(
-              constraints: BoxConstraints(maxHeight: Get.height * 0.45),
-              child: ListView.separated(
+              constraints: BoxConstraints(maxHeight: Get.height * 0.5),
+              child: ListView.builder(
                 shrinkWrap: true,
                 physics: const BouncingScrollPhysics(),
                 itemCount: controller.cartItems.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 12),
                 itemBuilder: (context, index) {
                   final item = controller.cartItems[index];
                   return TransactionCartItemWidget(
                     item: item,
                     isOutbound: false,
                     imageUrl: item.packageInfo?.product?.imageUrl,
-                    showDeleteButton: true,
+                    showDeleteButton: false,
                     onIncrease: () =>
                         controller.updateQuantity(index, item.quantity + 1),
                     onDecrease: () =>
@@ -112,7 +112,8 @@ class InboundTransactionScanCartBottomSheetWidget
 
             TPrimaryButtonWidget(
               text: TTexts.done.tr,
-              onPressed: () => Get.back(),
+              onPressed: () => Get.until((route) =>
+                  route.settings.name == AppRoutes.inboundTransaction),
               fontSize: 16.0,
             ),
           ],
