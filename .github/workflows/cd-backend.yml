@@ -59,7 +59,7 @@ jobs:
           username: ec2-user
           key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
           script: |
-            /otp/sis/scripts/deploy.sh ${{ github.sha }}
+            /opt/sis/scripts/deploy.sh ${{ github.sha }}
             docker service update --force sis_sis-nginx
 
       - name: Remove SSH rule
