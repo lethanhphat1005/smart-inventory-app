@@ -74,6 +74,8 @@ final Map<String, String> viTransaction = {
   TTexts.confirmAddPriorityTitle: "Xác nhận thêm ưu tiên",
   TTexts.confirmAddPriorityDesc: "Hệ thống sẽ tự động tính toán và thêm các sản phẩm đang dưới ngưỡng an toàn vào giỏ hàng. Bạn có chắc chắn muốn thực hiện?",
   TTexts.allPrioritySatisfied: "Tất cả sản phẩm ưu tiên đã có trong giỏ hàng hoặc đạt mức an toàn.",
+  TTexts.recentOutboundItems: "Sản phẩm đã xuất gần đây",
+  TTexts.lowStockPriority: "Cảnh báo sắp hết hàng",
 
   // -- Inbound
   TTexts.inboundTransaction: "Giao Dịch Nhập Kho",

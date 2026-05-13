@@ -931,6 +931,8 @@ class TTexts {
   static const String confirmAddPriorityTitle = "confirm_add_priority_title";
   static const String confirmAddPriorityDesc = "confirm_add_priority_desc";
   static const String allPrioritySatisfied = "all_priority_satisfied";
+  static const String recentOutboundItems = "recent_outbound_items";
+  static const String lowStockPriority = "low_stock_priority";
 
   // Specific Reasons
   static const String reasonRetailSale = "reason_retail_sale";

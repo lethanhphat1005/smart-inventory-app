@@ -16,6 +16,7 @@ import 'package:frontend/features/transaction/widgets/outbound_transaction/outbo
 import 'package:frontend/routes/app_routes.dart';
 import 'package:get/get.dart';
 import 'package:dio/dio.dart';
+import 'package:get_storage/get_storage.dart'; // ĐÃ THÊM: Import GetStorage
 import 'package:frontend/features/inventory/providers/inventory_provider.dart';
 import 'package:frontend/core/infrastructure/models/product_model.dart';
 import 'package:frontend/features/inventory/models/inventory_insight_display_model.dart';
@@ -25,11 +26,14 @@ import 'package:frontend/features/transaction/widgets/shared/transaction_scanner
 class OutboundTransactionController extends GetxController with TErrorHandler {
   final TransactionProvider _provider = TransactionProvider();
   final InventoryProvider _inventoryProvider = InventoryProvider();
-
+  final _storage = GetStorage();
   final RxList<TransactionDetailModel> cartItems =
       <TransactionDetailModel>[].obs;
 
   final TextEditingController noteController = TextEditingController();
+
+  final RxList<InventoryModel> drawerRecentItems = <InventoryModel>[].obs;
+  final RxList<InventoryModel> drawerPriorityItems = <InventoryModel>[].obs;
 
   final List<String> predefinedReasons = [
     TTexts.reasonRetailSale.tr,
@@ -44,6 +48,110 @@ class OutboundTransactionController extends GetxController with TErrorHandler {
   void onInit() {
     super.onInit();
     selectedReason.value = predefinedReasons[0];
+    _loadRecentFromStorage();
+  }
+
+  @override
+  void onReady() {
+    super.onReady();
+    fetchDrawerSuggestions();
+  }
+
+  // =========================================================================
+  // LOGIC STORAGE CHO RECENT (TÁCH BIỆT SHOP/USER)
+  // =========================================================================
+  String get _recentStorageKey {
+    final storeId = _storage.read('STORE_ID') ?? 'default_store';
+    final userEmail = _storage.read('USER_EMAIL') ?? 'default_user';
+    return 'recent_outbound_${storeId}_$userEmail';
+  }
+
+  void _loadRecentFromStorage() {
+    final List<dynamic>? storedData = _storage.read(_recentStorageKey);
+    if (storedData != null) {
+      drawerRecentItems.assignAll(storedData
+          .map((e) => InventoryModel.fromJson(Map<String, dynamic>.from(e)))
+          .toList());
+    }
+  }
+
+  Map<String, dynamic> _inventoryToMap(InventoryModel inv) {
+    return {
+      'inventoryId': inv.inventoryId,
+      'productPackageId': inv.productPackageId,
+      'quantity': inv.quantity,
+      'reorderThreshold': inv.reorderThreshold,
+      'lastCount': inv.lastCount,
+      'updatedAt': inv.updatedAt.toIso8601String(),
+      'activeStatus': inv.activeStatus,
+      'productPackage': inv.productPackage != null
+          ? {
+              'productPackageId': inv.productPackage!.productPackageId,
+              'displayName': inv.productPackage!.displayName,
+              'importPrice': inv.productPackage!.importPrice,
+              'sellingPrice': inv.productPackage!.sellingPrice,
+              'barcodeValue': inv.productPackage!.barcodeValue,
+              'product': inv.productPackage!.product != null
+                  ? {
+                      'productId': inv.productPackage!.product!.productId,
+                      'name': inv.productPackage!.product!.name,
+                      'imageUrl': inv.productPackage!.product!.imageUrl,
+                    }
+                  : null,
+            }
+          : null,
+    };
+  }
+
+  void _saveRecentToStorage(List<TransactionDetailModel> items) {
+    List<InventoryModel> currentRecent =
+        List<InventoryModel>.from(drawerRecentItems);
+    for (var item in items) {
+      if (item.packageInfo == null) continue;
+      final inv = InventoryModel(
+        inventoryId: '',
+        productPackageId: item.productPackageId ?? '',
+        quantity:
+            item.currentStock - item.quantity, // Tồn kho còn lại sau khi xuất
+        reorderThreshold: item.reorderThreshold,
+        lastCount: 0,
+        updatedAt: DateTime.now(),
+        activeStatus: 'active',
+        productPackage: item.packageInfo,
+      );
+      currentRecent
+          .removeWhere((e) => e.productPackageId == inv.productPackageId);
+      currentRecent.insert(0, inv);
+    }
+    final finalRecent = currentRecent.take(5).toList();
+    drawerRecentItems.assignAll(finalRecent);
+    _storage.write(
+        _recentStorageKey, finalRecent.map((e) => _inventoryToMap(e)).toList());
+  }
+
+  // =========================================================================
+  // GỢI Ý VÀ PHỤ TRỢ CHO DRAWER
+  // =========================================================================
+  int getItemQuantity(String packageId) {
+    final index = cartItems.indexWhere((e) => e.productPackageId == packageId);
+    return index != -1 ? cartItems[index].quantity : 0;
+  }
+
+  Future<void> fetchDrawerSuggestions() async {
+    try {
+      final Map<String, dynamic> data =
+          await _provider.getInventoriesPaginated(page: 1, limit: 30);
+      final List itemsRaw = data['items'] ?? data['data'] ?? [];
+      final List<InventoryModel> parsed =
+          itemsRaw.map((e) => InventoryModel.fromJson(e)).toList();
+
+      // Ưu tiên các món hết hàng/sắp hết hàng để nhắc nhở người dùng
+      var priority = parsed
+          .where((e) => e.quantity <= e.reorderThreshold)
+          .toList()
+        ..sort((a, b) => a.quantity.compareTo(b.quantity));
+      drawerPriorityItems.assignAll(priority.take(5).toList());
+    } catch (_) {}
   }
 
   int get totalItems => cartItems.fold(0, (sum, item) => sum + item.quantity);
@@ -263,6 +371,10 @@ class OutboundTransactionController extends GetxController with TErrorHandler {
         note: finalNote,
         items: itemsPayload,
       );
+
+      // ĐÃ THÊM: SAU KHI TẠO ĐƠN THÀNH CÔNG -> LƯU VÀO RECENT DỰA THEO KEY SHOP/USER
+      final List<TransactionDetailModel> savedItems = List.from(cartItems);
+      _saveRecentToStorage(savedItems);
 
       FullScreenLoaderUtils.stopLoading();
 

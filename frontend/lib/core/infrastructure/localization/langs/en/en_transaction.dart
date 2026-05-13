@@ -73,6 +73,8 @@ final Map<String, String> enTransaction = {
   TTexts.confirmAddPriorityTitle: "Confirm Add Priority",
   TTexts.confirmAddPriorityDesc: "System will automatically calculate and add products below safety stock to the cart. Are you sure?",
   TTexts.allPrioritySatisfied: "All priority items are already in cart or have reached safe levels.",
+  TTexts.recentOutboundItems: "Recently Exported Items",
+  TTexts.lowStockPriority: "Low Stock Warning",
 
   // -- Inbound
   TTexts.inboundTransaction: "Inbound Transaction",
