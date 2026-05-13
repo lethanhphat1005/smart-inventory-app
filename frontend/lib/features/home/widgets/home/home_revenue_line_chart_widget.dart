@@ -42,9 +42,9 @@ class _HomeRevenueLineChartWidgetState extends State<HomeRevenueLineChartWidget>
     String sign = value < 0 ? '-' : '';
 
     if (absVal >= 1000000) {
-      return '$sign\$${(absVal / 1000000).toStringAsFixed(1)}M';
+      return '$sign\$${(absVal / 1000000).toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '')}M';
     } else if (absVal >= 1000) {
-      return '$sign\$${(absVal / 1000).toStringAsFixed(1)}k';
+      return '$sign\$${(absVal / 1000).toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '')}k';
     } else {
       return '$sign\$${absVal.toInt()}';
     }
@@ -123,12 +123,14 @@ class _HomeRevenueLineChartWidgetState extends State<HomeRevenueLineChartWidget>
                   sideTitles: SideTitles(
                     showTitles: true,
                     interval: limits['interval'],
-                    reservedSize: 45,
+                    reservedSize: 60,
                     getTitlesWidget: (value, meta) {
                       return Padding(
-                        padding: const EdgeInsets.only(right: 8),
+                        padding: const EdgeInsets.only(right: 20),
                         child: Text(
                           _formatCurrency(value),
+                          maxLines: 1,
+                          softWrap: false,
                           style: TextStyle(
                             color: AppColors.subText,
                             fontSize: 10,
@@ -211,12 +213,26 @@ class _HomeRevenueLineChartWidgetState extends State<HomeRevenueLineChartWidget>
     if (val % 6 == 0 && val <= 24) {
       final hourStr =
           val.toInt() == 24 ? '00' : val.toInt().toString().padLeft(2, '0');
+
+      // Tự động né cột Y ở 2 đầu biểu đồ
+      EdgeInsets padding = EdgeInsets.zero;
+      if (val == 0) {
+        padding =
+            const EdgeInsets.only(left: 20); // Đẩy chữ 00:00 đầu tiên sang phải
+      } else if (val == 24) {
+        padding = const EdgeInsets.only(
+            right: 20); // Đẩy chữ 00:00 cuối cùng sang trái
+      }
+
       return SideTitleWidget(
         meta: meta,
         space: 10,
-        child: Text(
-          '$hourStr:00',
-          style: const TextStyle(fontSize: 10, color: AppColors.softGrey),
+        child: Padding(
+          padding: padding,
+          child: Text(
+            '$hourStr:00',
+            style: const TextStyle(fontSize: 10, color: AppColors.softGrey),
+          ),
         ),
       );
     }
