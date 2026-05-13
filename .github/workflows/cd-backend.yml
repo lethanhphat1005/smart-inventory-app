@@ -27,6 +27,8 @@ jobs:
       - name: Build and push backend image
         uses: docker/build-push-action@v7
         with:
+          context: ./backend
+          file: ./backend/Dockerfile
           push: true
           tags: peterhoward/storix-backend:${{ github.sha }}
           cache-from: type=gha
@@ -41,14 +43,14 @@ jobs:
 
       - name: Allow SSH from GitHub runner
         run: |
-          RUNNER_IP=$(curl -s https://checkip.amazonaws.com)
+          RUNNER_IP=$(curl -s https://checkip.amazonaws.com | tr -d '\n')
           echo "RUNNER_IP=$RUNNER_IP" >> $GITHUB_ENV
 
           aws ec2 authorize-security-group-ingress \
             --group-id ${{ secrets.EC2_SECURITY_GROUP_ID }} \
             --protocol tcp \
             --port 22 \
-            --cidr ${RUNNER_IP}/32
+            --cidr ${RUNNER_IP}/32 || true
 
       - name: Deploy on EC2 Docker Swarm
         uses: appleboy/ssh-action@v1.2.0
@@ -57,14 +59,16 @@ jobs:
           username: ec2-user
           key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
           script: |
-            ./otp/sis/scripts/deploy.sh ${{ github.sha }}
+            /otp/sis/scripts/deploy.sh ${{ github.sha }}
             docker service update --force sis_sis-nginx
 
       - name: Remove SSH rule
         if: always()
         run: |
-          aws ec2 revoke-security-group-ingress \
-            --group-id ${{ secrets.EC2_SECURITY_GROUP_ID }} \
-            --protocol tcp \
-            --port 22 \
-            --cidr ${RUNNER_IP}/32 || true
+          if [ -n "${RUNNER_IP:-}" ]; then
+            aws ec2 revoke-security-group-ingress \
+              --group-id ${{ secrets.EC2_SECURITY_GROUP_ID }} \
+              --protocol tcp \
+              --port 22 \
+              --cidr ${RUNNER_IP}/32 || true
+          fi
