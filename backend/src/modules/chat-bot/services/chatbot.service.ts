@@ -10,7 +10,6 @@ import {
   FRIENDLY_REPLY_MODEL,
   FRIENDLY_REPLY_TEMPERATURE,
   LOCK_TTL_SECONDS,
-  STATIC_REJECTION_REPLY,
 } from '../chatbot.constants.js';
 import {
   buildChatDraftKey,
@@ -350,8 +349,8 @@ export class ChatbotService {
             this.buildReplyContext(
               payload.message,
               `SYSTEM MODERATION: 
-               - If the user's message is a greeting or asks for help/guide/features -> Reply friendly as Tori and EXPLICITLY LIST your capabilities: 1) Create Import/Export, 2) Check product info & low stock, 3) View Audit Logs.
-               - If the message is OUT OF DOMAIN (e.g. coding, math, weather, history, gossip...) -> REFUSE to answer. Strictly reply with exactly this message: "${STATIC_REJECTION_REPLY}"`,
+         - If the user's message is a greeting or asks for help/guide/features -> Reply friendly as Tori and EXPLICITLY LIST your capabilities: 1) Create Import/Export, 2) Check product info & low stock, 3) View Audit Logs, 4) Smart Analysis & Restock Suggestions.
+         - If the message is OUT OF DOMAIN (e.g. coding, math, weather, history, gossip...) -> Politely refuse to answer in the same language as the user. Explain that you are a specialized assistant for Storix and can only assist with store and inventory management tasks.`,
             ),
           ),
         };
@@ -712,7 +711,7 @@ Inventory: ${firstResult.quantity} ${firstResult.productPackage.unit.name}.`;
       botReply: await this.generateFriendlyReply(
         this.buildReplyContext(
           userMessage,
-          `The system found multiple results for "${productName}". PLEASE SAY IN SHORT: "Tori found several similar products. Please select the exact one from the list below 👇". DO NOT list products yourself.`,
+          `Task: The system found multiple results for "${productName}". Inform the user to select the exact product from the interface below 👇. Keep it very short (1 sentence) and DO NOT list the products yourself.`,
         ),
       ),
       data: { originalIntent: 'get_product_info', items: searchResult },
@@ -797,7 +796,7 @@ Inventory: ${firstResult.quantity} ${firstResult.productPackage.unit.name}.`;
           botReply: await this.generateFriendlyReply(
             this.buildReplyContext(
               userMessage,
-              `Error: "${item.product_name}" was not found. Previous items (if any) have been saved to the cart.`,
+              `Task: Inform the user that "${item.product_name}" was not found in the inventory. Also let them know that previous valid items (if any) have been saved to the draft cart.`,
             ),
           ),
         });
@@ -851,7 +850,7 @@ Inventory: ${firstResult.quantity} ${firstResult.productPackage.unit.name}.`;
           botReply: await this.generateFriendlyReply(
             this.buildReplyContext(
               userMessage,
-              `Error: Insufficient stock. The inventory has ${targetItem.quantity}, but you want to export a total of ${newQuantity}.`,
+              `Task: Inform the user that there is insufficient stock. The inventory only has ${targetItem.quantity}, but they want to export ${newQuantity}.`,
             ),
           ),
         });
@@ -1390,8 +1389,8 @@ USER MESSAGE:
 "${userMessage}"
 
 STRICT INSTRUCTIONS:
-- IF the USER MESSAGE is in English -> You MUST reply ONLY in English.
-- IF the USER MESSAGE is in Vietnamese -> You MUST reply ONLY in Vietnamese.
+- ALWAYS reply in the EXACT SAME LANGUAGE as the USER MESSAGE.
+- If the user switches languages, you switch your language accordingly.
 - NEVER explain your language detection. NEVER output lines like "The language is..." or "Ngôn ngữ là...".
 - Respond directly with the conversational text based ONLY on the SYSTEM FACTS.
 - CRITICAL: DO NOT output any prefixes like "[REPLY]", "Reply:", or explain your thoughts. Output ONLY the final conversational response.
