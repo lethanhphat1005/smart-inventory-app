@@ -1,5 +1,6 @@
 import axios from 'axios';
 
+import { logger } from '../../../common/utils/logger.util.js';
 import { UPCITEMDB_API, OPENFOODFACTS_API } from '../barcode.constant.js';
 import {
   normalizeText,
@@ -86,10 +87,14 @@ export class BarcodeProviderService implements BarcodeProviderServicePort {
   ): Promise<BarcodeLookupProviderResult> {
     // duyệt qua các provider
     for (const provider of this.providers) {
-      const result = await provider.lookupBarcode(input);
+      try {
+        const result = await provider.lookupBarcode(input);
 
-      if (result.status === 'valid') {
-        return result;
+        if (result.status === 'valid') {
+          return result;
+        }
+      } catch {
+        logger.info('Barcode provider lookup failed, trying next provider');
       }
     }
 
@@ -282,9 +287,7 @@ class OpenFoodFactsBarcodeProvider implements BarcodeProviderStrategy {
       };
     }
 
-    const normalizedPayload = this.normalizeRawPayload(
-      responseData.product,
-    );
+    const normalizedPayload = this.normalizeRawPayload(responseData.product);
 
     const extractedPayload = this.extractRawPayload(responseData.product);
 
@@ -295,10 +298,10 @@ class OpenFoodFactsBarcodeProvider implements BarcodeProviderStrategy {
           productName: responseData.product.product_name,
         }),
         ...(responseData.product?.product_name_vi !== undefined && {
-          productName: responseData.product.product_name,
+          productName: responseData.product.product_name_vi,
         }),
         ...(responseData.product?.product_name_en !== undefined && {
-          productName: responseData.product.product_name,
+          productName: responseData.product.product_name_en,
         }),
         ...(responseData.product?.brands !== undefined && {
           brand: responseData.product.brands,
@@ -345,9 +348,7 @@ class OpenFoodFactsBarcodeProvider implements BarcodeProviderStrategy {
     };
   }
 
-  private normalizeRawPayload(
-    payload: OpenFoodFactsItem,
-  ): NormalizedPayload {
+  private normalizeRawPayload(payload: OpenFoodFactsItem): NormalizedPayload {
     const normalizedName = normalizeText(
       payload.product_name ??
         payload.product_name_vi ??
