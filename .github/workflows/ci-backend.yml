@@ -22,7 +22,7 @@ jobs:
         working-directory: ./backend
     steps:
       - name: Get code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup dependencies
         id: deps
@@ -42,7 +42,7 @@ jobs:
         working-directory: ./backend
     steps:
       - name: Get code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup dependencies
         uses: ./.github/actions/setup-deps-backend
@@ -55,7 +55,7 @@ jobs:
     needs: [lint, test]
     runs-on: ubuntu-latest
     env:
-      # env để tránh lỗi biến môi trường prisma.config.ts
+      # mock env để tránh lỗi biến môi trường prisma.config.ts
       DATABASE_URL: "postgresql://postgres:postgres@localhost:54322/postgres"
       DIRECT_URL: "postgresql://postgres:postgres@localhost:54322/postgres"
     defaults:
@@ -64,7 +64,7 @@ jobs:
         working-directory: ./backend
     steps:
       - name: Get code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup dependencies
         uses: ./.github/actions/setup-deps-backend
@@ -74,9 +74,3 @@ jobs:
 
       - name: Run build
         run: npm run build
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: dist-files
-          path: backend/dist
