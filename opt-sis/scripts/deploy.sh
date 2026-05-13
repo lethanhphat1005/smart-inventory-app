@@ -24,6 +24,8 @@ fi
 
 echo "${DOCKER_HUB_TOKEN}" | docker login --username "${DOCKER_HUB_USERNAME}" --password-stdin
 
+export BACKEND_IMAGE
+
 docker pull "${BACKEND_IMAGE}"
 
 docker stack deploy \

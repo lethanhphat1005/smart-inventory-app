@@ -1,7 +1,12 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/app_constants.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
+import 'package:frontend/core/state/services/auth_service.dart';
+import 'package:frontend/core/state/services/store_service.dart';
+import 'package:frontend/core/state/services/user_service.dart';
 import 'package:frontend/core/ui/widgets/t_snackbars_widget.dart';
+import 'package:frontend/features/navigation/controllers/chatbot_ui_controller.dart';
 import 'package:frontend/routes/app_routes.dart';
 import 'package:get/get.dart' hide Response;
 import 'package:get_storage/get_storage.dart';
@@ -51,34 +56,45 @@ class ApiClient {
 
           // Xử lý lỗi xác thực (401) hoặc quyền truy cập (403)
           if (statusCode == 401 || statusCode == 403) {
-            // 1. Thực hiện dọn dẹp session ngầm
             await supabase.auth.signOut();
-
-            // Đăng xuất Google để lần sau hiện lại popup chọn tài khoản
             await GoogleSignIn.instance.signOut();
-            GetStorage().remove('STORE_ID');
 
-            // 2. Kiểm tra xem user có đang ở màn hình "Công khai" hay không
-            // Chúng ta không muốn hiện thông báo lỗi login khi họ còn chưa kịp login (như lúc đang xem Onboarding)
+            try {
+              // Xóa dữ liệu Storage thông qua Services thay vì gọi GetStorage trực tiếp
+              if (Get.isRegistered<AuthService>()) {
+                await Get.find<AuthService>().clearAuthData();
+              }
+              if (Get.isRegistered<StoreService>()) {
+                await Get.find<StoreService>().clearWorkspaceData();
+              }
+              // Xóa dữ liệu trên RAM
+              if (Get.isRegistered<UserService>()) {
+                Get.find<UserService>().clearUser();
+              }
+              // Dọn dẹp Chatbot
+              if (Get.isRegistered<ChatbotUiController>()) {
+                Get.find<ChatbotUiController>().messages.clear();
+                Get.find<ChatbotUiController>().isChatOpen.value = false;
+              }
+            } catch (cleanupError) {
+              debugPrint(
+                  'Lỗi dọn dẹp local data khi bị 401/403: $cleanupError');
+            }
+
             final currentRoute = Get.currentRoute;
             final isPublicRoute = currentRoute == AppRoutes.login ||
                 currentRoute == AppRoutes.onboarding ||
                 currentRoute == AppRoutes.splash;
 
             if (!isPublicRoute) {
-              // Chỉ chuyển hướng và hiện thông báo nếu họ đang ở TRONG app mà bị mất quyền
               Get.offAllNamed(AppRoutes.login);
 
               TSnackbarsWidget.warning(
-                  title:
-                      TTexts.systemSnackbarTitle.tr, // Kết quả: "System Notice"
-                  message: TTexts.systemSnackbar403Error
-                      .tr // Kết quả: "Your session has expired..."
-                  );
+                  title: TTexts.systemSnackbarTitle.tr,
+                  message: TTexts.systemSnackbar403Error.tr);
             }
           }
 
-          // Trả lỗi về để các controller khác có thể bắt nếu cần
           return handler.next(e);
         },
       ),

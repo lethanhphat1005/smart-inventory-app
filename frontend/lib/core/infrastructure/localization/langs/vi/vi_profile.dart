@@ -9,17 +9,18 @@ final Map<String, String> viProfile = {
   TTexts.profileEmailUser: '',
   TTexts.profilePhoneNumber: '',
   TTexts.profileNameStore: '',
-  TTexts.profileNoAddress: 'Không có địa chỉ',
+  TTexts.profileNoAddress: 'Chưa cập nhật',
   TTexts.profileMembers: 'thành viên',
   TTexts.profileListMembers: 'Thành Viên',
-  TTexts.profileNoPhoneNumber: 'Không có số điện thoại',
-  TTexts.profileNoEmail: 'Không có email',
+  TTexts.profileNoPhoneNumber: 'Chưa cập nhật',
+  TTexts.profileNoEmail: 'Chưa cập nhật',
   TTexts.profileStoreName: 'Tên cửa hàng',
 
   //Bottom Sheet
   TTexts.profilePhoneNumberBottomSheet: 'Số điện thoại',
   TTexts.profileEmailBottomSheet: 'Email',
   TTexts.profileAddressBottomSheet: 'Địa chỉ',
+  TTexts.profileMemberInfo: 'Thông tin thành viên',
 
   //--Section
   TTexts.profileAccount: "Tài Khoản",
@@ -83,15 +84,16 @@ final Map<String, String> viProfile = {
 
   //Edit Store
   TTexts.editStoreTitle: 'Cửa Hàng Của Tôi',
-  TTexts.editStoreSubtitle: 'Quản lý và chỉnh sửa cửa hàng của bạn',
+  TTexts.editStoreSubtitle: 'Quản lý và chỉnh sửa thông tin cửa hàng',
   TTexts.editStoreNameLabel: 'Tên Cửa Hàng',
   TTexts.editStoreNameHint: 'Nhập tên cửa hàng',
-  TTexts.editStoreAddressLabel: 'Địa Chỉ *',
+  TTexts.editStoreAddressLabel: 'Địa Chỉ',
   TTexts.editStoreAddressHint: 'Nhập địa chỉ cửa hàng',
   TTexts.editStoreAmountMember: 'Thành Viên',
   TTexts.editStoreBtnEdit: 'Chỉnh Sửa',
   TTexts.profileUpdateStoreSuccess: 'Cập nhật cửa hàng thành công',
   TTexts.profileUpdateSuccess: 'Cập nhật hồ sơ thành công',
+  TTexts.profileStatusNotUpdatedYet: 'Chưa cập nhật',
   TTexts.loadingTitle: 'Đang tải',
   TTexts.editStoreCurrentStore: 'Cửa Hàng Hiện Tại',
   TTexts.profileNoStoreSelected: 'Chưa chọn cửa hàng',
@@ -111,7 +113,7 @@ final Map<String, String> viProfile = {
   TTexts.assignsRoleBtnSave: 'Lưu',
   TTexts.assignsRoleSearchHint: 'Tìm kiếm theo tên',
   TTexts.assignsRoleAll: 'Tất Cả',
-  TTexts.assignsRoleOwner: 'Chủ Sở Hữu',
+  TTexts.assignsRoleOwner: 'Chủ Cửa Hàng',
   TTexts.assignsRoleManager: 'Quản Lý',
   TTexts.assignsRoleStaff: 'Nhân Viên',
 

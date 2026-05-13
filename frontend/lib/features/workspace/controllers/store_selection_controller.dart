@@ -4,6 +4,7 @@ import 'package:frontend/core/infrastructure/models/store_model.dart';
 import 'package:frontend/core/infrastructure/utils/error_handler_utils.dart';
 import 'package:frontend/core/state/services/store_service.dart';
 import 'package:frontend/core/ui/widgets/t_snackbars_widget.dart';
+import 'package:frontend/features/navigation/controllers/chatbot_ui_controller.dart';
 import 'package:frontend/features/workspace/provider/workspace_provider.dart';
 import 'package:get/get.dart';
 import 'package:frontend/routes/app_routes.dart';
@@ -54,7 +55,6 @@ class StoreSelectionController extends GetxController with TErrorHandler {
     try {
       debugPrint("==== DỮ LIỆU STORE: ${store.toJson()} ====");
 
-      // Lấy storeId trực tiếp từ thuộc tính của StoreModel
       final String currentId = store.storeId;
       final String currentName = store.name;
       final String currentRole = store.role;
@@ -66,6 +66,17 @@ class StoreSelectionController extends GetxController with TErrorHandler {
             title: TTexts.errorTitle.tr,
             message: TTexts.errorUnknownMessage.tr);
         return;
+      }
+
+      if (currentId != _storeService.currentStoreId.value) {
+        if (Get.isRegistered<ChatbotUiController>()) {
+          try {
+            await Get.find<ChatbotUiController>().clearChatData();
+            debugPrint("Đã xóa lịch sử chat do đổi Store");
+          } catch (e) {
+            debugPrint('Lỗi khi xóa lịch sử chat lúc đổi store: $e');
+          }
+        }
       }
 
       debugPrint("LƯU VÀO MÁY STORE_ID: $currentId");

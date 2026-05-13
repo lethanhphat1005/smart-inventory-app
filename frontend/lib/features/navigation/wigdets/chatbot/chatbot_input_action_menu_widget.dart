@@ -85,7 +85,8 @@ class _ChatbotInputActionMenuWidgetState
       controller.textController.text = template;
       controller.sendMessage();
     } else {
-      controller.textController.text = template;
+      // Tối ưu UX: Thêm sẵn dấu cách để user gõ tiếp tên SP/Số lượng ngay
+      controller.textController.text = '$template ';
       controller.textController.selection = TextSelection.fromPosition(
           TextPosition(offset: controller.textController.text.length));
       controller.focusNode.requestFocus();
@@ -164,18 +165,38 @@ class _ChatbotInputActionMenuWidgetState
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Cập nhật đủ 6 tính năng đồng bộ với Quick Actions
                   _buildMenuItem(
-                      text: TTexts.chatbotMenuLowStock.tr,
+                      text: TTexts.chatbotQuickActionLowStock.tr,
                       onTap: () =>
                           _handleAction(TTexts.chatbotPromptLowStock.tr, true)),
                   _buildMenuItem(
-                      text: TTexts.chatbotMenuCreateImport.tr,
+                      text: TTexts.chatbotQuickActionInfo.tr,
+                      onTap: () => _handleAction(
+                          TTexts.chatbotPromptCheckInfo.tr, false)),
+                  _buildMenuItem(
+                      text: TTexts.chatbotQuickActionImport.tr,
                       onTap: () =>
                           _handleAction(TTexts.chatbotPromptImport.tr, false)),
                   _buildMenuItem(
-                      text: TTexts.chatbotMenuCreateExport.tr,
+                      text: TTexts.chatbotQuickActionExport.tr,
                       onTap: () =>
                           _handleAction(TTexts.chatbotPromptExport.tr, false)),
+
+                  _buildMenuItem(
+                      text: TTexts.chatbotQuickActionAnalyze.tr,
+                      onTap: () => _handleAction(
+                          TTexts.chatbotPromptAnalyzeRestock.tr, true)),
+
+                  if (Get.find<ChatbotUiController>().canViewAuditLog)
+                    _buildMenuItem(
+                        text: TTexts.chatbotQuickActionHistory.tr,
+                        onTap: () => _handleAction(
+                            TTexts.chatbotPromptAuditLog.tr, false)),
+                  _buildMenuItem(
+                      text: TTexts.chatbotQuickActionHelp.tr,
+                      onTap: () =>
+                          _handleAction(TTexts.chatbotPromptHelp.tr, true)),
                 ],
               ),
             ),

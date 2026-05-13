@@ -433,4 +433,16 @@ export class TransactionService {
       };
     });
   }
+
+  async getCrossSellSuggestions(
+    storeId: string,
+    productPackageId: string,
+    limit: number = 3,
+  ): Promise<{ associatedPackageId: string; frequency: number }[]> {
+    return await this.transactionRepository.getFrequentlyBoughtTogether(
+      storeId,
+      productPackageId,
+      limit,
+    );
+  }
 }

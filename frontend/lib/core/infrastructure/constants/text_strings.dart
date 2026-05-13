@@ -514,6 +514,62 @@ class TTexts {
       "chatbot_quick_action_low_stock";
   static const String chatbotQuickActionImport = "chatbot_quick_action_import";
   static const String chatbotQuickActionExport = "chatbot_quick_action_export";
+  static const String chatbotCoppiedSnackbar = "chatbot_coppied_snackbar";
+
+  // Suggested prompts — sub-text hướng dẫn
+  static const String chatbotPromptLowStockSub = 'chatbotPromptLowStockSub';
+  static const String chatbotPromptCheckInfoSub = 'chatbotPromptCheckInfoSub';
+  static const String chatbotPromptImportSub = 'chatbotPromptImportSub';
+  static const String chatbotPromptExportSub = 'chatbotPromptExportSub';
+  static const String chatbotPromptAuditLogSub =
+      'chatbotPromptAuditLogSub'; // Mới
+  static const String chatbotPromptHelpSub = 'chatbotPromptHelpSub'; // Mới
+  static const String chatbotPromptAuditLog = "chatbot_prompt_audit_log";
+  static const String chatbotPromptHelp = "chatbot_prompt_help";
+  static const String chatbotWelcomeDetailed = "chatbot_welcome_detailed";
+  static const String chatbotMessageTooLong = "chatbot_message_too_long";
+
+  // -- Smart AI Analysis (Thêm vào phần Chatbot)
+  static const String chatbotAnalyzeCrossSellTitle = "chatbot_analyze_cross_sell_title";
+  static const String chatbotAnalyzeRestockTitle = "chatbot_analyze_restock_title";
+  static const String chatbotAnalyzeOptimalStock = "chatbot_analyze_optimal_stock";
+  static const String chatbotAnalyzeCurrentStock = "chatbot_analyze_current_stock";
+  static const String chatbotAnalyzeBoughtTogether = "chatbot_analyze_bought_together";
+  static const String chatbotAnalyzeFrequencyUnit = "chatbot_analyze_frequency_unit";
+  static const String chatbotPromptAnalyzeRestock = "chatbot_prompt_analyze_restock";
+  static const String chatbotPromptAnalyzeRestockSub = "chatbot_prompt_analyze_restock_sub";
+  static const String chatbotPromptCrossSell = "chatbot_prompt_cross_sell";
+  static const String chatbotPromptCrossSellSub = "chatbot_prompt_cross_sell_sub";
+  static const String chatbotQuickActionAnalyze = "chatbot_quick_action_analyze";
+
+// Product Info Card — nhãn giá
+  static const String chatbotSellingPrice = 'chatbotSellingPrice';
+  static const String chatbotImportPrice = 'chatbotImportPrice';
+  static const String chatbotViewDetail = 'chatbotViewDetail';
+
+// Action Confirm Card — resolved states
+  static const String chatbotTransactionConfirmedLabel =
+      'chatbotTransactionConfirmedLabel';
+  static const String chatbotTransactionCancelledLabel =
+      'chatbotTransactionCancelledLabel';
+
+// UI Controller — cancel messages (thay thế hardcode string cũ)
+  static const String chatbotTransactionCancelled =
+      'chatbotTransactionCancelled';
+  static const String chatbotTransactionCancelFailed =
+      'chatbotTransactionCancelFailed';
+
+// Choose Product Card — selected label + command templates
+  static const String chatbotSelected = 'chatbotSelected';
+  static const String chatbotCmdCheckInfo = 'chatbotCmdCheckInfo';
+  static const String chatbotCmdImport = 'chatbotCmdImport';
+  static const String chatbotCmdExport = 'chatbotCmdExport';
+
+  // -- Quick Actions Labels
+  static const String chatbotQuickActionInfo = "chatbot_quick_action_info";
+  static const String chatbotQuickActionHistory =
+      "chatbot_quick_action_history";
+  static const String chatbotQuickActionHelp = "chatbot_quick_action_help";
 
   // -- Customize Catalog
   static const String customizeCatalog = "customize_catalog";
@@ -1131,6 +1187,9 @@ class TTexts {
   static const String profileDialogDescriptionLogout =
       'profile_dialog_description_logout';
   static const String profileDialogBtnLogout = 'profile_dialog_btn_logout';
+  static const String profileStatusNotUpdatedYet =
+      'profile_status_not_updated_yet';
+  static const String profileMemberInfo = 'profile_member_info';
   static const String errorLoadingData = "error_loading_data";
   static const String verifyingData = "verifying_data";
   static const String syncDataWarningTitle = "sync_data_warning_title";

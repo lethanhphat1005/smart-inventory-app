@@ -2,17 +2,17 @@
 
 final Map<String, String> viWorkspace = {
   // -- Workspace Selection
-  TTexts.workspaceSelectionTitle: "Chọn Không Gian Làm Việc",
+  TTexts.workspaceSelectionTitle: "Chọn workspace",
   TTexts.workspaceSelectionSubtitle:
-      "Chọn môi trường mà bạn muốn làm việc hôm nay.",
+      "Chọn cửa hàng mà bạn muốn làm việc hôm nay.",
   TTexts.joinAWorkspace: "Nhấn",
   TTexts.createYourWorkspace: "Tạo Cửa Hàng Mới",
   TTexts.requestAccess: "Yêu Cầu Truy Cập",
-  TTexts.requestAccessDesc: "Nhập mã cửa hàng để tham gia nhóm hiện có.",
+  TTexts.requestAccessDesc: "Nhập mã mời để tham gia cửa hàng hiện có.",
   TTexts.needHelp: "Cần Hỗ Trợ?",
   TTexts.whatIsWorkspace: "Workspace là gì?",
   TTexts.workspaceDescription:
-      "Workspace (hoặc Cửa hàng) là môi trường dùng chung nơi bạn và đội ngũ quản lý kho hàng, theo dõi lô hàng và xem báo cáo.\n\n• Để tham gia workspace hiện có, bạn cần mã cửa hàng gồm 6 ký tự do Quản lý cung cấp.\n• Nếu bạn là chủ doanh nghiệp, bạn có thể tạo workspace mới để bắt đầu quản lý kho của riêng mình.",
+      "Workspace (hoặc Cửa hàng) là môi trường dùng chung nơi bạn và đội ngũ quản lý kho hàng, theo dõi lô hàng và xem báo cáo.\n\n• Để tham gia workspace hiện có, bạn cần mã mời gồm 6 ký tự do Quản lý cung cấp.\n• Nếu bạn là chủ cửa hàng, bạn có thể tạo workspace mới để bắt đầu quản lý kho của riêng mình.",
   TTexts.understood: "Đã Hiểu",
   TTexts.storeSelectionSuccessTitle: "Đã Chọn Cửa Hàng",
   TTexts.storeSelectionSuccessMessage: "Đã tham gia thành công",
@@ -57,7 +57,7 @@ final Map<String, String> viWorkspace = {
 
   TTexts.joinWorkspaceTitle: "Tham Gia Workspace",
   TTexts.joinWorkspaceSubtitle:
-      "Nhập mã mời do Quản lý cung cấp để kết nối vào hệ thống.",
+      "Nhập mã mời do Chủ Cửa Hàng cung cấp để kết nối vào hệ thống.",
   TTexts.enterInviteCodeLabel: "Mã Mời",
   TTexts.enterInviteCodeHint: "ví dụ: ABCD-EFGH",
   TTexts.joinBtn: "Tham Gia Ngay",
@@ -79,7 +79,7 @@ final Map<String, String> viWorkspace = {
       "Xem và quản lý thành viên cùng vai trò của họ trong workspace này.",
   TTexts.membersCount: "Thành Viên",
   TTexts.roleManager: "Quản Lý",
-  TTexts.roleOwner: 'Chủ Sở Hữu',
+  TTexts.roleOwner: 'Chủ Cửa Hàng',
   TTexts.roleStaff: "Nhân Viên",
   TTexts.youBadge: "Bạn",
 

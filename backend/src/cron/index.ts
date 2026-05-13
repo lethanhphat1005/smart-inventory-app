@@ -6,10 +6,9 @@ import { smartDecisionService } from '../modules/alerts/smart-decision.module.js
 export const initCronJobs = () => {
   // 1. Vào 08:00 sáng: Phân tích và gợi ý nhập hàng (Planning)
   cron.schedule(
-    // '*/1 * * * *',
     '0 8 * * *',
     async () => {
-      console.info('[Cron] 08:00 AM - Generating reorder suggestions...');
+      // console.info('[Cron] 08:00 AM - Generating reorder suggestions...');
       await smartDecisionService.generateReorderSuggestions();
     },
     {
@@ -19,10 +18,9 @@ export const initCronJobs = () => {
 
   // 2. Vào 20:00 tối: Quét toàn bộ kho báo cáo hàng thấp (Review)
   cron.schedule(
-    // '*/1 * * * *',
     '0 20 * * *',
     async () => {
-      console.info('[Cron] Đang chạy kiểm tra tồn kho tự động...');
+      // console.info('[Cron] Đang chạy kiểm tra tồn kho tự động...');
       await smartAlertService.scanAllStoresForLowStock();
     },
     {

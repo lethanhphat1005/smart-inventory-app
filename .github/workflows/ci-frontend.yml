@@ -2,11 +2,15 @@ name: CI workflow for frontend
 
 on:
   push:
-    branches: [main]
-    paths: ["frontend/**"]
+    branches:
+      - main
+    paths:
+      - 'frontend/**'
   pull_request:
-    branches: [main]
-    paths: ["frontend/**"]
+    branches:
+      - main
+    paths:
+      - 'frontend/**'
   workflow_dispatch:
 
 jobs:
@@ -19,7 +23,7 @@ jobs:
 
     steps:
       - name: Checkout source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2

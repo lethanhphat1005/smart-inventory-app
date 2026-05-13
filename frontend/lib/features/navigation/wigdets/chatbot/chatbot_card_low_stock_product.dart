@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/infrastructure/utils/url_helper_utils.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
-import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/routes/app_routes.dart';
 import 'package:frontend/core/ui/widgets/t_no_image_widget.dart';
 import 'package:get/get.dart';
@@ -21,13 +20,17 @@ class ChatCardLowStockProduct extends StatelessWidget {
 
     final displayName =
         pkg['displayName'] ?? product?['name'] ?? TTexts.unknownProduct.tr;
-    final quantity = itemData['quantity'] ?? pkg['quantity'] ?? 0;
+    final quantity = (itemData['quantity'] ?? pkg['quantity'] ?? 0) as num;
     final unitName = pkg['unit']?['name'] ?? '';
 
-    final threshold = int.tryParse(itemData['reorder_threshold']?.toString() ??
-            itemData['reorderThreshold']?.toString() ??
-            '10') ??
-        10;
+    final threshold = (int.tryParse(
+              itemData['reorder_threshold']?.toString() ??
+                  itemData['reorderThreshold']?.toString() ??
+                  '10',
+            ) ??
+            10)
+        .toDouble();
+
     final String rawUrl = product?['imageUrl']?.toString() ??
         pkg?['imageUrl']?.toString() ??
         itemData['imageUrl']?.toString() ??
@@ -38,107 +41,146 @@ class ChatCardLowStockProduct extends StatelessWidget {
     final packageId = pkg['productPackageId'];
     final barcode = pkg['barcodeValue'] ?? '';
 
+    // Progress ratio: tồn kho / ngưỡng tối đa ước tính (2× threshold = đầy đủ)
+    final double maxExpected = threshold * 2;
+    final double ratio = (quantity.toDouble() / maxExpected).clamp(0.0, 1.0);
+
     Color stockColor;
     String stockText;
+    IconData stockIcon;
 
     if (quantity == 0) {
       stockColor = AppColors.stockOut;
       stockText = TTexts.chatbotOutOfStock.tr;
+      stockIcon = Iconsax.close_circle;
     } else if (quantity <= threshold) {
       stockColor = AppColors.primary;
-      stockText =
-          "${TTexts.chatbotLowStockPrefix.tr} $quantity $unitName".trim();
+      stockText = '${quantity.toInt()} / ${threshold.toInt()} $unitName'.trim();
+      stockIcon = Iconsax.warning_2;
     } else {
       stockColor = AppColors.stockIn;
-      stockText = "${TTexts.chatbotLeftPrefix.tr} $quantity $unitName".trim();
+      stockText =
+          '${TTexts.chatbotLeftPrefix.tr} ${quantity.toInt()} $unitName'.trim();
+      stockIcon = Iconsax.tick_circle;
     }
 
     return GestureDetector(
       onTap: () {
         if (productId != null) {
-          Get.toNamed(AppRoutes.inventoryDetail,
-              arguments: productId,
-              parameters: {
-                'packageId': packageId?.toString() ?? '',
-                'barcode': barcode?.toString() ?? ''
-              });
+          Get.toNamed(
+            AppRoutes.inventoryDetail,
+            arguments: productId,
+            parameters: {
+              'packageId': packageId?.toString() ?? '',
+              'barcode': barcode?.toString() ?? '',
+            },
+          );
         }
       },
       child: Container(
-        width: 200,
-        margin: const EdgeInsets.only(bottom: 8),
-        padding: const EdgeInsets.all(12),
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: [
-              BoxShadow(
-                  color: Colors.black.withOpacity(0.03),
-                  blurRadius: 20,
-                  offset: const Offset(0, 8))
-            ]),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
           children: [
-            Expanded(
-              flex: 3,
+            // Thumbnail
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
               child: Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                    color: const Color(0xFFF8F9FA),
-                    borderRadius: BorderRadius.circular(18)),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(18),
-                  child: finalImageUrl.isNotEmpty
-                      ? CachedNetworkImage(
-                          imageUrl: finalImageUrl,
-                          fit: BoxFit.cover,
-                          errorWidget: (context, url, error) =>
-                              _buildImagePlaceholder())
-                      : _buildImagePlaceholder(),
-                ),
+                width: 52,
+                height: 52,
+                color: const Color(0xFFF4F5F7),
+                child: finalImageUrl.isNotEmpty
+                    ? CachedNetworkImage(
+                        imageUrl: finalImageUrl,
+                        fit: BoxFit.cover,
+                        errorWidget: (_, __, ___) => _buildImagePlaceholder(),
+                      )
+                    : _buildImagePlaceholder(),
               ),
             ),
-            const SizedBox(height: 14),
+            const SizedBox(width: 12),
+
+            // Info + progress
             Expanded(
-              flex: 2,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(displayName,
-                      style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          fontSize: 14,
-                          color: AppColors.primaryText,
-                          height: 1.4,
-                          fontFamily: AppFonts.mainFont),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis),
-                  const Spacer(),
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                    decoration: BoxDecoration(
-                        color: stockColor.withOpacity(0.08),
-                        borderRadius: BorderRadius.circular(100)),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Iconsax.box, color: stockColor, size: 14),
-                        const SizedBox(width: 6),
-                        Flexible(
-                            child: Text(stockText,
-                                style: TextStyle(
-                                    color: stockColor,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                    fontFamily: AppFonts.mainFont),
-                                overflow: TextOverflow.ellipsis)),
-                      ],
+                  Text(
+                    displayName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.primaryText,
+                      fontFamily: 'Poppins',
                     ),
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      // Stock badge
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: stockColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(100),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(stockIcon, size: 12, color: stockColor),
+                            const SizedBox(width: 4),
+                            Text(
+                              stockText,
+                              style: TextStyle(
+                                color: stockColor,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+
+                      // Progress bar
+                      Expanded(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: LinearProgressIndicator(
+                            value: ratio,
+                            minHeight: 4,
+                            backgroundColor: Colors.grey.shade100,
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(stockColor),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
+            ),
+
+            const SizedBox(width: 8),
+            Icon(
+              Iconsax.arrow_right_3,
+              size: 16,
+              color: Colors.grey.shade400,
             ),
           ],
         ),
@@ -146,7 +188,5 @@ class ChatCardLowStockProduct extends StatelessWidget {
     );
   }
 
-  Widget _buildImagePlaceholder() {
-    return const TNoImageWidget(iconSize: 32);
-  }
+  Widget _buildImagePlaceholder() => const TNoImageWidget(iconSize: 24);
 }

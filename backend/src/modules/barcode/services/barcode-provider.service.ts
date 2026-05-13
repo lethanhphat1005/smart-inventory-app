@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-import { logger } from '../../../common/utils/index.js';
+import { UPCITEMDB_API, OPENFOODFACTS_API } from '../barcode.constant.js';
 import {
   normalizeText,
   reduceProviderNoise,
@@ -8,21 +8,19 @@ import {
 } from '../utils/index.js';
 
 import type { BarcodeType } from '../../../generated/prisma/client.js';
-import type { BarcodeLookupProviderResult } from '../barcodes.type.js';
-
-const UPCITEMDB_API = 'https://api.upcitemdb.com/prod/trial/lookup';
-const OPENFOODFACTS_API = 'https://world.openfoodfacts.org/api/v2/product';
+import type {
+  BarcodeLookupProviderResult,
+  NormalizedBarcodeData,
+  ExtractedBarcodeData,
+} from '../barcodes.type.js';
 
 export type BarcodeLookupInput = {
   barcode: string;
   type?: BarcodeType;
 };
 
-type NormalizedPayload = {
-  normalizedName?: string;
-  normalizedBrand?: string;
-  normalizedPackageText?: string;
-};
+type NormalizedPayload = NormalizedBarcodeData;
+type ExtractedPayload = ExtractedBarcodeData;
 
 type UpcItemDbItem = {
   ean?: string;
@@ -86,50 +84,14 @@ export class BarcodeProviderService implements BarcodeProviderServicePort {
   async lookupBarcode(
     input: BarcodeLookupInput,
   ): Promise<BarcodeLookupProviderResult> {
-    logger.info(
-      {
-        barcode: input.barcode,
-        type: input.type ?? null,
-        providerCount: this.providers.length,
-      },
-      'Starting to lookup barcode through provider list',
-    );
-
+    // duyệt qua các provider
     for (const provider of this.providers) {
-      try {
-        const result = await provider.lookupBarcode(input);
+      const result = await provider.lookupBarcode(input);
 
-        logger.info(
-          {
-            barcode: input.barcode,
-            provider: provider.providerName,
-            status: result.status,
-          },
-          'Barcode provider returned response',
-        );
-
-        if (result.status === 'valid') {
-          return result;
-        }
-      } catch (error) {
-        logger.warn(
-          {
-            err: error,
-            barcode: input.barcode,
-            provider: provider.providerName,
-          },
-          'Invalid provider response, switch to the next provider',
-        );
+      if (result.status === 'valid') {
+        return result;
       }
     }
-
-    logger.info(
-      {
-        barcode: input.barcode,
-        type: input.type ?? null,
-      },
-      'No provider return usable response',
-    );
 
     return {
       rawPayload: null,
@@ -169,7 +131,7 @@ class UpcItemDbBarcodeProvider implements BarcodeProviderStrategy {
       };
     }
 
-    const normalizedPayload = this.extractAndNormalizeRawPayload(firstItem);
+    const extractedPayload = this.extractAndNormalizeRawPayload(firstItem);
 
     return {
       rawPayload: responseData,
@@ -178,23 +140,35 @@ class UpcItemDbBarcodeProvider implements BarcodeProviderStrategy {
       ...(input.type !== undefined && {
         type: input.type,
       }),
-      ...(normalizedPayload.normalizedName !== undefined && {
-        normalizedName: normalizedPayload.normalizedName,
+      ...(extractedPayload.normalized.normalizedName !== undefined && {
+        normalizedName: extractedPayload.normalized.normalizedName,
       }),
-      ...(normalizedPayload.normalizedBrand !== undefined && {
-        normalizedBrand: normalizedPayload.normalizedBrand,
+      ...(extractedPayload.normalized.normalizedBrand !== undefined && {
+        normalizedBrand: extractedPayload.normalized.normalizedBrand,
       }),
-      ...(normalizedPayload.normalizedPackageText !== undefined && {
-        normalizedPackageText: normalizedPayload.normalizedPackageText,
+      ...(extractedPayload.normalized.normalizedPackageText !== undefined && {
+        normalizedPackageText:
+          extractedPayload.normalized.normalizedPackageText,
+      }),
+      ...(extractedPayload.extracted.extractedName !== undefined && {
+        extractedName: extractedPayload.extracted.extractedName,
+      }),
+      ...(extractedPayload.extracted.extractedBrand !== undefined && {
+        extractedBrand: extractedPayload.extracted.extractedBrand,
+      }),
+      ...(extractedPayload.extracted.extractedPackageText !== undefined && {
+        extractedPackageText: extractedPayload.extracted.extractedPackageText,
       }),
     };
   }
 
   // Extract raw payload của UPCItemDB thành normalized fields
-  // để BarcodesService có thể dùng cho candidate matching.
-  private extractAndNormalizeRawPayload(
-    payload: UpcItemDbItem,
-  ): NormalizedPayload {
+  // để BarcodesService có thể dùng cho candidate matching
+  // Và extract raw payload nhưng không normalize cho auto-fill
+  private extractAndNormalizeRawPayload(payload: UpcItemDbItem): {
+    normalized: NormalizedPayload;
+    extracted: ExtractedPayload;
+  } {
     // lọc các ký tự gây nhiễu
     const reducedName = reduceProviderNoise(
       `${payload.title} ${payload.offers?.[0]?.title}`,
@@ -219,16 +193,34 @@ class UpcItemDbBarcodeProvider implements BarcodeProviderStrategy {
       }),
     });
 
+    // trích xuất payload (không chuẩn hóa) cho auto-fill
+    const extractedName = reducedName;
+    const extractedBrand = reducedBrand;
+    const extractedPackageText = normalizedPackageText;
+
     return {
-      ...(normalizedName !== undefined && {
-        normalizedName,
-      }),
-      ...(normalizedBrand !== undefined && {
-        normalizedBrand,
-      }),
-      ...(normalizedPackageText !== undefined && {
-        normalizedPackageText,
-      }),
+      normalized: {
+        ...(normalizedName !== undefined && {
+          normalizedName,
+        }),
+        ...(normalizedBrand !== undefined && {
+          normalizedBrand,
+        }),
+        ...(normalizedPackageText !== undefined && {
+          normalizedPackageText,
+        }),
+      },
+      extracted: {
+        ...(extractedName !== undefined && {
+          extractedName,
+        }),
+        ...(extractedBrand !== undefined && {
+          extractedBrand,
+        }),
+        ...(extractedPackageText !== undefined && {
+          extractedPackageText,
+        }),
+      },
     };
   }
 
@@ -290,9 +282,11 @@ class OpenFoodFactsBarcodeProvider implements BarcodeProviderStrategy {
       };
     }
 
-    const normalizedPayload = this.extractAndNormalizeRawPayload(
+    const normalizedPayload = this.normalizeRawPayload(
       responseData.product,
     );
+
+    const extractedPayload = this.extractRawPayload(responseData.product);
 
     // filter các trường cần thiết để lưu cache vì response data size quá lớn
     const filteredResponse: OpenFoodFactsResponse = {
@@ -339,10 +333,19 @@ class OpenFoodFactsBarcodeProvider implements BarcodeProviderStrategy {
       ...(normalizedPayload.normalizedPackageText !== undefined && {
         normalizedPackageText: normalizedPayload.normalizedPackageText,
       }),
+      ...(extractedPayload.extractedName !== undefined && {
+        extractedName: extractedPayload.extractedName,
+      }),
+      ...(extractedPayload.extractedBrand !== undefined && {
+        extractedBrand: extractedPayload.extractedBrand,
+      }),
+      ...(extractedPayload.extractedPackageText !== undefined && {
+        extractedPackageText: extractedPayload.extractedPackageText,
+      }),
     };
   }
 
-  private extractAndNormalizeRawPayload(
+  private normalizeRawPayload(
     payload: OpenFoodFactsItem,
   ): NormalizedPayload {
     const normalizedName = normalizeText(
@@ -368,6 +371,33 @@ class OpenFoodFactsBarcodeProvider implements BarcodeProviderStrategy {
       }),
       ...(normalizedPackageText !== undefined && {
         normalizedPackageText,
+      }),
+    };
+  }
+
+  private extractRawPayload(payload: OpenFoodFactsItem): ExtractedPayload {
+    const extractedName =
+      payload.product_name_vi ??
+      payload.product_name ??
+      payload.product_name_en;
+
+    const extractedBrand = payload.brands;
+    const extractedPackageText =
+      payload?.quantity ??
+      (payload?.product_quantity !== undefined &&
+      payload?.product_quantity_unit !== undefined
+        ? `${payload.product_quantity} ${payload.product_quantity_unit}`
+        : undefined);
+
+    return {
+      ...(extractedName !== undefined && {
+        extractedName,
+      }),
+      ...(extractedBrand !== undefined && {
+        extractedBrand,
+      }),
+      ...(extractedPackageText !== undefined && {
+        extractedPackageText,
       }),
     };
   }

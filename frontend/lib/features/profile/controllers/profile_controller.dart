@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/models/store_member_model.dart';
 import 'package:frontend/core/infrastructure/network/app_client.dart';
 import 'package:frontend/core/infrastructure/utils/full_screen_loader_utils.dart';
@@ -7,6 +8,7 @@ import 'package:frontend/core/state/services/store_service.dart';
 import 'package:frontend/core/state/services/user_service.dart';
 import 'package:frontend/core/ui/widgets/t_snackbars_widget.dart';
 import 'package:frontend/features/auth/providers/auth_provider.dart';
+import 'package:frontend/features/navigation/controllers/chatbot_ui_controller.dart';
 import 'package:frontend/features/profile/providers/store_member_provider.dart';
 import 'package:frontend/features/profile/providers/store_provider.dart';
 import 'package:get/get.dart';
@@ -163,12 +165,20 @@ class ProfileController extends GetxController {
     try {
       FullScreenLoaderUtils.openLoadingDialog(TTexts.loggingOut.tr);
 
-      await AuthProvider(apiClient: apiClient).logout();
+      if (Get.isRegistered<ChatbotUiController>()) {
+        await Get.find<ChatbotUiController>().clearChatData();
+      }
+
+      try {
+        await AuthProvider(apiClient: apiClient).logout();
+      } catch (e) {
+        debugPrint('Lỗi API Backend khi logout (Bỏ qua): $e');
+      }
+
       await Get.find<AuthService>().clearAuthData();
       await Get.find<StoreService>().clearWorkspaceData();
-      userService.clearUser();
 
-      // Reset role
+      userService.clearUser();
       currentUserStoreRole.value = '';
 
       FullScreenLoaderUtils.stopLoading();

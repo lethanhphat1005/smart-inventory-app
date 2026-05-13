@@ -93,9 +93,9 @@ export class NotificationService {
     try {
       const response = await getMessaging().sendEachForMulticast(message);
 
-      console.info(
-        `[FCM] Gửi thành công: ${response.successCount}, Lỗi: ${response.failureCount}`,
-      );
+      // console.info(
+      //   `[FCM] Gửi thành công: ${response.successCount}, Lỗi: ${response.failureCount}`,
+      // );
 
       // Nếu có lỗi xảy ra trong quá trình gửi
       if (response.failureCount > 0) {
@@ -121,9 +121,9 @@ export class NotificationService {
 
         // Xóa các token rác khỏi Database để nhẹ DB và tăng tốc độ cho lần sau
         if (failedTokens.length > 0) {
-          console.info(
-            `[FCM] Đang dọn dẹp ${failedTokens.length} token rác khỏi Database...`,
-          );
+          // console.info(
+          //   `[FCM] Đang dọn dẹp ${failedTokens.length} token rác khỏi Database...`,
+          // );
           await this.notificationRepository.deleteMultipleTokens(failedTokens);
         }
       }

@@ -43,7 +43,7 @@ class InventoryProvider {
   }
 
   Future<void> hideDefaultCategory(String categoryId) async {
-    await _apiClient.patch('/api/categories/$categoryId/hide');
+    await _apiClient.post('/api/categories/$categoryId/hide');
   }
 
   // ==========================================

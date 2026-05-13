@@ -10,6 +10,17 @@ export class HiddenDefaultRepository {
     });
   }
 
+  async unhideOne(storeId: string, categoryId: string): Promise<void> {
+    await prisma.hidedDefault.delete({
+      where: {
+        storeId_categoryId: {
+          storeId,
+          categoryId,
+        },
+      },
+    });
+  }
+
   async isDefaultOneVisible(
     storeId: string,
     categoryId: string,

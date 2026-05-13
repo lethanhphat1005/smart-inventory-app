@@ -35,14 +35,16 @@ export class ChatbotController {
     req: Request,
     res: Response<ApiResponse<{ message: string }>>,
   ): Promise<void> => {
-    const { draftActionId, isConfirmed } = req.body as {
-      draftActionId: string;
-      isConfirmed: boolean;
-    };
+    const { draftActionId, isConfirmed } = req.body;
+
+    const storeId = requireReqStoreContext(req).storeId;
+    const userId = requireReqUser(req).userId;
 
     const resultMessage = await this.chatbotService.confirmDraftAction(
       draftActionId,
       isConfirmed,
+      storeId,
+      userId,
     );
 
     sendResponse.success(

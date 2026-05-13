@@ -37,6 +37,15 @@ export class BarcodeApiCacheRepository {
         ...(data.normalizedPackageText !== undefined && {
           normalizedPackageText: data.normalizedPackageText,
         }),
+        ...(data.extractedName !== undefined && {
+          extractedName: data.extractedName,
+        }),
+        ...(data.extractedBrand !== undefined && {
+          extractedBrand: data.extractedBrand,
+        }),
+        ...(data.extractedPackageText !== undefined && {
+          extractedPackageText: data.extractedPackageText,
+        }),
       },
     });
   }
@@ -67,6 +76,18 @@ export class BarcodeApiCacheRepository {
         }),
         ...(data.normalizedPackageText !== undefined && {
           normalizedPackageText: data.normalizedPackageText,
+        }),
+        ...(data.normalizedPackageText !== undefined && {
+          normalizedPackageText: data.normalizedPackageText,
+        }),
+        ...(data.extractedName !== undefined && {
+          extractedName: data.extractedName,
+        }),
+        ...(data.extractedBrand !== undefined && {
+          extractedBrand: data.extractedBrand,
+        }),
+        ...(data.extractedPackageText !== undefined && {
+          extractedPackageText: data.extractedPackageText,
         }),
       },
     });
