@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Thêm thư viện để dùng Clipboard
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/features/navigation/models/chat_message_model.dart';
@@ -20,9 +21,8 @@ class ChatbotMessage extends StatelessWidget {
       child: GestureDetector(
         onLongPress: () async {
           await Clipboard.setData(ClipboardData(text: message.text));
-          // Hiển thị thông báo khi copy thành công
           Get.rawSnackbar(
-            message: 'Copied to clipboard',
+            message: TTexts.barcodeCopied.tr,
             snackPosition: SnackPosition.TOP,
             backgroundColor: AppColors.primaryText.withOpacity(0.8),
             borderRadius: 12,

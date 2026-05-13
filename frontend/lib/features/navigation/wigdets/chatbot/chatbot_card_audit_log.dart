@@ -28,11 +28,10 @@ class _AuditLogEntry {
 
   factory _AuditLogEntry.fromMap(Map<String, dynamic> m) => _AuditLogEntry(
         action: (m['action']?.toString() ?? 'UNKNOWN').toUpperCase(),
-        target: m['target']?.toString() ?? 'Dữ liệu không xác định',
-        // ✅ Fix bug: ưu tiên userFullName, fallback user.fullName, rồi mới dùng placeholder
+        target: m['target']?.toString() ?? TTexts.unknownProduct.tr,
         userFullName: m['userFullName']?.toString() ??
             m['user']?['fullName']?.toString() ??
-            'Nhân viên',
+            TTexts.userLabel.tr,
         time: m['time']?.toString() ?? '',
         entityType: m['entityType']?.toString() ?? '',
       );
@@ -125,9 +124,9 @@ class _ChatCardAuditLogState extends State<ChatCardAuditLog> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'NHẬT KÝ THAO TÁC',
-                  style: TextStyle(
+                Text(
+                  TTexts.chatbotPromptAuditLog.tr.toUpperCase(),
+                  style: const TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 0.8,
@@ -136,7 +135,7 @@ class _ChatCardAuditLogState extends State<ChatCardAuditLog> {
                   ),
                 ),
                 Text(
-                  'hiển thị $start–$end / $_totalItems',
+                  '${TTexts.resultsFound.tr}: $start–$end / $_totalItems',
                   style: const TextStyle(
                     fontSize: 10,
                     color: AppColors.subText,
@@ -353,12 +352,12 @@ class _ChatCardAuditLogState extends State<ChatCardAuditLog> {
 
   String _entityLabel(String entityType) {
     const map = {
-      'Product': 'Sản phẩm',
-      'ProductPackage': 'Gói SP',
-      'Inventory': 'Kho hàng',
-      'Transaction': 'Giao dịch',
-      'Category': 'Danh mục',
-      'User': 'Nhân viên',
+      'Product': 'Product',
+      'ProductPackage': 'Package',
+      'Inventory': 'Inventory',
+      'Transaction': 'Transaction',
+      'Category': 'Category',
+      'User': 'Staff',
     };
     return map[entityType] ?? entityType;
   }

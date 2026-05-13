@@ -43,7 +43,10 @@ class ChatCardProductInfo extends StatelessWidget {
         ) ??
         10;
 
-    final formatCurrency = NumberFormat.decimalPattern('vi_VN');
+    final currentLocale = Get.locale?.languageCode == 'vi' ? 'vi_VN' : 'en_US';
+
+    final formatCurrency = NumberFormat.decimalPattern(currentLocale);
+
     final sellingPrice = formatCurrency
         .format(num.tryParse(pkg['sellingPrice']?.toString() ?? '0') ?? 0);
     final importPrice = formatCurrency

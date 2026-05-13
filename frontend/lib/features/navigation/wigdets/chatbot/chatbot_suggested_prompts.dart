@@ -50,7 +50,7 @@ class ChatbotSuggestedPrompts extends StatelessWidget {
         iconColor: const Color(0xFF4A4A9C),
         label: TTexts.chatbotPromptAuditLog.tr,
         sub: TTexts.chatbotPromptAuditLogSub.tr,
-        autoSend: false, // Dựa theo thay đổi bạn muốn ở bước trước
+        autoSend: true,
       ),
       _PromptItem(
         icon: Iconsax.info_circle,
@@ -163,16 +163,16 @@ class ChatbotSuggestedPrompts extends StatelessWidget {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
-                fontSize: 13.5,
-                fontWeight: FontWeight.w600,
-                color: AppColors.primaryText,
-                fontFamily: 'Poppins',
+                fontSize: 10,
+                fontWeight: FontWeight.w500,
+                color: AppColors.subText,
+                height: 1.2,
               ),
             ),
             const SizedBox(height: 2),
             Text(
               p.sub,
-              maxLines: 2,
+              maxLines: 3,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontSize: 11.5,

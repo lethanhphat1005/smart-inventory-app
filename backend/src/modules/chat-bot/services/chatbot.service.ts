@@ -342,7 +342,7 @@ export class ChatbotService {
     } catch (error) {
       console.error('[Chatbot Error]', error);
       throw new CustomError({
-        message: 'Lỗi kết nối với hệ thống mô hình AI',
+        message: 'Connection to the AI model system failed.',
         status: StatusCodes.INTERNAL_SERVER_ERROR,
       });
     } finally {
@@ -484,7 +484,7 @@ export class ChatbotService {
 
     if (!draftData) {
       throw new CustomError({
-        message: 'Yêu cầu đã hết hạn hoặc không tồn tại (quá 5 phút).',
+        message: 'The request has expired or does not exist (over 5 minutes).',
         status: StatusCodes.GONE,
       });
     }
@@ -512,7 +512,7 @@ export class ChatbotService {
     const lastUserMessage =
       typeof lastMessage?.content === 'string'
         ? lastMessage.content
-        : 'Xác nhận';
+        : 'Confirm';
 
     try {
       if (!isConfirmed) {
@@ -1042,7 +1042,7 @@ Inventory: ${firstResult.quantity} ${firstResult.productPackage.unit.name}.`;
         botReply: await this.generateFriendlyReply(
           this.buildReplyContext(
             userMessage,
-            'Không tìm thấy nhật ký thao tác nào.',
+            'No action history found.',
           ),
         ),
       };
