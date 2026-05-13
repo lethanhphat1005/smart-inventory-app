@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/ui/theme/app_fonts.dart';
-import 'package:intl/intl.dart';
 import 'package:get/get.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
+import 'package:frontend/core/infrastructure/utils/day_formatter_utils.dart';
 
 class HomeAdjustmentDetailsBottomSheet extends StatelessWidget {
   final String icon;
@@ -82,8 +82,9 @@ class HomeAdjustmentDetailsBottomSheet extends StatelessWidget {
 
               _buildInfoRow(
                 TTexts.transactionDate.tr,
-                DateFormat('dd MMM yyyy, HH:mm').format(date),
+                DayFormatterUtils.formatDateTime(date),
               ),
+
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: 12),
                 child: Divider(

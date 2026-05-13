@@ -5,6 +5,7 @@ import 'package:frontend/core/ui/widgets/t_primary_button_widget.dart';
 import 'package:frontend/features/transaction/controllers/transaction_summary_controller.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
+import 'package:frontend/core/infrastructure/utils/day_formatter_utils.dart';
 
 class TransactionSummaryDetailsBottomSheetWidget
     extends GetView<TransactionSummaryController> {
@@ -27,7 +28,8 @@ class TransactionSummaryDetailsBottomSheetWidget
                 : TTexts.transactionNumber.tr,
             controller.transaction.transactionId ?? TTexts.na.tr),
         const SizedBox(height: 8),
-        _buildInfoRow(TTexts.transactionDate.tr, controller.dateStr),
+        _buildInfoRow(TTexts.transactionDate.tr,
+            DayFormatterUtils.formatDateTime(controller.transaction.createdAt)),
         const SizedBox(height: 16),
         if (controller.isAdjustment)
           Container(

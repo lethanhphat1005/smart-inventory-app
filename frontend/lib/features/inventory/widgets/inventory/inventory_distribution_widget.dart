@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/features/inventory/controllers/inventory_controller.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
+import 'package:frontend/core/infrastructure/utils/number_formatter_utils.dart';
 
 class InventoryDistributionWidget extends GetView<InventoryController> {
   const InventoryDistributionWidget({super.key});
@@ -34,25 +35,33 @@ class InventoryDistributionWidget extends GetView<InventoryController> {
             final bool isTop = item == distributionData.first;
 
             return Padding(
-              padding: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.only(bottom: 12.0),
               child: Row(
                 children: [
-                  SizedBox(
-                      width: 80,
-                      child: Text(item.name,
-                          style: const TextStyle(
-                              fontSize: 12, fontWeight: FontWeight.w500),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis)),
-                  const SizedBox(width: 8),
                   Expanded(
+                    flex: 2,
+                    child: Text(
+                      item.name,
+                      style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.primaryText),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    flex: 3,
                     child: Stack(
                       children: [
                         Container(
-                            height: 10,
-                            decoration: BoxDecoration(
-                                color: AppColors.softGrey.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(5))),
+                          height: 10,
+                          decoration: BoxDecoration(
+                            color: AppColors.softGrey.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                        ),
                         TweenAnimationBuilder<double>(
                           tween: Tween<double>(begin: 0, end: percentage),
                           duration: const Duration(milliseconds: 1500),
@@ -77,8 +86,11 @@ class InventoryDistributionWidget extends GetView<InventoryController> {
                   ),
                   const SizedBox(width: 12),
                   SizedBox(
-                      width: 30,
-                      child: Text("${item.value}",
+                      width: 35,
+                      child: Text(
+                          NumberFormatterUtils.formatCompactNumber(
+                              item.value.toDouble(),
+                              isCurrency: false),
                           style: const TextStyle(
                               fontSize: 12,
                               color: AppColors.subText,
