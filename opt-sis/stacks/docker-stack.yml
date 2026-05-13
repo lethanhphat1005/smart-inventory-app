@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   sis-backend:
-    image: peterhoward/storix-backend:latest
+    image: ${BACKEND_IMAGE}
     env_file:
       - /opt/sis/env/backend.env
     secrets:
