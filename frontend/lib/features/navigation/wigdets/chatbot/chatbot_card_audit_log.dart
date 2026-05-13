@@ -4,54 +4,15 @@ import 'package:frontend/features/navigation/controllers/chatbot_ui_controller.d
 import 'package:frontend/features/navigation/controllers/navigation_controller.dart';
 import 'package:frontend/features/navigation/models/chat_message_model.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/features/navigation/models/chatbot_audit_log_models.dart';
 import 'package:frontend/features/navigation/wigdets/chatbot/chatbot_message_widget.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 
-// ---------------------------------------------------------------------------
-// Model nội bộ – map từ Map<String, dynamic> trả về Backend
-// ---------------------------------------------------------------------------
-class _AuditLogEntry {
-  final String action; // 'CREATE' | 'UPDATE' | 'DELETE'
-  final String target; // Tên sản phẩm / mã phiếu...
-  final String userFullName; // ✅ Fix: luôn lấy từ data, không hardcode
-  final String time;
-  final String entityType; // 'Product' | 'Transaction' | 'Inventory'...
-
-  const _AuditLogEntry({
-    required this.action,
-    required this.target,
-    required this.userFullName,
-    required this.time,
-    required this.entityType,
-  });
-
-  factory _AuditLogEntry.fromMap(Map<String, dynamic> m) => _AuditLogEntry(
-        action: (m['action']?.toString() ?? 'UNKNOWN').toUpperCase(),
-        target: m['target']?.toString() ?? TTexts.unknownProduct.tr,
-        userFullName: m['userFullName']?.toString() ??
-            m['user']?['fullName']?.toString() ??
-            TTexts.userLabel.tr,
-        time: m['time']?.toString() ?? '',
-        entityType: m['entityType']?.toString() ?? '',
-      );
-}
-
-// ---------------------------------------------------------------------------
-// Cấu hình hiển thị theo action
-// ---------------------------------------------------------------------------
-class _ActionConfig {
-  final Color color;
-  final IconData icon;
-  final String label;
-  const _ActionConfig(this.color, this.icon, this.label);
-}
+import 'chatbot_audit_log_item.dart';
 
 const _kPageSize = 5;
 
-// ---------------------------------------------------------------------------
-// Widget chính
-// ---------------------------------------------------------------------------
 class ChatCardAuditLog extends StatefulWidget {
   final ChatMessage message;
 
@@ -62,7 +23,7 @@ class ChatCardAuditLog extends StatefulWidget {
 }
 
 class _ChatCardAuditLogState extends State<ChatCardAuditLog> {
-  late final List<_AuditLogEntry> _logs;
+  late final List<AuditLogEntry> _logs;
   late final int _totalItems;
   int _page = 0;
 
@@ -71,18 +32,17 @@ class _ChatCardAuditLogState extends State<ChatCardAuditLog> {
     super.initState();
     final raw = widget.message.data;
 
-    // Backend có thể trả Map { items: [...], totalItems: N } hoặc trực tiếp List
     if (raw is Map<String, dynamic> && raw['items'] is List) {
       final items = raw['items'] as List<dynamic>;
       _logs = items
           .whereType<Map<String, dynamic>>()
-          .map(_AuditLogEntry.fromMap)
+          .map(AuditLogEntry.fromMap)
           .toList();
       _totalItems = (raw['totalItems'] as int?) ?? _logs.length;
     } else if (raw is List) {
       _logs = raw
           .whereType<Map<String, dynamic>>()
-          .map(_AuditLogEntry.fromMap)
+          .map(AuditLogEntry.fromMap)
           .toList();
       _totalItems = _logs.length;
     } else {
@@ -93,7 +53,7 @@ class _ChatCardAuditLogState extends State<ChatCardAuditLog> {
 
   int get _totalPages => (_logs.length / _kPageSize).ceil().clamp(1, 9999);
 
-  List<_AuditLogEntry> get _currentSlice {
+  List<AuditLogEntry> get _currentSlice {
     final start = _page * _kPageSize;
     final end = (start + _kPageSize).clamp(0, _logs.length);
     return _logs.sublist(start, end);
@@ -147,25 +107,23 @@ class _ChatCardAuditLogState extends State<ChatCardAuditLog> {
           ),
           const SizedBox(height: 6),
 
-          // 3. Danh sách log
-          ..._currentSlice.map(_buildLogCard),
+          // 3. Danh sách log (Gọi widget từ file kia)
+          ..._currentSlice.map((log) => ChatbotAuditLogItem(log: log)),
 
-          // 4. Phân trang (chỉ hiện khi có > 1 trang)
+          // 4. Phân trang
           if (_totalPages > 1) ...[
             const SizedBox(height: 4),
             _buildPagination(),
           ],
 
+          // 5. Nút View Full List
           const SizedBox(height: 8),
           Center(
             child: InkWell(
               onTap: () {
-                // 1. Đóng khung Chatbot
                 if (Get.isRegistered<ChatbotUiController>()) {
                   Get.find<ChatbotUiController>().closeChat();
                 }
-
-                // 2. Chuyển sang Tab số 3 (ReportView)
                 if (Get.isRegistered<NavigationController>()) {
                   Get.find<NavigationController>().selectedIndex.value = 3;
                 }
@@ -191,115 +149,6 @@ class _ChatCardAuditLogState extends State<ChatCardAuditLog> {
     );
   }
 
-  // -------------------------------------------------------------------------
-  // Một thẻ log
-  // -------------------------------------------------------------------------
-  Widget _buildLogCard(_AuditLogEntry log) {
-    final cfg = _actionConfig(log.action);
-    final entityLabel = _entityLabel(log.entityType);
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.black.withOpacity(0.06)),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // Icon tròn bo nhẹ
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: cfg.color.withOpacity(0.12),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(cfg.icon, color: cfg.color, size: 17),
-          ),
-          const SizedBox(width: 10),
-
-          // Nội dung giữa
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Tên target
-                Text(
-                  log.target,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.primaryText,
-                    fontFamily: 'Poppins',
-                  ),
-                ),
-                const SizedBox(height: 4),
-
-                // Người thao tác + entityType chip
-                Row(
-                  children: [
-                    const Icon(Iconsax.user,
-                        size: 11, color: AppColors.subText),
-                    const SizedBox(width: 3),
-                    Flexible(
-                      child: Text(
-                        log.userFullName,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.primaryText,
-                          fontFamily: 'Poppins',
-                        ),
-                      ),
-                    ),
-                    if (entityLabel.isNotEmpty) ...[
-                      const SizedBox(width: 6),
-                      _EntityChip(label: entityLabel),
-                    ],
-                  ],
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-
-          // Cột phải: badge + thời gian
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              _ActionBadge(label: cfg.label, color: cfg.color),
-              const SizedBox(height: 5),
-              Row(
-                children: [
-                  Icon(Iconsax.clock, size: 11, color: Colors.grey.shade400),
-                  const SizedBox(width: 3),
-                  Text(
-                    log.time,
-                    style: TextStyle(
-                      fontSize: 10,
-                      color: Colors.grey.shade500,
-                      fontFamily: 'Poppins',
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  // -------------------------------------------------------------------------
-  // Phân trang
-  // -------------------------------------------------------------------------
   Widget _buildPagination() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -330,98 +179,13 @@ class _ChatCardAuditLogState extends State<ChatCardAuditLog> {
       ],
     );
   }
-
-  // -------------------------------------------------------------------------
-  // Helpers
-  // -------------------------------------------------------------------------
-  _ActionConfig _actionConfig(String action) {
-    switch (action) {
-      case 'CREATE':
-        return const _ActionConfig(
-            AppColors.stockIn, Iconsax.add_circle, 'Tạo mới');
-      case 'UPDATE':
-        return const _ActionConfig(
-            AppColors.primary, Iconsax.edit_2, 'Cập nhật');
-      case 'DELETE':
-        return const _ActionConfig(AppColors.stockOut, Iconsax.trash, 'Xóa');
-      default:
-        return const _ActionConfig(
-            Colors.grey, Iconsax.info_circle, 'Thao tác');
-    }
-  }
-
-  String _entityLabel(String entityType) {
-    const map = {
-      'Product': 'Product',
-      'ProductPackage': 'Package',
-      'Inventory': 'Inventory',
-      'Transaction': 'Transaction',
-      'Category': 'Category',
-      'User': 'Staff',
-    };
-    return map[entityType] ?? entityType;
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Sub-widgets
-// ---------------------------------------------------------------------------
-
-class _ActionBadge extends StatelessWidget {
-  final String label;
-  final Color color;
-  const _ActionBadge({required this.label, required this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: color,
-          fontSize: 10,
-          fontWeight: FontWeight.w600,
-          fontFamily: 'Poppins',
-        ),
-      ),
-    );
-  }
-}
-
-class _EntityChip extends StatelessWidget {
-  final String label;
-  const _EntityChip({required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        label,
-        style: const TextStyle(
-          fontSize: 10,
-          fontWeight: FontWeight.w500,
-          color: AppColors.subText,
-          fontFamily: 'Poppins',
-        ),
-      ),
-    );
-  }
 }
 
 class _PageButton extends StatelessWidget {
   final IconData icon;
   final bool enabled;
   final VoidCallback onTap;
+
   const _PageButton({
     required this.icon,
     required this.enabled,

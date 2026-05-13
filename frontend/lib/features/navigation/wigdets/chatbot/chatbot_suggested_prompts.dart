@@ -14,15 +14,13 @@ class ChatbotSuggestedPrompts extends StatelessWidget {
     final prompts = [
       _PromptItem(
         icon: Iconsax.warning_2,
-        iconBg: const Color(0xFFFCEBEB),
         iconColor: const Color(0xFFA32D2D),
         label: TTexts.chatbotPromptLowStock.tr,
-        sub: TTexts.chatbotPromptLowStockSub.tr,
+        sub: TTexts.chatbotPromptLowStockSub.tr, // Phục hồi biến sub
         autoSend: true,
       ),
       _PromptItem(
         icon: Iconsax.box_search,
-        iconBg: const Color(0xFFE6F1FB),
         iconColor: const Color(0xFF185FA5),
         label: TTexts.chatbotPromptCheckInfo.tr,
         sub: TTexts.chatbotPromptCheckInfoSub.tr,
@@ -30,7 +28,6 @@ class ChatbotSuggestedPrompts extends StatelessWidget {
       ),
       _PromptItem(
         icon: Iconsax.import_1,
-        iconBg: const Color(0xFFEAF3DE),
         iconColor: const Color(0xFF3B6D11),
         label: TTexts.chatbotPromptImport.tr,
         sub: TTexts.chatbotPromptImportSub.tr,
@@ -38,7 +35,6 @@ class ChatbotSuggestedPrompts extends StatelessWidget {
       ),
       _PromptItem(
         icon: Iconsax.export_1,
-        iconBg: const Color(0xFFFAEEDA),
         iconColor: const Color(0xFF854F0B),
         label: TTexts.chatbotPromptExport.tr,
         sub: TTexts.chatbotPromptExportSub.tr,
@@ -46,7 +42,6 @@ class ChatbotSuggestedPrompts extends StatelessWidget {
       ),
       _PromptItem(
         icon: Iconsax.clock,
-        iconBg: const Color(0xFFEBEBFC),
         iconColor: const Color(0xFF4A4A9C),
         label: TTexts.chatbotPromptAuditLog.tr,
         sub: TTexts.chatbotPromptAuditLogSub.tr,
@@ -54,7 +49,6 @@ class ChatbotSuggestedPrompts extends StatelessWidget {
       ),
       _PromptItem(
         icon: Iconsax.info_circle,
-        iconBg: const Color(0xFFEBF7FC),
         iconColor: const Color(0xFF2D82A3),
         label: TTexts.chatbotPromptHelp.tr,
         sub: TTexts.chatbotPromptHelpSub.tr,
@@ -109,17 +103,14 @@ class ChatbotSuggestedPrompts extends StatelessWidget {
                   height: 1.5,
                 ),
               ),
+              const SizedBox(height: 24),
 
-              // Grid 2×2 -> 2x3
-              GridView.count(
-                crossAxisCount: 2,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio:
-                    1.4, // Đã điều chỉnh lại tỉ lệ để vừa chứa sub-text
-                children: prompts.map((p) => _buildPromptCard(p)).toList(),
+              // Dùng Wrap để linh hoạt xếp các nút
+              Wrap(
+                alignment: WrapAlignment.center,
+                spacing: 8,
+                runSpacing: 12,
+                children: prompts.map((p) => _buildPromptChip(p)).toList(),
               ),
             ],
           ),
@@ -128,59 +119,61 @@ class ChatbotSuggestedPrompts extends StatelessWidget {
     );
   }
 
-  Widget _buildPromptCard(_PromptItem p) {
-    return InkWell(
-      onTap: () => onAction(p.label, p.autoSend),
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.grey.shade200),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.025),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
+  Widget _buildPromptChip(_PromptItem p) {
+    return Tooltip(
+      message: p.sub, // Text hiển thị khi Tooltip nổi lên
+      triggerMode: TooltipTriggerMode
+          .longPress, // Quan trọng cho Mobile: Nhấn giữ để hiện
+      decoration: BoxDecoration(
+        color: AppColors.primaryText.withOpacity(0.9), // Nền tối
+        borderRadius: BorderRadius.circular(8), // Bo góc nhẹ
+      ),
+      textStyle: const TextStyle(
+        color: Colors.white,
+        fontSize: 12,
+        fontFamily: 'Poppins',
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      showDuration: const Duration(seconds: 3), // Hiện 3s rồi tự tắt
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => onAction(p.label, p.autoSend),
+          borderRadius: BorderRadius.circular(30),
+          splashColor: AppColors.primary.withOpacity(0.1),
+          highlightColor: Colors.transparent,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(30),
+              border: Border.all(color: Colors.grey.shade200),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.03),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: p.iconBg,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(p.icon, size: 18, color: p.iconColor),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(p.icon, size: 16, color: p.iconColor),
+                const SizedBox(width: 8),
+                Text(
+                  p.label,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.primaryText,
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+              ],
             ),
-            const Spacer(),
-            Text(
-              p.label,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w500,
-                color: AppColors.subText,
-                height: 1.2,
-              ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              p.sub,
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 11.5,
-                color: AppColors.subText.withOpacity(0.75),
-                fontFamily: 'Poppins',
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -189,15 +182,13 @@ class ChatbotSuggestedPrompts extends StatelessWidget {
 
 class _PromptItem {
   final IconData icon;
-  final Color iconBg;
   final Color iconColor;
   final String label;
-  final String sub;
+  final String sub; // Khôi phục lại biến mô tả
   final bool autoSend;
 
   const _PromptItem({
     required this.icon,
-    required this.iconBg,
     required this.iconColor,
     required this.label,
     required this.sub,

@@ -242,6 +242,7 @@ class ChatbotUiController extends GetxController with TErrorHandler {
     } finally {
       messages.clear();
       isChatOpen.value = true;
+      _hideKeyboard();
     }
   }
 
