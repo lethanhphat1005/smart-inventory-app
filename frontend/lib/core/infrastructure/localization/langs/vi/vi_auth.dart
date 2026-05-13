@@ -36,7 +36,7 @@ final Map<String, String> viAuth = {
   TTexts.emailHint: 'johndoe@gmail.com',
   TTexts.passwordLabel: 'Mật khẩu',
   TTexts.passwordHint: '********',
-  TTexts.rememberMe: 'Ghi nhớ tôi',
+  TTexts.rememberMe: 'Ghi nhớ',
   TTexts.forgotPassword: 'Quên mật khẩu?',
   TTexts.loginBtn: 'Đăng Nhập',
   TTexts.loggingIn: 'Đang đăng nhập...',
@@ -48,7 +48,7 @@ final Map<String, String> viAuth = {
   TTexts.loginSuccessTitle: 'Chào Mừng Trở Lại',
   TTexts.loginSuccessMessage: 'Đăng nhập thành công: @name',
   TTexts.loginFailedTitle: 'Đăng Nhập Thất Bại',
-  TTexts.loginErrorInvalidCredentialsTitle: 'Đăng Nhập Thất Bại',
+  TTexts.loginErrorInvalidCredentialsTitle: 'Thông Tin Đăng Nhập Không Hợp Lệ',
   TTexts.loginErrorInvalidCredentialsMessage:
       'Email hoặc mật khẩu không đúng. Vui lòng thử lại.',
   TTexts.loginWarningUnverifiedTitle: 'Email Chưa Xác Minh',

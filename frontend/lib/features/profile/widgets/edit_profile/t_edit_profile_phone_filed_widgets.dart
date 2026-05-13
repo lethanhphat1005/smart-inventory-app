@@ -119,84 +119,93 @@ class _TPhoneFormFieldWidgetState extends State<TPhoneFormFieldWidget> {
             color:
                 widget.enabled ? Colors.white : Colors.grey.withOpacity(0.05),
           ),
-          child: IntlPhoneField(
-            enabled: widget.enabled,
-            focusNode: _focusNode,
-            controller: widget.controller,
-            initialCountryCode: 'VN',
-            showDropdownIcon: widget.enabled,
-            dropdownIcon: Icon(
-              Icons.arrow_drop_down,
-              color: widget.enabled ? AppColors.softGrey : AppColors.subText,
+          child: TextSelectionTheme(
+            data: TextSelectionThemeData(
+              cursorColor: AppColors.primary,
+              selectionColor: AppColors.primary.withOpacity(0.3),
+              selectionHandleColor: AppColors.primary,
             ),
-            disableLengthCheck: true,
-            autovalidateMode: AutovalidateMode.disabled,
-            cursorColor: AppColors.primary,
-            flagsButtonPadding:
-                const EdgeInsets.only(left: AppSizes.p10, right: AppSizes.p10),
-            inputFormatters: [
-              FilteringTextInputFormatter.digitsOnly,
-              LengthLimitingTextInputFormatter(10),
-            ],
-            keyboardType: TextInputType.phone,
-            style: TextStyle(
-              fontFamily: AppFonts.mainFont,
-              fontSize: AppSizes.p14,
-              fontWeight: FontWeight.w500,
-              color: textColor,
-            ),
-            dropdownTextStyle: TextStyle(
-              fontFamily: AppFonts.mainFont,
-              fontSize: AppSizes.p14,
-              fontWeight: FontWeight.w500,
-              color: textColor,
-            ),
-            decoration: InputDecoration(
-              hintText: TTexts.editPhoneNumberHint.tr,
-              hintStyle: TextStyle(
+            child: IntlPhoneField(
+              enabled: widget.enabled,
+              focusNode: _focusNode,
+              controller: widget.controller,
+              initialCountryCode: 'VN',
+              showDropdownIcon: widget.enabled,
+              dropdownIcon: Icon(
+                Icons.arrow_drop_down,
+                color: widget.enabled ? AppColors.softGrey : AppColors.subText,
+              ),
+              disableLengthCheck: true,
+              autovalidateMode: AutovalidateMode.disabled,
+              cursorColor: AppColors.primary,
+              flagsButtonPadding: const EdgeInsets.only(
+                left: AppSizes.p10,
+                right: AppSizes.p10,
+              ),
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+                LengthLimitingTextInputFormatter(10),
+              ],
+              keyboardType: TextInputType.phone,
+              style: TextStyle(
                 fontFamily: AppFonts.mainFont,
-                fontSize: AppSizes.p14,
-                fontWeight: FontWeight.w400,
-                color: AppColors.softGrey,
+                fontSize: AppSizes.p12,
+                fontWeight: FontWeight.w500,
+                color: textColor,
               ),
-              counterText: "",
-              border: InputBorder.none,
-              enabledBorder: InputBorder.none,
-              focusedBorder: InputBorder.none,
-              disabledBorder: InputBorder.none,
-              errorBorder: InputBorder.none,
-              focusedErrorBorder: InputBorder.none,
-              filled: false,
-              isDense: true,
-              contentPadding: const EdgeInsets.only(
-                left: AppSizes.p12,
-                right: AppSizes.p12,
-                top: AppSizes.p16,
-                bottom: AppSizes.p16,
+              dropdownTextStyle: TextStyle(
+                fontFamily: AppFonts.mainFont,
+                fontSize: AppSizes.p12,
+                fontWeight: FontWeight.w500,
+                color: textColor,
               ),
-              suffixIcon: (hasText && widget.enabled)
-                  ? IconButton(
-                      icon: const Icon(
-                        Icons.cancel,
-                        size: AppSizes.p20,
-                        color: AppColors.lightGreyBorder,
-                      ),
-                      onPressed: () {
-                        widget.controller.clear();
-                        widget.onChanged("");
-                        setState(() {});
-                        _focusNode.requestFocus();
-                      },
-                      splashColor: Colors.transparent,
-                    )
-                  : null,
+              decoration: InputDecoration(
+                hintText: TTexts.editPhoneNumberHint.tr,
+                hintStyle: TextStyle(
+                  fontFamily: AppFonts.mainFont,
+                  fontSize: AppSizes.p12,
+                  fontWeight: FontWeight.w400,
+                  color: AppColors.softGrey,
+                ),
+                counterText: "",
+                border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                disabledBorder: InputBorder.none,
+                errorBorder: InputBorder.none,
+                focusedErrorBorder: InputBorder.none,
+                filled: false,
+                isDense: true,
+                contentPadding: const EdgeInsets.only(
+                  left: AppSizes.p12,
+                  right: AppSizes.p12,
+                  top: AppSizes.p16,
+                  bottom: AppSizes.p16,
+                ),
+                suffixIcon: (hasText && widget.enabled)
+                    ? IconButton(
+                        icon: const Icon(
+                          Icons.cancel,
+                          size: AppSizes.p20,
+                          color: AppColors.lightGreyBorder,
+                        ),
+                        onPressed: () {
+                          widget.controller.clear();
+                          widget.onChanged("");
+                          setState(() {});
+                          _focusNode.requestFocus();
+                        },
+                        splashColor: Colors.transparent,
+                      )
+                    : null,
+              ),
+              onChanged: (phone) {
+                if (!widget.enabled) return;
+                setState(() {
+                  widget.onChanged(phone.number);
+                });
+              },
             ),
-            onChanged: (phone) {
-              if (!widget.enabled) return;
-              setState(() {
-                widget.onChanged(phone.number);
-              });
-            },
           ),
         ),
 

@@ -53,7 +53,7 @@ class ProfileEditStoreController extends GetxController {
 
   final _dio = Dio();
 
-  static const String notUpdatedYetText = "Not updated yet";
+  static String get notUpdatedYetText => TTexts.profileStatusNotUpdatedYet.tr;
 
   String _displayOrNotUpdated(String? value) {
     final text = value?.trim() ?? "";
@@ -472,6 +472,6 @@ class ProfileEditStoreController extends GetxController {
   void resetFormState() {
     isEditing.value = false;
     addressPredictions.clear();
-    _initializeFields(); 
+    _initializeFields();
   }
 }

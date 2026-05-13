@@ -121,4 +121,134 @@ final Map<String, String> viTransaction = {
   TTexts.deleteSearchTitle: "Xóa Lịch Sử Tìm Kiếm",
   TTexts.deleteSearchMessage:
       "Bạn có chắc muốn xóa từ khóa tìm kiếm này không?",
+
+  // Specific Reasons
+  TTexts.reasonRetailSale: 'Bán Lẻ',
+  TTexts.reasonWholesale: 'Bán Sỉ',
+  TTexts.reasonDamaged: 'Hư Hỏng / Hết Hạn',
+  TTexts.reasonInternalTransfer: 'Chuyển Nội Bộ',
+  TTexts.reasonReturn: 'Trả Về Nhà Cung Cấp',
+  TTexts.reasonOther: 'Khác',
+  TTexts.reasonIncome: 'Thu Nhập (+)',
+  TTexts.reasonNeutral: 'Không Doanh Thu (0)',
+  TTexts.reasonExpense: 'Chi Phí / Thất Thoát (-)',
+
+  TTexts.selectBatchFIFO: 'Chọn lô hàng',
+  TTexts.batchRemaining: 'còn lại',
+  TTexts.expiresOn: 'HSD',
+  TTexts.batchExceedsStock: 'Số lượng vượt quá tồn kho của lô đã chọn!',
+  TTexts.quantityToExport: 'Số lượng xuất',
+  TTexts.importPriceLot: 'Giá Nhập',
+  TTexts.sellingPriceLot: 'Giá Bán',
+  TTexts.quantityToImport: 'Số lượng nhập',
+  TTexts.importedOn: "Ngày nhập",
+  TTexts.outOfStockBatch: "Hết hàng",
+  TTexts.confirmExportTitle: "Xác Nhận Xuất Kho",
+  TTexts.confirmExportDescription:
+      "Bạn có chắc muốn hoàn tất giao dịch xuất kho này không? Hành động này sẽ cập nhật tồn kho.",
+  TTexts.processingExport: "Đang xử lý xuất kho...",
+  TTexts.exportSuccessMessage: "Giao dịch xuất kho hoàn tất thành công!",
+  TTexts.noteLabel: "Ghi Chú",
+  TTexts.emptyCartWarning:
+      "Giỏ hàng đang trống. Vui lòng thêm sản phẩm trước khi xuất kho.",
+  TTexts.priceChangeDetectedTitle: "Phát Hiện Thay Đổi Giá",
+  TTexts.priceChangeDetectedDesc: "Các sản phẩm sau đã thay đổi giá bán:",
+  TTexts.proceedExport: "Xác Nhận & Xuất Kho",
+  TTexts.reasonForExport: "Lý Do Xuất Kho",
+  TTexts.total: "Tổng",
+  TTexts.totalQuantity: "Tổng Số Lượng",
+  TTexts.specifyBatchQuantity:
+      "Vui lòng chỉ định số lượng từ các lô hàng trên.",
+  TTexts.outboundTransaction: "Giao Dịch Xuất Kho",
+  TTexts.loadingCreatingTransaction: "Đang tạo giao dịch...",
+  TTexts.creatingExportTicket: "Đang tạo phiếu xuất...",
+  TTexts.exportTicketCreated: "Đã tạo phiếu xuất thành công!",
+
+  // -- Stock Adjustment
+  TTexts.confirmAdjustmentTitle: "Bắt Đầu Kiểm Kê?",
+  TTexts.confirmAdjustmentDesc:
+      "Bạn có chắc muốn bắt đầu phiên kiểm kê mới không? Điều này sẽ cho phép cập nhật số lượng tồn kho thực tế.",
+  TTexts.proceedAdjustment: "Bắt Đầu Kiểm Kê",
+  TTexts.listItems: "Danh sách sản phẩm",
+  TTexts.system: "Hệ Thống",
+  TTexts.actual: "Thực Tế",
+  TTexts.spread: "Chênh Lệch",
+  TTexts.status: "Trạng Thái",
+  TTexts.checked: "Đã Kiểm",
+  TTexts.unchecked: "Chưa Kiểm",
+  TTexts.checkedItems: "Sản phẩm đã kiểm",
+  TTexts.saveAll: "Lưu tất cả",
+  TTexts.updateActualQty: "Cập Nhật Số Lượng Thực Tế",
+  TTexts.mismatched: "Không Khớp",
+  TTexts.reason: "Lý Do",
+  TTexts.damage: "Hư Hỏng",
+  TTexts.expired: "Hết Hạn",
+  TTexts.loss: "Thất Thoát",
+  TTexts.itemFound: "Đã Tìm Thấy Sản Phẩm",
+  TTexts.inputError: "Lỗi nhập liệu",
+  TTexts.additionalNote: "Ghi Chú Bổ Sung",
+  TTexts.stockOutput: "XUẤT KHO:",
+  TTexts.checkComplete: "Kiểm kê hoàn tất",
+  TTexts.mismatchedReasonLabel: "Lý do chênh lệch (Hoặc ghi chú nếu có):",
+  TTexts.productInformation: "Thông Tin Sản Phẩm",
+  TTexts.stockCount: "Số Lượng Tồn:",
+  TTexts.otherReason: "Lý Do Khác",
+  TTexts.notEnoughStockWarning:
+      "Bạn không thể đặt số lượng thực tế thấp hơn tồn kho hiện tại.",
+  TTexts.quantityToAdjust: "Số Lượng Điều Chỉnh:",
+  TTexts.automatedNote: "Ghi Chú Tự Động:",
+  TTexts.currentStock: "Tồn Kho Hiện Tại",
+  TTexts.barcode: "Mã Vạch",
+  TTexts.checkAll: "Đánh Dấu Tất Cả",
+  TTexts.uncheckAll: "Bỏ Đánh Dấu Tất Cả",
+  TTexts.confirmCheckAllTitle: "Đánh Dấu Tất Cả Sản Phẩm?",
+  TTexts.confirmCheckAllDesc:
+      "Tất cả sản phẩm chưa kiểm sẽ được đánh dấu là đã kiểm với số lượng hệ thống (Chênh lệch: 0). Bạn có muốn tiếp tục không?",
+  TTexts.confirmUncheckAllTitle: "Bỏ Đánh Dấu Tất Cả?",
+  TTexts.confirmUncheckAllDesc:
+      "Hành động này sẽ đặt lại tất cả sản phẩm về trạng thái chưa kiểm và xóa toàn bộ số lượng thực tế cùng ghi chú đã nhập. Tiếp tục?",
+  TTexts.incompleteSaveTitle: "Kiểm Kê Chưa Hoàn Tất!",
+  TTexts.incompleteSaveDesc:
+      "Bạn chưa kiểm kê toàn bộ sản phẩm trong kho. Các sản phẩm chưa kiểm sẽ KHÔNG được cập nhật. Bạn có chắc muốn lưu ngay bây giờ không?",
+  TTexts.confirmSaveTitle: "Lưu Điều Chỉnh Kho?",
+  TTexts.confirmSaveDesc:
+      "Hành động này sẽ cập nhật tồn kho và tạo bản ghi giao dịch điều chỉnh. Tiếp tục?",
+  TTexts.combinedNotesTitle: "Tóm Tắt Ghi Chú Điều Chỉnh:",
+  TTexts.errorLoadingData: "Lỗi tải dữ liệu. Vui lòng thử lại.",
+  TTexts.verifyingData: "Đang xác minh dữ liệu tồn kho hiện tại...",
+  TTexts.syncDataWarningTitle: "Dữ Liệu Tồn Kho Đã Thay Đổi!",
+  TTexts.syncDataWarningDesc:
+      "Một số sản phẩm đã bị thay đổi bởi tiến trình khác trong lúc bạn kiểm kê. Chúng tôi đã cập nhật Số Lượng Hệ Thống. Vui lòng kiểm tra lại các sản phẩm được đánh dấu.",
+  TTexts.unsavedChangesTitle: "Hủy Thay Đổi?",
+  TTexts.unsavedChangesDesc:
+      "Bạn vẫn còn sản phẩm chưa kiểm. Nếu thoát bây giờ, tiến trình kiểm kê sẽ bị mất. Bạn có muốn thoát không?",
+  TTexts.exitAnyway: "Vẫn Thoát",
+  TTexts.inventoryUpdatedSuccess: "Đã cập nhật kho thành công.",
+  TTexts.noReasonNeededWarning:
+      "Bạn không cần chọn lý do khi không có chênh lệch.",
+  TTexts.defaultAdjustmentNote: "Điều Chỉnh Kho (Không có chênh lệch/ghi chú)",
+  TTexts.itemFoundText: "Đã tìm thấy",
+  TTexts.defaultUnit: "Đơn Vị",
+  TTexts.specificNoteHint: "Nhập ghi chú cụ thể (ví dụ: Hỏng 1 thùng bởi John)",
+  TTexts.noItemsFound: "Không tìm thấy sản phẩm",
+  TTexts.noItemsFoundDesc:
+      "Chúng tôi không tìm thấy sản phẩm phù hợp với tìm kiếm của bạn. Vui lòng thử từ khóa khác hoặc quét lại.",
+  TTexts.discardTransactionTitle: "Hủy Giao Dịch?",
+  TTexts.discardTransactionDesc:
+      "Bạn đang có sản phẩm trong phiếu. Nếu thoát bây giờ, giao dịch này sẽ bị mất. Bạn có muốn thoát không?",
+  TTexts.noDifferencesFound:
+      "Không tìm thấy chênh lệch nào. Vui lòng chỉnh sửa ít nhất một sản phẩm.",
+  TTexts.adjustmentCompletedTitle: "Hoàn Tất Kiểm Kê",
+  TTexts.adjustmentSuccessSub:
+      "Điều chỉnh kho của bạn đã được xử lý thành công.",
+  TTexts.adjustmentId: "Mã Điều Chỉnh",
+  TTexts.checkItemsStats: "Kiểm Kê / Thống Kê Kho",
+
+  TTexts.totalDifference: "Tổng Chênh Lệch",
+
+  // -- Transaction Summary
+  TTexts.qty: "SL",
+  TTexts.modifiedProducts: "Sản Phẩm Đã Điều Chỉnh",
+  TTexts.adjustmentSummaryBrief:
+      "Đây là tóm tắt ngắn gọn của điều chỉnh kho. Để xem danh sách chi tiết các sản phẩm đã điều chỉnh, vui lòng kiểm tra Lịch Sử Giao Dịch.",
 };

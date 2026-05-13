@@ -17,22 +17,41 @@ class TUserInfoBottomSheetWidgets extends StatelessWidget {
 
   static void show(StoreMemberModel member) {
     TBottomSheetWidget.show(
-      title: "Member Information",
+      title: TTexts.profileMemberInfo.tr,
       child: TUserInfoBottomSheetWidgets(member: member),
     );
   }
 
   // COLOR
   Color get roleColor {
-    switch (member.role.toLowerCase()) {
+    switch (member.role.trim().toLowerCase()) {
       case 'owner':
         return AppColors.gradientOrangeStart;
+
       case 'manager':
         return AppColors.gradientOrangeEnd;
+
       case 'staff':
         return AppColors.toastSuccessGradientStart;
+
       default:
         return AppColors.subText;
+    }
+  }
+
+  String get roleText {
+    switch (member.role.trim().toLowerCase()) {
+      case 'owner':
+        return TTexts.roleOwner.tr;
+
+      case 'manager':
+        return TTexts.roleManager.tr;
+
+      case 'staff':
+        return TTexts.roleStaff.tr;
+
+      default:
+        return member.role;
     }
   }
 
@@ -110,7 +129,7 @@ class TUserInfoBottomSheetWidgets extends StatelessWidget {
             borderRadius: BorderRadius.circular(999),
           ),
           child: Text(
-            member.role.toUpperCase(),
+            roleText.toUpperCase(),
             style: TextStyle(
               fontSize: AppSizes.p12,
               fontWeight: FontWeight.w700,

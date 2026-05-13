@@ -1082,6 +1082,8 @@ class TTexts {
   static const String profileDialogDescriptionLogout =
       'profile_dialog_description_logout';
   static const String profileDialogBtnLogout = 'profile_dialog_btn_logout';
+  static const String profileStatusNotUpdatedYet = 'profile_status_not_updated_yet';
+  static const String profileMemberInfo = 'profile_member_info';
   static const String errorLoadingData = "error_loading_data";
   static const String verifyingData = "verifying_data";
   static const String syncDataWarningTitle = "sync_data_warning_title";

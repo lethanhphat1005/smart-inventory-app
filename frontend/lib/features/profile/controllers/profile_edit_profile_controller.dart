@@ -36,7 +36,7 @@ class ProfileEditController extends GetxController {
   final _dio = Dio();
   final addressPredictions = <dynamic>[].obs;
 
-  static const String notUpdatedYetText = "Not updated yet";
+  static String get notUpdatedYetText => TTexts.profileStatusNotUpdatedYet.tr;
 
   String _displayOrNotUpdated(String? value) {
     final text = value?.trim() ?? "";
