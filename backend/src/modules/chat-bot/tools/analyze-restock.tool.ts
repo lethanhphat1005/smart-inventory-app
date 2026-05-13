@@ -5,14 +5,15 @@ export const ANALYZE_RESTOCK = {
   function: {
     name: 'analyze_restock',
     description:
-      'Gọi tool này khi người dùng yêu cầu tư vấn nhập hàng, dự báo tồn kho, hoặc hỏi "Nên nhập thêm gì?", "Có sản phẩm nào bán chạy cần nhập không?", hoặc "Khách mua [Tên sản phẩm] thường mua kèm gì?".',
+      'MANDATORY: Gọi tool này khi người dùng yêu cầu "tư vấn nhập hàng", "mua kèm", "bán chạy", HOẶC trong tiếng Anh: "restock suggestions", "what to import", "frequently bought together", "buy along with", "cross-sell". ' +
+      'LUẬT QUAN TRỌNG: BẮT BUỘC dùng tool này cho mọi câu hỏi về phân tích mua kèm (bought together) hoặc tư vấn nhập hàng.',
     parameters: {
       type: 'object',
       properties: {
         product_name: {
-          type: 'string',
+          type: ['string', 'null'],
           description:
-            'Tên sản phẩm (nếu có) mà người dùng muốn phân tích mua kèm. Bỏ trống nếu người dùng chỉ hỏi gợi ý nhập hàng chung chung toàn cửa hàng.',
+            'Tên sản phẩm (nếu có) mà người dùng muốn phân tích mua kèm (cross-sell). Bỏ trống hoặc null nếu người dùng yêu cầu dự báo/tư vấn nhập hàng chung toàn cửa hàng.',
         },
       },
       required: [],

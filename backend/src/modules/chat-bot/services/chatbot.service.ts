@@ -438,8 +438,6 @@ export class ChatbotService {
           };
         }
 
-        // 2. GUARDRAIL THÉP: Kiểm tra xem người dùng CÓ THỰC SỰ GÕ SỐ lượng vào tin nhắn không!
-        // Quét các chữ số (0-9) hoặc các chữ cái chỉ số lượng cơ bản tiếng Anh/Việt
         const hasNumberInMessage =
           /\d/.test(normalizedMessage) ||
           // eslint-disable-next-line max-len
@@ -1292,16 +1290,12 @@ Task: Answer the user's query accurately using ONLY the logs provided above. Do 
         };
       }
 
-      // Lấy sản phẩm khớp nhất (tương tự logic get_product_info)
       const targetItem =
         findExactInventoryMatch(searchResult, params.product_name) ||
         searchResult[0];
       const packageId = targetItem!.productPackage.productPackageId;
       const displayName = targetItem!.productPackage.displayName;
 
-      // Gọi hàm Raw SQL trong TransactionRepository (thông qua TransactionService)
-      // Lưu ý: Bạn cần tạo method getCrossSellSuggestions trong
-      // TransactionService để gọi sang Repo nhé.
       const crossSellItems =
         await this.transactionService.getCrossSellSuggestions(
           storeId,
@@ -1324,12 +1318,16 @@ Task: Answer the user's query accurately using ONLY the logs provided above. Do 
       // Format dữ liệu để nhồi vào prompt cho AI
       const crossSellText = crossSellItems
         .map(
-          (item: { associatedPackageId: string; frequency: number }) =>
-            `- Sản phẩm ID [${item.associatedPackageId}] (Tần suất xuất hiện cùng lúc: ${item.frequency} lần)`,
+          (item: {
+            associatedPackageId: string;
+            frequency: number;
+            productName?: string;
+          }) =>
+            `- Sản phẩm: ${item.productName || 'N/A'} (Mã tham chiếu: ${item.associatedPackageId}, Tần suất mua cùng: ${item.frequency} lần)`,
         )
         .join('\n');
 
-      const systemContext = `Data Analysis: Customers who bought "${displayName}" often buy these items together:\n${crossSellText}\nTask: Explain this insight to the user naturally and suggest they might want to import or display these items close to each other.`;
+      const systemContext = `Data Analysis: Customers who bought "${displayName}" often buy these items together:\n${crossSellText}\nTask: Explain this insight to the user naturally using Product Names. Suggest they might want to import or display these items close to each other.`;
 
       return {
         aiIntent: 'analyze_restock',
@@ -1344,8 +1342,6 @@ Task: Answer the user's query accurately using ONLY the logs provided above. Do 
       };
     }
 
-    // TRƯỜNG HỢP 2: DỰ BÁO NHẬP HÀNG CHUNG (PREDICTIVE RESTOCKING)
-    // Người dùng hỏi: "Tư vấn cho tôi nên nhập hàng gì hôm nay?"
     const suggestions =
       await this.smartDecisionService.getStoreReorderSuggestions(storeId);
 
@@ -1362,7 +1358,7 @@ Task: Answer the user's query accurately using ONLY the logs provided above. Do 
       };
     }
 
-    const displaySuggestions = suggestions.slice(0, 5); // Lấy top 5 cảnh báo khẩn cấp nhất
+    const displaySuggestions = suggestions.slice(0, 5);
     const suggestionsText = displaySuggestions
       .map(
         (s) =>
@@ -1398,6 +1394,10 @@ STRICT INSTRUCTIONS:
 - IF the USER MESSAGE is in Vietnamese -> You MUST reply ONLY in Vietnamese.
 - NEVER explain your language detection. NEVER output lines like "The language is..." or "Ngôn ngữ là...".
 - Respond directly with the conversational text based ONLY on the SYSTEM FACTS.
-- CRITICAL: DO NOT output any prefixes like "[REPLY]", "Reply:", or explain your thoughts. Output ONLY the final conversational response.`;
+- CRITICAL: DO NOT output any prefixes like "[REPLY]", "Reply:", or explain your thoughts. Output ONLY the final conversational response.
+- 🛑 DATA PRESENTATION RULES:
+  - NEVER display raw IDs or UUIDs (e.g., '22222222-2222...') in your conversation.
+  - ALWAYS use the Product Name (DisplayName) provided in the facts to refer to items.
+  - If a Product Name is available, ignore its ID in the final reply.`;
   }
 }
