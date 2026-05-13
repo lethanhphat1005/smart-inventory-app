@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 
 class RestockItemRow extends StatelessWidget {
   final dynamic item;
@@ -15,12 +17,14 @@ class RestockItemRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  item['productName'] ?? 'Sản phẩm',
+                  // Dùng TTexts.product.tr nếu không có tên
+                  item['productName'] ?? TTexts.product.tr,
                   style: const TextStyle(
                       fontWeight: FontWeight.w600, fontSize: 14),
                 ),
                 Text(
-                  "Tồn hiện tại: ${item['currentStock']}",
+                  // Sử dụng Localization cho "Tồn hiện tại"
+                  "${TTexts.currentStock.tr}: ${item['currentStock']}",
                   style: TextStyle(color: Colors.grey[600], fontSize: 12),
                 ),
               ],

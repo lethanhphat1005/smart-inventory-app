@@ -183,6 +183,11 @@ class _ChatbotInputActionMenuWidgetState
                       onTap: () =>
                           _handleAction(TTexts.chatbotPromptExport.tr, false)),
 
+                  _buildMenuItem(
+                      text: TTexts.chatbotQuickActionAnalyze.tr,
+                      onTap: () => _handleAction(
+                          TTexts.chatbotPromptAnalyzeRestock.tr, true)),
+
                   if (Get.find<ChatbotUiController>().canViewAuditLog)
                     _buildMenuItem(
                         text: TTexts.chatbotQuickActionHistory.tr,
