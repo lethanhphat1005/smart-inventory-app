@@ -30,6 +30,18 @@ export class CategoryController {
     });
   };
 
+  findAllHidden = async (
+    req: Request,
+    res: Response<ApiResponse<CategoryResponseDto[]>>,
+  ): Promise<void> => {
+    const storeId = requireReqStoreContext(req).storeId;
+    const hiddenCategories = await this.categoryService.findAllHiddenInStore(storeId);
+
+    sendResponse.success(res, hiddenCategories, {
+      status: StatusCodes.OK,
+    });
+  };
+
   createOne = async (
     req: Request,
     res: Response<ApiResponse<CategoryResponseDto>>,
