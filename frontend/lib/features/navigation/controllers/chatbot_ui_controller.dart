@@ -125,9 +125,10 @@ class ChatbotUiController extends GetxController with TErrorHandler {
           ),
           ElevatedButton(
             onPressed: () async {
-              await clearChatData();
-              Get.back(); // đóng dialog
-              Get.back(); // đóng chatbot
+              await _apiClient.delete('/api/chat-bot/history');
+              messages.clear();
+              Get.back();
+              Get.back();
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
@@ -233,12 +234,11 @@ class ChatbotUiController extends GetxController with TErrorHandler {
 
   Future<void> clearChatData() async {
     try {
-      await _apiClient.delete('/api/chat-bot/history');
-    } catch (_) {
-    } finally {
       messages.clear();
-      isChatOpen.value = true;
-      _hideKeyboard();
+      isChatOpen.value = false;
+      await _apiClient.delete('/api/chat-bot/history');
+    } catch (e) {
+      debugPrint('Lỗi khi xóa lịch sử chat: $e');
     }
   }
 

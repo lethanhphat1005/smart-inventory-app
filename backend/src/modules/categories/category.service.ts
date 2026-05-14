@@ -11,6 +11,7 @@ import { ProductRepository, productService } from '../products/index.js';
 import type {
   CategoryResponseDto,
   CreateCategoryDto,
+  HiddenDefaultResponseDto,
   UpdateCategoryDto,
 } from './category.dto.js';
 import type { DbClient } from '../../common/types/index.js';
@@ -30,6 +31,10 @@ export class CategoriesService {
 
   public async findAll(storeId: string): Promise<CategoryResponseDto[]> {
     return await this.categoryRepository.findAll(storeId);
+  }
+
+  public async findAllHiddenInStore(storeId: string): Promise<HiddenDefaultResponseDto[]> {
+    return await this.hiddenDefaultRepository.findManyByStore(storeId);
   }
 
   public async createOne(
