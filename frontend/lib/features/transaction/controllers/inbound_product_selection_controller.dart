@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/models/inventory_model.dart';
+import 'package:frontend/core/infrastructure/models/product_package_model.dart';
 import 'package:frontend/core/infrastructure/utils/error_handler_utils.dart';
 import 'package:frontend/features/transaction/controllers/inbound_transaction_controller.dart';
 import 'package:frontend/features/transaction/providers/transaction_provider.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/ui/widgets/t_custom_dialog_widget.dart';
 import 'package:frontend/features/inventory/models/inventory_insight_display_model.dart';
-import 'package:frontend/core/ui/widgets/t_snackbars_widget.dart';
 import 'package:frontend/features/transaction/widgets/inbound_product_selection/inbound_product_selection_overflow_dialog_widget.dart';
 import 'package:frontend/routes/app_routes.dart';
 import 'package:get/get.dart';
+import 'package:frontend/core/infrastructure/utils/full_screen_loader_utils.dart';
 
 class InboundProductSelectionController extends GetxController
     with TErrorHandler {
@@ -38,11 +39,17 @@ class InboundProductSelectionController extends GetxController
   final RxMap<String, int> draftCart = <String, int>{}.obs;
   final Map<String, InventoryModel> draftCartModels = {};
 
+  final RxMap<String, double> draftCustomPrices = <String, double>{}.obs;
+  final RxMap<String, double> cachedOriginalPrices = <String, double>{}.obs;
   int get totalDraftItems => draftCart.values.fold(0, (sum, qty) => sum + qty);
+
   double get totalDraftPrice {
     double total = 0.0;
     draftCart.forEach((id, qty) {
-      final price = draftCartModels[id]?.productPackage?.importPrice ?? 0.0;
+      final price = draftCustomPrices[id] ??
+          cachedOriginalPrices[id] ??
+          draftCartModels[id]?.productPackage?.importPrice ??
+          0.0;
       total += price * qty;
     });
     return total;
@@ -80,12 +87,8 @@ class InboundProductSelectionController extends GetxController
         item.productPackage!.productPackageId.isNotEmpty) {
       return item.productPackage!.productPackageId;
     }
-    if (item.productPackageId.isNotEmpty) {
-      return item.productPackageId;
-    }
-    if (item.inventoryId.isNotEmpty) {
-      return item.inventoryId;
-    }
+    if (item.productPackageId.isNotEmpty) return item.productPackageId;
+    if (item.inventoryId.isNotEmpty) return item.inventoryId;
     return item.hashCode.toString();
   }
 
@@ -113,15 +116,8 @@ class InboundProductSelectionController extends GetxController
 
       if (_fetchId != currentFetchId) return;
 
-      List itemsRaw = [];
-      int totalItems = 0;
-
-      itemsRaw = data['items'] ?? data['data'] ?? [];
-      if (data['totalItems'] != null) {
-        totalItems = data['totalItems'];
-      } else if (data['total'] != null) {
-        totalItems = data['total'];
-      }
+      List itemsRaw = data['items'] ?? data['data'] ?? [];
+      int totalItems = data['totalItems'] ?? data['total'] ?? 0;
 
       final List<InventoryModel> parsed =
           itemsRaw.map((e) => InventoryModel.fromJson(e)).toList();
@@ -156,18 +152,11 @@ class InboundProductSelectionController extends GetxController
 
   Future<void> navigateToDetail(InventoryModel item) async {
     final pkgId = _getPkgId(item);
-
-    if (pkgId.isEmpty || pkgId == item.hashCode.toString()) {
-      TSnackbarsWidget.warning(
-          title: "Lỗi", message: "Sản phẩm không có ID hợp lệ.");
-      return;
-    }
+    if (pkgId.isEmpty || pkgId == item.hashCode.toString()) return;
 
     final qty = getQtyInDraft(pkgId);
     final displayItem = InventoryInsightDisplayModel(
-      product: item.productPackage?.product,
-      inventory: item,
-    );
+        product: item.productPackage?.product, inventory: item);
 
     final result = await Get.toNamed(
       AppRoutes.inboundTransactionItemAdd,
@@ -176,11 +165,17 @@ class InboundProductSelectionController extends GetxController
         'quantity': qty > 0 ? qty : 1,
         'isEditing': qty > 0,
         'fromSelectionScreen': true,
+        'customPrice': draftCustomPrices[pkgId],
       },
     );
 
+    // Hứng lại giá Import Price gốc để cập nhật nháp
     if (result != null && result is Map && result.containsKey('quantity')) {
-      updateQuantity(item, result['quantity']);
+      if (result['importPrice'] != null) {
+        cachedOriginalPrices[pkgId] = result['importPrice'];
+      }
+      updateQuantity(item, result['quantity'],
+          customPrice: result['customPrice']);
     }
   }
 
@@ -235,24 +230,32 @@ class InboundProductSelectionController extends GetxController
     } else {
       draftCart.remove(pkgId);
       draftCartModels.remove(pkgId);
+      draftCustomPrices.remove(pkgId);
+      cachedOriginalPrices.remove(pkgId);
     }
   }
 
-  void updateQuantity(InventoryModel inventory, int newQty) {
+  void updateQuantity(InventoryModel inventory, int newQty,
+      {double? customPrice}) {
     final pkgId = _getPkgId(inventory);
     if (pkgId.isEmpty || pkgId == inventory.hashCode.toString()) return;
     if (newQty <= 0) {
       draftCart.remove(pkgId);
       draftCartModels.remove(pkgId);
+      draftCustomPrices.remove(pkgId);
+      cachedOriginalPrices.remove(pkgId);
     } else {
       draftCart[pkgId] = newQty > 999999 ? 999999 : newQty;
       draftCartModels[pkgId] = inventory;
+      if (customPrice != null) draftCustomPrices[pkgId] = customPrice;
     }
   }
 
   void clearDraft() {
     draftCart.clear();
     draftCartModels.clear();
+    draftCustomPrices.clear();
+    cachedOriginalPrices.clear();
   }
 
   // ==========================================
@@ -268,12 +271,9 @@ class InboundProductSelectionController extends GetxController
       final draftQty = draftCart[pkgId]!;
       final existingItemIndex = _inboundCtrl.cartItems
           .indexWhere((item) => item.productPackageId == pkgId);
-
-      int existingQty = 0;
-      if (existingItemIndex != -1) {
-        existingQty = _inboundCtrl.cartItems[existingItemIndex].quantity;
-      }
-
+      int existingQty = existingItemIndex != -1
+          ? _inboundCtrl.cartItems[existingItemIndex].quantity
+          : 0;
       if (draftQty + existingQty > 999999) {
         overflowingKeys.add(pkgId);
       } else {
@@ -290,83 +290,88 @@ class InboundProductSelectionController extends GetxController
 
   void _showOverflowDialog(
       List<String> normalKeys, List<String> overflowingKeys) {
-    Get.dialog(
-      InboundProductSelectionOverflowDialogWidget(
-        // Lựa chọn 1: Ép cộng dồn đến mốc 999999 (Nút Cam)
-        onCapAtMax: () {
-          Get.back();
-          _executeAddToCart(draftCart.keys.toList(), capAtMax: true);
-        },
-
-        // Lựa chọn 2: Chỉ thêm món hợp lệ (Nút Cam)
-        onAddValidOnly: normalKeys.isNotEmpty
-            ? () {
-                Get.back();
-                _executeAddToCart(normalKeys, capAtMax: false);
-              }
-            : null,
-
-        // Lựa chọn 3: Hủy & Quay lại (Nút Xám Surface)
-        onReviewAgain: () => Get.back(),
-      ),
-    );
+    Get.dialog(InboundProductSelectionOverflowDialogWidget(
+      onCapAtMax: () {
+        Get.back();
+        _executeAddToCart(draftCart.keys.toList(), capAtMax: true);
+      },
+      onAddValidOnly: normalKeys.isNotEmpty
+          ? () {
+              Get.back();
+              _executeAddToCart(normalKeys, capAtMax: false);
+            }
+          : null,
+      onReviewAgain: () => Get.back(),
+    ));
   }
 
-  void _executeAddToCart(List<String> keysToAdd, {required bool capAtMax}) {
+  // Lấy dữ liệu API Full Package lần cuối trước khi thêm vào giỏ
+  Future<void> _executeAddToCart(List<String> keysToAdd,
+      {required bool capAtMax}) async {
     bool hasAdded = false;
+    FullScreenLoaderUtils.openLoadingDialog(TTexts.loadingAddingToCart.tr);
 
-    for (var pkgId in keysToAdd) {
-      final inv = draftCartModels[pkgId]!;
-      final pkg = inv.productPackage;
-      int qtyToAdd = draftCart[pkgId]!;
+    try {
+      for (var pkgId in keysToAdd) {
+        final inv = draftCartModels[pkgId]!;
+        int qtyToAdd = draftCart[pkgId]!;
 
-      if (capAtMax) {
-        final existingItemIndex = _inboundCtrl.cartItems
-            .indexWhere((item) => item.productPackageId == pkgId);
-        int existingQty = 0;
-        if (existingItemIndex != -1) {
-          existingQty = _inboundCtrl.cartItems[existingItemIndex].quantity;
+        if (capAtMax) {
+          final existingItemIndex = _inboundCtrl.cartItems
+              .indexWhere((item) => item.productPackageId == pkgId);
+          int existingQty = existingItemIndex != -1
+              ? _inboundCtrl.cartItems[existingItemIndex].quantity
+              : 0;
+          if (existingQty + qtyToAdd > 999999) {
+            qtyToAdd = 999999 - existingQty;
+          }
         }
-        if (existingQty + qtyToAdd > 999999) {
-          qtyToAdd = 999999 - existingQty;
+
+        if (qtyToAdd > 0) {
+          hasAdded = true;
+          final packageFullData = await _provider.getProductPackageById(pkgId);
+          final pkg = ProductPackageModel.fromJson(packageFullData);
+
+          final Map<String, dynamic> data = {
+            'productPackageId': pkgId,
+            'displayName': pkg.displayName,
+            'packageInfo': pkg,
+            'importPrice': pkg.importPrice,
+            'sellingPrice': pkg.sellingPrice,
+            'currentStock': inv.quantity,
+            'reorderThreshold': inv.reorderThreshold,
+          };
+
+          _inboundCtrl.addToCart(data,
+              quantity: qtyToAdd,
+              customPrice: draftCustomPrices[pkgId],
+              isReplace: false);
         }
       }
 
-      if (qtyToAdd > 0) {
-        hasAdded = true;
-        final Map<String, dynamic> data = {
-          'productPackageId': pkgId,
-          'displayName': pkg?.displayName ?? 'Hàng hóa',
-          'packageInfo': pkg,
-          'importPrice': pkg?.importPrice ?? 0.0,
-          'sellingPrice': pkg?.sellingPrice ?? 0.0,
-          'currentStock': inv.quantity,
-          'reorderThreshold': inv.reorderThreshold,
-        };
-        _inboundCtrl.addToCart(data, quantity: qtyToAdd, isReplace: false);
-      }
+      if (hasAdded) _inboundCtrl.cartItems.refresh();
+      Get.until((route) => route.settings.name == AppRoutes.inboundTransaction);
+    } catch (e) {
+      handleError(e);
+    } finally {
+      FullScreenLoaderUtils.stopLoading();
     }
-
-    if (hasAdded) _inboundCtrl.cartItems.refresh();
-    Get.until((route) => route.settings.name == AppRoutes.inboundTransaction);
   }
 
   void handleBack() {
     if (draftCart.isNotEmpty) {
-      Get.dialog(
-        TCustomDialogWidget(
-          title: TTexts.discardSelectionTitle.tr,
-          description: TTexts.discardSelectionDesc.tr,
-          icon: const Text('️⚠️', style: TextStyle(fontSize: 40)),
-          primaryButtonText: TTexts.exitAnyway.tr,
-          onPrimaryPressed: () {
-            Get.back();
-            Get.back();
-          },
-          secondaryButtonText: TTexts.cancel.tr,
-          onSecondaryPressed: () => Get.back(),
-        ),
-      );
+      Get.dialog(TCustomDialogWidget(
+        title: TTexts.discardSelectionTitle.tr,
+        description: TTexts.discardSelectionDesc.tr,
+        icon: const Text('️⚠️', style: TextStyle(fontSize: 40)),
+        primaryButtonText: TTexts.exitAnyway.tr,
+        onPrimaryPressed: () {
+          Get.back();
+          Get.back();
+        },
+        secondaryButtonText: TTexts.cancel.tr,
+        onSecondaryPressed: () => Get.back(),
+      ));
     } else {
       Get.back();
     }

@@ -43,7 +43,7 @@ class TransactionBottomSheetWidget extends StatelessWidget {
             TTexts.manageInventoryDesc.tr,
             textAlign: TextAlign.center,
             style: const TextStyle(
-              fontSize: 13,
+              fontSize: 12,
               color: AppColors.subText,
               height: 1.5,
             ),

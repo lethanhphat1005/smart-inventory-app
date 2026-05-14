@@ -126,7 +126,10 @@ class InboundProductSelectionMobileView
                           final detail = TransactionDetailModel(
                             productPackageId: pkgId,
                             quantity: qty,
-                            unitPrice: item.productPackage?.importPrice ?? 0.0,
+                            unitPrice: controller.draftCustomPrices[pkgId] ??
+                                controller.cachedOriginalPrices[pkgId] ??
+                                item.productPackage?.importPrice ??
+                                0.0,
                             currentStock: item.quantity,
                             reorderThreshold: item.reorderThreshold,
                             packageInfo: item.productPackage,
