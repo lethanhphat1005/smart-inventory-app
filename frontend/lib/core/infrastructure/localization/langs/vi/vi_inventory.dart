@@ -163,6 +163,21 @@ final Map<String, String> viInventory = {
   TTexts.invalidPrice: 'Vui lòng nhập số hợp lệ',
   TTexts.barcodeDeletedSuccess: 'Xóa barcode thành công',
   TTexts.barcodeDeleted: 'Đã xóa barcode',
+  TTexts.hiddenCategories: "Danh mục đã ẩn",
+  TTexts.hiddenCategoriesDesc: "Xem và khôi phục các danh mục",
+  TTexts.noHiddenCategories: "Không có danh mục nào bị ẩn",
+  TTexts.noHiddenCategoriesDesc:
+      "Tất cả danh mục của bạn đều đang được hiển thị",
+  TTexts.restore: "Khôi phục",
+  TTexts.confirmRestoreTitle: "Khôi phục danh mục?",
+  TTexts.confirmRestoreDesc:
+      "Danh mục này sẽ hiển thị trở lại trong cửa hàng của bạn. Bạn có chắc chắn không?",
+  TTexts.restoreSuccess: "Đã khôi phục danh mục thành công",
+  TTexts.selected: "Đã chọn",
+  TTexts.restoreSelected: "Khôi phục mục đã chọn",
+  TTexts.confirmBatchRestoreTitle: "Khôi phục nhiều danh mục?",
+  TTexts.confirmBatchRestoreDesc:
+      "Tất cả các danh mục bạn đã chọn sẽ được khôi phục. Tiếp tục?",
 
   // -- Category Detail
   TTexts.addNewProduct: 'Thêm sản phẩm mới',

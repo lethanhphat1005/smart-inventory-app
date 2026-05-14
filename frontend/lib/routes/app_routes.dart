@@ -26,6 +26,7 @@ class AppRoutes {
   static const inventorySight = '/inventory_insight';
   static const inventoryDetail = '/inventory_detail';
   static const productCatalog = '/product_catalog';
+  static const hiddenCategories = '/hidden-categories';
   static const allProducts = '/all_products';
   static const categoryDetail = '/category_detail';
   static const productCatalogDetail = '/product_catalog_detail';

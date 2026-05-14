@@ -3,6 +3,7 @@ import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/widgets/t_empty_state_widget.dart';
 import 'package:frontend/core/ui/widgets/t_form_skeleton_widget.dart';
 import 'package:frontend/core/ui/widgets/t_refresh_indicator_widget.dart';
+import 'package:frontend/features/inventory/widgets/product_catalog/product_catalog_action_menu_widget.dart';
 import 'package:frontend/features/inventory/widgets/product_catalog/product_catalog_category_list_item_widget.dart';
 import 'package:frontend/features/inventory/widgets/product_catalog/product_catalog_search_bar_widget.dart';
 import 'package:frontend/features/inventory/widgets/product_catalog/product_catalog_add_category_widget.dart';
@@ -30,6 +31,9 @@ class ProductCatalogMobileView extends GetView<ProductCatalogController> {
       appBar: TAppBarWidget(
         title: TTexts.categoryCatalog.tr,
         showBackArrow: true,
+        actions: const [
+          ProductCatalogActionMenuWidget(),
+        ],
       ),
       body: TRefreshIndicatorWidget(
         edgeOffset: topOffset,

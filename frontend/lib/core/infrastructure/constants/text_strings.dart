@@ -684,6 +684,18 @@ class TTexts {
   static const String barcodeDeleted = 'barcode_deleted';
   static const String quantityGreaterThanZero = 'quantity_greater_than_zero';
   static const String unitPriceLabel = 'unit_price_label';
+  static const String hiddenCategories = "hidden_categories";
+  static const String hiddenCategoriesDesc = "hidden_categories_desc";
+  static const String noHiddenCategories = "no_hidden_categories";
+  static const String noHiddenCategoriesDesc = "no_hidden_categories_desc";
+  static const String restore = "restore";
+  static const String confirmRestoreTitle = "confirm_restore_title";
+  static const String confirmRestoreDesc = "confirm_restore_desc";
+  static const String restoreSuccess = "restore_success";
+  static const String selected = "selected";
+  static const String restoreSelected = "restore_selected";
+  static const String confirmBatchRestoreTitle = "confirm_batch_restore_title";
+  static const String confirmBatchRestoreDesc = "confirm_batch_restore_desc";
 
   // --- View All Products
   static const String viewAllProducts = 'view_all_products';

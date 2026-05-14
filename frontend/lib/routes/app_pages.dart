@@ -19,6 +19,7 @@ import 'package:frontend/features/inventory/bindings/all_products_binding.dart';
 import 'package:frontend/features/inventory/bindings/category_form_binding.dart';
 import 'package:frontend/features/inventory/bindings/category_detail_binding.dart';
 import 'package:frontend/features/inventory/bindings/customize_catalog_binding.dart';
+import 'package:frontend/features/inventory/bindings/hidden_category_binding.dart';
 import 'package:frontend/features/inventory/bindings/inventory_detail_binding.dart';
 import 'package:frontend/features/inventory/bindings/inventory_insight_binding.dart';
 import 'package:frontend/features/inventory/bindings/product_catalog_bindings.dart';
@@ -31,6 +32,7 @@ import 'package:frontend/features/inventory/views/customize_catalog_view.dart';
 import 'package:frontend/features/inventory/views/inventory_detail_view.dart';
 import 'package:frontend/features/inventory/views/inventory_insight_view.dart';
 import 'package:frontend/features/inventory/views/inventory_view.dart';
+import 'package:frontend/features/inventory/views/platform/hidden_category_mobile_view.dart';
 import 'package:frontend/features/inventory/views/product_catalog_detail_view.dart';
 import 'package:frontend/features/inventory/views/product_catalog_view.dart';
 import 'package:frontend/features/inventory/views/product_form_view.dart';
@@ -256,6 +258,13 @@ class AppPages {
       name: AppRoutes.productCatalog,
       page: () => const ProductCatalogView(),
       binding: ProductCatalogBinding(),
+      transition: Transition.cupertino,
+    ),
+
+    GetPage(
+      name: AppRoutes.hiddenCategories,
+      page: () => const HiddenCategoryMobileView(),
+      binding: HiddenCategoryBinding(),
       transition: Transition.cupertino,
     ),
 

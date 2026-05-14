@@ -154,4 +154,8 @@ class ProductCatalogController extends GetxController with TErrorHandler {
       handleError(e);
     }
   }
+
+  void goToHiddenCategories() {
+    Get.toNamed(AppRoutes.hiddenCategories);
+  }
 }

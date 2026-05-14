@@ -45,6 +45,19 @@ class InventoryProvider {
   Future<void> hideDefaultCategory(String categoryId) async {
     await _apiClient.post('/api/categories/$categoryId/hide');
   }
+  // ==========================================
+  // HIDDEN CATEGORIES
+  // ==========================================
+  Future<List<CategoryModel>> getHiddenCategories() async {
+    final listData = await _apiClient.getList('/api/categories',
+        queryParameters: {'isHidden': true, 'limit': 100});
+    return listData.map((json) => CategoryModel.fromJson(json)).toList();
+  }
+
+  // 2. Khôi phục category mặc định đã ẩn
+  Future<void> unhideDefaultCategory(String categoryId) async {
+    await _apiClient.delete('/api/categories/$categoryId/unhide');
+  }
 
   // ==========================================
   // PRODUCTS
@@ -247,7 +260,7 @@ class InventoryProvider {
       '/api/product-packages/$productPackageId/barcodes/$barcode',
     );
   }
-  
+
   // ==========================================
   // INVENTORY DETAIL FETCH
   // ==========================================

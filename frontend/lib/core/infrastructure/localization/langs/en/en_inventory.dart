@@ -161,6 +161,20 @@ final Map<String, String> enInventory = {
   TTexts.invalidPrice: 'Please enter a valid number',
   TTexts.barcodeDeletedSuccess: 'Barcode deleted successfully',
   TTexts.barcodeDeleted: 'Deleted barcode',
+  TTexts.hiddenCategories: "Hidden Categories",
+  TTexts.hiddenCategoriesDesc: "View and recover hidden categories",
+  TTexts.noHiddenCategories: "No hidden categories",
+  TTexts.noHiddenCategoriesDesc: "All your categories are currently visible",
+  TTexts.restore: "Restore",
+  TTexts.confirmRestoreTitle: "Restore category?",
+  TTexts.confirmRestoreDesc:
+      "This category will be visible in your store again. Are you sure?",
+  TTexts.restoreSuccess: "Category restored successfully",
+  TTexts.selected: "Selected",
+  TTexts.restoreSelected: "Restore selected items",
+  TTexts.confirmBatchRestoreTitle: "Restore multiple categories?",
+  TTexts.confirmBatchRestoreDesc:
+      "All selected categories will be restored. Do you want to proceed?",
 
   // -- Category Detail
   TTexts.addNewProduct: 'Add New Product',
