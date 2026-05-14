@@ -7,8 +7,8 @@ import 'package:frontend/core/ui/widgets/t_empty_state_widget.dart';
 import 'package:frontend/core/ui/widgets/t_refresh_indicator_widget.dart';
 import 'package:frontend/core/ui/widgets/t_primary_button_widget.dart';
 import 'package:frontend/features/inventory/controllers/hidden_category_controller.dart';
-import 'package:frontend/features/transaction/widgets/hidden_category/hidden_category_list_item_widget.dart';
-import 'package:frontend/features/transaction/widgets/hidden_category/hidden_category_shimmer_widget.dart';
+import 'package:frontend/features/inventory/widgets/hidden_category/hidden_category_list_item_widget.dart';
+import 'package:frontend/features/inventory/widgets/hidden_category/hidden_category_shimmer_widget.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 

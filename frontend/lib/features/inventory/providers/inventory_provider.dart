@@ -4,7 +4,7 @@ import 'package:frontend/core/infrastructure/network/app_client.dart';
 import 'package:frontend/core/infrastructure/models/category_model.dart';
 import 'package:frontend/core/infrastructure/models/product_model.dart';
 import 'package:frontend/core/infrastructure/models/inventory_model.dart';
-import 'package:frontend/core/infrastructure/models/unit_model.dart'; // IMPORT THÊM UNIT MODEL
+import 'package:frontend/core/infrastructure/models/unit_model.dart';
 
 class InventoryProvider {
   final _apiClient = ApiClient();
@@ -45,13 +45,24 @@ class InventoryProvider {
   Future<void> hideDefaultCategory(String categoryId) async {
     await _apiClient.post('/api/categories/$categoryId/hide');
   }
-  // ==========================================
+
+  // ==============================================================
   // HIDDEN CATEGORIES
-  // ==========================================
+  // ==============================================================
   Future<List<CategoryModel>> getHiddenCategories() async {
-    final listData = await _apiClient.getList('/api/categories',
-        queryParameters: {'isHidden': true, 'limit': 100});
-    return listData.map((json) => CategoryModel.fromJson(json)).toList();
+    // 1. Đổi endpoint thành /hide theo đúng category.route.ts
+    final listData = await _apiClient
+        .getList('/api/categories/hide', queryParameters: {'limit': 100});
+
+    return listData.map((json) {
+      // 2. Tiêm thêm isDefault = true vào JSON.
+      // Vì API findManyByStore ở BE chỉ trả về {categoryId, name, description}
+      // Làm thế này để CategoryModel.fromJson không bị lỗi (nếu model của bạn require isDefault)
+      if (json is Map<String, dynamic>) {
+        json['isDefault'] = true;
+      }
+      return CategoryModel.fromJson(json);
+    }).toList();
   }
 
   // 2. Khôi phục category mặc định đã ẩn

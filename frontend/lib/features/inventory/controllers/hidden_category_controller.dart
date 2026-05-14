@@ -79,7 +79,6 @@ class HiddenCategoryController extends GetxController with TErrorHandler {
     );
   }
 
-  // ĐÃ SỬA: Không dùng FullScreenLoader, cho UI chạy trước (Optimistic Update)
   Future<void> _executeRestore(CategoryModel category) async {
     try {
       // 1. Gỡ ngay khỏi UI để tạo cảm giác mượt mà
@@ -125,7 +124,6 @@ class HiddenCategoryController extends GetxController with TErrorHandler {
     );
   }
 
-  // ĐÃ SỬA: Bỏ FullScreenLoader, cập nhật UI ngay lập tức
   Future<void> _executeBatchRestore() async {
     try {
       final List<String> idsToRestore = List.from(selectedIds);

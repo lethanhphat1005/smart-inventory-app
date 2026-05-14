@@ -194,14 +194,19 @@ class ReorderSuggestionCardWidget extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontFamily: AppFonts.mainFont,
-            fontSize: 13,
-            color: AppColors.softGrey,
+        Expanded(
+          child: Text(
+            label,
+            style: TextStyle(
+              fontFamily: AppFonts.mainFont,
+              fontSize: 13,
+              color: AppColors.softGrey,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
+        const SizedBox(width: 8),
         Text(
           value,
           style: TextStyle(
