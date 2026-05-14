@@ -41,5 +41,7 @@ final Map<String, String> enBarcode = {
   TTexts.createProduct: "Create New",
   TTexts.barcodeScanHint: "Place the barcode in the center and hold still",
   TTexts.barcodeScanGalleryFailedTitle: "Scan Failed",
-  TTexts.barcodeScanGalleryFailedDesc: "No valid barcode found in this image. Please try again with a clearer photo.",
+  TTexts.barcodeScanGalleryFailedDesc:
+      "No valid barcode found in this image. Please try again with a clearer photo.",
+  TTexts.analyzingImageLoader: "Analyzing image...",
 };

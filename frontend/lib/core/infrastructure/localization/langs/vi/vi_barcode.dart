@@ -44,4 +44,5 @@ final Map<String, String> viBarcode = {
   TTexts.barcodeScanGalleryFailedTitle: "Quét ảnh thất bại",
   TTexts.barcodeScanGalleryFailedDesc:
       "Không tìm thấy mã vạch hợp lệ nào trong bức ảnh này. Vui lòng thử lại với ảnh rõ nét hơn.",
+  TTexts.analyzingImageLoader: "Đang phân tích ảnh...",
 };

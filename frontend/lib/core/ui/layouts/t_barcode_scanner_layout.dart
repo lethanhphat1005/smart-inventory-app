@@ -238,6 +238,41 @@ class _TBarcodeScannerLayoutState extends State<TBarcodeScannerLayout>
             ),
           ),
 
+          Obx(() {
+            if (scannerController.isProcessingImage.value) {
+              return Container(
+                color: Colors.black, // Phủ đen toàn bộ khu vực camera
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const SizedBox(
+                        width: 32,
+                        height: 32,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2.5,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        TTexts.analyzingImageLoader.tr,
+                        style: TextStyle(
+                          fontFamily: AppFonts.mainFont,
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
+            return const SizedBox.shrink();
+          }),
+
           Positioned(
             top: MediaQuery.of(context).padding.top + 10,
             left: 20,

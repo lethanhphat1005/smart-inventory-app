@@ -29,6 +29,7 @@ class BarcodeScannerController extends GetxController {
   final RxBool isPaused = false.obs;
   final RxnString scannedCode = RxnString(null);
   final RxBool isTorchOn = false.obs;
+  final RxBool isProcessingImage = false.obs;
   late RxBool isBeepOn;
 
   // CÁC BIẾN CỦA HỆ THỐNG CHỐNG NHIỄU (DEBOUNCE)
@@ -99,6 +100,13 @@ class BarcodeScannerController extends GetxController {
       final XFile? image = await picker.pickImage(source: ImageSource.gallery);
 
       if (image != null) {
+        // 1. BẬT MÀN HÌNH ĐEN LOADING
+        isProcessingImage.value = true;
+
+        // Cố ý delay 200ms để UI kịp vẽ cái màn hình đen trước khi thuật toán phân tích làm đơ máy
+        await Future.delayed(const Duration(milliseconds: 200));
+
+        // 2. PHÂN TÍCH ẢNH
         final capture = await cameraController.analyzeImage(image.path);
 
         // Nếu ảnh có chứa mã vạch
@@ -121,7 +129,10 @@ class BarcodeScannerController extends GetxController {
     } catch (e) {
       debugPrint("Lỗi quét ảnh: $e");
     } finally {
-      // Chỉ mở lại camera nếu chưa quét được mã nào
+      // 3. TẮT MÀN HÌNH LOADING
+      isProcessingImage.value = false;
+
+      // Nếu không bắt được mã nào thì tự mở lại camera
       if (scannedCode.value == null) {
         resumeScan();
       }
@@ -191,8 +202,7 @@ class BarcodeScannerController extends GetxController {
   void resumeScan() {
     isPaused.value = false;
     scannedCode.value = null;
-    isTorchOn.value = false; // Camera mặc định luôn khởi động tắt đèn
-
+    isTorchOn.value = false;
     _lastScannedCode = null;
     _consecutiveReads = 0;
     _lastReadTime = null;
@@ -201,6 +211,6 @@ class BarcodeScannerController extends GetxController {
   // Hàm chủ động tạm dừng quét (Ví dụ: khi đang call API kiểm tra mã)
   void pauseScan() {
     isPaused.value = true;
-    isTorchOn.value = false; // Ngủ thì phải tắt đèn
+    isTorchOn.value = false;
   }
 }

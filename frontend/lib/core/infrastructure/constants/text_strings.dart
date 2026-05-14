@@ -1428,6 +1428,7 @@ class TTexts {
   static const String barcodeScanHint = "barcode_scan_hint";
   static const String barcodeScanGalleryFailedTitle = "barcode_scan_gallery_failed_title";
   static const String barcodeScanGalleryFailedDesc = "barcode_scan_gallery_failed_desc";
+  static const String analyzingImageLoader = "analyzing_image_loader";
 
   // -- Verify OTP
   static const String verifyOtpTitle = "verify_otp_title";
