@@ -174,7 +174,7 @@ class InventoryProductPackageFormFieldsWidget
                 FocusScope.of(context).unfocus();
 
                 Get.to(() => TBarcodeScannerLayout(
-                      title: TTexts.homeScanBarcode.tr,
+                      // title: TTexts.homeScanBarcode.tr,
                       onScanned: (code) {
                         // Đóng màn hình camera trước tiên
                         Get.back();

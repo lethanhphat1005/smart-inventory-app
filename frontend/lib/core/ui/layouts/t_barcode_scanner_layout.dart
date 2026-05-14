@@ -1,3 +1,5 @@
+// (Giữ nguyên các import và phần logic ở trên)
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
@@ -14,9 +16,10 @@ class TBarcodeScannerLayout extends StatefulWidget {
   final Widget Function(String code, VoidCallback resumeScan)?
       bottomCardBuilder;
   final Widget? bottomBar;
+
   const TBarcodeScannerLayout({
     super.key,
-    this.title = 'Bar Code Scan',
+    this.title = '',
     this.onScanned,
     this.bottomCardBuilder,
     this.bottomBar,
@@ -32,6 +35,9 @@ class _TBarcodeScannerLayoutState extends State<TBarcodeScannerLayout>
       Get.find<BarcodeScannerController>();
   late AnimationController _animationController;
 
+  bool _showHint = true;
+  Timer? _hintTimer;
+
   @override
   void initState() {
     super.initState();
@@ -40,16 +46,26 @@ class _TBarcodeScannerLayoutState extends State<TBarcodeScannerLayout>
       vsync: this,
       duration: const Duration(seconds: 2),
     )..repeat(reverse: true);
+
+    _hintTimer = Timer(const Duration(milliseconds: 4500), () {
+      if (mounted) {
+        setState(() {
+          _showHint = false;
+        });
+      }
+    });
   }
 
   @override
   void dispose() {
+    _hintTimer?.cancel();
     _animationController.dispose();
     super.dispose();
   }
 
-  // === UI HIỂN THỊ POPUP NHẬP MÃ THỦ CÔNG (ĐÃ LÀM THANH THOÁT HƠN) ===
   void _showManualEntryDialog() {
+    setState(() => _showHint = false);
+
     final TextEditingController manualController = TextEditingController();
 
     Get.dialog(
@@ -66,7 +82,6 @@ class _TBarcodeScannerLayoutState extends State<TBarcodeScannerLayout>
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Icon
                   Container(
                     padding: const EdgeInsets.all(AppSizes.p12),
                     decoration: BoxDecoration(
@@ -77,8 +92,6 @@ class _TBarcodeScannerLayoutState extends State<TBarcodeScannerLayout>
                         size: 32, color: AppColors.primary),
                   ),
                   const SizedBox(height: AppSizes.p16),
-
-                  // Tiêu đề
                   Text(
                     TTexts.manualBarcodeEntryTitle.tr,
                     style: TextStyle(
@@ -88,8 +101,6 @@ class _TBarcodeScannerLayoutState extends State<TBarcodeScannerLayout>
                         fontFamily: AppFonts.mainFont),
                   ),
                   const SizedBox(height: 6),
-
-                  // Mô tả
                   Text(
                     TTexts.manualBarcodeEntryDesc.tr,
                     textAlign: TextAlign.center,
@@ -101,8 +112,6 @@ class _TBarcodeScannerLayoutState extends State<TBarcodeScannerLayout>
                         height: 1.3),
                   ),
                   const SizedBox(height: AppSizes.p24),
-
-                  // Ô Nhập Text (Mỏng và phẳng hơn)
                   TextField(
                     controller: manualController,
                     keyboardType: TextInputType.number,
@@ -144,8 +153,6 @@ class _TBarcodeScannerLayoutState extends State<TBarcodeScannerLayout>
                     },
                   ),
                   const SizedBox(height: AppSizes.p24),
-
-                  // Nút Xác nhận
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -176,8 +183,6 @@ class _TBarcodeScannerLayoutState extends State<TBarcodeScannerLayout>
                 ],
               ),
             ),
-
-            // Nút Tắt (X) ở góc trên
             Positioned(
               top: 8,
               right: 8,
@@ -192,7 +197,6 @@ class _TBarcodeScannerLayoutState extends State<TBarcodeScannerLayout>
         ),
       ),
     ).then((_) {
-      // Khi đóng Dialog, mở lại camera
       scannerController.resumeScan();
     });
   }
@@ -210,14 +214,12 @@ class _TBarcodeScannerLayoutState extends State<TBarcodeScannerLayout>
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          // 1. Camera View
           MobileScanner(
-            controller: scannerController.cameraController,
-            onDetect: (capture) =>
-                scannerController.onDetect(capture, widget.onScanned),
-          ),
-
-          // 2. Overlay
+              controller: scannerController.cameraController,
+              onDetect: (capture) {
+                if (_showHint) setState(() => _showHint = false);
+                scannerController.onDetect(capture, widget.onScanned);
+              }),
           Positioned.fill(
             child: CustomPaint(
               painter: ScannerOverlayPainter(
@@ -228,7 +230,9 @@ class _TBarcodeScannerLayoutState extends State<TBarcodeScannerLayout>
             ),
           ),
 
-          // 3. Header
+          // ==========================================
+          // ĐÃ SỬA: HEADER GỌN GÀNG, TÍCH HỢP 2 NÚT VÀO TRAILING WIDGET
+          // ==========================================
           Positioned(
             top: MediaQuery.of(context).padding.top + 10,
             left: 20,
@@ -236,10 +240,62 @@ class _TBarcodeScannerLayoutState extends State<TBarcodeScannerLayout>
             child: TCustomHeaderWidget(
               title: widget.title,
               isDark: true,
+              // Đẩy 2 nút vào trailingWidget
+              trailingWidget: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // NÚT ĐÈN PIN (Được làm đồng điệu với nút Back)
+                  Obx(() {
+                    final isTorchOn = scannerController.isTorchOn.value;
+                    return GestureDetector(
+                      onTap: () => scannerController.toggleTorch(),
+                      child: Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          // Màu nền giống nút Back khi ở isDark
+                          color: isTorchOn
+                              ? AppColors.primary
+                              : const Color(0xFF1E1E1E),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(
+                          isTorchOn
+                              ? Icons.flash_on_rounded
+                              : Icons.flash_off_rounded,
+                          color: isTorchOn ? Colors.white : Colors.white70,
+                          size: 20,
+                        ),
+                      ),
+                    );
+                  }),
+                  const SizedBox(width: 8),
+
+                  // NÚT NHẬP THỦ CÔNG
+                  GestureDetector(
+                    onTap: () {
+                      scannerController.pauseScan();
+                      _showManualEntryDialog();
+                    },
+                    child: Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF1E1E1E),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(
+                        Icons.keyboard_alt_outlined,
+                        color: Colors.white70,
+                        size: 20,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
 
-          // 4. Laser & Bottom Card
           Obx(() {
             final isPaused = scannerController.isPaused.value;
             final code = scannerController.scannedCode.value;
@@ -285,9 +341,31 @@ class _TBarcodeScannerLayoutState extends State<TBarcodeScannerLayout>
             );
           }),
 
-          // ==========================================
-          // ĐÃ THÊM: HIỂN THỊ BOTTOM BAR BÊN DƯỚI CÙNG
-          // ==========================================
+          Positioned(
+            top: scanAreaTop + scanAreaHeight + 32,
+            left: 20,
+            right: 20,
+            child: Obx(() {
+              final isPaused = scannerController.isPaused.value;
+
+              return AnimatedOpacity(
+                opacity: (_showHint && !isPaused) ? 1.0 : 0.0,
+                duration: const Duration(milliseconds: 800),
+                child: Text(
+                  TTexts.barcodeScanHint.tr,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    height: 1.5,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              );
+            }),
+          ),
+
           if (widget.bottomBar != null)
             Positioned(
               bottom: 0,
@@ -296,26 +374,7 @@ class _TBarcodeScannerLayoutState extends State<TBarcodeScannerLayout>
               child: widget.bottomBar!,
             ),
 
-          Positioned(
-            top: MediaQuery.of(context).padding.top + 10,
-            right: 20,
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.4),
-                shape: BoxShape.circle,
-              ),
-              child: IconButton(
-                icon: const Icon(Icons.keyboard_alt_outlined,
-                    color: Colors.white, size: 24),
-                tooltip: TTexts.manualBarcodeEntryTitle.tr,
-                onPressed: () {
-                  // Dừng camera trước khi mở bàn phím để tránh giật lag
-                  scannerController.pauseScan();
-                  _showManualEntryDialog();
-                },
-              ),
-            ),
-          ),
+          // ĐÃ XÓA KHỐI NÚT DƯ THỪA Ở GÓC DƯỚI ĐÂY
         ],
       ),
     );

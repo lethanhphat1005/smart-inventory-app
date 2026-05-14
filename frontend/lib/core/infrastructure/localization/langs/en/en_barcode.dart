@@ -38,4 +38,5 @@ final Map<String, String> enBarcode = {
   TTexts.barcodeMatchesMultipleProducts: "matches multiple products. Please select one:",
   TTexts.skipLabel: "Skip",
   TTexts.createProduct: "Create New",
+  TTexts.barcodeScanHint: "Place the barcode in the center and hold still",
 };

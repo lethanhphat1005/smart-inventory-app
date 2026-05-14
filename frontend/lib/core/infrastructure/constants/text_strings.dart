@@ -1425,6 +1425,7 @@ class TTexts {
       "barcode_matches_multiple_products";
   static const String skipLabel = "skip_label";
   static const String createProduct = "create_product";
+  static const String barcodeScanHint = "barcode_scan_hint";
 
   // -- Verify OTP
   static const String verifyOtpTitle = "verify_otp_title";

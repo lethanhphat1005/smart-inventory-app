@@ -473,7 +473,7 @@ class InboundTransactionController extends GetxController with TErrorHandler {
   void openScanner() {
     Get.to(
       () => TBarcodeScannerLayout(
-        title: TTexts.scanProductBarcode.tr,
+        // title: TTexts.scanProductBarcode.tr,
         onScanned: (code) {
           Get.find<BarcodeScannerController>().pauseScan();
           _processContinuousScannedBarcode(code);

@@ -40,4 +40,5 @@ final Map<String, String> viBarcode = {
       "khớp với nhiều sản phẩm. Vui lòng chọn một:",
   TTexts.skipLabel: "Bỏ qua",
   TTexts.createProduct: "Tạo Mới",
+  TTexts.barcodeScanHint: "Place the barcode in the center and hold still",
 };

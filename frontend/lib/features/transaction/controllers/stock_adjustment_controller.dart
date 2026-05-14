@@ -332,7 +332,7 @@ class StockAdjustmentController extends GetxController with TErrorHandler {
   void openScanner() {
     Get.to(
       () => TBarcodeScannerLayout(
-        title: TTexts.scanProductBarcode.tr,
+        // title: TTexts.scanProductBarcode.tr,
         onScanned: (code) {
           Get.back();
           _processScannedBarcode(code);
