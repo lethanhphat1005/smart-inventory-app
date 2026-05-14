@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
-import 'package:frontend/core/ui/theme/app_fonts.dart';
-import 'package:frontend/core/ui/theme/app_sizes.dart';
-import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:get/get.dart';
 
-class TransactionQuantitySelectorWidget extends StatelessWidget {
+class TransactionQuantitySelectorWidget extends StatefulWidget {
   final TextEditingController controller;
   final VoidCallback onIncrease;
   final VoidCallback onDecrease;
   final int? maxQuantity;
+  final bool isUnlimited;
 
   const TransactionQuantitySelectorWidget({
     super.key,
@@ -19,123 +17,198 @@ class TransactionQuantitySelectorWidget extends StatelessWidget {
     required this.onIncrease,
     required this.onDecrease,
     this.maxQuantity,
+    this.isUnlimited = false,
   });
 
   @override
+  State<TransactionQuantitySelectorWidget> createState() =>
+      _TransactionQuantitySelectorWidgetState();
+}
+
+class _TransactionQuantitySelectorWidgetState
+    extends State<TransactionQuantitySelectorWidget> {
+  late FocusNode _focusNode;
+
+  // ĐÃ SỬA: Nếu isUnlimited là true thì cho max là xấp xỉ 1 tỷ
+  int get _effectiveMax =>
+      widget.isUnlimited ? 999999999 : (widget.maxQuantity ?? 999999);
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode = FocusNode();
+    _focusNode.addListener(() {
+      if (!_focusNode.hasFocus) {
+        if (widget.controller.text.isEmpty) {
+          widget.controller.text = '0';
+        }
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  void _onInputChanged(String value) {
+    if (value.isEmpty) return;
+    int val = int.tryParse(value) ?? 0;
+
+    // Tự động ép về ngưỡng tối đa nếu cố tình gõ lố
+    if (val >= _effectiveMax) {
+      widget.controller.text = _effectiveMax.toString();
+      widget.controller.selection = TextSelection.fromPosition(
+          TextPosition(offset: widget.controller.text.length));
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          TTexts.labelQuantity.tr,
-          style: TextStyle(
-            fontFamily: AppFonts.mainFont,
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-            color: AppColors.subText,
-          ),
-        ),
-        const SizedBox(height: AppSizes.p12),
-        Center(
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildRawButton(
-                icon: Iconsax.minus_copy,
-                onTap: onDecrease,
-                color: AppColors.softGrey,
+    return ValueListenableBuilder<TextEditingValue>(
+      valueListenable: widget.controller,
+      builder: (context, value, child) {
+        int current = int.tryParse(value.text) ?? 0;
+
+        bool canDecrease = current > 0;
+        bool canIncrease = current < _effectiveMax;
+
+        // Trạng thái đạt giới hạn (isMaxed) chỉ được bật khi CHẠM ĐÚNG NGƯỠNG TRẦN
+        bool isMaxed = current >= _effectiveMax;
+
+        // Xác định câu thông báo tương ứng
+        String errorText = '';
+        if (isMaxed) {
+          if (widget.maxQuantity != null) {
+            errorText = TTexts.maxStockReached.tr;
+          } else {
+            errorText = TTexts.absoluteMaxQuantity.tr;
+          }
+        }
+
+        return Column(
+          // Đảm bảo khối luôn ở giữa, không bị dạt sang phải khi Tag đỏ xuất hiện
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+              height: 46,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(
+                  color: isMaxed
+                      ? Colors.red.shade400
+                      : AppColors.divider.withOpacity(0.5),
+                  width: 1.0,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: isMaxed
+                        ? Colors.red.withOpacity(0.1)
+                        : Colors.black.withOpacity(0.04),
+                    blurRadius: 10,
+                    offset: const Offset(0, 2),
+                  )
+                ],
               ),
-              const SizedBox(width: 20),
-              IntrinsicWidth(
-                stepWidth: 48,
-                child: Container(
-                  constraints:
-                      const BoxConstraints(minWidth: 48, minHeight: 48),
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    border:
-                        Border.all(color: AppColors.softGrey.withOpacity(0.5)),
-                    borderRadius: BorderRadius.circular(AppSizes.radius8),
-                    color: Colors.white,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildBtn(
+                    icon: Icons.remove,
+                    onTap: canDecrease ? widget.onDecrease : null,
+                    color: canDecrease
+                        ? AppColors.primaryText
+                        : AppColors.softGrey,
                   ),
-                  child: TextSelectionTheme(
-                    data: TextSelectionThemeData(
-                      cursorColor: AppColors.primary,
-                      selectionColor: AppColors.primary.withOpacity(0.3),
-                      selectionHandleColor: AppColors.primary,
+                  Container(
+                    constraints: const BoxConstraints(
+                      minWidth: 84,
+                      maxWidth: 140,
                     ),
-                    child: TextFormField(
-                      controller: controller,
-                      keyboardType: TextInputType.number,
-                      textAlign: TextAlign.center,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      onChanged: (value) {
-                        if (value.isEmpty) return;
-
-                        final qty = int.tryParse(value);
-                        if (qty == null || qty < 1) {
-                          controller.text = '1';
-                          controller.selection = TextSelection.fromPosition(
-                              const TextPosition(offset: 1));
-                          return;
-                        }
-
-                        if (maxQuantity != null && qty > maxQuantity!) {
-                          controller.text = maxQuantity.toString();
-                          controller.selection = TextSelection.fromPosition(
-                              TextPosition(offset: controller.text.length));
-                        }
-                      },
-                      style: TextStyle(
-                        fontFamily: AppFonts.mainFont,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.primaryText,
+                    child: Theme(
+                      data: Theme.of(context).copyWith(
+                        textSelectionTheme: TextSelectionThemeData(
+                          cursorColor: AppColors.primary,
+                          selectionColor: AppColors.primary.withOpacity(0.3),
+                          selectionHandleColor: AppColors.primary,
+                        ),
                       ),
-                      decoration: const InputDecoration(
-                        isDense: true,
-                        contentPadding: EdgeInsets.symmetric(vertical: 8),
-                        border: InputBorder.none,
-                        enabledBorder: InputBorder.none,
-                        focusedBorder: InputBorder.none,
+                      child: TextFormField(
+                        controller: widget.controller,
+                        focusNode: _focusNode,
+                        textAlign: TextAlign.center,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
+                        onChanged: _onInputChanged,
+                        cursorColor: AppColors.primary,
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 18),
+                        decoration: const InputDecoration(
+                          border: InputBorder.none,
+                          isDense: true,
+                          contentPadding: EdgeInsets.zero,
+                        ),
                       ),
                     ),
+                  ),
+                  _buildBtn(
+                    icon: Icons.add,
+                    onTap: canIncrease ? widget.onIncrease : null,
+                    color: canIncrease
+                        ? AppColors.primaryText
+                        : AppColors.softGrey,
+                  ),
+                ],
+              ),
+            ),
+
+            // Hiện tag nếu chạm ngưỡng
+            if (errorText.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFEF2F2),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.red.shade200),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.info_outline,
+                          color: Colors.red, size: 14),
+                      const SizedBox(width: 6),
+                      Text(
+                        errorText,
+                        style: const TextStyle(
+                            color: Colors.red,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600),
+                      ),
+                    ],
                   ),
                 ),
-              ),
-              const SizedBox(width: 20),
-              _buildRawButton(
-                icon: Iconsax.add_copy,
-                onTap: () {
-                  final current = int.tryParse(controller.text) ?? 1;
-                  if (maxQuantity != null && current >= maxQuantity!) return;
-                  onIncrease();
-                },
-                // Đổi màu dấu cộng thành xám nếu đã max
-                color: (maxQuantity != null &&
-                        (int.tryParse(controller.text) ?? 1) >= maxQuantity!)
-                    ? AppColors.softGrey
-                    : AppColors.primary,
-              ),
-            ],
-          ),
-        ),
-      ],
+              )
+          ],
+        );
+      },
     );
   }
 
-  Widget _buildRawButton({
-    required IconData icon,
-    required VoidCallback onTap,
-    required Color color,
-  }) {
+  Widget _buildBtn(
+      {required IconData icon, VoidCallback? onTap, required Color color}) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(100),
+      borderRadius: BorderRadius.circular(24),
       child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Icon(icon, size: 22, color: color),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        child: Icon(icon, size: 20, color: color),
       ),
     );
   }

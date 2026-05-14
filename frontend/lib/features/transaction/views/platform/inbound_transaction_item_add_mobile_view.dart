@@ -51,14 +51,29 @@ class InboundTransactionItemAddMobileView
                     const TransactionBarcodeWidget(),
                     const SizedBox(height: AppSizes.p8),
                     const _Divider(),
-                    _buildSectionTitle(TTexts.details.tr),
                     Padding(
                       padding: const EdgeInsets.symmetric(
                           horizontal: AppSizes.p20, vertical: 8),
-                      child: TransactionQuantitySelectorWidget(
-                        controller: controller.quantityController,
-                        onIncrease: controller.incrementQuantity,
-                        onDecrease: controller.decrementQuantity,
+                      child: Column(
+                        children: [
+                          Align(
+                            alignment: AlignmentGeometry.topLeft,
+                            child: Text(
+                              TTexts.labelQuantity.tr,
+                              style: TextStyle(
+                                fontFamily: AppFonts.mainFont,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.subText,
+                              ),
+                            ),
+                          ),
+                          TransactionQuantitySelectorWidget(
+                            controller: controller.quantityController,
+                            onIncrease: controller.incrementQuantity,
+                            onDecrease: controller.decrementQuantity,
+                          ),
+                        ],
                       ),
                     ),
                     Padding(
@@ -109,21 +124,6 @@ class InboundTransactionItemAddMobileView
       bottomNavigationBar: Obx(() => controller.isLoadingFreshData.value
           ? const SizedBox.shrink()
           : _buildBottomButton()),
-    );
-  }
-
-  Widget _buildSectionTitle(String title) {
-    return Padding(
-      padding:
-          const EdgeInsets.symmetric(horizontal: AppSizes.p20, vertical: 4),
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: Text(title,
-            style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: AppColors.primaryText)),
-      ),
     );
   }
 

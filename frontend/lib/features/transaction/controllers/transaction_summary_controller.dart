@@ -7,6 +7,7 @@ import 'package:frontend/features/inventory/controllers/inventory_controller.dar
 import 'package:frontend/features/transaction/widgets/transaction_summary/transaction_summary_details_bottom_sheet_widget.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/ui/widgets/t_bottom_sheet_widget.dart';
+import 'package:frontend/routes/app_routes.dart';
 import 'package:get/get.dart';
 
 class TransactionSummaryController extends GetxController {
@@ -30,8 +31,7 @@ class TransactionSummaryController extends GetxController {
   Color get themeColor {
     if (isInbound) return AppColors.stockIn;
     if (isOutbound) return AppColors.stockOut;
-    if (isAdjustment) return const Color(0xFFFF9900);
-    return AppColors.primaryText;
+    return AppColors.primary;
   }
 
   // Lấy số lượng dòng hàng (items) thay vì cộng dồn quantity
@@ -68,6 +68,33 @@ class TransactionSummaryController extends GetxController {
   String get dateStr => DayFormatterUtils.formatDate(transaction.createdAt,
       format: 'dd MMMM yyyy');
 
+  String get createAnotherText {
+    if (isInbound) return TTexts.createAnotherInbound.tr;
+    if (isOutbound) return TTexts.createAnotherOutbound.tr;
+    if (isAdjustment) return TTexts.createAnotherAdjustment.tr;
+    return TTexts.createNewTransaction.tr;
+  }
+
+  void createAnotherTransaction() {
+    Get.until((route) => route.isFirst);
+
+    if (Get.isRegistered<HomeController>()) {
+      Get.find<HomeController>().loadAllHomeData();
+    }
+    if (Get.isRegistered<InventoryController>()) {
+      // ĐÃ FIX: Đổi thành fetchDashboardData
+      Get.find<InventoryController>().fetchDashboardData(isRefresh: true);
+    }
+
+    if (isInbound) {
+      Get.toNamed(AppRoutes.inboundTransaction);
+    } else if (isOutbound) {
+      Get.toNamed(AppRoutes.outboundTransaction);
+    } else if (isAdjustment) {
+      Get.toNamed(AppRoutes.stockAdjustment);
+    }
+  }
+
   void goToHome() {
     Get.until((route) => route.isFirst);
 
@@ -75,7 +102,8 @@ class TransactionSummaryController extends GetxController {
       Get.find<HomeController>().loadAllHomeData();
     }
     if (Get.isRegistered<InventoryController>()) {
-      Get.find<InventoryController>().fetchDashboardData();
+      // ĐÃ FIX: Đổi thành fetchDashboardData
+      Get.find<InventoryController>().fetchDashboardData(isRefresh: true);
     }
   }
 

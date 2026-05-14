@@ -40,4 +40,9 @@ final Map<String, String> viBarcode = {
       "khớp với nhiều sản phẩm. Vui lòng chọn một:",
   TTexts.skipLabel: "Bỏ qua",
   TTexts.createProduct: "Tạo Mới",
+  TTexts.barcodeScanHint: "Place the barcode in the center and hold still",
+  TTexts.barcodeScanGalleryFailedTitle: "Quét ảnh thất bại",
+  TTexts.barcodeScanGalleryFailedDesc:
+      "Không tìm thấy mã vạch hợp lệ nào trong bức ảnh này. Vui lòng thử lại với ảnh rõ nét hơn.",
+  TTexts.analyzingImageLoader: "Đang phân tích ảnh...",
 };

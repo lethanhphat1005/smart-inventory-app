@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/features/profile/controllers/settings_controller.dart';
 import 'package:frontend/features/profile/widgets/settings/settings_language_dropdown_widget.dart';
+// import 'package:frontend/features/profile/widgets/settings/settings_currency_dropdown_widget.dart';
 import 'package:get/get.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:frontend/core/ui/widgets/t_blur_app_bar_widget.dart';
-import 'package:frontend/core/infrastructure/constants/text_strings.dart'; // Add this import
+import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 
 class SettingsMobileView extends GetView<SettingsController> {
   const SettingsMobileView({super.key});
@@ -14,15 +15,14 @@ class SettingsMobileView extends GetView<SettingsController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar:
-          const TBlurAppBarWidget(), // Bỏ title ở đây để nhường chỗ cho Header to
+      appBar: const TBlurAppBarWidget(),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(AppSizes.p24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // --- HEADER ĐỒNG BỘ UI ---
+              // --- Header ---
               Text(
                 TTexts.settingsTitle.tr,
                 style: const TextStyle(
@@ -38,9 +38,13 @@ class SettingsMobileView extends GetView<SettingsController> {
               ),
               const SizedBox(height: AppSizes.p32),
 
-              // --- DROPDOWN ---
+              // --- DROPDOWN NGÔN NGỮ ---
               const SettingsLanguageDropdownWidget(),
-              const SizedBox(height: AppSizes.p20),
+              const SizedBox(height: AppSizes.p24),
+
+              // --- DROPDOWN TIỀN TÊ ---
+              // const SettingsCurrencyDropdownWidget(),
+              // const SizedBox(height: AppSizes.p20),
             ],
           ),
         ),

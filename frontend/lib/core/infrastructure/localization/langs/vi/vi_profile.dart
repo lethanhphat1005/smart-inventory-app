@@ -137,4 +137,13 @@ final Map<String, String> viProfile = {
   //Exceptions
   TTexts.userNotFound: 'Không tìm thấy thông tin người dùng',
   TTexts.userIdNotFound: 'Không tìm thấy ID người dùng để cập nhật hồ sơ',
+
+  TTexts.currencyUSD: "Đô-la Mỹ (USD)",
+  TTexts.currencyVND: "Việt Nam Đồng (VND)",
+  TTexts.currencyEUR: "Euro (EUR)",
+  TTexts.currencyGBP: "Bảng Anh (GBP)",
+  TTexts.currencyJPY: "Yên Nhật (JPY)",
+  TTexts.currencyCNY: "Nhân Dân Tệ (CNY)",
+  TTexts.currencyKRW: "Won Hàn Quốc (KRW)",
+  TTexts.currencyLabel: "Tiền tệ",
 };

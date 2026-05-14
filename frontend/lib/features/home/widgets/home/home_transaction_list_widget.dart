@@ -46,27 +46,22 @@ class HomeTransactionListWidget extends GetView<HomeController> {
               Color color;
               String title;
               bool isPositive;
-              String displayAmount = '\$${t.totalPrice.toStringAsFixed(2)}';
 
               if (type == 'export') {
                 icon = Icons.upload_rounded;
                 color = AppColors.stockOut;
                 title = TTexts.homeOutboundDelivery.tr;
                 isPositive = true;
-                displayAmount = "+$displayAmount";
               } else if (type == 'import') {
                 icon = Icons.download_rounded;
                 color = AppColors.stockIn;
                 title = TTexts.homeInboundShipment.tr;
                 isPositive = false;
-                displayAmount = "-$displayAmount";
               } else {
                 icon = Icons.sync_alt_rounded;
                 color = AppColors.primary;
                 title = TTexts.homeStockAdjustment.tr;
-
                 isPositive = t.totalPrice >= 0;
-                displayAmount = "${t.totalPrice > 0 ? '+' : ''}$displayAmount";
               }
 
               return HomeTransactionItemWidget(
@@ -74,7 +69,8 @@ class HomeTransactionListWidget extends GetView<HomeController> {
                 iconColor: color,
                 title: title,
                 time: time,
-                amount: displayAmount,
+                // ĐÃ SỬA: Truyền trực tiếp con số (double) vào
+                amount: t.totalPrice,
                 isPositive: isPositive,
               );
             }).toList(),

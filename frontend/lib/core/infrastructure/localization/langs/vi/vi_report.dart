@@ -33,4 +33,5 @@ final Map<String, String> viReport = {
       'Tạo báo cáo Excel chứa @count giao dịch cho ngày @date?',
   TTexts.exportSingleTransactionDesc: 'Tạo báo cáo Excel cho giao dịch này?',
   TTexts.amount: 'Số Tiền',
+  TTexts.productList: "Danh sách sản phẩm",
 };

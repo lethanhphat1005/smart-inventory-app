@@ -28,4 +28,5 @@ final Map<String, String> enSearch = {
   TTexts.filterNone: "None",
   TTexts.supplier: "Supplier",
   TTexts.customer: "Customer",
+  TTexts.scrollDownToLoadMore: "Scroll down to load more...",
 };

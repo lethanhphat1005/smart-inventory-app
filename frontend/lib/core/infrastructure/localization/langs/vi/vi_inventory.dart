@@ -129,7 +129,7 @@ final Map<String, String> viInventory = {
   TTexts.addToTransaction: 'Thêm vào giao dịch',
   TTexts.enterQuantityToAdd: 'Nhập số lượng',
   TTexts.quantityToImport: 'Số lượng nhập',
-  TTexts.importPriceLot: 'Giá nhập (VND)',
+  TTexts.importPriceLot: 'Giá nhập',
   TTexts.confirmAndAdd: 'Xác nhận & Thêm',
 
   // -- Product Catalog & Categories ---

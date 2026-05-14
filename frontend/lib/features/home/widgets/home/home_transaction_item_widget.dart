@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/utils/day_formatter_utils.dart';
+import 'package:frontend/core/infrastructure/utils/currency_formatter_utils.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/core/ui/theme/app_fonts.dart';
 
@@ -8,7 +9,7 @@ class HomeTransactionItemWidget extends StatelessWidget {
   final Color iconColor;
   final String title;
   final DateTime? time;
-  final String amount;
+  final double amount;
   final bool isPositive;
   final String? qtyInfo;
 
@@ -26,6 +27,9 @@ class HomeTransactionItemWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final String formattedTime = DayFormatterUtils.formatDate(time);
+
+    String displayAmount = CurrencyFormatterUtils.formatFull(amount.abs());
+    displayAmount = '${isPositive ? '+' : '-'}$displayAmount';
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -76,11 +80,11 @@ class HomeTransactionItemWidget extends StatelessWidget {
               ],
             ),
           ),
-          Text(amount,
+          Text(displayAmount,
               style: TextStyle(
                   fontFamily: AppFonts.mainFont,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w500,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
                   color: isPositive ? AppColors.stockIn : AppColors.stockOut)),
         ],
       ),

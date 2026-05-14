@@ -127,7 +127,7 @@ final Map<String, String> enInventory = {
   TTexts.addToTransaction: 'Add to Transaction',
   TTexts.enterQuantityToAdd: 'Enter Quantity',
   TTexts.quantityToImport: 'Quantity to import',
-  TTexts.importPriceLot: 'Import Price (VND)',
+  TTexts.importPriceLot: 'Import Price',
   TTexts.confirmAndAdd: 'Confirm & Add',
 
   // -- Product Catalog & Categories ---

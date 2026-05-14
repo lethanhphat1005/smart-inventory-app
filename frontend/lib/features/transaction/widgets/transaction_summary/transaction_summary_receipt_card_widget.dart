@@ -6,6 +6,7 @@ import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:frontend/features/transaction/controllers/transaction_summary_controller.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
+import 'package:frontend/core/infrastructure/utils/day_formatter_utils.dart';
 
 class TransactionSummaryReceiptCardWidget
     extends GetView<TransactionSummaryController> {
@@ -63,7 +64,8 @@ class TransactionSummaryReceiptCardWidget
           // 2. NGÀY GIỜ VÀ LOẠI GIAO DỊCH
           _buildRow(
             TTexts.transactionDate.tr,
-            controller.dateStr,
+            // ĐÃ SỬA: Gọi formatDateTime để lấy cả Ngày và Giờ, tự động theo ngôn ngữ
+            DayFormatterUtils.formatDateTime(controller.transaction.createdAt),
             rightWidget: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [

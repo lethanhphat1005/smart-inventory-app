@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:frontend/core/infrastructure/utils/currency_formatter_utils.dart';
 import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:get/get.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
@@ -44,7 +45,7 @@ class _HomeRevenueBarChartWidgetState extends State<HomeRevenueBarChartWidget> {
           barTouchData: BarTouchData(
             touchTooltipData: BarTouchTooltipData(
               getTooltipItem: (group, x, rod, y) => BarTooltipItem(
-                '${rod.toY.toStringAsFixed(1)}k\$',
+                CurrencyFormatterUtils.formatCompact(rod.toY * 1000),
                 const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -72,31 +73,23 @@ class _HomeRevenueBarChartWidgetState extends State<HomeRevenueBarChartWidget> {
             leftTitles: AxisTitles(
               sideTitles: SideTitles(
                 showTitles: true,
-                reservedSize: 45,
+                reservedSize: 60,
                 interval: limits['interval'],
                 getTitlesWidget: (value, meta) {
                   double realValue = value * 1000;
-                  double absVal = realValue.abs();
-
-                  String label;
-                  if (absVal >= 1000000) {
-                    label = '${(realValue / 1000000).toStringAsFixed(1)}M\$';
-                  } else if (absVal >= 1000) {
-                    label =
-                        '${(realValue / 1000).toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '')}k\$';
-                  } else {
-                    label = '${realValue.toInt()}\$';
-                  }
 
                   return Padding(
-                    padding: const EdgeInsets.only(right: 8),
+                    padding: const EdgeInsets.only(right: 20),
                     child: Text(
-                      label,
+                      CurrencyFormatterUtils.formatCompact(realValue),
+                      maxLines: 1,
+                      softWrap: false,
                       style: TextStyle(
                         color: AppColors.subText,
                         fontSize: 10,
                         fontFamily: AppFonts.mainFont,
                       ),
+                      textAlign: TextAlign.right,
                     ),
                   );
                 },
@@ -139,13 +132,27 @@ class _HomeRevenueBarChartWidgetState extends State<HomeRevenueBarChartWidget> {
   }
 
   Widget _bottomTitles(double value, TitleMeta meta) {
-    final days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+    // ĐÃ THÊM: Kiểm tra xem app đang dùng tiếng Việt hay tiếng Anh
+    final isVi = Get.locale?.languageCode == 'vi';
+
+    // ĐÃ THÊM: Gán mảng ngày tương ứng
+    final days = isVi
+        ? ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN']
+        : ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+
     if (value < 0 || value >= 7) return const SizedBox();
 
-    return SideTitleWidget(
-      meta: meta,
-      space: 8,
-      child: Text(days[value.toInt()]),
+    return Padding(
+      padding: const EdgeInsets.only(top: 8.0),
+      child: Text(
+        days[value.toInt()],
+        style: TextStyle(
+          color: AppColors.subText,
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          fontFamily: AppFonts.mainFont,
+        ),
+      ),
     );
   }
 }

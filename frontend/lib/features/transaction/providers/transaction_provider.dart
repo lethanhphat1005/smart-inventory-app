@@ -109,4 +109,22 @@ class TransactionProvider {
     );
     return response.data['data'] ?? response.data;
   }
+
+  Future<Map<String, dynamic>> getInventoriesPaginated({
+    int page = 1,
+    int limit = 20,
+    String? keyword,
+  }) async {
+    try {
+      String url =
+          '/api/inventories?page=$page&limit=$limit&sortBy=quantity&sortOrder=asc';
+      if (keyword != null && keyword.isNotEmpty) {
+        url += '&keyword=$keyword';
+      }
+      final response = await _apiClient.get(url);
+      return response.data['data'] ?? {};
+    } catch (e) {
+      throw Exception('Lỗi khi fetch danh sách tồn kho phân trang: $e');
+    }
+  }
 }

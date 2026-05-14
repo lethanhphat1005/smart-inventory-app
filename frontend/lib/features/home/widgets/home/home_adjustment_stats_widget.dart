@@ -122,13 +122,17 @@ class HomeAdjustmentStatsWidget extends GetView<HomeController> {
                                         ),
                                         const SizedBox(width: 12),
                                         // Hiển thị Qty: 23 -> 21
-                                        Text(
-                                            "${TTexts.qty.tr}: ${item.oldQuantity} → ${item.newQuantity}",
-                                            style: TextStyle(
-                                                fontFamily: AppFonts.mainFont,
-                                                fontSize: 10,
-                                                fontWeight: FontWeight.w400,
-                                                color: AppColors.subText)),
+                                        Expanded(
+                                          child: Text(
+                                              "${TTexts.qty.tr}: ${item.oldQuantity} → ${item.newQuantity}",
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                  fontFamily: AppFonts.mainFont,
+                                                  fontSize: 10,
+                                                  fontWeight: FontWeight.w400,
+                                                  color: AppColors.subText)),
+                                        ),
                                       ],
                                     ),
                                   ],

@@ -14,6 +14,16 @@ class ReportTransactionDetailInfoCardWidget extends StatelessWidget {
 
   const ReportTransactionDetailInfoCardWidget({super.key, required this.tx});
 
+  String _getLocalizedRole(String role) {
+    final r = role.toLowerCase();
+
+    if (r == 'owner') return TTexts.roleOwner.tr;
+    if (r == 'manager') return TTexts.roleManager.tr;
+    if (r == 'staff') return TTexts.staff.tr;
+
+    return role.capitalizeFirst ?? '';
+  }
+
   @override
   Widget build(BuildContext context) {
     final userService = Get.find<UserService>();
@@ -25,7 +35,8 @@ class ReportTransactionDetailInfoCardWidget extends StatelessWidget {
     const String? realAvatarUrl = null;
 
     final String displayRole =
-        storeService.currentRole.value.capitalizeFirst ?? TTexts.staff.tr;
+        _getLocalizedRole(storeService.currentRole.value);
+
     final String storeName = storeService.currentStoreName.value.isNotEmpty
         ? storeService.currentStoreName.value
         : TTexts.mainHQStore.tr;
@@ -117,6 +128,7 @@ class ReportTransactionDetailInfoCardWidget extends StatelessWidget {
               TTexts.transactionId.tr, tx.transactionId ?? TTexts.na.tr,
               isBold: true),
           const SizedBox(height: 12),
+          // Ngày tháng đã dùng Utils chuẩn từ trước, chỉ cần Hot Restart là chạy đúng!
           _buildInfoRow(TTexts.dateAndTime.tr,
               DayFormatterUtils.formatDateTime(tx.createdAt)),
           const SizedBox(height: 12),

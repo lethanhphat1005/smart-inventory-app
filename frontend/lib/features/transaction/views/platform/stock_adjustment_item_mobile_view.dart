@@ -49,6 +49,7 @@ class StockAdjustmentItemMobileView
                     controller: controller.actualQtyController,
                     onDecrease: controller.decrementActualQty,
                     onIncrease: controller.incrementActualQty,
+                    isUnlimited: true,
                   ),
                 ),
               ),

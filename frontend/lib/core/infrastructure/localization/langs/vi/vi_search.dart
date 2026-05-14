@@ -28,4 +28,5 @@ final Map<String, String> viSearch = {
   TTexts.filterNone: "Không",
   TTexts.supplier: "Nhà Cung Cấp",
   TTexts.customer: "Khách Hàng",
+  TTexts.scrollDownToLoadMore: "Kéo xuống để xem thêm...",
 };

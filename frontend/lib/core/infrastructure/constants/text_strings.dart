@@ -42,7 +42,14 @@ class TTexts {
       "language_select_select_language";
   static const String settingsVietnameseSub = "settings_vietnamese_sub";
   static const String settingsEnglishSub = "settings_english_sub";
-
+  static const String currencyUSD = "currency_usd";
+  static const String currencyVND = "currency_vnd";
+  static const String currencyEUR = "currency_eur";
+  static const String currencyGBP = "currency_gbp";
+  static const String currencyJPY = "currency_jpy";
+  static const String currencyCNY = "currency_cny";
+  static const String currencyKRW = "currency_krw";
+  static const String currencyLabel = "currency_label";
   // -- Search
   static const String searchHint = "search_hint";
   static const String recentSearches = "recent_searches";
@@ -93,6 +100,7 @@ class TTexts {
   static const String filterNone = "filter_none";
   static const String supplier = "supplier";
   static const String customer = "customer";
+  static const String scrollDownToLoadMore = "scroll_down_to_load_more";
 
   // -- Network Error Dialog
   static const String netErrorTitle = "net_error_title";
@@ -529,17 +537,27 @@ class TTexts {
   static const String chatbotMessageTooLong = "chatbot_message_too_long";
 
   // -- Smart AI Analysis (Thêm vào phần Chatbot)
-  static const String chatbotAnalyzeCrossSellTitle = "chatbot_analyze_cross_sell_title";
-  static const String chatbotAnalyzeRestockTitle = "chatbot_analyze_restock_title";
-  static const String chatbotAnalyzeOptimalStock = "chatbot_analyze_optimal_stock";
-  static const String chatbotAnalyzeCurrentStock = "chatbot_analyze_current_stock";
-  static const String chatbotAnalyzeBoughtTogether = "chatbot_analyze_bought_together";
-  static const String chatbotAnalyzeFrequencyUnit = "chatbot_analyze_frequency_unit";
-  static const String chatbotPromptAnalyzeRestock = "chatbot_prompt_analyze_restock";
-  static const String chatbotPromptAnalyzeRestockSub = "chatbot_prompt_analyze_restock_sub";
+  static const String chatbotAnalyzeCrossSellTitle =
+      "chatbot_analyze_cross_sell_title";
+  static const String chatbotAnalyzeRestockTitle =
+      "chatbot_analyze_restock_title";
+  static const String chatbotAnalyzeOptimalStock =
+      "chatbot_analyze_optimal_stock";
+  static const String chatbotAnalyzeCurrentStock =
+      "chatbot_analyze_current_stock";
+  static const String chatbotAnalyzeBoughtTogether =
+      "chatbot_analyze_bought_together";
+  static const String chatbotAnalyzeFrequencyUnit =
+      "chatbot_analyze_frequency_unit";
+  static const String chatbotPromptAnalyzeRestock =
+      "chatbot_prompt_analyze_restock";
+  static const String chatbotPromptAnalyzeRestockSub =
+      "chatbot_prompt_analyze_restock_sub";
   static const String chatbotPromptCrossSell = "chatbot_prompt_cross_sell";
-  static const String chatbotPromptCrossSellSub = "chatbot_prompt_cross_sell_sub";
-  static const String chatbotQuickActionAnalyze = "chatbot_quick_action_analyze";
+  static const String chatbotPromptCrossSellSub =
+      "chatbot_prompt_cross_sell_sub";
+  static const String chatbotQuickActionAnalyze =
+      "chatbot_quick_action_analyze";
 
 // Product Info Card — nhãn giá
   static const String chatbotSellingPrice = 'chatbotSellingPrice';
@@ -864,6 +882,29 @@ class TTexts {
   static const String barcodeNotFoundMessage = "barcode_not_found_message";
   static const String errorProcessingBarcode = "error_processing_barcode";
   static const String tReason = "t_reason";
+  static const String removeProductTitle = "remove_product_title";
+  static const String removeProductDesc = "remove_product_desc";
+  static const String maxQuantityReached = "max_quantity_reached";
+  static const String maxStockReached = "max_stock_reached";
+  static const String quickAddProducts = "quick_add_products";
+  static const String quickAddProductsSubtitle = "quick_add_products_subtitle";
+  static const String selectProductsTitle = "select_products_title";
+  static const String searchProductNameHint = "search_product_name_hint";
+  static const String discardSelectionTitle = "discard_selection_title";
+  static const String discardSelectionDesc = "discard_selection_desc";
+  static const String selectedItems = "selected_items";
+  static const String confirmSelection = "confirm_selection";
+  static const String searchStandardHint = "search_standard_hint";
+  static const String labelItemsCount = "label_items_count";
+  static const String errorInvalidPackageId = "error_invalid_package_id";
+  static const String productBarcodes = "product_barcodes";
+  static const String noBarcodesFound = "no_barcodes_found";
+  static const String absoluteMaxQuantity = "absolute_max_quantity";
+  static const String overflowLimitTitle = "overflow_limit_title";
+  static const String overflowLimitDesc = "overflow_limit_desc";
+  static const String capAtMaxBtn = "cap_at_max_btn";
+  static const String addValidOnlyBtn = "add_valid_only_btn";
+  static const String reviewAgainBtn = "review_again_btn";
 
   // --- Inbound ---
   static const String inboundTransaction = "inbound_transaction";
@@ -945,6 +986,27 @@ class TTexts {
   static const String checkDetails = "check_details";
   static const String transactionDetails = "transaction_details";
   static const String selectExportType = "select_export_type";
+  static const String outboundOverflowLimitDesc =
+      "outbound_overflow_limit_desc";
+  static const String currentCart = "current_cart";
+  static const String clearCartConfirmDesc = "clear_cart_confirm_desc";
+  static const String errorInvalidController = "error_invalid_controller";
+  static const String recentActivities = "recent_activities";
+  static const String priorityList = "priority_list";
+  static const String addAllPriority = "add_all_priority";
+  static const String scanBarcodeShortcut = "scan_barcode_shortcut";
+  static const String allProducts = "all_products";
+  static const String stableInventoryMsg = "stable_inventory_msg";
+  static const String addedPrioritySuccessMsg = "added_priority_success_msg";
+  static const String allPriorityInCartMsg = "all_priority_in_cart_msg";
+  static const String selectedText = "selected_text";
+  static const String checkingInventory = "checking_inventory";
+  static const String options = "options";
+  static const String confirmAddPriorityTitle = "confirm_add_priority_title";
+  static const String confirmAddPriorityDesc = "confirm_add_priority_desc";
+  static const String allPrioritySatisfied = "all_priority_satisfied";
+  static const String recentOutboundItems = "recent_outbound_items";
+  static const String lowStockPriority = "low_stock_priority";
 
   // Specific Reasons
   static const String reasonRetailSale = "reason_retail_sale";
@@ -1044,6 +1106,9 @@ class TTexts {
   static const String qty = "qty";
   static const String modifiedProducts = 'modified_products';
   static const String adjustmentSummaryBrief = "adjustment_summary_brief";
+  static const String createAnotherInbound = "create_another_inbound";
+  static const String createAnotherOutbound = "create_another_outbound";
+  static const String createAnotherAdjustment = "create_another_adjustment";
 
   // -- Report
   static const String reportTabToday = 'report_tab_today';
@@ -1080,6 +1145,7 @@ class TTexts {
   static const String exportDailyReportDesc = 'export_daily_report_desc';
   static const String exportSingleTransactionDesc =
       'export_single_transaction_desc';
+  static const String productList = "product_list";
 
   // -- Notifications
   static const String notificationTitle = "notification_title";
@@ -1359,6 +1425,10 @@ class TTexts {
       "barcode_matches_multiple_products";
   static const String skipLabel = "skip_label";
   static const String createProduct = "create_product";
+  static const String barcodeScanHint = "barcode_scan_hint";
+  static const String barcodeScanGalleryFailedTitle = "barcode_scan_gallery_failed_title";
+  static const String barcodeScanGalleryFailedDesc = "barcode_scan_gallery_failed_desc";
+  static const String analyzingImageLoader = "analyzing_image_loader";
 
   // -- Verify OTP
   static const String verifyOtpTitle = "verify_otp_title";

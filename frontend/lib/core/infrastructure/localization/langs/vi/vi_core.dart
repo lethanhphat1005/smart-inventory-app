@@ -30,7 +30,7 @@ final Map<String, String> viCore = {
   TTexts.exit: 'Thoát',
   TTexts.next: 'Tiếp Theo',
   TTexts.confirm: 'Xác Nhận',
-  TTexts.done: 'Hoàn Thành',
+  TTexts.done: 'Xong',
   TTexts.errorServerTitle: 'Lỗi Máy Chủ',
   TTexts.errorServerMessage:
       'Máy chủ hiện đang gặp sự cố. Vui lòng thử lại sau.',

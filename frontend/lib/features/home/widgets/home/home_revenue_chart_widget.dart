@@ -5,6 +5,7 @@ import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/features/home/controllers/home_controller.dart';
+import 'package:frontend/core/infrastructure/utils/currency_formatter_utils.dart';
 import 'home_revenue_line_chart_widget.dart';
 import 'home_revenue_bar_chart_widget.dart';
 
@@ -40,17 +41,19 @@ class _HomeRevenueChartWidgetState extends State<HomeRevenueChartWidget> {
             : controller.weekChangePercent;
         final compareText =
             isLineChart ? TTexts.homeVsYesterday.tr : TTexts.homeThisWeek.tr;
-        final prefix = amount < 0 ? '-' : '';
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildHeader(),
             const SizedBox(height: AppSizes.p12),
-            Text("$prefix\$${amount.abs().toStringAsFixed(2)}",
-                style: TextStyle(
-                    fontFamily: AppFonts.mainFont,
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold)),
+            Text(
+              CurrencyFormatterUtils.formatFull(amount),
+              style: TextStyle(
+                  fontFamily: AppFonts.mainFont,
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: AppSizes.p8),
             _buildChangeIndicator(change, compareText),
             const SizedBox(height: AppSizes.p32),
