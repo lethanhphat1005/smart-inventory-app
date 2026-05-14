@@ -354,4 +354,5 @@ final Map<String, String> viInventory = {
   TTexts.save: 'Lưu',
   TTexts.noDataAvailable: 'Không có dữ liệu',
   TTexts.noCategoriesFound: 'Không tìm thấy danh mục',
+  TTexts.tapToSwap: "Chạm để đổi",
 };

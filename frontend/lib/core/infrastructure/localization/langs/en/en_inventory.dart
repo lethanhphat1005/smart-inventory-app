@@ -360,4 +360,5 @@ final Map<String, String> enInventory = {
   TTexts.save: 'Save',
   TTexts.noDataAvailable: 'No data available',
   TTexts.noCategoriesFound: 'No categories found',
+  TTexts.tapToSwap: "Tap to swap",
 };

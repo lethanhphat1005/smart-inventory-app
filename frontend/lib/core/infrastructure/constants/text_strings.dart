@@ -593,6 +593,7 @@ class TTexts {
   static const String pinnedOnHome = "pinned_on_home";
   static const String tapAndHoldToDrag = "tap_and_hold_to_drag";
   static const String save = "save";
+  static const String tapToSwap = "tap_to_swap";
 
   // -- Inventory Insight
   static const String inventoryList = "inventory_list";
@@ -1438,8 +1439,10 @@ class TTexts {
   static const String skipLabel = "skip_label";
   static const String createProduct = "create_product";
   static const String barcodeScanHint = "barcode_scan_hint";
-  static const String barcodeScanGalleryFailedTitle = "barcode_scan_gallery_failed_title";
-  static const String barcodeScanGalleryFailedDesc = "barcode_scan_gallery_failed_desc";
+  static const String barcodeScanGalleryFailedTitle =
+      "barcode_scan_gallery_failed_title";
+  static const String barcodeScanGalleryFailedDesc =
+      "barcode_scan_gallery_failed_desc";
   static const String analyzingImageLoader = "analyzing_image_loader";
 
   // -- Verify OTP
