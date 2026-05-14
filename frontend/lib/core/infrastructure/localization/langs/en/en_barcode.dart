@@ -35,8 +35,11 @@ final Map<String, String> enBarcode = {
   TTexts.verifiedLabel: "Verified",
   TTexts.barcodeCandidateTitle: "Multiple Matches Found",
   TTexts.barcodeCandidateSubtitle: "Barcode",
-  TTexts.barcodeMatchesMultipleProducts: "matches multiple products. Please select one:",
+  TTexts.barcodeMatchesMultipleProducts:
+      "matches multiple products. Please select one:",
   TTexts.skipLabel: "Skip",
   TTexts.createProduct: "Create New",
   TTexts.barcodeScanHint: "Place the barcode in the center and hold still",
+  TTexts.barcodeScanGalleryFailedTitle: "Scan Failed",
+  TTexts.barcodeScanGalleryFailedDesc: "No valid barcode found in this image. Please try again with a clearer photo.",
 };

@@ -1,4 +1,3 @@
-// (Giữ nguyên các import và phần logic ở trên)
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
@@ -9,6 +8,7 @@ import 'package:frontend/core/ui/widgets/t_custom_header_widget.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:get/get.dart';
 import 'package:frontend/core/state/controllers/barcode_scanner_controller.dart';
+import 'package:frontend/core/ui/widgets/t_square_icon_button_widget.dart';
 
 class TBarcodeScannerLayout extends StatefulWidget {
   final String title;
@@ -38,6 +38,8 @@ class _TBarcodeScannerLayoutState extends State<TBarcodeScannerLayout>
   bool _showHint = true;
   Timer? _hintTimer;
 
+  double _currentZoom = 0.0;
+
   @override
   void initState() {
     super.initState();
@@ -48,11 +50,7 @@ class _TBarcodeScannerLayoutState extends State<TBarcodeScannerLayout>
     )..repeat(reverse: true);
 
     _hintTimer = Timer(const Duration(milliseconds: 4500), () {
-      if (mounted) {
-        setState(() {
-          _showHint = false;
-        });
-      }
+      if (mounted) setState(() => _showHint = false);
     });
   }
 
@@ -69,6 +67,7 @@ class _TBarcodeScannerLayoutState extends State<TBarcodeScannerLayout>
     final TextEditingController manualController = TextEditingController();
 
     Get.dialog(
+      // [Phần UI Popup nhập tay]
       Dialog(
         backgroundColor: AppColors.background,
         elevation: 0,
@@ -196,9 +195,7 @@ class _TBarcodeScannerLayoutState extends State<TBarcodeScannerLayout>
           ],
         ),
       ),
-    ).then((_) {
-      scannerController.resumeScan();
-    });
+    ).then((_) => scannerController.resumeScan());
   }
 
   @override
@@ -214,12 +211,23 @@ class _TBarcodeScannerLayoutState extends State<TBarcodeScannerLayout>
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          MobileScanner(
+          // CAMERA VÀ CHỨC NĂNG ZOOM
+          GestureDetector(
+            onScaleUpdate: (details) {
+              double newZoom = _currentZoom + (details.scale - 1.0) * 0.05;
+              newZoom = newZoom.clamp(0.0, 1.0);
+              scannerController.cameraController.setZoomScale(newZoom);
+              _currentZoom = newZoom;
+            },
+            child: MobileScanner(
               controller: scannerController.cameraController,
               onDetect: (capture) {
                 if (_showHint) setState(() => _showHint = false);
                 scannerController.onDetect(capture, widget.onScanned);
-              }),
+              },
+            ),
+          ),
+
           Positioned.fill(
             child: CustomPaint(
               painter: ScannerOverlayPainter(
@@ -230,9 +238,6 @@ class _TBarcodeScannerLayoutState extends State<TBarcodeScannerLayout>
             ),
           ),
 
-          // ==========================================
-          // ĐÃ SỬA: HEADER GỌN GÀNG, TÍCH HỢP 2 NÚT VÀO TRAILING WIDGET
-          // ==========================================
           Positioned(
             top: MediaQuery.of(context).padding.top + 10,
             left: 20,
@@ -240,62 +245,47 @@ class _TBarcodeScannerLayoutState extends State<TBarcodeScannerLayout>
             child: TCustomHeaderWidget(
               title: widget.title,
               isDark: true,
-              // Đẩy 2 nút vào trailingWidget
+              // Đẩy 4 nút vào trailingWidget
               trailingWidget: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // NÚT ĐÈN PIN (Được làm đồng điệu với nút Back)
-                  Obx(() {
-                    final isTorchOn = scannerController.isTorchOn.value;
-                    return GestureDetector(
-                      onTap: () => scannerController.toggleTorch(),
-                      child: Container(
-                        width: 44,
-                        height: 44,
-                        decoration: BoxDecoration(
-                          // Màu nền giống nút Back khi ở isDark
-                          color: isTorchOn
-                              ? AppColors.primary
-                              : const Color(0xFF1E1E1E),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Icon(
-                          isTorchOn
-                              ? Icons.flash_on_rounded
-                              : Icons.flash_off_rounded,
-                          color: isTorchOn ? Colors.white : Colors.white70,
-                          size: 20,
-                        ),
-                      ),
-                    );
-                  }),
+                  Obx(() => TSquareIconButtonWidget(
+                        icon: scannerController.isTorchOn.value
+                            ? Icons.flash_on_rounded
+                            : Icons.flash_off_rounded,
+                        isActive: scannerController.isTorchOn.value,
+                        onTap: () => scannerController.toggleTorch(),
+                      )),
                   const SizedBox(width: 8),
-
-                  // NÚT NHẬP THỦ CÔNG
-                  GestureDetector(
+                  Obx(() => TSquareIconButtonWidget(
+                        icon: scannerController.isBeepOn.value
+                            ? Icons.volume_up_rounded
+                            : Icons.volume_off_rounded,
+                        isActive: scannerController.isBeepOn.value,
+                        onTap: () => scannerController.toggleBeep(),
+                      )),
+                  const SizedBox(width: 8),
+                  TSquareIconButtonWidget(
+                    icon: Icons.image_outlined,
+                    isActive: false,
+                    onTap: () =>
+                        scannerController.scanFromGallery(widget.onScanned),
+                  ),
+                  const SizedBox(width: 8),
+                  TSquareIconButtonWidget(
+                    icon: Icons.keyboard_alt_outlined,
+                    isActive: false,
                     onTap: () {
                       scannerController.pauseScan();
                       _showManualEntryDialog();
                     },
-                    child: Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF1E1E1E),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Icon(
-                        Icons.keyboard_alt_outlined,
-                        color: Colors.white70,
-                        size: 20,
-                      ),
-                    ),
                   ),
                 ],
               ),
             ),
           ),
 
+          // Laser và Bottom card
           Obx(() {
             final isPaused = scannerController.isPaused.value;
             final code = scannerController.scannedCode.value;
@@ -341,6 +331,7 @@ class _TBarcodeScannerLayoutState extends State<TBarcodeScannerLayout>
             );
           }),
 
+          // HINT TEXT
           Positioned(
             top: scanAreaTop + scanAreaHeight + 32,
             left: 20,
@@ -373,8 +364,6 @@ class _TBarcodeScannerLayoutState extends State<TBarcodeScannerLayout>
               right: 0,
               child: widget.bottomBar!,
             ),
-
-          // ĐÃ XÓA KHỐI NÚT DƯ THỪA Ở GÓC DƯỚI ĐÂY
         ],
       ),
     );

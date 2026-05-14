@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/ui/widgets/t_barcode_candidate_bottom_sheet.dart';
 import 'package:frontend/core/ui/widgets/t_barcode_not_found_bottom_sheet.dart';
@@ -59,14 +58,17 @@ class BarcodeActionController extends GetxController {
       }
     } catch (e) {
       FullScreenLoaderUtils.stopLoading();
-      debugPrint('====== LỖI SCAN BARCODE: $e ======');
+
+      if (Get.isRegistered<BarcodeScannerController>()) {
+        BarcodeScannerController.instance.playErrorSound();
+      }
 
       TSnackbarsWidget.error(
         title: TTexts.barcodeScanErrorTitle.tr,
         message: e.toString(),
       );
 
-      // Nếu API lỗi thì nhả khóa cho quét lại
+      await Future.delayed(const Duration(seconds: 2));
       if (Get.isRegistered<BarcodeScannerController>()) {
         BarcodeScannerController.instance.resumeScan();
       }

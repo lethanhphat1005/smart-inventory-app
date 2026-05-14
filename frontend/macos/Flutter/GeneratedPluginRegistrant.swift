@@ -7,6 +7,7 @@ import Foundation
 
 import app_links
 import app_settings
+import audioplayers_darwin
 import connectivity_plus
 import file_selector_macos
 import firebase_core
@@ -28,6 +29,7 @@ import url_launcher_macos
 func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   AppLinksMacosPlugin.register(with: registry.registrar(forPlugin: "AppLinksMacosPlugin"))
   AppSettingsPlugin.register(with: registry.registrar(forPlugin: "AppSettingsPlugin"))
+  AudioplayersDarwinPlugin.register(with: registry.registrar(forPlugin: "AudioplayersDarwinPlugin"))
   ConnectivityPlusPlugin.register(with: registry.registrar(forPlugin: "ConnectivityPlusPlugin"))
   FileSelectorPlugin.register(with: registry.registrar(forPlugin: "FileSelectorPlugin"))
   FLTFirebaseCorePlugin.register(with: registry.registrar(forPlugin: "FLTFirebaseCorePlugin"))
