@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
+import 'package:frontend/core/infrastructure/utils/day_formatter_utils.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:frontend/core/ui/widgets/t_bottom_sheet_widget.dart';
@@ -9,7 +10,6 @@ import 'package:frontend/features/report/widgets/report/report_export_bottom_she
 import 'package:frontend/routes/app_routes.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
-import 'package:intl/intl.dart';
 
 class ReportHistoryHeaderWidget extends StatelessWidget {
   const ReportHistoryHeaderWidget({super.key});
@@ -57,8 +57,7 @@ class ReportHistoryHeaderWidget extends StatelessWidget {
                   } else if (difference == -1) {
                     timeLabel = TTexts.yesterday.tr.toLowerCase();
                   } else {
-                    // Mặc định hiển thị dạng 25 Apr 2026
-                    timeLabel = DateFormat('dd MMM yyyy').format(selectedDate);
+                    timeLabel = DayFormatterUtils.formatDate(selectedDate);
                   }
 
                   return Text(
@@ -108,9 +107,8 @@ class ReportHistoryHeaderWidget extends StatelessWidget {
               }
 
               final String dateStr = reportCtrl.activeTab.value == 'Today'
-                  ? 'Today'
-                  : DateFormat('dd/MM/yyyy')
-                      .format(reportCtrl.selectedDay.value);
+                  ? TTexts.today.tr
+                  : DayFormatterUtils.formatDate(reportCtrl.selectedDay.value);
 
               TBottomSheetWidget.show(
                 child: ReportExportBottomSheetWidget(

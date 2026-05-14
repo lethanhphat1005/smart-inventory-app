@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/core/infrastructure/constants/text_strings.dart'; // ĐÃ THÊM
+import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
-import 'package:get/get.dart'; // ĐÃ THÊM
+import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 
 class ReportTransactionCardWidget extends StatelessWidget {
@@ -36,9 +36,6 @@ class ReportTransactionCardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // ==============================================================
-    // LOGIC MÀU SẮC VÀ DẤU VÀO
-    // ==============================================================
     String finalItemsDisplay = itemsDisplay;
     Color finalItemsColor = itemsColor;
     String finalMoneyDisplay = moneyDisplay;
@@ -108,21 +105,21 @@ class ReportTransactionCardWidget extends StatelessWidget {
             '',
             customLeftWidget: Row(
               children: [
-                Text(finalItemsDisplay, // ĐÃ ÁP DỤNG LOGIC BIẾN Ở ĐÂY
+                Text(finalItemsDisplay,
                     style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
-                        color: finalItemsColor)), // ĐÃ ÁP DỤNG LOGIC BIẾN Ở ĐÂY
+                        color: finalItemsColor)),
                 const Text(" / ",
                     style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w400,
                         color: AppColors.subText)),
-                Text(finalMoneyDisplay, // ĐÃ ÁP DỤNG LOGIC BIẾN Ở ĐÂY
+                Text(finalMoneyDisplay,
                     style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
-                        color: finalMoneyColor)), // ĐÃ ÁP DỤNG LOGIC BIẾN Ở ĐÂY
+                        color: finalMoneyColor)),
               ],
             ),
             rightWidget: _buildCustomLayerIcon(),

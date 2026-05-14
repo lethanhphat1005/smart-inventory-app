@@ -84,26 +84,27 @@ class ReportMobileView extends GetView<ReportController> {
                           const EdgeInsets.symmetric(horizontal: AppSizes.p16),
                       child: Column(
                         children: displayList.map((tx) {
-                          Color themeColor = AppColors.primaryText;
-                          String bottomLabel = TTexts.totalItemsTransaction.tr;
-
-                          // Lấy type nguyên bản để check
                           final String typeLower = tx.type.toLowerCase();
 
-                          if (typeLower == 'import') {
-                            themeColor = AppColors.stockIn; // XANH LÁ TOÀN TẬP
-                          } else if (typeLower == 'export') {
-                            themeColor = AppColors.stockOut; // ĐỎ TOÀN TẬP
-                          }
+                          Color themeColor = AppColors.primaryText;
+                          String bottomLabel = TTexts.totalItemsTransaction.tr;
+                          String displayType = TTexts.na.tr;
 
-                          // Viết hoa chữ cái đầu cho đẹp UI (import -> Import)
-                          final String displayType = tx.type.isNotEmpty
-                              ? '${tx.type[0].toUpperCase()}${tx.type.substring(1).toLowerCase()}'
-                              : TTexts.unknownProduct.tr;
+                          if (typeLower == 'import') {
+                            themeColor = AppColors.stockIn;
+                            displayType = TTexts.inbound.tr;
+                          } else if (typeLower == 'export') {
+                            themeColor = AppColors.stockOut;
+                            displayType = TTexts.outbound.tr;
+                          } else {
+                            themeColor = const Color(0xFFFF9900);
+                            bottomLabel = TTexts.checkItemsStats.tr;
+                            displayType = TTexts.stockAdjustment.tr;
+                          }
 
                           final String itemCountDisplay =
                               "${tx.itemCount} ${TTexts.items.tr}";
-                              
+
                           return GestureDetector(
                             onTap: () {
                               Get.toNamed(
