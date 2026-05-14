@@ -6,7 +6,7 @@ import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:frontend/core/ui/widgets/t_app_bar_widget.dart';
 import 'package:frontend/core/ui/widgets/t_empty_state_widget.dart';
 import 'package:frontend/features/transaction/controllers/outbound_product_selection_controller.dart';
-import 'package:frontend/features/transaction/widgets/inbound_product_selection/inbound_product_selection_shimmer_widget.dart'; // Dùng chung shimmer
+import 'package:frontend/features/transaction/widgets/inbound_product_selection/inbound_product_selection_shimmer_widget.dart';
 import 'package:frontend/features/transaction/widgets/outbound_product_selection/outbound_product_selection_bottom_bar_widget.dart';
 import 'package:frontend/features/transaction/widgets/outbound_product_selection/outbound_product_selection_cart_bottom_sheet_widget.dart';
 import 'package:frontend/features/transaction/widgets/shared/transaction_category_chip_widget.dart';
@@ -124,7 +124,9 @@ class OutboundProductSelectionMobileView
                           final detail = TransactionDetailModel(
                             productPackageId: pkgId,
                             quantity: qty,
-                            unitPrice: item.productPackage?.sellingPrice ?? 0.0,
+                            unitPrice: controller.draftCustomPrices[pkgId] ??
+                                item.productPackage?.sellingPrice ??
+                                0.0,
                             currentStock: item.quantity,
                             reorderThreshold: item.reorderThreshold,
                             packageInfo: item.productPackage,

@@ -22,6 +22,7 @@ class OutboundTransactionItemAddController extends GetxController
 
   late final InventoryInsightDisplayModel initialItem;
   final Rxn<InventoryModel> freshInventoryData = Rxn<InventoryModel>();
+
   final RxBool isLoadingFreshData = true.obs;
 
   final TextEditingController quantityController =
@@ -41,7 +42,9 @@ class OutboundTransactionItemAddController extends GetxController
 
   bool isEditing = false;
   bool fromSelectionScreen = false;
-  bool fromScanner = false; // ĐÃ THÊM: Cờ Scanner
+  bool fromScanner = false;
+
+  double? passedCustomPrice;
 
   @override
   void onInit() {
@@ -57,15 +60,17 @@ class OutboundTransactionItemAddController extends GetxController
         if (Get.arguments['fromSelectionScreen'] != null) {
           fromSelectionScreen = Get.arguments['fromSelectionScreen'];
         }
-        // ĐÃ THÊM: Bắt cờ Scanner
+        // Bắt cờ Scanner
         if (Get.arguments['fromScanner'] != null) {
           fromScanner = Get.arguments['fromScanner'];
+        }
+        if (Get.arguments['customPrice'] != null) {
+          passedCustomPrice = Get.arguments['customPrice'];
         }
       } else {
         initialItem = Get.arguments as InventoryInsightDisplayModel;
       }
 
-      // ĐỒNG BỘ TỪ GIỎ HÀNG CHÍNH
       if (!fromSelectionScreen) {
         try {
           final outboundCtrl = Get.find<OutboundTransactionController>();
@@ -91,6 +96,30 @@ class OutboundTransactionItemAddController extends GetxController
 
       quantityController.text = passedQty.toString();
       itemQuantity.value = passedQty;
+      double initPrice =
+          initialItem.inventory.productPackage?.sellingPrice ?? 0.0;
+
+      if (fromSelectionScreen && passedCustomPrice != null) {
+        initPrice = passedCustomPrice!;
+      } else if (isEditing && !fromSelectionScreen) {
+        try {
+          final outboundCtrl = Get.find<OutboundTransactionController>();
+          String pkgId = initialItem.inventory.productPackageId;
+          if (pkgId.isEmpty) {
+            pkgId =
+                initialItem.inventory.productPackage?.productPackageId ?? '';
+          }
+          final existingIndex = outboundCtrl.cartItems
+              .indexWhere((item) => item.productPackageId == pkgId);
+          if (existingIndex != -1) {
+            initPrice = outboundCtrl.cartItems[existingIndex].unitPrice;
+          }
+        } catch (_) {}
+      }
+
+      // Gắn lên UI tức thì để không bị rỗng
+      priceController.text = initPrice.toStringAsFixed(2);
+      _updateTotalPriceAndQuantity();
 
       fetchedCategoryName.value = initialItem.product?.categoryName ??
           initialItem.inventory.productPackage?.product?.categoryName ??
@@ -135,7 +164,15 @@ class OutboundTransactionItemAddController extends GetxController
   Future<void> _fetchFreshData() async {
     try {
       isLoadingFreshData.value = true;
-      final packageId = initialItem.inventory.productPackageId;
+
+      // ==========================================
+      // ĐÃ SỬA: KHẮC PHỤC LỖI TRỐNG PACKAGE ID
+      // ==========================================
+      String packageId = initialItem.inventory.productPackageId;
+      if (packageId.isEmpty || packageId == 'null') {
+        packageId =
+            initialItem.inventory.productPackage?.productPackageId ?? '';
+      }
 
       String? targetProductId = initialItem.product?.productId;
       if (targetProductId == null || targetProductId.isEmpty) {
@@ -143,14 +180,29 @@ class OutboundTransactionItemAddController extends GetxController
       }
 
       if (packageId.isNotEmpty) {
-        final invData =
-            await _provider.getInventoryDetailByPackageId(packageId);
-        freshInventoryData.value = InventoryModel.fromJson(invData);
+        final results = await Future.wait([
+          _provider.getInventoryDetailByPackageId(packageId),
+          _provider.getProductPackageById(packageId),
+        ]);
 
-        // ĐỒNG BỘ GIÁ ĐANG SỬA TRONG GIỎ (GIỐNG INBOUND)
+        final invDataRaw = results[0];
+        final packageFullData = results[1];
+
+        final Map<String, dynamic> mutableInvData =
+            Map<String, dynamic>.from(invDataRaw);
+        mutableInvData['productPackage'] = packageFullData;
+
+        freshInventoryData.value = InventoryModel.fromJson(mutableInvData);
+
         double displayPrice =
-            freshInventoryData.value?.productPackage?.sellingPrice ?? 0.0;
-        if (isEditing && !fromSelectionScreen) {
+            initialItem.inventory.productPackage?.sellingPrice ?? 0.0;
+        if (packageFullData['sellingPrice'] != null) {
+          displayPrice = (packageFullData['sellingPrice'] as num).toDouble();
+        }
+
+        if (fromSelectionScreen) {
+          if (passedCustomPrice != null) displayPrice = passedCustomPrice!;
+        } else if (isEditing) {
           try {
             final outboundCtrl = Get.find<OutboundTransactionController>();
             final existingIndex = outboundCtrl.cartItems
@@ -160,33 +212,25 @@ class OutboundTransactionItemAddController extends GetxController
             }
           } catch (_) {}
         }
+
         priceController.text = displayPrice.toStringAsFixed(2);
 
         if (targetProductId == null || targetProductId.isEmpty) {
           targetProductId = freshInventoryData.value?.productPackage?.productId;
         }
 
-        try {
-          final packageFullData =
-              await _provider.getProductPackageById(packageId);
-          if (targetProductId == null || targetProductId.isEmpty) {
-            targetProductId = packageFullData['productId'];
-          }
-          if (packageFullData['productPackageBarcodes'] != null) {
-            final barcodes = (packageFullData['productPackageBarcodes'] as List)
-                .map((e) => ProductPackageBarcodeModel.fromJson(e))
-                .toList();
-            fetchedBarcodesList.assignAll(barcodes);
-            if (barcodes.isNotEmpty) {
-              fetchedBarcode.value = barcodes.first.barcode;
-            } else {
-              fetchedBarcode.value = packageFullData['barcodeValue'] ?? '';
-            }
+        if (packageFullData['productPackageBarcodes'] != null) {
+          final barcodes = (packageFullData['productPackageBarcodes'] as List)
+              .map((e) => ProductPackageBarcodeModel.fromJson(e))
+              .toList();
+          fetchedBarcodesList.assignAll(barcodes);
+          if (barcodes.isNotEmpty) {
+            fetchedBarcode.value = barcodes.first.barcode;
           } else {
             fetchedBarcode.value = packageFullData['barcodeValue'] ?? '';
           }
-        } catch (e) {
-          debugPrint('Lỗi fetch package: $e');
+        } else {
+          fetchedBarcode.value = packageFullData['barcodeValue'] ?? '';
         }
       }
 
@@ -220,8 +264,8 @@ class OutboundTransactionItemAddController extends GetxController
     if (package != null && fetchedBarcodesList.isNotEmpty) {
       final updatedPackage = package.copyWith(barcodes: fetchedBarcodesList);
       TBottomSheetWidget.show(
-        child: InventoryBarcodeListBottomSheetWidget(package: updatedPackage),
-      );
+          child:
+              InventoryBarcodeListBottomSheetWidget(package: updatedPackage));
     }
   }
 
@@ -244,11 +288,9 @@ class OutboundTransactionItemAddController extends GetxController
 
   int get currentStock => _activeInventory.quantity;
   int get threshold => _activeInventory.reorderThreshold;
-
   String get productImageUrl => fetchedImageUrl.value;
   String get categoryName => fetchedCategoryName.value;
   String get brandName => fetchedBrandName.value;
-
   bool get isProductActive =>
       (initialItem.product?.activeStatus ?? 'active').toLowerCase() == 'active';
 
@@ -285,8 +327,14 @@ class OutboundTransactionItemAddController extends GetxController
   void confirmAndAddToCart() {
     try {
       final qty = int.tryParse(quantityController.text) ?? 0;
+      final price = double.tryParse(priceController.text);
+
       if (fromSelectionScreen) {
-        Get.back(result: {'quantity': qty});
+        Get.back(result: {
+          'quantity': qty,
+          'customPrice': price,
+          'sellingPrice': _activeInventory.productPackage?.sellingPrice ?? 0.0,
+        });
         return;
       }
 
@@ -346,9 +394,8 @@ class OutboundTransactionItemAddController extends GetxController
       ProductModel finalProduct;
       if (initialItem.product != null) {
         finalProduct = initialItem.product!.copyWith(
-          imageUrl: fetchedImageUrl.value,
-          categoryName: fetchedCategoryName.value,
-        );
+            imageUrl: fetchedImageUrl.value,
+            categoryName: fetchedCategoryName.value);
       } else {
         finalProduct = ProductModel.fromJson({
           'productId': package?.productId ?? '',
@@ -363,9 +410,7 @@ class OutboundTransactionItemAddController extends GetxController
         'productPackageId': realPkgId,
         'displayName': displayName,
         'packageInfo': package?.copyWith(
-          product: finalProduct,
-          barcodes: fetchedBarcodesList,
-        ),
+            product: finalProduct, barcodes: fetchedBarcodesList),
         'importPrice': package?.importPrice ?? 0.0,
         'sellingPrice': package?.sellingPrice ?? 0.0,
         'currentStock': currentStock,

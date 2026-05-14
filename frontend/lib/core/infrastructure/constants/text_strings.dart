@@ -593,6 +593,7 @@ class TTexts {
   static const String pinnedOnHome = "pinned_on_home";
   static const String tapAndHoldToDrag = "tap_and_hold_to_drag";
   static const String save = "save";
+  static const String tapToSwap = "tap_to_swap";
 
   // -- Inventory Insight
   static const String inventoryList = "inventory_list";
@@ -684,6 +685,18 @@ class TTexts {
   static const String barcodeDeleted = 'barcode_deleted';
   static const String quantityGreaterThanZero = 'quantity_greater_than_zero';
   static const String unitPriceLabel = 'unit_price_label';
+  static const String hiddenCategories = "hidden_categories";
+  static const String hiddenCategoriesDesc = "hidden_categories_desc";
+  static const String noHiddenCategories = "no_hidden_categories";
+  static const String noHiddenCategoriesDesc = "no_hidden_categories_desc";
+  static const String restore = "restore";
+  static const String confirmRestoreTitle = "confirm_restore_title";
+  static const String confirmRestoreDesc = "confirm_restore_desc";
+  static const String restoreSuccess = "restore_success";
+  static const String selected = "selected";
+  static const String restoreSelected = "restore_selected";
+  static const String confirmBatchRestoreTitle = "confirm_batch_restore_title";
+  static const String confirmBatchRestoreDesc = "confirm_batch_restore_desc";
 
   // --- View All Products
   static const String viewAllProducts = 'view_all_products';
@@ -1426,8 +1439,10 @@ class TTexts {
   static const String skipLabel = "skip_label";
   static const String createProduct = "create_product";
   static const String barcodeScanHint = "barcode_scan_hint";
-  static const String barcodeScanGalleryFailedTitle = "barcode_scan_gallery_failed_title";
-  static const String barcodeScanGalleryFailedDesc = "barcode_scan_gallery_failed_desc";
+  static const String barcodeScanGalleryFailedTitle =
+      "barcode_scan_gallery_failed_title";
+  static const String barcodeScanGalleryFailedDesc =
+      "barcode_scan_gallery_failed_desc";
   static const String analyzingImageLoader = "analyzing_image_loader";
 
   // -- Verify OTP

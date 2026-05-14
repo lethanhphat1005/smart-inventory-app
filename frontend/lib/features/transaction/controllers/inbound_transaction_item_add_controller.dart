@@ -46,6 +46,8 @@ class InboundTransactionItemAddController extends GetxController
   bool fromSelectionScreen = false;
   bool fromScanner = false;
 
+  double? passedCustomPrice;
+
   @override
   void onInit() {
     super.onInit();
@@ -61,13 +63,16 @@ class InboundTransactionItemAddController extends GetxController
           fromSelectionScreen = Get.arguments['fromSelectionScreen'];
         }
         if (Get.arguments['fromScanner'] != null) {
-          fromScanner = Get.arguments['fromScanner']; // Bắt cờ Scanner
+          fromScanner = Get.arguments['fromScanner'];
+        }
+        if (Get.arguments['customPrice'] != null) {
+          passedCustomPrice = Get.arguments['customPrice'];
         }
       } else {
         initialItem = Get.arguments as InventoryInsightDisplayModel;
       }
 
-      // ĐỒNG BỘ TỪ GIỎ HÀNG CHÍNH NẾU ĐÃ CÓ (Cả lúc Search thường và Scan Camera đều chạy vào đây)
+      // Đồng bộ từ giỏ hàng chính
       if (!fromSelectionScreen) {
         try {
           final inboundCtrl = Get.find<InboundTransactionController>();
@@ -93,6 +98,30 @@ class InboundTransactionItemAddController extends GetxController
 
       quantityController.text = passedQty.toString();
       itemQuantity.value = passedQty;
+      double initPrice =
+          initialItem.inventory.productPackage?.importPrice ?? 0.0;
+
+      if (fromSelectionScreen && passedCustomPrice != null) {
+        initPrice = passedCustomPrice!;
+      } else if (isEditing && !fromSelectionScreen) {
+        try {
+          final inboundCtrl = Get.find<InboundTransactionController>();
+          String pkgId = initialItem.inventory.productPackageId;
+          if (pkgId.isEmpty) {
+            pkgId =
+                initialItem.inventory.productPackage?.productPackageId ?? '';
+          }
+          final existingIndex = inboundCtrl.cartItems
+              .indexWhere((item) => item.productPackageId == pkgId);
+          if (existingIndex != -1) {
+            initPrice = inboundCtrl.cartItems[existingIndex].unitPrice;
+          }
+        } catch (_) {}
+      }
+
+      // Gắn lên UI tức thì để không bị rỗng
+      priceController.text = initPrice.toStringAsFixed(2);
+      _updateTotalPriceAndQuantity();
 
       fetchedCategoryName.value = initialItem.product?.categoryName ??
           initialItem.inventory.productPackage?.product?.categoryName ??
@@ -126,7 +155,12 @@ class InboundTransactionItemAddController extends GetxController
   Future<void> _fetchFreshData() async {
     try {
       isLoadingFreshData.value = true;
-      final packageId = initialItem.inventory.productPackageId;
+
+      String packageId = initialItem.inventory.productPackageId;
+      if (packageId.isEmpty || packageId == 'null') {
+        packageId =
+            initialItem.inventory.productPackage?.productPackageId ?? '';
+      }
 
       String? targetProductId = initialItem.product?.productId;
       if (targetProductId == null || targetProductId.isEmpty) {
@@ -134,14 +168,30 @@ class InboundTransactionItemAddController extends GetxController
       }
 
       if (packageId.isNotEmpty) {
-        final invData =
-            await _provider.getInventoryDetailByPackageId(packageId);
-        freshInventoryData.value = InventoryModel.fromJson(invData);
+        // Fetch đồng thời Full Package
+        final results = await Future.wait([
+          _provider.getInventoryDetailByPackageId(packageId),
+          _provider.getProductPackageById(packageId),
+        ]);
 
-        // ĐỒNG BỘ GIÁ ĐANG CÓ Ở GIỎ
+        final invDataRaw = results[0];
+        final packageFullData = results[1];
+
+        // Nhồi Full Package vào JSON để InventoryModel lấy đúng giá
+        final Map<String, dynamic> mutableInvData =
+            Map<String, dynamic>.from(invDataRaw);
+        mutableInvData['productPackage'] = packageFullData;
+
+        freshInventoryData.value = InventoryModel.fromJson(mutableInvData);
         double displayPrice =
-            freshInventoryData.value?.productPackage?.importPrice ?? 0.0;
-        if (isEditing && !fromSelectionScreen) {
+            initialItem.inventory.productPackage?.importPrice ?? 0.0;
+        if (packageFullData['importPrice'] != null) {
+          displayPrice = (packageFullData['importPrice'] as num).toDouble();
+        }
+
+        if (fromSelectionScreen) {
+          if (passedCustomPrice != null) displayPrice = passedCustomPrice!;
+        } else if (isEditing) {
           try {
             final inboundCtrl = Get.find<InboundTransactionController>();
             final existingIndex = inboundCtrl.cartItems
@@ -151,36 +201,25 @@ class InboundTransactionItemAddController extends GetxController
             }
           } catch (_) {}
         }
+
         priceController.text = displayPrice.toStringAsFixed(2);
 
         if (targetProductId == null || targetProductId.isEmpty) {
           targetProductId = freshInventoryData.value?.productPackage?.productId;
         }
 
-        try {
-          final packageFullData =
-              await _provider.getProductPackageById(packageId);
-
-          if (targetProductId == null || targetProductId.isEmpty) {
-            targetProductId = packageFullData['productId'];
-          }
-
-          if (packageFullData['productPackageBarcodes'] != null) {
-            final barcodes = (packageFullData['productPackageBarcodes'] as List)
-                .map((e) => ProductPackageBarcodeModel.fromJson(e))
-                .toList();
-            fetchedBarcodesList.assignAll(barcodes);
-
-            if (barcodes.isNotEmpty) {
-              fetchedBarcode.value = barcodes.first.barcode;
-            } else {
-              fetchedBarcode.value = packageFullData['barcodeValue'] ?? '';
-            }
+        if (packageFullData['productPackageBarcodes'] != null) {
+          final barcodes = (packageFullData['productPackageBarcodes'] as List)
+              .map((e) => ProductPackageBarcodeModel.fromJson(e))
+              .toList();
+          fetchedBarcodesList.assignAll(barcodes);
+          if (barcodes.isNotEmpty) {
+            fetchedBarcode.value = barcodes.first.barcode;
           } else {
             fetchedBarcode.value = packageFullData['barcodeValue'] ?? '';
           }
-        } catch (e) {
-          debugPrint('Error fetching package details: $e');
+        } else {
+          fetchedBarcode.value = packageFullData['barcodeValue'] ?? '';
         }
       }
 
@@ -214,8 +253,8 @@ class InboundTransactionItemAddController extends GetxController
     if (package != null && fetchedBarcodesList.isNotEmpty) {
       final updatedPackage = package.copyWith(barcodes: fetchedBarcodesList);
       TBottomSheetWidget.show(
-        child: InventoryBarcodeListBottomSheetWidget(package: updatedPackage),
-      );
+          child:
+              InventoryBarcodeListBottomSheetWidget(package: updatedPackage));
     } else {
       TSnackbarsWidget.warning(
           title: TTexts.warningTitle.tr, message: TTexts.noBarcodesFound.tr);
@@ -277,8 +316,14 @@ class InboundTransactionItemAddController extends GetxController
   void confirmAndAddToCart() {
     try {
       final qty = int.tryParse(quantityController.text) ?? 0;
+      final price = double.tryParse(priceController.text);
+
       if (fromSelectionScreen) {
-        Get.back(result: {'quantity': qty});
+        Get.back(result: {
+          'quantity': qty,
+          'customPrice': price,
+          'importPrice': _activeInventory.productPackage?.importPrice ?? 0.0,
+        });
         return;
       }
 
@@ -292,7 +337,7 @@ class InboundTransactionItemAddController extends GetxController
           if (index != -1) {
             Get.find<InboundTransactionController>().removeItem(index);
           }
-          // ĐÃ SỬA: Xử lý về đúng chỗ khi Xóa (Số lượng = 0)
+          // Xử lý về đúng chỗ khi Xóa (Số lượng = 0)
           if (fromScanner) {
             Get.back();
           } else {
@@ -331,9 +376,8 @@ class InboundTransactionItemAddController extends GetxController
       ProductModel finalProduct;
       if (initialItem.product != null) {
         finalProduct = initialItem.product!.copyWith(
-          imageUrl: fetchedImageUrl.value,
-          categoryName: fetchedCategoryName.value,
-        );
+            imageUrl: fetchedImageUrl.value,
+            categoryName: fetchedCategoryName.value);
       } else {
         finalProduct = ProductModel.fromJson({
           'productId': package?.productId ?? '',
@@ -348,9 +392,7 @@ class InboundTransactionItemAddController extends GetxController
         'productPackageId': realPkgId,
         'displayName': displayName,
         'packageInfo': package?.copyWith(
-          product: finalProduct,
-          barcodes: fetchedBarcodesList,
-        ),
+            product: finalProduct, barcodes: fetchedBarcodesList),
         'importPrice': package?.importPrice ?? 0.0,
         'sellingPrice': package?.sellingPrice ?? 0.0,
         'currentStock': currentStock,

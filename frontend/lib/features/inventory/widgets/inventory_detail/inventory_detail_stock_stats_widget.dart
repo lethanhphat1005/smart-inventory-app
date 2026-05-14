@@ -219,7 +219,7 @@ class _InventoryDetailStockStatsWidgetState
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: controller.stockMovementData.map((d) {
-              return Text(d['day'],
+              return Text(_getLocalizedDay(d['day']),
                   style: const TextStyle(
                       fontSize: 11,
                       color: AppColors.subText,
@@ -229,6 +229,34 @@ class _InventoryDetailStockStatsWidgetState
         ],
       ),
     );
+  }
+
+  // ==========================================
+  // HÀM DỊCH NGÀY THEO LOCALE HIỆN TẠI
+  // ==========================================
+  String _getLocalizedDay(String rawDay) {
+    if (rawDay.isEmpty) return rawDay;
+    final isVi = Get.locale?.languageCode == 'vi';
+    final lowerDay = rawDay.toLowerCase();
+
+    if (isVi) {
+      if (lowerDay.contains('mon')) return 'T2';
+      if (lowerDay.contains('tue')) return 'T3';
+      if (lowerDay.contains('wed')) return 'T4';
+      if (lowerDay.contains('thu')) return 'T5';
+      if (lowerDay.contains('fri')) return 'T6';
+      if (lowerDay.contains('sat')) return 'T7';
+      if (lowerDay.contains('sun')) return 'CN';
+    } else {
+      if (lowerDay.contains('mon')) return 'Mon';
+      if (lowerDay.contains('tue')) return 'Tue';
+      if (lowerDay.contains('wed')) return 'Wed';
+      if (lowerDay.contains('thu')) return 'Thu';
+      if (lowerDay.contains('fri')) return 'Fri';
+      if (lowerDay.contains('sat')) return 'Sat';
+      if (lowerDay.contains('sun')) return 'Sun';
+    }
+    return rawDay; // Fallback trả về nguyên mẫu
   }
 
   // HÀM TÍNH TOÁN VỊ TRÍ CHẠM

@@ -42,11 +42,11 @@ class TransactionStandardSearchBarWidget extends StatelessWidget {
               onChanged: onChanged,
               cursorColor: AppColors.primary,
               style:
-                  const TextStyle(color: AppColors.primaryText, fontSize: 13),
+                  const TextStyle(color: AppColors.primaryText, fontSize: 12),
               decoration: InputDecoration(
                 hintText: hintText,
                 hintStyle:
-                    const TextStyle(color: AppColors.softGrey, fontSize: 13),
+                    const TextStyle(color: AppColors.softGrey, fontSize: 12),
                 border: InputBorder.none,
                 enabledBorder: InputBorder.none,
                 focusedBorder: InputBorder.none,
