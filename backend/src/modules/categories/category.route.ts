@@ -88,6 +88,16 @@ categoryRouter
   );
 
 /**
+ * API endpoint: GET /api/categories/hide
+ * Lấy danh sách category mặc định đang bị ẩn trong cửa hàng hiện tại
+ */
+categoryRouter.get(
+  '/hide',
+  requirePermission(PERMISSION.CATEGORY_READ),
+  asyncWrapper(categoryController.findAllHidden),
+);
+
+/**
  * API endpoint: POST /api/categories/:categoryId/hide
  * Ẩn một category mặc định khỏi cửa hàng hiện tại
  *

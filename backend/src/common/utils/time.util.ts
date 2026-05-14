@@ -27,8 +27,6 @@ export const buildDateRangeFilter = (
     filter.lte = new Date(`${endDate}T23:59:59.999${offset}`);
   }
 
-  console.info('Date Range Filter: ', filter);
-
   return filter;
 };
 
