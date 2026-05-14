@@ -9,6 +9,7 @@ class TransactionQuantitySelectorWidget extends StatefulWidget {
   final VoidCallback onIncrease;
   final VoidCallback onDecrease;
   final int? maxQuantity;
+  final bool isUnlimited;
 
   const TransactionQuantitySelectorWidget({
     super.key,
@@ -16,6 +17,7 @@ class TransactionQuantitySelectorWidget extends StatefulWidget {
     required this.onIncrease,
     required this.onDecrease,
     this.maxQuantity,
+    this.isUnlimited = false,
   });
 
   @override
@@ -27,8 +29,9 @@ class _TransactionQuantitySelectorWidgetState
     extends State<TransactionQuantitySelectorWidget> {
   late FocusNode _focusNode;
 
-  // Giới hạn tuyệt đối là 999999 nếu không có maxQuantity (nhập kho)
-  int get _effectiveMax => widget.maxQuantity ?? 999999;
+  // ĐÃ SỬA: Nếu isUnlimited là true thì cho max là xấp xỉ 1 tỷ
+  int get _effectiveMax =>
+      widget.isUnlimited ? 999999999 : (widget.maxQuantity ?? 999999);
 
   @override
   void initState() {
@@ -71,7 +74,6 @@ class _TransactionQuantitySelectorWidgetState
         bool canDecrease = current > 0;
         bool canIncrease = current < _effectiveMax;
 
-        // ĐÃ SỬA: Loại bỏ kiểm tra độ dài text.length >= 6
         // Trạng thái đạt giới hạn (isMaxed) chỉ được bật khi CHẠM ĐÚNG NGƯỠNG TRẦN
         bool isMaxed = current >= _effectiveMax;
 
@@ -120,8 +122,11 @@ class _TransactionQuantitySelectorWidgetState
                         ? AppColors.primaryText
                         : AppColors.softGrey,
                   ),
-                  SizedBox(
-                    width: 84, // Đủ chiều rộng cho số 999999 với font size 18
+                  Container(
+                    constraints: const BoxConstraints(
+                      minWidth: 84,
+                      maxWidth: 140,
+                    ),
                     child: Theme(
                       data: Theme.of(context).copyWith(
                         textSelectionTheme: TextSelectionThemeData(
@@ -135,7 +140,6 @@ class _TransactionQuantitySelectorWidgetState
                         focusNode: _focusNode,
                         textAlign: TextAlign.center,
                         keyboardType: TextInputType.number,
-                        // ĐÃ GỠ BỎ LengthLimitingTextInputFormatter(6) ĐỂ BẮT ĐƯỢC HÀNH ĐỘNG GÕ LỐ
                         inputFormatters: [
                           FilteringTextInputFormatter.digitsOnly,
                         ],
@@ -162,7 +166,7 @@ class _TransactionQuantitySelectorWidgetState
               ),
             ),
 
-            // HIỆN TAG CẢNH BÁO MÀU ĐỎ NẾU CHẠM NGƯỠNG
+            // Hiện tag nếu chạm ngưỡng
             if (errorText.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(top: 8),

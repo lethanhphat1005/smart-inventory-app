@@ -145,7 +145,7 @@ class InventoryDetailHistoryWidget extends GetView<InventoryDetailController> {
           trailing: Text(displayQty,
               style: TextStyle(
                   fontSize: 12,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w500,
                   color: displayColor,
                   fontFamily: AppFonts.mainFont)),
         ),

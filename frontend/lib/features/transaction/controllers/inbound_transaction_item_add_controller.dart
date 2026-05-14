@@ -367,7 +367,7 @@ class InboundTransactionItemAddController extends GetxController
 
       FullScreenLoaderUtils.stopLoading();
 
-      // ĐÃ SỬA: Lùi về Camera Scanner nếu đến từ đó
+      // Lùi về Camera Scanner nếu đến từ đó
       if (fromScanner) {
         Get.back();
       } else {
