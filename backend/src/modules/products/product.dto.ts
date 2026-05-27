@@ -13,7 +13,7 @@ export type ProductSimpleResponseDto = Omit<
 
 export type ProductsByCategoryDto = {
   count: number;
-  products: ProductSimpleResponseDto[];
+  products: Omit<ProductSimpleResponseDto, 'storeId' | 'categoryId'>[];
 };
 
 export type ProductResponseDto = Omit<Product, 'categoryId'> & {

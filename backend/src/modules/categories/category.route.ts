@@ -107,7 +107,7 @@ categoryRouter.get(
 categoryRouter.post(
   '/:categoryId/hide',
   requirePermission(PERMISSION.CATEGORY_WRITE),
-  asyncWrapper(categoryController.softDeleteDefaultOne),
+  asyncWrapper(categoryController.hideDefaultCategory),
 );
 
 /**

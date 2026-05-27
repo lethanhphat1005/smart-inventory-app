@@ -1,10 +1,11 @@
-import { prisma } from '../../../db/prismaClient.js';
-
+import type { DbClient } from '../../../common/types/index.js';
 import type { HiddenDefaultResponseDto } from '../category.dto.js';
 
 export class HiddenDefaultRepository {
+    constructor(private readonly db: DbClient) {}
+
   async findManyByStore(storeId: string): Promise<HiddenDefaultResponseDto[]> {
-    const result = await prisma.hidedDefault.findMany({
+    const result = await this.db.hidedDefault.findMany({
       where: {
         storeId,
       },
@@ -34,7 +35,7 @@ export class HiddenDefaultRepository {
   }
 
   async hideOne(storeId: string, categoryId: string): Promise<void> {
-    await prisma.hidedDefault.create({
+    await this.db.hidedDefault.create({
       data: {
         storeId,
         categoryId,
@@ -43,7 +44,7 @@ export class HiddenDefaultRepository {
   }
 
   async unhideOne(storeId: string, categoryId: string): Promise<void> {
-    await prisma.hidedDefault.delete({
+    await this.db.hidedDefault.delete({
       where: {
         storeId_categoryId: {
           storeId,
@@ -57,7 +58,7 @@ export class HiddenDefaultRepository {
     storeId: string,
     categoryId: string,
   ): Promise<boolean> {
-    const hiddenRecord = await prisma.hidedDefault.findUnique({
+    const hiddenRecord = await this.db.hidedDefault.findUnique({
       where: {
         storeId_categoryId: {
           storeId,
