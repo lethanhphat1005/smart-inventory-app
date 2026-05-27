@@ -131,7 +131,7 @@ export class ProductService {
     await this.checkCategoryExisted(categoryId);
 
     const result =
-      await this.productRepository.findProductsByCategoryId(categoryId);
+      await this.productRepository.findManyByCategoryId(categoryId);
 
     // Tạo Signed URL cho mảng products trong category
     const productsWithSignedUrls = await Promise.all(

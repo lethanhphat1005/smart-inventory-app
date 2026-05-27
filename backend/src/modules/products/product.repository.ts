@@ -214,18 +214,16 @@ export class ProductRepository {
     });
   }
 
-  async findProductsByCategoryId(
+  async findManyByCategoryId(
     categoryId: string,
   ): Promise<ProductsByCategoryDto> {
     const products = await this.db.product.findMany({
-      where: { categoryId },
+      where: { categoryId, activeStatus: 'active' },
       select: {
         productId: true,
         name: true,
         imageUrl: true,
         brand: true,
-        storeId: true,
-        categoryId: true,
       },
     });
 
