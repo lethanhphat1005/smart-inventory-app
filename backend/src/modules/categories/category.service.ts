@@ -27,13 +27,16 @@ export class CategoriesService {
     productRepositoryTx: new ProductRepository(db),
     categoryRepositoryTx: new CategoryRepository(db),
     auditLogRepositoryTx: new AuditLogRepository(db),
+    hiddenDefaultRepositoryTx: new HiddenDefaultRepository(db),
   });
 
   public async findAll(storeId: string): Promise<CategoryResponseDto[]> {
     return await this.categoryRepository.findAll(storeId);
   }
 
-  public async findAllHiddenInStore(storeId: string): Promise<HiddenDefaultResponseDto[]> {
+  public async findAllHiddenInStore(
+    storeId: string,
+  ): Promise<HiddenDefaultResponseDto[]> {
     return await this.hiddenDefaultRepository.findManyByStore(storeId);
   }
 
@@ -159,9 +162,10 @@ export class CategoriesService {
     await productService.getProductsByCategory(categoryId);
   }
 
-  public async softDeleteDefault(
+  public async hideDefaultCategory(
     storeId: string,
     categoryId: string,
+    canReassignToUncategorized: boolean,
   ): Promise<void> {
     const foundCategory = await this.categoryRepository.findById(categoryId);
 
@@ -191,7 +195,52 @@ export class CategoriesService {
       });
     }
 
-    await this.hiddenDefaultRepository.hideOne(storeId, categoryId);
+    // Lấy danh sách product đang gắn với category cần xóa để quyết định
+    // có thể xóa ngay hay phải yêu cầu FE xác nhận chuyển sang Uncategorized.
+    const productsInCategory =
+      await productService.getProductsByCategory(categoryId);
+
+    // Nếu category vẫn đang được product sử dụng và FE chưa xác nhận
+    // chuyển product sang Uncategorized, backend trả lỗi 409 để FE
+    // hiển thị popup xác nhận cho người dùng.
+    if (productsInCategory.count > 0 && !canReassignToUncategorized) {
+      throw new CustomError({
+        message: 'Category is being used by products',
+        status: StatusCodes.CONFLICT,
+        code: 'CATEGORY_IN_USE',
+        details: {
+          productCount: productsInCategory.count,
+          products: productsInCategory.products,
+        },
+      });
+    }
+
+    // Nếu category không còn product nào sử dụng thì ẩn ngay,
+    // không cần qua bước chuyển sang Uncategorized
+    if (productsInCategory.count === 0) {
+      await this.hiddenDefaultRepository.hideOne(storeId, categoryId);
+
+      return;
+    }
+
+    const uncategorizedId = await this.categoryRepository.getUncategorizedId();
+
+    await prisma.$transaction(async (tx) => {
+      const { productRepositoryTx, hiddenDefaultRepositoryTx } =
+        this.createTxRepositories(tx);
+
+      // Phải cập nhật các product sang Uncategorized trước khi xóa category cũ
+      // để tránh lỗi ràng buộc khóa ngoại
+      await productRepositoryTx.uncategorizeMany(
+        storeId,
+        categoryId,
+        uncategorizedId,
+      );
+
+      // NOTE: Phải chạy sau khi uncategorize products
+      // NOTE: vì cần category tham chiếu đến cho product trước
+      await hiddenDefaultRepositoryTx.hideOne(storeId, categoryId);
+    });
   }
 
   public async restoreDefault(
@@ -279,7 +328,7 @@ export class CategoriesService {
     }
 
     // Nếu category không còn product nào sử dụng thì xóa ngay,
-    // không cần qua bước chuyển sang Uncategorized.
+    // không cần qua bước chuyển sang Uncategorized
     if (productsInCategory.count === 0) {
       await prisma.$transaction(async (tx) => {
         const { auditLogRepositoryTx, categoryRepositoryTx } =
@@ -315,7 +364,7 @@ export class CategoriesService {
       } = this.createTxRepositories(tx);
 
       // Phải cập nhật các product sang Uncategorized trước khi xóa category cũ
-      // để tránh lỗi ràng buộc khóa ngoại.
+      // để tránh lỗi ràng buộc khóa ngoại
       await productRepositoryTx.uncategorizeMany(
         storeId,
         categoryId,

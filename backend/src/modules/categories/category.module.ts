@@ -5,7 +5,7 @@ import { HiddenDefaultRepository } from './repositories/hidden-default.repositor
 import { prisma } from '../../db/prismaClient.js';
 
 const categoryRepository = new CategoryRepository(prisma);
-const hiddenDefaultRepository = new HiddenDefaultRepository();
+const hiddenDefaultRepository = new HiddenDefaultRepository(prisma);
 const categoryService = new CategoriesService(
   categoryRepository,
   hiddenDefaultRepository,

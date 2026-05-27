@@ -35,7 +35,8 @@ export class CategoryController {
     res: Response<ApiResponse<CategoryResponseDto[]>>,
   ): Promise<void> => {
     const storeId = requireReqStoreContext(req).storeId;
-    const hiddenCategories = await this.categoryService.findAllHiddenInStore(storeId);
+    const hiddenCategories =
+      await this.categoryService.findAllHiddenInStore(storeId);
 
     sendResponse.success(res, hiddenCategories, {
       status: StatusCodes.OK,
@@ -82,14 +83,33 @@ export class CategoryController {
     });
   };
 
-  softDeleteDefaultOne = async (
+  /*
+    FE gọi ẩn category với canReassignToUncategorized = false
+    Nếu category rỗng, backend ẩn category luôn
+    Nếu category đang được dùng, backend trả 409 CATEGORY_IN_USE
+    FE hiện popup xác nhận
+    User đồng ý
+    FE gọi lại cùng endpoint với canReassignToUncategorized = true
+    Backend chuyển product sang Uncategorized rồi ẩn category category trong transaction
+  */
+  hideDefaultCategory = async (
     req: Request,
     res: Response<ApiResponse<null>>,
   ): Promise<void> => {
     const storeId = requireReqStoreContext(req).storeId;
     const { categoryId } = req.params;
 
-    await this.categoryService.softDeleteDefault(storeId, categoryId as string);
+    // FE gửi cờ canReassignToUncategorized để thể hiện người dùng
+    // đã xác nhận chuyển toàn bộ product sang Uncategorized trước khi ẩn.
+    const { canReassignToUncategorized } = req.body as {
+      canReassignToUncategorized?: boolean;
+    };
+
+    await this.categoryService.hideDefaultCategory(
+      storeId,
+      categoryId as string,
+      canReassignToUncategorized ?? false,
+    );
 
     sendResponse.success(res, null, {
       status: StatusCodes.OK,
