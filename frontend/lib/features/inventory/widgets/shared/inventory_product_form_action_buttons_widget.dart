@@ -36,6 +36,48 @@ class InventoryProductFormActionButtonsWidget
               text: TTexts.savePackage.tr,
               onPressed: () => controller.savePackageData());
         }
+        if (mode == 'view_package') {
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TPrimaryButtonWidget(
+                text: TTexts.inventoryDetails.tr,
+                backgroundColor: AppColors.primary.withOpacity(0.1),
+                textColor: AppColors.primary,
+                onPressed: () => controller.goToInventoryDetail(),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    flex: 1,
+                    child: TPrimaryButtonWidget(
+                      text: TTexts.delete.tr,
+                      backgroundColor: AppColors.toastErrorBg,
+                      textColor: AppColors.alertText,
+                      onPressed: () {
+                        if (controller.packageToEdit != null) {
+                          controller.confirmDeletePackage(
+                              controller.packageToEdit!.productPackageId);
+                        }
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    flex: 1,
+                    child: TPrimaryButtonWidget(
+                      text: TTexts.editPackage.tr,
+                      onPressed: () {
+                        controller.formMode.value = 'edit_package';
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          );
+        }
 
         // 2. CÁC NÚT BẤM DÀNH CHO WIZARD TẠO MỚI HOÀN TOÀN (CREATE)
         return Column(

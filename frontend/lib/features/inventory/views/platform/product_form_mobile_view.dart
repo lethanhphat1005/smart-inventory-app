@@ -3,6 +3,7 @@ import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/features/inventory/widgets/shared/inventory_product_form_action_buttons_widget.dart';
 import 'package:frontend/features/inventory/widgets/shared/inventory_product_form_base_info_widget.dart';
 import 'package:frontend/features/inventory/widgets/shared/inventory_product_form_image_widget.dart';
+import 'package:frontend/features/inventory/widgets/shared/inventory_product_form_shimmer_widget.dart';
 import 'package:frontend/features/inventory/widgets/shared/inventory_product_package_form_fields_widget.dart';
 import 'package:get/get.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
@@ -39,13 +40,17 @@ class ProductFormMobileView extends GetView<ProductFormController> {
           ],
         ),
         body: SafeArea(
-          child: SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            child: Obx(() {
-              final mode = controller.formMode.value;
-              final step = controller.currentStep.value;
+          child: Obx(() {
+            if (controller.isLoadingData.value) {
+              return const InventoryProductFormShimmerWidget();
+            }
 
-              return Column(
+            final mode = controller.formMode.value;
+            final step = controller.currentStep.value;
+
+            return SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: Column(
                 children: [
                   // 1. THANH TIẾN TRÌNH (Chỉ hiện khi tạo mới hoàn toàn)
                   if (mode == 'create') const ProductFormProgressBarWidget(),
@@ -90,12 +95,12 @@ class ProductFormMobileView extends GetView<ProductFormController> {
                     ),
                   ),
 
-                  // 3. KHU VỰC NÚT BẤM (Cũng thay đổi theo Mode)
+                  // 3. KHU VỰC NÚT BẤM
                   const InventoryProductFormActionButtonsWidget(),
                 ],
-              );
-            }),
-          ),
+              ),
+            );
+          }),
         ),
       ),
     );
@@ -106,6 +111,8 @@ class ProductFormMobileView extends GetView<ProductFormController> {
   String _getAppBarTitle() {
     final mode = controller.formMode.value;
     switch (mode) {
+      case 'view_package':
+        return TTexts.packageInfo.tr;
       case 'info':
         return TTexts.editProductTitle.tr;
       case 'image':
@@ -120,6 +127,7 @@ class ProductFormMobileView extends GetView<ProductFormController> {
   }
 
   String _getHeaderTitle(String mode, int step) {
+    if (mode == 'view_package') return TTexts.packageInfo.tr;
     if (mode == 'info') return TTexts.productBaseTitle.tr;
     if (mode == 'image') return TTexts.productImageTitle.tr;
     if (mode == 'edit_package') return TTexts.editPackageTitle.tr;
@@ -137,6 +145,7 @@ class ProductFormMobileView extends GetView<ProductFormController> {
     if (mode == 'image') return TTexts.editProductImageSub.tr;
     if (mode == 'edit_package') return TTexts.editPackageSub.tr;
     if (mode == 'add_package') return TTexts.addPackageSub.tr;
+    if (mode == 'view_package') return TTexts.productPackageInfoSub.tr;
     // Mode create
     return step == 1
         ? TTexts.productBaseSub.tr
@@ -151,10 +160,11 @@ class ProductFormMobileView extends GetView<ProductFormController> {
     if (mode == 'image') {
       return const InventoryProductFormImageWidget(key: ValueKey('image'));
     }
-    if (mode == 'edit_package' || mode == 'add_package') {
-      return const Form(
-          key: ValueKey('pkg'),
-          child: InventoryProductPackageFormFieldsWidget());
+    if (mode == 'edit_package' ||
+        mode == 'add_package' ||
+        mode == 'view_package') {
+      return const InventoryProductPackageFormFieldsWidget(
+          key: ValueKey('package_form'));
     }
 
     // NẾU LÀ TẠO MỚI (WIZARD) THÌ CHẠY THEO STEP

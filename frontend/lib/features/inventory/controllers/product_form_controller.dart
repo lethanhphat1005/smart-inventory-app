@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:frontend/core/state/services/supabase_storage_service.dart';
 import 'package:frontend/core/ui/theme/app_fonts.dart';
+import 'package:frontend/routes/app_routes.dart';
 import 'package:get/get.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
@@ -44,6 +45,8 @@ class ProductFormController extends GetxController with TErrorHandler {
   final Rx<File?> selectedImage = Rx<File?>(null);
   final RxString existingImageUrl = ''.obs;
   String originalImageUrl = '';
+  final RxBool isLoadingData = true.obs;
+  bool _isDeleteDialogShowing = false;
 
   final TextEditingController nameController = TextEditingController();
   final TextEditingController brandController = TextEditingController();
@@ -79,13 +82,97 @@ class ProductFormController extends GetxController with TErrorHandler {
   @override
   void onInit() {
     super.onInit();
-    _loadCategories();
-    _loadUnits();
-    _parseArguments();
+
+    _initializeData();
 
     nameController.addListener(_updateDynamicDisplayName);
     unitNameController.addListener(_updateDynamicDisplayName);
     packageVariantNameController.addListener(_updateDynamicDisplayName);
+  }
+
+  Future<void> _initializeData() async {
+    isLoadingData.value = true;
+    try {
+      // Chờ toàn bộ các tiến trình lấy dữ liệu chạy xong
+      await Future.wait([
+        _loadCategories(),
+        _loadUnits(),
+        _parseArgumentsAsync(),
+      ]);
+    } catch (e) {
+      handleError(e);
+    } finally {
+      // Dù thành công hay lỗi thì cũng phải tắt shimmer để hiện UI
+      isLoadingData.value = false;
+    }
+  }
+
+  Future<void> _parseArgumentsAsync() async {
+    if (Get.arguments == null) return;
+
+    if (Get.arguments is Map) {
+      final args = Get.arguments as Map<String, dynamic>;
+      formMode.value = args['mode'] ?? 'create';
+
+      if (formMode.value == 'create') {
+        if (args['barcode'] != null) {
+          packageBarcodes.add(args['barcode']);
+        }
+        if (args['freshName'] != null) {
+          nameController.text = args['freshName'];
+        }
+        if (args['freshBrand'] != null) {
+          brandController.text = args['freshBrand'];
+        }
+      }
+
+      if (args['product'] != null) {
+        isEditMode = true;
+        isCategoryLocked = true;
+        productToEdit = args['product'] as ProductModel;
+
+        final freshImageUrl = args['freshImageUrl'];
+        final freshName = args['freshName'];
+        final freshBrand = args['freshBrand'];
+
+        existingImageUrl.value = freshImageUrl ?? productToEdit!.imageUrl ?? '';
+        originalImageUrl = existingImageUrl.value;
+
+        nameController.text = freshName ?? productToEdit!.name;
+        brandController.text = freshBrand ?? productToEdit!.brand ?? '';
+      }
+      if (args['package'] != null) {
+        packageToEdit = args['package'] as ProductPackageModel;
+
+        importPriceController.text = packageToEdit!.importPrice.toString();
+        salePriceController.text = packageToEdit!.sellingPrice.toString();
+        selectedUnitId.value = packageToEdit!.unitId;
+        packageVariantNameController.text = packageToEdit!.variant ?? '';
+
+        packageBarcodes.clear();
+        originalBarcodes.clear();
+        pendingDeleteBarcodes.clear();
+
+        if (packageToEdit!.barcodes.isNotEmpty) {
+          final codes = packageToEdit!.barcodes.map((b) => b.barcode).toList();
+          packageBarcodes.assignAll(codes);
+          originalBarcodes.assignAll(codes);
+        } else if (packageToEdit!.barcodeValue?.isNotEmpty == true) {
+          packageBarcodes.add(packageToEdit!.barcodeValue!);
+          originalBarcodes.add(packageToEdit!.barcodeValue!);
+        }
+
+        await _fetchAndSetThreshold(packageToEdit!.productPackageId);
+      }
+
+      if (args['category'] != null) {
+        isCategoryLocked = true;
+        selectedCategory.value = args['category'] as CategoryModel;
+      }
+    } else if (Get.arguments is CategoryModel) {
+      isCategoryLocked = true;
+      selectedCategory.value = Get.arguments as CategoryModel;
+    }
   }
 
   void _updateDynamicDisplayName() {
@@ -179,74 +266,6 @@ class ProductFormController extends GetxController with TErrorHandler {
         ]));
   }
 
-  void _parseArguments() {
-    if (Get.arguments == null) return;
-
-    if (Get.arguments is Map) {
-      final args = Get.arguments as Map<String, dynamic>;
-      formMode.value = args['mode'] ?? 'create';
-
-      if (formMode.value == 'create') {
-        if (args['barcode'] != null) {
-          packageBarcodes.add(args['barcode']);
-        }
-        if (args['freshName'] != null) {
-          nameController.text = args['freshName'];
-        }
-        if (args['freshBrand'] != null) {
-          brandController.text = args['freshBrand'];
-        }
-      }
-
-      if (args['product'] != null) {
-        isEditMode = true;
-        isCategoryLocked = true;
-        productToEdit = args['product'] as ProductModel;
-
-        final freshImageUrl = args['freshImageUrl'];
-        final freshName = args['freshName'];
-        final freshBrand = args['freshBrand'];
-
-        existingImageUrl.value = freshImageUrl ?? productToEdit!.imageUrl ?? '';
-        originalImageUrl = existingImageUrl.value;
-
-        nameController.text = freshName ?? productToEdit!.name;
-        brandController.text = freshBrand ?? productToEdit!.brand ?? '';
-      }
-      if (args['package'] != null) {
-        packageToEdit = args['package'] as ProductPackageModel;
-
-        importPriceController.text = packageToEdit!.importPrice.toString();
-        salePriceController.text = packageToEdit!.sellingPrice.toString();
-        selectedUnitId.value = packageToEdit!.unitId;
-        packageVariantNameController.text = packageToEdit!.variant ?? '';
-
-        packageBarcodes.clear();
-        originalBarcodes.clear();
-        pendingDeleteBarcodes.clear();
-
-        if (packageToEdit!.barcodes.isNotEmpty) {
-          final codes = packageToEdit!.barcodes.map((b) => b.barcode).toList();
-          packageBarcodes.assignAll(codes);
-          originalBarcodes.assignAll(codes);
-        } else if (packageToEdit!.barcodeValue?.isNotEmpty == true) {
-          packageBarcodes.add(packageToEdit!.barcodeValue!);
-          originalBarcodes.add(packageToEdit!.barcodeValue!);
-        }
-
-        _fetchAndSetThreshold(packageToEdit!.productPackageId);
-      }
-
-      if (args['category'] != null) {
-        isCategoryLocked = true;
-        selectedCategory.value = args['category'] as CategoryModel;
-      }
-    } else if (Get.arguments is CategoryModel) {
-      isCategoryLocked = true;
-      selectedCategory.value = Get.arguments as CategoryModel;
-    }
-  }
-
   Future<void> _loadCategories() async {
     try {
       allCategories = await _provider.getCategories();
@@ -329,6 +348,15 @@ class ProductFormController extends GetxController with TErrorHandler {
 
   void previousStep() {
     if (currentStep.value > 1) currentStep.value--;
+  }
+
+  void goToInventoryDetail() {
+    if (packageToEdit != null && productToEdit != null) {
+      Get.toNamed(AppRoutes.inventoryDetail, arguments: {
+        'productId': productToEdit!.productId,
+        'packageId': packageToEdit!.productPackageId,
+      });
+    }
   }
 
   // ==========================================
@@ -501,29 +529,92 @@ class ProductFormController extends GetxController with TErrorHandler {
     ));
   }
 
-  void confirmDeletePackage(String packageId) {
-    Get.dialog(TCustomDialogWidget(
-      title: TTexts.confirmDeleteTitle.tr,
-      description: TTexts.confirmDeleteMessage.tr,
-      icon: const Text('🗑️', style: TextStyle(fontSize: 40)),
-      primaryButtonText: TTexts.delete.tr,
-      secondaryButtonText: TTexts.cancel.tr,
-      onSecondaryPressed: () => Get.back(),
-      onPrimaryPressed: () async {
-        Get.back();
-        Future.delayed(const Duration(milliseconds: 200), () async {
-          try {
-            FullScreenLoaderUtils.openLoadingDialog(TTexts.deleting.tr);
-            await _provider.deleteProductPackage(packageId);
-            FullScreenLoaderUtils.stopLoading();
-            _triggerRefreshAndClose(TTexts.packageDeletedSuccess.tr);
-          } catch (e) {
-            FullScreenLoaderUtils.stopLoading();
-            handleError(e);
-          }
-        });
-      },
-    ));
+  void confirmDeletePackage(String packageId) async {
+    if (_isDeleteDialogShowing) return;
+
+    // Ở form, packageToEdit là package đang được thao tác
+    if (packageToEdit == null || packageToEdit!.productPackageId != packageId) {
+      return;
+    }
+
+    _isDeleteDialogShowing = true;
+    final package = packageToEdit!;
+
+    try {
+      FullScreenLoaderUtils.openLoadingDialog(TTexts.loading.tr);
+
+      // 1. Lấy dữ liệu tồn kho từ API
+      final inv = await _provider.getInventoryDetail(packageId);
+      final int currentQuantity = inv.quantity;
+
+      FullScreenLoaderUtils.stopLoading();
+
+      // 2. NẾU CÒN TỒN KHO -> Bật Dialog yêu cầu xuất kho
+      if (currentQuantity > 0) {
+        await Get.dialog(
+          TCustomDialogWidget(
+            title: TTexts.inventoryNotEmptyTitle.tr,
+            description:
+                '${TTexts.inventoryNotEmptyMessage.tr}\n\n(${TTexts.currentStockWithCount.trParams({
+                  'count': currentQuantity.toString()
+                })})',
+            icon: const Text('📦', style: TextStyle(fontSize: 40)),
+            primaryButtonText: TTexts.clearStock.tr,
+            secondaryButtonText: TTexts.cancel.tr,
+            onSecondaryPressed: () => Get.back(),
+            onPrimaryPressed: () {
+              Get.back(); // Đóng dialog
+
+              // Đóng sạch các popup/form để quay về màn hình gốc
+              Get.until((route) => route.settings.name == AppRoutes.main);
+
+              // Chuyển sang màn hình tạo đơn xuất kho kèm data
+              Get.toNamed(AppRoutes.outboundTransaction, arguments: {
+                'autoAddItems': [
+                  {
+                    'package': package,
+                    'inventory': inv,
+                    'quantity': currentQuantity,
+                  }
+                ]
+              });
+            },
+          ),
+          barrierDismissible: false,
+        );
+        return;
+      }
+
+      // 3. NẾU HẾT HÀNG -> Bật Dialog xác nhận xóa bình thường
+      final bool? shouldDelete = await Get.dialog<bool>(
+        TCustomDialogWidget(
+          title: TTexts.deletePackage.tr,
+          description:
+              '${TTexts.confirmDeletePackageMessage.tr}\n(${package.displayName})',
+          icon: const Text('🗑️', style: TextStyle(fontSize: 40)),
+          primaryButtonText: TTexts.delete.tr,
+          secondaryButtonText: TTexts.cancel.tr,
+          onSecondaryPressed: () => Get.back(result: false),
+          onPrimaryPressed: () => Get.back(result: true),
+        ),
+        barrierDismissible: false,
+      );
+
+      if (shouldDelete == true) {
+        FullScreenLoaderUtils.openLoadingDialog(TTexts.deletingPackage.tr);
+        await _provider.deleteProductPackage(packageId);
+        FullScreenLoaderUtils.stopLoading();
+
+        // Load lại danh sách và đóng Form
+        _triggerRefreshAndClose(TTexts.packageDeletedSuccess.tr);
+      }
+    } catch (e) {
+      FullScreenLoaderUtils.stopLoading();
+      handleError(e);
+    } finally {
+      await Future.delayed(const Duration(milliseconds: 300));
+      _isDeleteDialogShowing = false;
+    }
   }
 
   void confirmRemoveBarcode(String code) {

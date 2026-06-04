@@ -172,6 +172,7 @@ class ProductCatalogDetailMobileView
                       package: currentPkg,
                       onEdit: () => controller.editPackage(currentPkg),
                       onDelete: () => controller.deletePackage(currentPkg),
+                      onGoToInventory: () => controller.goToInventoryDetail(currentPkg),
                     );
                   },
                 ),

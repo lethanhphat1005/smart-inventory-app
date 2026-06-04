@@ -188,22 +188,27 @@ class _InventoryProductPackageUnitDropdownWidgetState
       child: GestureDetector(
         onTap: _toggleDropdown,
         child: AbsorbPointer(
-          child: TTextFormFieldWidget(
-            label: TTexts.unitLabel.tr,
-            hintText: TTexts.selectUnit.tr,
-            controller: controller.unitNameController,
-            readOnly: true,
-            // Luôn hiển thị icon mũi tên xoay
-            suffixIcon: AnimatedRotation(
-              turns: _isOpen ? 0.5 : 0.0,
-              duration: const Duration(milliseconds: 200),
-              child: const Icon(
-                Iconsax.arrow_down_1_copy,
-                size: 20,
-                color: AppColors.primaryText,
-              ),
-            ),
-          ),
+          child: Obx(() {
+            final isView = controller.formMode.value == 'view_package';
+            return TTextFormFieldWidget(
+              label: TTexts.unitLabel.tr,
+              hintText: TTexts.selectUnit.tr,
+              controller: controller.unitNameController,
+              readOnly: true,
+              // Ẩn icon mũi tên nếu đang ở chế độ xem
+              suffixIcon: isView
+                  ? const SizedBox.shrink()
+                  : AnimatedRotation(
+                      turns: _isOpen ? 0.5 : 0.0,
+                      duration: const Duration(milliseconds: 200),
+                      child: const Icon(
+                        Iconsax.arrow_down_1_copy,
+                        size: 20,
+                        color: AppColors.primaryText,
+                      ),
+                    ),
+            );
+          }),
         ),
       ),
     );

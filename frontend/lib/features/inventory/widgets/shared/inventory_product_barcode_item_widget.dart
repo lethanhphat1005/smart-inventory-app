@@ -7,6 +7,7 @@ import 'package:iconsax_flutter/iconsax_flutter.dart';
 class InventoryProductBarcodeItemWidget extends StatelessWidget {
   final String barcode;
   final bool isDeleted;
+  final bool isView;
   final VoidCallback onRemove;
   final VoidCallback onUndo;
 
@@ -14,6 +15,7 @@ class InventoryProductBarcodeItemWidget extends StatelessWidget {
     super.key,
     required this.barcode,
     this.isDeleted = false,
+    this.isView = false,
     required this.onRemove,
     required this.onUndo,
   });
@@ -77,7 +79,7 @@ class InventoryProductBarcodeItemWidget extends StatelessWidget {
                   duration: const Duration(milliseconds: 400),
                   curve: Curves.fastOutSlowIn,
                   height: 1.5,
-                  width: isDeleted ? 150 : 0, // Độ dài tăng dần khi xóa
+                  width: isDeleted ? 150 : 0,
                   color: AppColors.softGrey.withOpacity(0.8),
                 ),
               ],
@@ -85,25 +87,26 @@ class InventoryProductBarcodeItemWidget extends StatelessWidget {
           ),
 
           // Nút Xóa / Hoàn Tác
-          Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: isDeleted ? onUndo : onRemove,
-              borderRadius: BorderRadius.circular(8),
-              child: AnimatedRotation(
-                duration: const Duration(milliseconds: 300),
-                turns: isDeleted ? 1 : 0, // Xoay nhẹ icon khi đổi trạng thái
-                child: Container(
-                  padding: const EdgeInsets.all(6),
-                  child: Icon(
-                      isDeleted ? Iconsax.undo_copy : Iconsax.trash_copy,
-                      color:
-                          isDeleted ? AppColors.primary : AppColors.alertText,
-                      size: 18),
+          if (!isView)
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: isDeleted ? onUndo : onRemove,
+                borderRadius: BorderRadius.circular(8),
+                child: AnimatedRotation(
+                  duration: const Duration(milliseconds: 300),
+                  turns: isDeleted ? 1 : 0,
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    child: Icon(
+                        isDeleted ? Iconsax.undo_copy : Iconsax.trash_copy,
+                        color:
+                            isDeleted ? AppColors.primary : AppColors.alertText,
+                        size: 18),
+                  ),
                 ),
               ),
             ),
-          ),
         ],
       ),
     );
