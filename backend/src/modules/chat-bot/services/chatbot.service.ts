@@ -428,6 +428,31 @@ export class ChatbotService {
       query,
     );
 
+    // Cửa hàng mới tạo, hệ thống trả về rỗng (0 sản phẩm)
+    if (!res || !res.items || res.items.length === 0) {
+      const emptyContext =
+        locale === 'en'
+          ? 'Your store currently has 0 products in the inventory system. ' +
+            'CRITICAL: You CANNOT create or register a new product package via this chat interface. ' +
+            'Task: Inform the user that their warehouse is brand new and completely empty. ' +
+            'Politely guide them to exit the chatbot and use the application interface (the Inventory management screen) ' +
+            'to create their first product items manually. After adding products to the system, they can return here to ask you to draft import/export orders.'
+          : 'Cửa hàng của bạn hiện tại chưa có bất kỳ sản phẩm nào trong hệ thống kho. ' +
+            'CHÚ Ý QUAN TRỌNG: Bạn KHÔNG THỂ tạo mới hoặc đăng ký một sản phẩm/gói sản phẩm mới ngay tại ô chat này. ' +
+            'Nhiệm vụ: Thông báo rằng kho đang trống do cửa hàng mới được tạo. ' +
+            'Hướng dẫn họ một cách lịch sự là hãy đóng ô chat này lại, truy cập vào màn hình "Quản lý kho hàng" (Inventory) trên giao diện ứng dụng để thêm sản phẩm thủ công trước. ' +
+            'Sau khi hệ thống đã có danh mục sản phẩm, họ có thể quay lại đây để nhờ bạn soạn nhanh các phiếu nhập/xuất kho.';
+
+      return {
+        aiIntent: 'get_low_stock',
+        botReply: await this.generateFriendlyReply(
+          this.buildReplyContext(userMessage, emptyContext),
+          locale,
+        ),
+        data: { totalCount: 0, items: [] },
+      };
+    }
+
     const allLowStockItems = (res.items as InventoryItemData[]).filter(
       (item) =>
         item.quantity <= (item.reorder_threshold ?? item.reorderThreshold ?? 0),
