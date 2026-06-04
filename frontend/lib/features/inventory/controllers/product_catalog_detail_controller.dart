@@ -310,6 +310,21 @@ class ProductCatalogDetailController extends GetxController with TErrorHandler {
     });
   }
 
+  void viewPackage(ProductPackageModel package) {
+    Get.toNamed(AppRoutes.productForm, arguments: {
+      'product': product,
+      'package': package,
+      'mode': 'view_package'
+    });
+  }
+
+  void goToInventoryDetail(ProductPackageModel package) {
+    Get.toNamed(AppRoutes.inventoryDetail, arguments: {
+      'productId': product.productId,
+      'packageId': package.productPackageId,
+    });
+  }
+
   // ==========================================
   // XÓA 1 PACKAGE CỤ THỂ
   // ==========================================

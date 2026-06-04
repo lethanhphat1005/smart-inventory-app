@@ -839,6 +839,7 @@ class TTexts {
   static const String editProductImageSub = 'edit_product_image_sub';
   static const String editPackageTitle = 'edit_package_title';
   static const String editPackageSub = 'edit_package_sub';
+  static const String productPackageInfoSub = 'product_package_info_sub';
   static const String addPackageTitle = 'add_package_title';
   static const String addPackageSub = 'add_package_sub';
   static const String saveChanges = 'save_changes';

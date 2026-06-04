@@ -295,6 +295,8 @@ final Map<String, String> enInventory = {
   TTexts.editPackageTitle: 'Edit Package',
   TTexts.editPackageSub:
       'Update pricing, barcode, and threshold for this package.',
+  TTexts.productPackageInfoSub:
+      'View detailed package information, pricing, and barcodes.',
   TTexts.addPackageTitle: 'Add New Package',
   TTexts.addPackageSub: 'Create a new variant or unit for this product.',
   TTexts.saveChanges: 'Save Changes',

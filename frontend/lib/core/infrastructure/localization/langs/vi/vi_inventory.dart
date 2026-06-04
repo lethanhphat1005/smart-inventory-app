@@ -290,6 +290,7 @@ final Map<String, String> viInventory = {
   TTexts.editProductImageSub: 'Cập nhật ảnh chính của sản phẩm.',
   TTexts.editPackageTitle: 'Chỉnh sửa gói',
   TTexts.editPackageSub: 'Cập nhật giá, barcode và ngưỡng tồn kho.',
+  TTexts.productPackageInfoSub: 'Xem chi tiết thông tin gói sản phẩm, giá bán và mã vạch.',
   TTexts.addPackageTitle: 'Thêm gói mới',
   TTexts.addPackageSub: 'Tạo biến thể hoặc đơn vị mới cho sản phẩm.',
   TTexts.saveChanges: 'Lưu thay đổi',
