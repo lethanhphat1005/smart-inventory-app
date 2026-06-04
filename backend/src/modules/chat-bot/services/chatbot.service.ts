@@ -1106,6 +1106,22 @@ Task: Answer the user's query accurately using ONLY the logs provided above. Do 
     }
   }
 
+  public async clearChatHistory(
+    storeId: string,
+    userId: string,
+  ): Promise<void> {
+    // 1. Xóa lịch sử hội thoại trong Redis thông qua memory service
+    await this.chatMemoryService.clearChatHistory(storeId, userId);
+
+    // 2. Xóa luôn giỏ hàng tạm (Cart Session) đang dở dang để user làm sạch bối cảnh hoàn toàn
+    await this.chatMemoryService.clearCartSession(storeId, userId);
+
+    // 3. Xóa luôn reference draft action nếu có để tránh xung đột phiếu cũ
+    const draftRefKey = buildUserDraftRefKey(storeId, userId);
+
+    await this.redisClient.del(draftRefKey);
+  }
+
   private buildReplyContext(userMessage: string, systemData: string): string {
     return `You are Tori, a helpful AI assistant for Storix.
 

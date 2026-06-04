@@ -17,4 +17,29 @@ class ChatbotProvider {
       rethrow;
     }
   }
+
+  Future<void> clearChatHistory() async {
+    try {
+      await _apiClient.delete('/api/chat-bot/history');
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<Map<String, dynamic>> confirmAction(
+      String draftActionId, bool isConfirmed) async {
+    try {
+      final response = await _apiClient.post(
+        '/api/chat-bot/confirm',
+        data: {
+          'draftActionId': draftActionId,
+          'isConfirmed': isConfirmed,
+        },
+      );
+
+      return response.data ?? {};
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

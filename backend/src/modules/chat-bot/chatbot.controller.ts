@@ -51,12 +51,30 @@ export class ChatbotController {
       isConfirmed,
       storeId,
       userId,
-      locale
+      locale,
     );
 
     sendResponse.success(
       res,
       { message: resultMessage },
+      { status: StatusCodes.OK },
+    );
+  };
+
+  clearHistory = async (
+    req: Request,
+    res: Response<ApiResponse<{ message: string }>>,
+  ): Promise<void> => {
+    const storeId = requireReqStoreContext(req).storeId;
+    const userId = requireReqUser(req).userId;
+
+    // Gọi service xử lý dọn dẹp bộ nhớ Redis
+    await this.chatbotService.clearChatHistory(storeId, userId);
+
+    // Trả về kết quả thành công cho Frontend
+    sendResponse.success(
+      res,
+      { message: 'Chat history and temporary session cleared successfully ✨' },
       { status: StatusCodes.OK },
     );
   };
