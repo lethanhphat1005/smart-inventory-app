@@ -22,10 +22,14 @@ export class ChatbotController {
     const userId = requireReqUser(req).userId;
     const payload = req.body as ChatbotRequestDto;
 
+    const locale =
+      (req.headers['x-locale'] as string) || payload.locale || 'vi';
+
     const result = await this.chatbotService.processMessage(
       storeId,
       userId,
       payload,
+      locale,
     );
 
     sendResponse.success(res, result, { status: StatusCodes.OK });
@@ -40,11 +44,14 @@ export class ChatbotController {
     const storeId = requireReqStoreContext(req).storeId;
     const userId = requireReqUser(req).userId;
 
+    const locale = (req.headers['x-locale'] as string) || 'vi';
+
     const resultMessage = await this.chatbotService.confirmDraftAction(
       draftActionId,
       isConfirmed,
       storeId,
       userId,
+      locale
     );
 
     sendResponse.success(
