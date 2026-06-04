@@ -66,8 +66,31 @@ export interface CartSession {
 }
 
 export interface AuditLogItemData {
-  action: string; // 'CREATE', 'UPDATE', 'DELETE'
-  target: string; // Tên sản phẩm, mã phiếu...
-  userFullName: string; // Tên nhân viên thao tác
-  time: string; // Thời gian (đã format)
+  action: string;
+  target: string;
+  userFullName: string;
+  time: string;
+}
+
+export interface AuditLogDetails {
+  displayName?: string;
+  productName?: string;
+  name?: string;
+}
+
+export interface AuditLogRecord {
+  actionType: string;
+  entityType: string;
+  note: string | null | undefined;
+  newValue: string | Record<string, unknown> | null | undefined;
+  performedAt: string | number | Date;
+  user?: {
+    fullName?: string | null;
+  } | null;
+}
+
+export interface CrossSellItem {
+  productName?: string | null;
+  associatedPackageId: string;
+  frequency: number;
 }

@@ -4,7 +4,7 @@ import {
   chatbotBurstLimit,
   chatbotRateLimit,
 } from './chatbot-rate-limit.middleware.js';
-import { chatController } from './chatbot.module.js';
+import { chatbotController, chatController } from './chatbot.module.js';
 import { chatPayloadSchema, confirmActionSchema } from './chatbot.validator.js';
 import { asyncWrapper } from '../../common/middlewares/async-wrapper.middleware.js';
 import { validator } from '../../common/middlewares/validate.middleware.js';
@@ -27,5 +27,6 @@ chatRouter.post(
   validator(confirmActionSchema),
   asyncWrapper(chatController.confirmAction),
 );
+chatRouter.delete('/history', asyncWrapper(chatbotController.clearHistory));
 
 export { chatRouter, chatRouter as chatbotRouter };

@@ -10,13 +10,11 @@ import 'package:frontend/features/navigation/providers/chatbot_provider.dart';
 import 'package:frontend/features/report/controllers/report_controller.dart';
 import 'package:get/get.dart';
 import 'package:frontend/features/navigation/models/chat_message_model.dart';
-import 'package:frontend/core/infrastructure/network/app_client.dart';
 
 class ChatbotUiController extends GetxController with TErrorHandler {
   static ChatbotUiController get instance => Get.find();
 
   final ChatbotProvider _chatbotProvider = ChatbotProvider();
-  final ApiClient _apiClient = ApiClient();
 
   final RxBool isChatOpen = false.obs;
   final RxList<ChatMessage> messages = <ChatMessage>[].obs;
@@ -125,7 +123,7 @@ class ChatbotUiController extends GetxController with TErrorHandler {
           ),
           ElevatedButton(
             onPressed: () async {
-              await _apiClient.delete('/api/chat-bot/history');
+              await _chatbotProvider.clearChatHistory();
               messages.clear();
               Get.back();
               Get.back();
@@ -161,12 +159,10 @@ class ChatbotUiController extends GetxController with TErrorHandler {
 
       final draftActionId = message.data['draftActionId'];
 
-      final response = await _apiClient.post(
-        '/api/chat-bot/confirm',
-        data: {'draftActionId': draftActionId, 'isConfirmed': true},
-      );
+      final responseData =
+          await _chatbotProvider.confirmAction(draftActionId, true);
 
-      final serverMessage = response.data['data']?['message'] as String?;
+      final serverMessage = responseData['data']?['message'] as String?;
 
       (message.data as Map<String, dynamic>)['wasConfirmed'] = true;
       message.isResolved = true;
@@ -206,10 +202,7 @@ class ChatbotUiController extends GetxController with TErrorHandler {
 
       final draftActionId = message.data['draftActionId'];
 
-      await _apiClient.post(
-        '/api/chat-bot/confirm',
-        data: {'draftActionId': draftActionId, 'isConfirmed': false},
-      );
+      await _chatbotProvider.confirmAction(draftActionId, false);
 
       (message.data as Map<String, dynamic>)['wasConfirmed'] = false;
       message.isResolved = true;
@@ -236,7 +229,7 @@ class ChatbotUiController extends GetxController with TErrorHandler {
     try {
       messages.clear();
       isChatOpen.value = false;
-      await _apiClient.delete('/api/chat-bot/history');
+      await _chatbotProvider.clearChatHistory();
     } catch (e) {
       debugPrint('Lỗi khi xóa lịch sử chat: $e');
     }
@@ -254,7 +247,6 @@ class ChatbotUiController extends GetxController with TErrorHandler {
     });
   }
 
-  /// Kiểm tra xem user hiện tại có quyền xem lịch sử thao tác không
   bool get canViewAuditLog {
     if (!Get.isRegistered<StoreService>()) return false;
     final role = Get.find<StoreService>().currentRole.value.toLowerCase();

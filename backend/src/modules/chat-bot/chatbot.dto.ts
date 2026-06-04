@@ -3,6 +3,7 @@ import type { ReorderSuggestionItemDto } from '../alerts/index.js';
 
 export type ChatbotRequestDto = {
   message: string;
+  locale?: string;
 };
 
 export type ChatbotResponseDto = {

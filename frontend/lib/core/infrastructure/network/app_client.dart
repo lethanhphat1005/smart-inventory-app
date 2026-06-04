@@ -48,6 +48,12 @@ class ApiClient {
             options.headers['x-store-id'] = storeId;
           }
 
+          // Đính kèm Locale hiện tại của GetX ứng dụng vào Header
+          final currentLocale = Get.locale?.languageCode ??
+              Get.deviceLocale?.languageCode ??
+              'vi';
+          options.headers['x-locale'] = currentLocale;
+
           return handler.next(options);
         },
         onResponse: (response, handler) => handler.next(response),
