@@ -36,7 +36,18 @@ class CategoryDetailMobileView extends GetView<CategoryDetailController> {
               ),
             )),
         showBackArrow: true,
-        actions: const [CategoryDetailActionMenuWidget()],
+        actions: [
+          Obx(() {
+            final categoryName = controller.rxCategory.value.name.toLowerCase();
+            // Nếu danh mục là Uncategorized thì ẩn luôn nút 3 chấm
+            if (categoryName == 'uncategorized') {
+              return const SizedBox.shrink();
+            }
+
+            // Nếu là danh mục bình thường thì hiện nút 3 chấm
+            return const CategoryDetailActionMenuWidget();
+          }),
+        ],
       ),
       body: TRefreshIndicatorWidget(
         edgeOffset: topOffset,

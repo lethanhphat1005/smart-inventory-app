@@ -269,6 +269,10 @@ class ProductFormController extends GetxController with TErrorHandler {
   Future<void> _loadCategories() async {
     try {
       allCategories = await _provider.getCategories();
+
+      allCategories
+          .sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+
       if (isEditMode && productToEdit != null) {
         selectedCategory.value = allCategories
             .firstWhereOrNull((c) => c.categoryId == productToEdit!.categoryId);

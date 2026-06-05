@@ -20,7 +20,7 @@ class CategoryDetailController extends GetxController with TErrorHandler {
 
   final Rx<CategoryModel> rxCategory = CategoryModel(
     categoryId: '',
-    name: 'Loading...',
+    name: TTexts.loading.tr,
     storeId: '',
     isDefault: false,
   ).obs;
@@ -90,7 +90,10 @@ class CategoryDetailController extends GetxController with TErrorHandler {
   // ==========================================
   // ẨN DEFAULT CATEGORY
   // ==========================================
-  Future<void> hideCategory() async {
+  // ==========================================
+  // ẨN DEFAULT CATEGORY (LUỒNG 2 BƯỚC)
+  // ==========================================
+  void hideCategory() {
     Get.dialog(
       TCustomDialogWidget(
         title: TTexts.hideCategoryTitle.tr,
@@ -99,39 +102,73 @@ class CategoryDetailController extends GetxController with TErrorHandler {
         primaryButtonText: TTexts.hide.tr,
         secondaryButtonText: TTexts.cancel.tr,
         onSecondaryPressed: () => Get.back(),
-        onPrimaryPressed: () async {
+        onPrimaryPressed: () {
           Get.back();
-          try {
-            FullScreenLoaderUtils.openLoadingDialog(TTexts.loading.tr);
-
-            // Gọi API ẩn category từ provider
-            await _provider.hideDefaultCategory(rxCategory.value.categoryId);
-
-            FullScreenLoaderUtils.stopLoading();
-
-            // Refresh lại danh sách Catalog
-            if (Get.isRegistered<ProductCatalogController>()) {
-              Get.find<ProductCatalogController>().fetchCategories();
-            }
-
-            if (Get.isRegistered<InventoryController>()) {
-              Get.find<InventoryController>().fetchDashboardData();
-            }
-
-            // Văng người dùng về trang Product Catalog
-            Get.back();
-
-            TSnackbarsWidget.success(
-                title: TTexts.successTitle.tr,
-                message: TTexts.hideCategorySuccessMessage.tr);
-          } catch (e) {
-            FullScreenLoaderUtils.stopLoading();
-            handleError(e);
-          }
+          _executeHideCategory(canReassign: false);
         },
       ),
       barrierDismissible: true,
     );
+  }
+
+  Future<void> _executeHideCategory({required bool canReassign}) async {
+    try {
+      FullScreenLoaderUtils.openLoadingDialog(TTexts.loading.tr);
+
+      // Gọi API ẩn category từ provider kèm theo cờ
+      await _provider.hideDefaultCategory(
+        rxCategory.value.categoryId,
+        canReassignToUncategorized: canReassign,
+      );
+
+      FullScreenLoaderUtils.stopLoading();
+
+      // Refresh lại danh sách
+      if (Get.isRegistered<ProductCatalogController>()) {
+        Get.find<ProductCatalogController>().fetchCategories();
+      }
+      if (Get.isRegistered<InventoryController>()) {
+        Get.find<InventoryController>().fetchDashboardData();
+      }
+
+      Get.back(); // Thoát trang chi tiết
+
+      TSnackbarsWidget.success(
+        title: TTexts.successTitle.tr,
+        message: TTexts.hideCategorySuccessMessage.tr,
+      );
+    } on DioException catch (e) {
+      FullScreenLoaderUtils.stopLoading();
+
+      // NẾU BACKEND TRẢ VỀ 409 (DANH MỤC ĐANG CÓ SẢN PHẨM)
+      if (e.response?.statusCode == 409) {
+        final int productCount = products.length;
+
+        Get.dialog(
+          TCustomDialogWidget(
+            title: TTexts.categoryInUseErrorTitle.tr,
+            description: TTexts.categoryInUseErrorDesc.trParams({
+              'count': productCount.toString(),
+            }),
+            icon: const Text('⚠️', style: TextStyle(fontSize: 40)),
+            primaryButtonText: TTexts.moveAndProceedBtn.tr,
+            secondaryButtonText: TTexts.cancel.tr,
+            onSecondaryPressed: () => Get.back(),
+            onPrimaryPressed: () async {
+              Get.back();
+              // Gọi lại API với cờ true để đồng ý chuyển sản phẩm sang Uncategorized
+              await _executeHideCategory(canReassign: true);
+            },
+          ),
+          barrierDismissible: false,
+        );
+      } else {
+        handleError(e);
+      }
+    } catch (e) {
+      FullScreenLoaderUtils.stopLoading();
+      handleError(e);
+    }
   }
 
   void goToProductDetail(ProductModel product) {

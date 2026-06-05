@@ -473,6 +473,9 @@ class TTexts {
   static const String hideCategorySuccessMessage =
       'hide_category_success_message';
   static const String addNewProductDesc = "add_new_product_desc";
+  static const String categoryInUseErrorTitle = 'category_in_use_error_title';
+  static const String categoryInUseErrorDesc = 'category_in_use_error_desc';
+  static const String moveAndProceedBtn = 'move_and_proceed_btn';
 
   // -- Chatbot AI
   static const String chatbotName = "chatbot_name";
