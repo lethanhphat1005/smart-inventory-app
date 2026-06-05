@@ -28,6 +28,12 @@ const createStoreBodySchema = z.object({
     .max(100, 'Timezone must not exceed 100 characters')
     .nullable()
     .optional(),
+
+  currencyCode: z
+    .string()
+    .trim()
+    .min(1, 'Currency code is required')
+    .max(100, 'Currency code must not exceed 100 characters'),
 });
 
 const updateStoreBodySchema = z
@@ -50,6 +56,13 @@ const updateStoreBodySchema = z
       .string()
       .trim()
       .max(100, 'Timezone must not exceed 100 characters')
+      .nullable()
+      .optional(),
+
+    currencyCode: z
+      .string()
+      .trim()
+      .max(100, 'Currency code must not exceed 100 characters')
       .nullable()
       .optional(),
   })

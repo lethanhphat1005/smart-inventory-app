@@ -76,13 +76,13 @@ export class StoreService {
     userId: string,
     data: CreateStoreDto,
   ): Promise<StoreResponseDto> {
+    const newInviteCode = generateFormattedInviteCode();
+
     /* dùng hàm $transaction để chạy nhiều query trong một lệnh,
     $transaction hỗ trợ cơ chế Either ALL succeed hoặc ALL rollback */
     return await prisma.$transaction(async (tx) => {
       const storeRepositoryTx = new StoreRepository(tx);
       const storeMemberRepositoryTx = new StoreMemberRepository(tx);
-
-      const newInviteCode = generateFormattedInviteCode();
 
       const createdStore = await storeRepositoryTx.createOne({
         ...data,

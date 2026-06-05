@@ -12,6 +12,7 @@ import {
 } from './modules/barcode/index.js';
 import { categoryRouter } from './modules/categories/index.js';
 import { chatRouter } from './modules/chat-bot/index.js';
+import { currencyRouter } from './modules/currencies/index.js';
 import { inventoryRouter } from './modules/inventories/inventory.route.js';
 import notificationRouter from './modules/notification/notification.route.js';
 import {
@@ -64,6 +65,7 @@ app.use('/api/units', unitRouter);
 app.use('/api/store-members', storeMemberRouter);
 app.use('/api/chat-bot', chatRouter);
 app.use('/api/smart-decisions', smartDecisionRouter);
+app.use('/api/currencies', currencyRouter);
 
 app.use(errorHandler);
 
