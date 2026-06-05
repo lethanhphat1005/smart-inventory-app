@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
+import 'package:frontend/core/ui/widgets/t_snackbars_widget.dart'; // Đã thêm import cho Snackbar
 
 class SettingsCurrencyDropdownWidget extends StatefulWidget {
   const SettingsCurrencyDropdownWidget({super.key});
@@ -71,7 +72,7 @@ class _SettingsCurrencyDropdownWidgetState
   // Widget tạo Icon Tiền Tệ "Premium" (Có Gradient và Viền)
   Widget _buildCurrencyIcon(String symbol) {
     return Container(
-      width: 32, // Tăng size lên xíu cho đẹp
+      width: 32,
       height: 32,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
@@ -124,9 +125,7 @@ class _SettingsCurrencyDropdownWidgetState
                 axisAlignment: -1,
                 child: Container(
                   width: size.width,
-                  constraints: const BoxConstraints(
-                      maxHeight:
-                          280), // Nới chiều cao thêm chút cho nhiều tiền tệ
+                  constraints: const BoxConstraints(maxHeight: 280),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(AppSizes.radius16),
                     child: BackdropFilter(
@@ -174,8 +173,7 @@ class _SettingsCurrencyDropdownWidgetState
                               },
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 12), // Giảm padding dọc 1 chút
+                                    horizontal: 16, vertical: 12),
                                 child: Row(
                                   children: [
                                     _buildCurrencyIcon(
@@ -211,76 +209,96 @@ class _SettingsCurrencyDropdownWidgetState
 
     return CompositedTransformTarget(
       link: _layerLink,
-      child: GestureDetector(
-        onTap: _toggleDropdown,
-        child: Obx(() {
-          final selectedCurrency = controller.supportedCurrencies.firstWhere(
-            (c) => c['code'] == controller.currentCurrencyCode.value,
-            orElse: () => controller.supportedCurrencies.first,
-          );
+      // Bọc Obx ngay bên ngoài để lắng nghe việc thay đổi Role
+      child: Obx(() {
+        final selectedCurrency = controller.supportedCurrencies.firstWhere(
+          (c) => c['code'] == controller.currentCurrencyCode.value,
+          orElse: () => controller.supportedCurrencies.first,
+        );
 
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Label Tiền tệ (Đã dùng Locale)
-              Text(
-                TTexts.currencyLabel.tr,
-                style: TextStyle(
-                  fontFamily: AppFonts.mainFont,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.subText,
-                ),
-              ),
-              const SizedBox(height: AppSizes.p8),
+        // Logic check quyền
+        final role = controller.currentUserRole.value.toLowerCase();
+        final isRestricted = role == 'staff' || role == 'employee';
 
-              // Ô Input giả lập
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSizes.p16,
-                  vertical: 11,
+        return GestureDetector(
+            onTap: () {
+              // Nếu bị cấm thì bắn Snackbar cảnh báo và return
+              if (isRestricted) {
+                TSnackbarsWidget.warning(
+                  title: TTexts.errorAccessRestrictedTitle.tr,
+                  message: TTexts.currencyRestrictedMessage.tr,
+                );
+                return;
+              }
+              // Nếu hợp lệ thì mới xổ dropdown ra
+              _toggleDropdown();
+            },
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Label Tiền tệ
+                Text(
+                  TTexts.currencyLabel.tr,
+                  style: TextStyle(
+                    fontFamily: AppFonts.mainFont,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.subText,
+                  ),
                 ),
-                decoration: BoxDecoration(
-                  color: Colors.grey.withOpacity(0.05),
-                  borderRadius: BorderRadius.circular(AppSizes.radius8),
-                ),
-                child: Row(
-                  children: [
-                    // --- Ký hiệu tiền tệ hình tròn ---
-                    _buildCurrencyIcon(selectedCurrency['symbol'] ?? ''),
-                    const SizedBox(width: 12),
+                const SizedBox(height: AppSizes.p8),
 
-                    // --- Text tên tiền tệ ---
-                    Expanded(
-                      child: Text(
-                        selectedCurrency['name'] ?? '',
-                        style: TextStyle(
-                          fontFamily: AppFonts.mainFont,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors
-                              .subText, // Chỉnh lại subText hoặc primaryText tuỳ ý bạn
+                // Ô Input giả lập
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSizes.p16,
+                    vertical: 11,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(AppSizes.radius8),
+                  ),
+                  child: Row(
+                    children: [
+                      // --- Ký hiệu tiền tệ hình tròn ---
+                      _buildCurrencyIcon(selectedCurrency['symbol'] ?? ''),
+                      const SizedBox(width: 12),
+
+                      // --- Text tên tiền tệ ---
+                      Expanded(
+                        child: Text(
+                          selectedCurrency['name'] ?? '',
+                          style: TextStyle(
+                            fontFamily: AppFonts.mainFont,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.subText,
+                          ),
                         ),
                       ),
-                    ),
 
-                    // --- Suffix Icon (Mũi tên xoay) ---
-                    AnimatedRotation(
-                      turns: _isOpen ? 0.5 : 0.0,
-                      duration: const Duration(milliseconds: 200),
-                      child: const Icon(
-                        Iconsax.arrow_down_1_copy,
-                        size: 20,
-                        color: AppColors.primaryText,
-                      ),
-                    ),
-                  ],
+                      // Icon linh hoạt: Nếu bị khóa thì hiện ổ khóa, nếu không thì hiện mũi tên xoay
+                      isRestricted
+                          ? const Icon(
+                              Iconsax.lock_1_copy,
+                              size: 18,
+                              color: AppColors.softGrey,
+                            )
+                          : AnimatedRotation(
+                              turns: _isOpen ? 0.5 : 0.0,
+                              duration: const Duration(milliseconds: 200),
+                              child: const Icon(
+                                Iconsax.arrow_down_1_copy,
+                                size: 20,
+                                color: AppColors.primaryText,
+                              ),
+                            ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          );
-        }),
-      ),
+              ],
+            ));
+      }),
     );
   }
 }

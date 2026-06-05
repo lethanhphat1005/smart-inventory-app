@@ -10,6 +10,7 @@ class SettingsController extends GetxController {
   final currencyController = TextEditingController();
   final storage = GetStorage();
 
+  final RxString currentUserRole = 'manager'.obs;
   final RxString currentCurrencySymbol = '\$'.obs;
   final RxString currentCurrencyCode = 'USD'.obs;
 

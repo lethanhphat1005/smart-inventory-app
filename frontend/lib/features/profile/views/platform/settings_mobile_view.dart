@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/features/profile/controllers/settings_controller.dart';
+import 'package:frontend/features/profile/widgets/settings/settings_currency_dropdown_widget.dart';
 import 'package:frontend/features/profile/widgets/settings/settings_language_dropdown_widget.dart';
 // import 'package:frontend/features/profile/widgets/settings/settings_currency_dropdown_widget.dart';
 import 'package:get/get.dart';
@@ -43,8 +44,8 @@ class SettingsMobileView extends GetView<SettingsController> {
               const SizedBox(height: AppSizes.p24),
 
               // --- DROPDOWN TIỀN TÊ ---
-              // const SettingsCurrencyDropdownWidget(),
-              // const SizedBox(height: AppSizes.p20),
+              const SettingsCurrencyDropdownWidget(),
+              const SizedBox(height: AppSizes.p20),
             ],
           ),
         ),

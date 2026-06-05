@@ -1342,6 +1342,7 @@ class TTexts {
   static const String settingsSelectCurrency = "settings_select_currency";
   static const String settingsVietnamese = "settings_vietnamese";
   static const String settingsEnglish = "settings_english";
+  static const String currencyRestrictedMessage = "currency_restricted_message";  
 
   //Exceptions
   static const String userNotFound = "user_not_found";

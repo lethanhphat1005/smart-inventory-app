@@ -124,6 +124,7 @@ final Map<String, String> enProfile = {
   TTexts.settingsSelectLanguage: 'Select Language',
   TTexts.settingsCurrency: 'Currency',
   TTexts.settingsSelectCurrency: 'Select Currency',
+  TTexts.currencyRestrictedMessage: 'Only Managers or Store Owners have permission to change the currency.',
 
   //Exceptions
   TTexts.userNotFound: 'User information not found',
