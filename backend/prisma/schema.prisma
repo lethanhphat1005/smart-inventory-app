@@ -81,18 +81,28 @@ model UserProfile {
   notifications Notification[]
 }
 
+model Currency {
+  code   String  @id
+  symbol String?
+  name   String?
+
+  stores Store[]
+}
+
 model Store {
   storeId      String       @id @default(uuid()) @map("store_id")
   address      String?
   timezone     String?
   name         String?
   inviteCode   String?      @unique @map("invite_code")
+  currencyCode String       @map("currency_code")
   createdAt    DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt    DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
   activeStatus ActiveStatus @default(active) @map("active_status")
   userId       String       @map("user_id")
 
   owner         UserProfile    @relation(fields: [userId], references: [userId])
+  currency      Currency       @relation(fields: [currencyCode], references: [code])
   categories    Category[]
   products      Product[]
   auditLogs     AuditLog[]
