@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
+import 'package:frontend/core/infrastructure/utils/currency_formatter_utils.dart';
 import 'package:frontend/core/infrastructure/utils/day_formatter_utils.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
@@ -121,8 +122,8 @@ class ReportMobileView extends GetView<ReportController> {
                               leftBottomLabel: bottomLabel,
                               itemsDisplay: itemCountDisplay,
                               itemsColor: themeColor,
-                              moneyDisplay:
-                                  '\$${tx.totalPrice.toStringAsFixed(2)}',
+                              moneyDisplay: CurrencyFormatterUtils.formatFull(
+                                  tx.totalPrice),
                               moneyColor: themeColor,
                               isInbound: typeLower == 'import',
                               isOutbound: typeLower == 'export',

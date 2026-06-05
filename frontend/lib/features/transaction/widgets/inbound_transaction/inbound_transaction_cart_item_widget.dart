@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/infrastructure/models/transaction_detail_model.dart';
+import 'package:frontend/core/infrastructure/utils/currency_formatter_utils.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:get/get.dart';
@@ -22,8 +23,6 @@ class InboundTransactionCartItemWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final name = item.packageInfo?.displayName ??
         '${TTexts.product.tr} #${item.productPackageId?.substring(0, 5) ?? TTexts.labelNoBarcode.tr}';
-
-    final price = item.unitPrice.toStringAsFixed(2);
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -66,14 +65,14 @@ class InboundTransactionCartItemWidget extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  '\$$price',
-                  style: TextStyle(
-                    fontFamily: AppFonts.mainFont,
-                    fontSize: 13,
-                    color: AppColors.subText,
-                  ),
-                ),
+                Obx(() => Text(
+                      CurrencyFormatterUtils.formatFull(item.unitPrice),
+                      style: TextStyle(
+                        fontFamily: AppFonts.mainFont,
+                        fontSize: 13,
+                        color: AppColors.subText,
+                      ),
+                    )),
               ],
             ),
           ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/infrastructure/utils/currency_formatter_utils.dart';
 import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:get/get.dart';
 import 'package:frontend/features/transaction/controllers/inbound_transaction_item_add_controller.dart';
@@ -101,13 +102,14 @@ class InboundTransactionItemAddMobileView
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
                                   color: AppColors.primaryText)),
-                          Text(
-                              '\$${controller.totalPrice.value.toStringAsFixed(2)}',
+                          Obx(() => Text(
+                              CurrencyFormatterUtils.formatFull(
+                                  controller.totalPrice.value),
                               style: TextStyle(
                                   fontFamily: AppFonts.mainFont,
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
-                                  color: AppColors.primary)),
+                                  color: AppColors.primary))),
                         ],
                       ),
                     ),

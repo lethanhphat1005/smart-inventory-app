@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
+import 'package:frontend/core/infrastructure/utils/currency_formatter_utils.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:frontend/core/ui/widgets/t_primary_button_widget.dart';
@@ -66,11 +67,12 @@ class InboundProductSelectionBottomBarWidget extends StatelessWidget {
                                   fontSize: 16,
                                   color: AppColors.primaryText)),
                           const SizedBox(height: 2),
-                          Text('\$${totalPrice.toStringAsFixed(2)}',
+                          Obx(() => Text(
+                              CurrencyFormatterUtils.formatFull(totalPrice),
                               style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 14,
-                                  color: AppColors.primary)),
+                                  color: AppColors.primary))),
                         ],
                       ),
                     ),

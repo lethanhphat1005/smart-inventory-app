@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/infrastructure/utils/currency_formatter_utils.dart';
 import 'package:frontend/core/infrastructure/utils/day_formatter_utils.dart';
 import 'package:frontend/features/search/widgets/search_filter_chips_widget.dart';
 import 'package:frontend/features/report/widgets/report/report_transaction_card_widget.dart';
@@ -210,8 +211,8 @@ class SearchResultsListWidget extends GetView<TSearchController> {
                             leftBottomLabel: bottomLabel,
                             itemsDisplay: itemCountDisplay,
                             itemsColor: themeColor,
-                            moneyDisplay:
-                                '\$${tx.totalPrice.toStringAsFixed(2)}',
+                            moneyDisplay: CurrencyFormatterUtils.formatFull(
+                                tx.totalPrice),
                             moneyColor: themeColor,
                             isInbound: typeLower == 'import',
                             isOutbound: typeLower == 'export',

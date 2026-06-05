@@ -2,7 +2,9 @@ import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:frontend/core/infrastructure/utils/currency_formatter_utils.dart';
 import 'package:frontend/core/infrastructure/utils/url_helper_utils.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/widgets/t_no_image_widget.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/infrastructure/models/transaction_detail_model.dart';
@@ -131,7 +133,6 @@ class _TransactionCartItemWidgetState extends State<TransactionCartItemWidget> {
 
     final name = widget.item.packageInfo?.displayName ??
         '${TTexts.product.tr} #${displayId.isEmpty ? TTexts.labelNoBarcode.tr : displayId}';
-    final price = widget.item.unitPrice.toStringAsFixed(2);
     final bool canIncrease = widget.item.quantity < _maxAllowed;
     final bool canDecrease = widget.item.quantity > 0;
     final bool hasImage =
@@ -348,11 +349,15 @@ class _TransactionCartItemWidgetState extends State<TransactionCartItemWidget> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          Text('\$$price',
-                              style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.primaryText)),
+                          Obx(() => Text(
+                                CurrencyFormatterUtils.formatFull(
+                                    widget.item.unitPrice),
+                                style: TextStyle(
+                                  fontFamily: AppFonts.mainFont,
+                                  fontSize: 13,
+                                  color: AppColors.subText,
+                                ),
+                              )),
                           GestureDetector(
                             onTap: () {},
                             child: Container(

@@ -8,39 +8,40 @@ class CurrencyFormatterUtils {
   /// Ví dụ: $1,234.56 hoặc 1.234.567 đ
   static String formatFull(double amount) {
     final config = _getCurrencyConfig();
+    int finalDecimals = config.decimals;
+    if (amount % 1 != 0 && amount != 0) {
+      finalDecimals = 2;
+    }
 
     final formatter = NumberFormat.currency(
       locale: config.locale,
       symbol: config.symbol,
-      decimalDigits: config.decimals,
-      customPattern:
-          config.pattern, // Pattern quyết định vị trí symbol và dấu phẩy
+      decimalDigits: finalDecimals,
+      customPattern: config.pattern,
     );
 
     return formatter.format(amount);
   }
 
-  /// Dùng để hiển thị số rút gọn trên các trục của Biểu đồ
-  /// Ví dụ: $1.2K hoặc 1.2M đ
+  /// Ví dụ: $40K, 40K đ, 40K €
   static String formatCompact(double amount) {
     final config = _getCurrencyConfig();
 
-    final formatter = NumberFormat.compactCurrency(
-      locale: config.locale,
-      symbol: config.symbol,
-      // Khi rút gọn K, M, T thì cho phép giữ 1 số thập phân (VD: 1.5K)
-      decimalDigits: config.decimals > 0 ? 1 : 0,
-    );
+    // 1. Ép dùng chuẩn 'en_US' để LUÔN LUÔN rút gọn thành K, M, B (Bất chấp mọi loại tiền)
+    final formatter = NumberFormat.compact(locale: 'en_US');
+    formatter.maximumFractionDigits = 1;
+    String compactNumber = formatter.format(amount);
 
-    String result = formatter.format(amount);
-
-    // Mẹo nhỏ: Xử lý thêm khoảng trắng cho đẹp nếu pattern yêu cầu khoảng trắng trước ký hiệu
-    if (config.pattern.endsWith(' \u00A4')) {
-      // Tách số và ký hiệu ra một khoảng trắng (VD: 1.5Mđ -> 1.5M đ)
-      result = result.replaceFirst(config.symbol, ' ${config.symbol}');
+    // 2. Tự động ghép ký hiệu tiền tệ vào đúng vị trí dựa theo Pattern
+    if (config.pattern.startsWith('\u00A4')) {
+      // Ký hiệu đứng TRƯỚC (VD: $40K, ¥40K)
+      bool hasSpace = config.pattern.startsWith('\u00A4 ');
+      return '${config.symbol}${hasSpace ? ' ' : ''}$compactNumber';
+    } else {
+      // Ký hiệu đứng SAU (VD: 40K đ, 40K €)
+      bool hasSpace = config.pattern.endsWith(' \u00A4');
+      return '$compactNumber${hasSpace ? ' ' : ''}${config.symbol}';
     }
-
-    return result.trim();
   }
 
   /// Hàm nội bộ cấu hình quy tắc tiền tệ động dựa vào Settings
@@ -48,7 +49,7 @@ class CurrencyFormatterUtils {
     String code = 'USD';
     String symbol = '\$';
 
-    // 1. TÍNH NĂNG REACTIVE: Lấy giá trị từ SettingsController
+    // 1. Lấy giá trị từ SettingsController
     // Nhờ việc gọi `.value` ở đây, bất kỳ widget nào dùng Obx gọi hàm format này
     // đều sẽ tự động render lại khi tiền tệ bị thay đổi!
     if (Get.isRegistered<SettingsController>()) {
@@ -56,7 +57,7 @@ class CurrencyFormatterUtils {
       code = settings.currentCurrencyCode.value;
       symbol = settings.currentCurrencySymbol.value;
     } else {
-      // 2. FALLBACK: Đọc từ Storage nếu app vừa mở lên Controller chưa kịp khởi tạo
+      // 2. Đọc từ Storage nếu app vừa mở lên Controller chưa kịp khởi tạo
       final storage = GetStorage();
       code = storage.read('app_currency_code') ?? 'USD';
       symbol = storage.read('app_currency_symbol') ?? '\$';

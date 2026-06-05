@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
+import 'package:frontend/core/infrastructure/utils/currency_formatter_utils.dart';
 import 'package:frontend/core/infrastructure/utils/url_helper_utils.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
@@ -131,7 +132,7 @@ class OutboundProductSelectionCartBottomSheetWidget
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis),
                               const SizedBox(height: 2),
-                              Text('\$${price.toStringAsFixed(2)}',
+                              Text(CurrencyFormatterUtils.formatFull(price),
                                   style: const TextStyle(
                                       fontWeight: FontWeight.bold,
                                       color: AppColors.primary,
@@ -201,7 +202,9 @@ class OutboundProductSelectionCartBottomSheetWidget
                             fontWeight: FontWeight.w500, fontSize: 14)),
                   ],
                 ),
-                Text('\$${controller.totalDraftPrice.toStringAsFixed(2)}',
+                Text(
+                    CurrencyFormatterUtils.formatFull(
+                        controller.totalDraftPrice),
                     style: const TextStyle(
                         fontWeight: FontWeight.w900,
                         color: AppColors.primaryText,

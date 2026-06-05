@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/infrastructure/utils/currency_formatter_utils.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
@@ -21,7 +22,6 @@ class TransactionConfirmButtonWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final itemText = quantity > 1 ? TTexts.items.tr : TTexts.item.tr;
     final qtyStr = '$quantity $itemText';
-    final priceStr = '\$${totalPrice.toStringAsFixed(2)}';
 
     return Container(
       padding: const EdgeInsets.all(AppSizes.p20),
@@ -57,14 +57,14 @@ class TransactionConfirmButtonWidget extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                     fontSize: 15),
               ),
-              Text(
-                priceStr,
-                style: TextStyle(
-                    fontFamily: AppFonts.mainFont,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18),
-              ),
+              Obx(() => Text(
+                    CurrencyFormatterUtils.formatFull(totalPrice),
+                    style: TextStyle(
+                        fontFamily: AppFonts.mainFont,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18),
+                  )),
             ],
           ),
         ),

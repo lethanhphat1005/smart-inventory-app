@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
+import 'package:frontend/core/infrastructure/utils/currency_formatter_utils.dart';
 import 'package:frontend/features/transaction/controllers/inbound_transaction_controller.dart';
 import 'package:get/get.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
@@ -42,7 +43,7 @@ class InboundTransactionBottomBarWidget
                   const SizedBox(width: 16),
                   Expanded(
                     child: Text(
-                      '${controller.totalItems} ${TTexts.items.tr.toLowerCase()} • \$${controller.totalFunds.toStringAsFixed(2)}',
+                      '${controller.totalItems} ${TTexts.items.tr.toLowerCase()} • ${CurrencyFormatterUtils.formatFull(controller.totalFunds)}',
                       textAlign: TextAlign.right,
                       style: TextStyle(
                         fontSize: 16,

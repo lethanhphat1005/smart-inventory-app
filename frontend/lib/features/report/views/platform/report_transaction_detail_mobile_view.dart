@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
+import 'package:frontend/core/infrastructure/utils/currency_formatter_utils.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
@@ -13,7 +14,6 @@ import 'package:frontend/features/report/widgets/report_transaction_detail/repor
 import 'package:frontend/features/report/widgets/report_transaction_detail/report_transaction_detail_shimmer_widget.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
-import 'package:intl/intl.dart';
 
 class ReportTransactionDetailView
     extends GetView<ReportTransactionDetailController> {
@@ -108,11 +108,6 @@ class ReportTransactionDetailView
             : tx.items
                 .fold(0, (sum, item) => sum + item.quantity.abs().toInt());
 
-        final moneyFormatted =
-            NumberFormat.currency(locale: 'en_US', symbol: '\$')
-                .format(tx.totalPrice);
-
-        // BỌC SAFE AREA Ở ĐÂY ĐỂ TRÁNH BỊ LÚN VÀO THANH ĐIỀU HƯỚNG
         return SafeArea(
           bottom: true,
           child: Container(
@@ -160,12 +155,15 @@ class ReportTransactionDetailView
                             color: AppColors.subText,
                             fontWeight: FontWeight.w500)),
                     const SizedBox(height: 4),
-                    Text(moneyFormatted,
-                        style: TextStyle(
-                            fontFamily: AppFonts.mainFont,
-                            fontSize: 22,
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.bold)),
+                    Obx(() => Text(
+                          CurrencyFormatterUtils.formatFull(
+                              controller.transaction.value?.totalPrice ?? 0.0),
+                          style: TextStyle(
+                              fontFamily: AppFonts.mainFont,
+                              fontSize: 22,
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.bold),
+                        )),
                   ],
                 ),
               ],

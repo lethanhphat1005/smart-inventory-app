@@ -4,6 +4,7 @@ import 'package:frontend/core/infrastructure/models/transaction_detail_model.dar
 import 'package:frontend/core/infrastructure/models/transaction_model.dart';
 import 'package:frontend/core/infrastructure/models/product_package_model.dart';
 import 'package:frontend/core/infrastructure/models/inventory_model.dart';
+import 'package:frontend/core/infrastructure/utils/currency_formatter_utils.dart';
 import 'package:frontend/core/infrastructure/utils/error_handler_utils.dart';
 import 'package:frontend/core/infrastructure/utils/full_screen_loader_utils.dart';
 import 'package:frontend/core/ui/layouts/t_barcode_scanner_layout.dart';
@@ -282,7 +283,7 @@ class OutboundTransactionController extends GetxController with TErrorHandler {
     }).toList();
 
     if (priceChangedItems.isNotEmpty) {
-      // 3. XÂY DỰNG DANH SÁCH CHI TIẾT GIÁ BÁN (TỐI ĐA 3)
+      // 3. XÂY DỰNG DANH SÁCH CHI TIẾT GIÁ BÁN
       String priceDetails = "${TTexts.priceFluctuationDesc.tr}\n";
       for (var i = 0; i < priceChangedItems.length; i++) {
         if (i >= 3) {
@@ -291,10 +292,13 @@ class OutboundTransactionController extends GetxController with TErrorHandler {
         }
         final item = priceChangedItems[i];
         final oldPrice = item.packageInfo?.sellingPrice ?? 0.0;
-        priceDetails +=
-            "\n• ${item.packageInfo?.displayName ?? TTexts.unknownProduct.tr}: \$${oldPrice.toStringAsFixed(2)} ➔ \$${item.unitPrice.toStringAsFixed(2)}";
-      }
 
+        final oldPriceStr = CurrencyFormatterUtils.formatFull(oldPrice);
+        final newPriceStr = CurrencyFormatterUtils.formatFull(item.unitPrice);
+
+        priceDetails +=
+            "\n• ${item.packageInfo?.displayName ?? TTexts.unknownProduct.tr}: $oldPriceStr ➔ $newPriceStr";
+      }
       priceDetails += "\n\n${TTexts.sellingPriceChangeDetectedDesc.tr}";
 
       Get.dialog(
