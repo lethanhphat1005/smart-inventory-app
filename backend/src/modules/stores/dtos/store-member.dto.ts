@@ -1,4 +1,4 @@
-import type { StoreMember } from '../types/store.type.js';
+import type { StoreMember } from '../../../generated/prisma/client.js';
 
 export type StoreMembershipList = Pick<StoreMember, 'userId' | 'storeId'>;
 

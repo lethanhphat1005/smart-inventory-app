@@ -28,6 +28,7 @@ storeRouter.use(authenticate);
  *  - name: string (required) - tên cửa hàng
  *  - address?: string | null - địa chỉ cửa hàng
  *  - timezone?: string | null - múi giờ của cửa hàng
+ *  - currencyCode: string (required) - tiền tệ của cửa hàng
  *
  * API endpoint: PATCH /api/stores/
  * Cập nhật thông tin cửa hàng
@@ -36,7 +37,7 @@ storeRouter.use(authenticate);
  *  - name?: string - tên cửa hàng
  *  - address?: string | null - địa chỉ cửa hàng
  *  - timezone?: string | null - múi giờ của cửa hàng
- *
+ *  - currencyCode?: string - tiền tệ của cửa hàng
  */
 storeRouter
   .route('/')
