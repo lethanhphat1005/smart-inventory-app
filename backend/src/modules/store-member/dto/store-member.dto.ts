@@ -1,6 +1,5 @@
+import type { StoreMember, UserProfile } from '../../../generated/prisma/client.js';
 import type { StoreRole } from '../../../generated/prisma/enums.js';
-import type { StoreMember } from '../../stores/types/store.type.js';
-import type { UserProfile } from '../../user-profile/types/user-profile.type.js';
 
 export type StoreMemberResponseDto = StoreMember;
 

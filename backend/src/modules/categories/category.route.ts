@@ -103,6 +103,11 @@ categoryRouter.get(
  *
  * Path params:
  *  - categoryId: string (UUID, required)
+ * Body:
+ *  - canReassignToUncategorized?: boolean - nếu `true`,
+ *    backend sẽ chuyển toàn bộ product sang `Uncategorized` trước khi xóa
+ *
+ * Flow tương tự như DELETE /api/categories/:categoryId
  */
 categoryRouter.post(
   '/:categoryId/hide',

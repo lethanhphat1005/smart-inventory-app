@@ -33,6 +33,7 @@ export class StoreRepository {
         updatedAt: true,
         userId: true,
         activeStatus: true,
+        currencyCode: true,
         storeMembers: {
           where: {
             userId,
@@ -62,6 +63,7 @@ export class StoreRepository {
         updatedAt: true,
         userId: true,
         activeStatus: true,
+        currencyCode: true,
       },
     });
   }
@@ -91,6 +93,7 @@ export class StoreRepository {
         updatedAt: true,
         userId: true,
         activeStatus: true,
+        currencyCode: true,
       },
     });
   }
@@ -110,6 +113,7 @@ export class StoreRepository {
         updatedAt: true,
         userId: true,
         activeStatus: true,
+        currencyCode: true,
       },
     });
   }
@@ -131,6 +135,7 @@ export class StoreRepository {
         updatedAt: true,
         userId: true,
         activeStatus: true,
+        currencyCode: true,
       },
     });
   }
@@ -161,6 +166,7 @@ export class StoreRepository {
         updatedAt: true,
         userId: true,
         activeStatus: true,
+        currencyCode: true,
       },
     });
   }
@@ -181,6 +187,7 @@ export class StoreRepository {
         updatedAt: true,
         userId: true,
         activeStatus: true,
+        currencyCode: true,
       },
     });
   }

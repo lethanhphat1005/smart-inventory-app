@@ -1,4 +1,4 @@
-import type { UserProfile } from '../types/user-profile.type.js';
+import type { UserProfile } from '../../../generated/prisma/client.js';
 
 export type UserProfileResponseDto = UserProfile;
 
