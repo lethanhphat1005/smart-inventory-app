@@ -1,4 +1,5 @@
 // lib/features/workspace/providers/workspace_provider.dart
+import 'package:frontend/core/infrastructure/models/currency_model.dart';
 import 'package:frontend/core/infrastructure/models/store_member_model.dart';
 import 'package:frontend/core/infrastructure/models/store_model.dart';
 import 'package:get/get.dart';
@@ -92,6 +93,16 @@ class WorkspaceProvider {
           'role': newRole,
         },
       );
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<List<CurrencyModel>> getCurrencies() async {
+    try {
+      final response = await _apiClient.get('/api/currencies');
+      final List<dynamic> data = response.data['data'] ?? response.data;
+      return data.map((json) => CurrencyModel.fromJson(json)).toList();
     } catch (e) {
       rethrow;
     }

@@ -297,6 +297,8 @@ class TTexts {
   static const String locationErrorMessage = "location_error_message";
   static const String warningEmptyName = "warning_empty_name";
   static const String warningStoreExists = "warning_store_exists";
+  static const String storeCurrencyLabel = "store_currency_label";
+  static const String loadingCurrency = "loading_currency";
 
   // -- Invite Code & Join Store
   static const String inviteCodeTitle = "invite_code_title";
@@ -1342,17 +1344,17 @@ class TTexts {
   static const String settingsSelectCurrency = "settings_select_currency";
   static const String settingsVietnamese = "settings_vietnamese";
   static const String settingsEnglish = "settings_english";
-  static const String currencyRestrictedMessage = "currency_restricted_message";  
+  static const String currencyRestrictedMessage = "currency_restricted_message";
 
   //Exceptions
   static const String userNotFound = "user_not_found";
   static const String userIdNotFound = "user_id_not_found";
 
-  //Member
+  // -- Member
   static const String profileNoMembers = 'profile_no_members';
   static const String profileNoMembersSubtitle = 'profile_no_members_subtitle';
 
-  //-- System
+  // -- System
   static const String systemSnackbarTitle = "system_snackbar_title";
   static const String systemSnackbar403Error = "system_snackbar_403_error";
 

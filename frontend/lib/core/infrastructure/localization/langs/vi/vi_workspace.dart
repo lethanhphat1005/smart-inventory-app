@@ -1,4 +1,4 @@
- import 'package:frontend/core/infrastructure/constants/text_strings.dart';
+import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 
 final Map<String, String> viWorkspace = {
   // -- Workspace Selection
@@ -47,6 +47,8 @@ final Map<String, String> viWorkspace = {
   TTexts.warningEmptyName: "Vui lòng nhập tên workspace.",
   TTexts.warningStoreExists:
       "Workspace với tên hoặc địa chỉ này đã tồn tại. Vui lòng thử tên khác.",
+  TTexts.storeCurrencyLabel: "Chọn loại tiền tệ *",
+  TTexts.loadingCurrency: "Đang tải tiền tệ...",
 
   // -- Invite Code & Join Store
   TTexts.inviteCodeTitle: "Mã Mời Của Bạn",

@@ -49,6 +49,8 @@ final Map<String, String> enWorkspace = {
   TTexts.warningEmptyName: "Please enter a workspace name.",
   TTexts.warningStoreExists:
       "A workspace with this name or address already exists. Please try another.",
+  TTexts.storeCurrencyLabel: "Store Currency *",
+  TTexts.loadingCurrency: "Loading currencies...",
 
   // -- Invite Code & Join Store
   TTexts.inviteCodeTitle: "Your Invite Code",
