@@ -51,8 +51,13 @@ class JoinStoreController extends GetxController with TErrorHandler {
           title: TTexts.joinSuccessTitle.tr,
           message: TTexts.joinSuccessMessage.tr);
 
-      await _storeService.saveSelectedStore(joinedStore.storeId,
-          joinedStore.name, joinedStore.role, joinedStore.inviteCode ?? '');
+      await _storeService.saveSelectedStore(
+        joinedStore.storeId,
+        joinedStore.name,
+        joinedStore.role,
+        joinedStore.inviteCode ?? '',
+        joinedStore.currencyCode ?? 'VND',
+      );
 
       Get.offAllNamed(AppRoutes.main);
     } on DioException catch (e) {

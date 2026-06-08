@@ -30,42 +30,56 @@ class _SettingsLanguageDropdownWidgetState
   void initState() {
     super.initState();
     _animationController = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 250));
+        vsync: this, duration: const Duration(milliseconds: 200));
     _animation = CurvedAnimation(
         parent: _animationController, curve: Curves.easeOutCubic);
   }
 
   @override
   void dispose() {
-    if (_overlayEntry != null) {
-      _overlayEntry!.remove();
-      _overlayEntry = null;
-    }
+    _removeOverlay();
     _animationController.dispose();
     super.dispose();
   }
 
-  void _toggleDropdown() {
-    _isOpen ? _closeDropdown() : _openDropdown();
-  }
-
-  void _openDropdown() {
-    _overlayEntry = _createOverlayEntry();
-    Overlay.of(context).insert(_overlayEntry!);
-    setState(() => _isOpen = true);
-    _animationController.forward();
-  }
-
-  void _closeDropdown() {
-    _animationController.reverse().then((_) {
-      if (mounted) _removeOverlay();
-    });
-  }
-
   void _removeOverlay() {
-    _overlayEntry?.remove();
-    _overlayEntry = null;
-    if (mounted) setState(() => _isOpen = false);
+    if (_overlayEntry != null) {
+      _overlayEntry!.remove();
+      _overlayEntry = null;
+    }
+  }
+
+  void _toggleDropdown() {
+    if (_isOpen) {
+      _animationController.reverse().then((_) {
+        _removeOverlay();
+        if (mounted) setState(() => _isOpen = false);
+      });
+    } else {
+      _overlayEntry = _createOverlayEntry();
+      Overlay.of(context).insert(_overlayEntry!);
+      setState(() => _isOpen = true);
+      _animationController.forward();
+    }
+  }
+
+  // Widget tạo Icon Quốc Kỳ giống hệt Icon Tiền Tệ
+  Widget _buildLanguageIcon(String emoji) {
+    return Container(
+      width: 32,
+      height: 32,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: LinearGradient(colors: [
+          AppColors.primary.withOpacity(0.2),
+          AppColors.primary.withOpacity(0.05)
+        ]),
+        border: Border.all(color: AppColors.primary.withOpacity(0.25)),
+      ),
+      alignment: Alignment.center,
+      child: Text(emoji,
+          style: TextStyle(fontSize: 16, fontFamily: AppFonts.mainFont)),
+    );
   }
 
   OverlayEntry _createOverlayEntry() {
@@ -77,103 +91,99 @@ class _SettingsLanguageDropdownWidgetState
       builder: (context) => Stack(
         children: [
           GestureDetector(
-            onTap: _closeDropdown,
-            behavior: HitTestBehavior.translucent,
-            child: Container(color: Colors.transparent),
-          ),
+              onTap: _toggleDropdown,
+              behavior: HitTestBehavior.translucent,
+              child: Container(color: Colors.transparent)),
           CompositedTransformFollower(
             link: _layerLink,
-            showWhenUnlinked: false,
             offset: Offset(0, size.height + 8),
             child: Material(
               color: Colors.transparent,
               child: SizeTransition(
                 sizeFactor: _animation,
-                axisAlignment: -1,
                 child: Container(
                   width: size.width,
                   constraints: const BoxConstraints(maxHeight: 250),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(AppSizes.radius8),
+                    boxShadow: [
+                      BoxShadow(
+                          color: Colors.black.withOpacity(0.1), blurRadius: 20)
+                    ],
+                  ),
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(AppSizes.radius16),
+                    borderRadius: BorderRadius.circular(AppSizes.radius8),
                     child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                      filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
                       child: Container(
                         decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              Colors.white.withOpacity(0.6),
-                              Colors.white.withOpacity(0.15),
-                            ],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          borderRadius:
-                              BorderRadius.circular(AppSizes.radius16),
-                          border: Border.all(
-                              color: Colors.white.withOpacity(0.7), width: 1.5),
-                          boxShadow: [
-                            BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
-                                blurRadius: 20,
-                                offset: const Offset(0, 10))
-                          ],
-                        ),
-                        child: ListView.separated(
-                          padding: EdgeInsets.zero,
-                          shrinkWrap: true,
-                          itemCount: controller.supportedLanguages.length,
-                          separatorBuilder: (_, __) => Divider(
-                              height: 1, color: Colors.white.withOpacity(0.3)),
-                          itemBuilder: (context, index) {
-                            final lang = controller.supportedLanguages[index];
-                            return InkWell(
-                              onTap: () {
-                                // 1. Xóa nóng Overlay KHÔNG chờ animation để tránh lỗi defunct
-                                if (_overlayEntry != null) {
-                                  _overlayEntry!.remove();
-                                  _overlayEntry = null;
-                                }
+                            color: Colors.white.withOpacity(0.95),
+                            border: Border.all(color: Colors.grey.shade200),
+                            borderRadius:
+                                BorderRadius.circular(AppSizes.radius8)),
+                        // Ngôn ngữ không dùng Obx vì Get.updateLocale sẽ tự rebuild toàn bộ app
+                        child: Builder(builder: (context) {
+                          final currentLangCode =
+                              controller.storage.read('app_language') ?? 'vi';
+                          final sortedList =
+                              List.from(controller.supportedLanguages);
 
-                                // 2. Cập nhật state nội bộ
-                                if (mounted) {
-                                  setState(() => _isOpen = false);
-                                }
+                          // Thuật toán tách lọc và đưa ngôn ngữ đang chọn lên đầu danh sách
+                          final selectedIndex = sortedList
+                              .indexWhere((l) => l.code == currentLangCode);
+                          if (selectedIndex != -1) {
+                            final selectedItem =
+                                sortedList.removeAt(selectedIndex);
+                            sortedList.insert(0, selectedItem);
+                          }
 
-                                // 3. Gọi GetX đổi ngôn ngữ (rebuild toàn app)
-                                controller.changeLanguage(lang);
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 16, vertical: 14),
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      width: 28,
-                                      height: 28,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: Colors.grey.shade200,
+                          return ListView.separated(
+                            padding: EdgeInsets.zero,
+                            shrinkWrap: true,
+                            itemCount: sortedList.length,
+                            separatorBuilder: (_, __) =>
+                                Divider(height: 1, color: Colors.grey.shade200),
+                            itemBuilder: (context, index) {
+                              final lang = sortedList[index];
+                              final isSelected = lang.code == currentLangCode;
+
+                              return InkWell(
+                                onTap: () {
+                                  _toggleDropdown();
+                                  controller.changeLanguage(lang);
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: AppSizes.p16, vertical: 12),
+                                  color: isSelected
+                                      ? AppColors.primary.withOpacity(0.05)
+                                      : Colors.transparent,
+                                  child: Row(
+                                    children: [
+                                      _buildLanguageIcon(lang.flagEmoji),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Text(lang.name,
+                                            style: TextStyle(
+                                                fontFamily: AppFonts.mainFont,
+                                                fontSize: 12, // ĐỒNG BỘ SIZE 12
+                                                fontWeight: isSelected
+                                                    ? FontWeight.bold
+                                                    : FontWeight.w500,
+                                                color: isSelected
+                                                    ? AppColors.primary
+                                                    : AppColors.primaryText)),
                                       ),
-                                      clipBehavior: Clip.antiAlias,
-                                      alignment: Alignment.center,
-                                      child: Text(
-                                        lang.flagEmoji,
-                                        style: const TextStyle(fontSize: 18),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Text(lang.name,
-                                        style: TextStyle(
-                                            fontFamily: AppFonts.mainFont,
-                                            fontSize: 14,
-                                            color: AppColors.primaryText,
-                                            fontWeight: FontWeight.w600)),
-                                  ],
+                                      if (isSelected)
+                                        const Icon(Icons.check_circle,
+                                            color: AppColors.primary, size: 18),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            );
-                          },
-                        ),
+                              );
+                            },
+                          );
+                        }),
                       ),
                     ),
                   ),
@@ -190,91 +200,68 @@ class _SettingsLanguageDropdownWidgetState
   Widget build(BuildContext context) {
     final controller = Get.find<SettingsController>();
 
+    // Lấy ngôn ngữ hiện tại đang được lưu trong hệ thống
+    final currentLangCode = controller.storage.read('app_language') ?? 'vi';
+    final selectedLang = controller.supportedLanguages.firstWhere(
+      (l) => l.code == currentLangCode,
+      orElse: () => controller.supportedLanguages.first,
+    );
+
     return CompositedTransformTarget(
       link: _layerLink,
-      child: GestureDetector(
-        onTap: _toggleDropdown,
-        child: ValueListenableBuilder<TextEditingValue>(
-          valueListenable: controller.languageController,
-          builder: (context, value, child) {
-            final selectedLang = controller.supportedLanguages.firstWhere(
-              (lang) => lang.name == value.text,
-              orElse: () => controller.supportedLanguages.first,
-            );
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Label Title
+          Text(
+            TTexts.settingsLanguage.tr,
+            style: TextStyle(
+              fontFamily: AppFonts.mainFont,
+              fontSize: 12, // ĐỒNG BỘ SIZE 12
+              fontWeight: FontWeight.w500,
+              color: AppColors.subText,
+            ),
+          ),
+          const SizedBox(height: AppSizes.p8),
 
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // 1. Label (Giống TTextFormFieldWidget)
-                Text(
-                  TTexts.settingsLanguage.tr,
-                  style: TextStyle(
-                    fontFamily: AppFonts.mainFont,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.subText,
-                  ),
-                ),
-                const SizedBox(height: AppSizes.p8),
-
-                // 2. Ô Input giả lập
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSizes.p16,
-                    vertical: 11,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.withOpacity(0.05),
-                    borderRadius: BorderRadius.circular(AppSizes.radius8),
-                  ),
-                  child: Row(
-                    children: [
-                      // --- Cờ hình tròn ---
-                      Container(
-                        width: 28,
-                        height: 28,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.grey.shade200,
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          selectedLang.flagEmoji,
-                          style: const TextStyle(fontSize: 18),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-
-                      // --- Text ngôn ngữ ---
-                      Expanded(
-                        child: Text(
-                          selectedLang.name,
-                          style: TextStyle(
+          // Input Container
+          InkWell(
+            onTap: _toggleDropdown,
+            borderRadius: BorderRadius.circular(AppSizes.radius8),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              padding: const EdgeInsets.symmetric(
+                  horizontal: AppSizes.p16, vertical: 14),
+              decoration: BoxDecoration(
+                color: Colors.transparent,
+                borderRadius: BorderRadius.circular(AppSizes.radius8),
+                border: Border.all(
+                    color: _isOpen ? AppColors.primary : Colors.grey.shade300,
+                    width: _isOpen ? 1.5 : 1.0),
+              ),
+              child: Row(
+                children: [
+                  _buildLanguageIcon(selectedLang.flagEmoji),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(selectedLang.name,
+                        style: TextStyle(
                             fontFamily: AppFonts.mainFont,
                             fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.subText,
-                          ),
-                        ),
-                      ),
-
-                      // --- Suffix Icon (Mũi tên xoay) ---
-                      AnimatedRotation(
-                        turns: _isOpen ? 0.5 : 0.0,
-                        duration: const Duration(milliseconds: 200),
-                        child: const Icon(
-                          Iconsax.arrow_down_1_copy,
-                          size: 20,
-                          color: AppColors.primaryText,
-                        ),
-                      ),
-                    ],
+                            color: AppColors.primaryText,
+                            fontWeight: FontWeight.w500)),
                   ),
-                ),
-              ],
-            );
-          },
-        ),
+                  AnimatedRotation(
+                    turns: _isOpen ? 0.5 : 0.0,
+                    duration: const Duration(milliseconds: 200),
+                    child: const Icon(Iconsax.arrow_down_1_copy,
+                        size: 20, color: AppColors.softGrey),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

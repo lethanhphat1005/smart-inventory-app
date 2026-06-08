@@ -1,7 +1,7 @@
 import 'package:intl/intl.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:frontend/features/profile/controllers/settings_controller.dart';
+import 'package:frontend/core/state/services/store_service.dart';
 
 class CurrencyFormatterUtils {
   /// Dùng để hiển thị số đầy đủ (VD: Trang chi tiết, Header doanh thu)
@@ -9,8 +9,8 @@ class CurrencyFormatterUtils {
   static String formatFull(double amount) {
     final config = _getCurrencyConfig();
     int finalDecimals = config.decimals;
-    if (amount % 1 != 0 && amount != 0) {
-      finalDecimals = 2;
+    if (amount % 1 != 0 && amount != 0 && config.decimals > 0) {
+      finalDecimals = 2; // Giữ 2 số thập phân nếu số tiền bị lẻ
     }
 
     final formatter = NumberFormat.currency(
@@ -44,57 +44,153 @@ class CurrencyFormatterUtils {
     }
   }
 
-  /// Hàm nội bộ cấu hình quy tắc tiền tệ động dựa vào Settings
+  /// Hàm nội bộ cấu hình quy tắc tiền tệ động dựa trên 20 loại tiền từ hệ thống
   static _CurrencyConfig _getCurrencyConfig() {
-    String code = 'USD';
-    String symbol = '\$';
+    String code = 'VND'; // Mặc định nếu không tìm thấy
 
-    // 1. Lấy giá trị từ SettingsController
-    // Nhờ việc gọi `.value` ở đây, bất kỳ widget nào dùng Obx gọi hàm format này
-    // đều sẽ tự động render lại khi tiền tệ bị thay đổi!
-    if (Get.isRegistered<SettingsController>()) {
-      final settings = Get.find<SettingsController>();
-      code = settings.currentCurrencyCode.value;
-      symbol = settings.currentCurrencySymbol.value;
+    // 1. Lấy mã Tiền tệ trực tiếp từ StoreService (của Cửa hàng hiện tại)
+    if (Get.isRegistered<StoreService>()) {
+      final storeService = Get.find<StoreService>();
+      final serviceCode = storeService.currentCurrencyCode.value;
+      if (serviceCode.isNotEmpty) {
+        code = serviceCode;
+      }
     } else {
-      // 2. Đọc từ Storage nếu app vừa mở lên Controller chưa kịp khởi tạo
+      // 2. Đọc từ Storage nếu app vừa mở lên Service chưa kịp khởi tạo
       final storage = GetStorage();
-      code = storage.read('app_currency_code') ?? 'USD';
-      symbol = storage.read('app_currency_symbol') ?? '\$';
+      final storedCode = storage.read('STORE_CURRENCY_CODE');
+      if (storedCode != null && storedCode.toString().isNotEmpty) {
+        code = storedCode;
+      }
     }
 
-    // 3. THIẾT LẬP QUY TẮC RIÊNG CHO TỪNG QUỐC GIA
-    int decimals = 2;
-    String locale = 'en_US';
-    String pattern =
-        '\u00A4#,##0.00'; // \u00A4 là biểu tượng tiền tệ (Symbol đứng trước)
+    // 3. THIẾT LẬP QUY TẮC & KÝ HIỆU RIÊNG CHO 20 LOẠI TIỀN TỆ
+    String symbol;
+    int decimals;
+    String locale;
+    String pattern;
 
     switch (code) {
       case 'VND':
-        decimals = 0; // VNĐ không có số thập phân
+        symbol = '₫';
+        decimals = 0;
         locale = 'vi_VN';
-        pattern = '#,##0 \u00A4'; // Symbol đứng sau, có khoảng trắng
+        pattern = '#,##0 \u00A4'; // Ký hiệu đứng sau, có cách
         break;
       case 'EUR':
+        symbol = '€';
         decimals = 2;
-        locale = 'de_DE'; // Dùng chuẩn Đức/Pháp cho chuẩn dấu phẩy châu Âu
-        pattern = '#,##0.00 \u00A4'; // Symbol đứng sau, có khoảng trắng
+        locale = 'de_DE';
+        pattern = '#,##0.00 \u00A4';
         break;
       case 'JPY':
-      case 'KRW':
-        decimals = 0; // Yên và Won thường không dùng thập phân
-        locale = 'en_US';
-        pattern = '\u00A4#,##0'; // Symbol đứng trước
-        break;
-      case 'CNY':
-        decimals = 2;
-        locale = 'zh_CN';
-        pattern = '\u00A4#,##0.00'; // Symbol đứng trước
+        symbol = '¥';
+        decimals = 0;
+        locale = 'ja_JP';
+        pattern = '\u00A4#,##0'; // Ký hiệu đứng trước
         break;
       case 'GBP':
+        symbol = '£';
         decimals = 2;
         locale = 'en_GB';
-        pattern = '\u00A4#,##0.00'; // Symbol đứng trước
+        pattern = '\u00A4#,##0.00';
+        break;
+      case 'AUD':
+        symbol = 'A\$';
+        decimals = 2;
+        locale = 'en_AU';
+        pattern = '\u00A4#,##0.00';
+        break;
+      case 'CAD':
+        symbol = 'C\$';
+        decimals = 2;
+        locale = 'en_CA';
+        pattern = '\u00A4#,##0.00';
+        break;
+      case 'CHF':
+        symbol = 'CHF';
+        decimals = 2;
+        locale = 'de_CH';
+        pattern = '#,##0.00 \u00A4'; // Ký hiệu đứng sau
+        break;
+      case 'CNY':
+        symbol = '¥';
+        decimals = 2;
+        locale = 'zh_CN';
+        pattern = '\u00A4#,##0.00';
+        break;
+      case 'HKD':
+        symbol = 'HK\$';
+        decimals = 2;
+        locale = 'en_HK';
+        pattern = '\u00A4#,##0.00';
+        break;
+      case 'NZD':
+        symbol = 'NZ\$';
+        decimals = 2;
+        locale = 'en_NZ';
+        pattern = '\u00A4#,##0.00';
+        break;
+      case 'KRW':
+        symbol = '₩';
+        decimals = 0;
+        locale = 'ko_KR';
+        pattern = '\u00A4#,##0';
+        break;
+      case 'SGD':
+        symbol = 'S\$';
+        decimals = 2;
+        locale = 'en_SG';
+        pattern = '\u00A4#,##0.00';
+        break;
+      case 'INR':
+        symbol = '₹';
+        decimals = 2;
+        locale = 'en_IN';
+        pattern = '\u00A4#,##0.00';
+        break;
+      case 'RUB':
+        symbol = '₽';
+        decimals = 2;
+        locale = 'ru_RU';
+        pattern = '#,##0.00 \u00A4'; // Đứng sau
+        break;
+      case 'ZAR':
+        symbol = 'R';
+        decimals = 2;
+        locale = 'en_ZA';
+        pattern = '\u00A4 #,##0.00'; // Đứng trước, có cách
+        break;
+      case 'BRL':
+        symbol = 'R\$';
+        decimals = 2;
+        locale = 'pt_BR';
+        pattern = '\u00A4 #,##0.00'; // Đứng trước, có cách
+        break;
+      case 'TWD':
+        symbol = 'NT\$';
+        decimals = 0; // Thường không dùng thập phân
+        locale = 'zh_TW';
+        pattern = '\u00A4#,##0';
+        break;
+      case 'THB':
+        symbol = '฿';
+        decimals = 2;
+        locale = 'th_TH';
+        pattern = '\u00A4#,##0.00';
+        break;
+      case 'MYR':
+        symbol = 'RM';
+        decimals = 2;
+        locale = 'ms_MY';
+        pattern = '\u00A4#,##0.00';
+        break;
+      case 'USD':
+      default:
+        symbol = '\$';
+        decimals = 2;
+        locale = 'en_US';
+        pattern = '\u00A4#,##0.00';
         break;
     }
 

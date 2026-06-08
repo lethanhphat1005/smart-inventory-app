@@ -8,6 +8,7 @@ class StoreModel {
   final String? address;
   final String role;
   final String activeStatus;
+  final String? currencyCode;
 
   StoreModel({
     required this.storeId,
@@ -16,6 +17,7 @@ class StoreModel {
     this.address,
     required this.role,
     required this.activeStatus,
+    this.currencyCode,
   });
 
   factory StoreModel.fromJson(Map<String, dynamic> json) {
@@ -26,6 +28,7 @@ class StoreModel {
       address: json['address'],
       role: json['role'] ?? 'staff',
       activeStatus: json['activeStatus'] ?? 'active',
+      currencyCode: json['currencyCode'],
     );
   }
 
@@ -36,6 +39,7 @@ class StoreModel {
       'address': address,
       'role': role,
       'activeStatus': activeStatus,
+      'currencyCode': currencyCode,
     };
   }
 }

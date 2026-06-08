@@ -191,7 +191,6 @@ class CreateStoreController extends GetxController {
 
       String currentTimezone = 'Asia/Ho_Chi_Minh';
       try {
-        // Fix lỗi TimezoneInfo bằng .toString()
         final dynamic tz = await FlutterTimezone.getLocalTimezone();
         currentTimezone = tz.toString();
       } catch (_) {}
@@ -214,8 +213,9 @@ class CreateStoreController extends GetxController {
       await _storeService.saveSelectedStore(
         createdStore.storeId,
         createdStore.name,
-        'owner', // Gán cứng owner vì người tạo chắc chắn là owner
+        'owner',
         createdStore.inviteCode ?? '',
+        createdStore.currencyCode ?? 'VND',
       );
 
       // 3. RESET NAVIGATION VỀ TAB HOME

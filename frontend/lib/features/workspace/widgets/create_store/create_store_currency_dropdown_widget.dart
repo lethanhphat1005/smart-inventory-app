@@ -78,7 +78,7 @@ class _CreateStoreCurrencyDropdownWidgetState
       alignment: Alignment.center,
       child: Text(symbol,
           style: TextStyle(
-              fontSize: 12,
+              fontSize: 12, // Đã chỉnh đồng bộ 12
               fontFamily: AppFonts.mainFont,
               fontWeight: FontWeight.bold,
               color: AppColors.primary)),
@@ -124,39 +124,68 @@ class _CreateStoreCurrencyDropdownWidgetState
                             border: Border.all(color: Colors.grey.shade200),
                             borderRadius:
                                 BorderRadius.circular(AppSizes.radius8)),
-                        child: Obx(() => ListView.separated(
-                              padding: EdgeInsets.zero,
-                              shrinkWrap: true,
-                              itemCount: controller.currencies.length,
-                              separatorBuilder: (_, __) => Divider(
-                                  height: 1, color: Colors.grey.shade200),
-                              itemBuilder: (context, index) {
-                                final currency = controller.currencies[index];
-                                return InkWell(
-                                  onTap: () {
-                                    controller.selectedCurrency.value =
-                                        currency;
-                                    _toggleDropdown();
-                                  },
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: AppSizes.p16, vertical: 12),
-                                    child: Row(
-                                      children: [
-                                        _buildCurrencyIcon(currency.symbol),
-                                        const SizedBox(width: 12),
-                                        Text(currency.name,
+                        child: Obx(() {
+                          final selectedCode =
+                              controller.selectedCurrency.value?.code;
+                          final sortedList = List.from(controller.currencies);
+
+                          if (selectedCode != null) {
+                            final selectedIndex = sortedList
+                                .indexWhere((c) => c.code == selectedCode);
+                            if (selectedIndex != -1) {
+                              final selectedItem =
+                                  sortedList.removeAt(selectedIndex);
+                              sortedList.insert(0, selectedItem);
+                            }
+                          }
+
+                          return ListView.separated(
+                            padding: EdgeInsets.zero,
+                            shrinkWrap: true,
+                            itemCount: sortedList.length,
+                            separatorBuilder: (_, __) =>
+                                Divider(height: 1, color: Colors.grey.shade200),
+                            itemBuilder: (context, index) {
+                              final currency = sortedList[index];
+                              final isSelected = currency.code == selectedCode;
+
+                              return InkWell(
+                                onTap: () {
+                                  controller.selectedCurrency.value = currency;
+                                  _toggleDropdown();
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: AppSizes.p16, vertical: 12),
+                                  color: isSelected
+                                      ? AppColors.primary.withOpacity(0.05)
+                                      : Colors.transparent,
+                                  child: Row(
+                                    children: [
+                                      _buildCurrencyIcon(currency.symbol),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Text(currency.name,
                                             style: TextStyle(
                                                 fontFamily: AppFonts.mainFont,
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w500,
-                                                color: AppColors.primaryText)),
-                                      ],
-                                    ),
+                                                fontSize: 12,
+                                                fontWeight: isSelected
+                                                    ? FontWeight.bold
+                                                    : FontWeight.w500,
+                                                color: isSelected
+                                                    ? AppColors.primary
+                                                    : AppColors.primaryText)),
+                                      ),
+                                      if (isSelected)
+                                        const Icon(Icons.check_circle,
+                                            color: AppColors.primary, size: 18),
+                                    ],
                                   ),
-                                );
-                              },
-                            )),
+                                ),
+                              );
+                            },
+                          );
+                        }),
                       ),
                     ),
                   ),
@@ -184,7 +213,6 @@ class _CreateStoreCurrencyDropdownWidgetState
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 1. Label
             RichText(
               text: TextSpan(
                 text: TTexts.storeCurrencyLabel.tr.replaceAll(' *', ''),
@@ -200,15 +228,13 @@ class _CreateStoreCurrencyDropdownWidgetState
                     style: TextStyle(
                       color: AppColors.alertText,
                       fontWeight: FontWeight.bold,
-                      fontSize: 12,
+                      fontSize: 13,
                     ),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: AppSizes.p8),
-
-            // 2. Input Box
             InkWell(
               onTap: _toggleDropdown,
               borderRadius: BorderRadius.circular(AppSizes.radius8),
@@ -225,7 +251,6 @@ class _CreateStoreCurrencyDropdownWidgetState
                 child: Row(
                   children: [
                     if (selected != null) ...[
-                      // Loaded state
                       _buildCurrencyIcon(selected.symbol),
                       const SizedBox(width: 12),
                       Expanded(
@@ -235,6 +260,13 @@ class _CreateStoreCurrencyDropdownWidgetState
                                   fontSize: 12,
                                   color: AppColors.primaryText,
                                   fontWeight: FontWeight.w500))),
+                    ] else ...[
+                      Expanded(
+                          child: Text(TTexts.loading.tr,
+                              style: TextStyle(
+                                  color: AppColors.softGrey,
+                                  fontSize: 12,
+                                  fontFamily: AppFonts.mainFont))),
                     ],
                     AnimatedRotation(
                       turns: _isOpen ? 0.5 : 0.0,

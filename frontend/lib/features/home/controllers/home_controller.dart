@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/utils/error_handler_utils.dart';
+import 'package:frontend/core/state/services/store_service.dart';
 import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/features/home/model/home_adjustment_model.dart';
 import 'package:frontend/features/home/providers/home_provider.dart';
@@ -21,6 +22,7 @@ import 'package:frontend/core/ui/theme/app_sizes.dart';
 
 class HomeController extends GetxController with TErrorHandler {
   final HomeProvider _provider = HomeProvider();
+  final StoreService _storeService = Get.find<StoreService>();
 
   final RxBool isLoading = true.obs;
 
@@ -48,11 +50,20 @@ class HomeController extends GetxController with TErrorHandler {
   @override
   void onInit() {
     super.onInit();
+
     loadAllHomeData();
     getMyProfile();
 
     ever(notificationController.unreadCount, (int count) {
       unreadCount.value = count;
+    });
+
+    ever(_storeService.currentCurrencyCode, (_) {
+      debugPrint(
+          "Đã phát hiện đổi tiền tệ sang: ${_storeService.currentCurrencyCode.value}");
+      // Khi tiền tệ đổi, ép toàn bộ HomeController cập nhật lại (Rebuild UI)
+      update();
+      // Hoặc nếu bạn muốn nó gọi lại API fetch data luôn thì gọi: loadAllHomeData();
     });
     unreadCount.value = notificationController.unreadCount.value;
   }

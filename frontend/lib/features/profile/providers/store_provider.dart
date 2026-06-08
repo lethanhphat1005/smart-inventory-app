@@ -82,4 +82,16 @@ class StoreProvider {
       rethrow;
     }
   }
+
+  Future<List<dynamic>> getCurrencies() async {
+    try {
+      final response = await _apiClient.get('/api/currencies');
+      if (response.data != null && response.data['data'] != null) {
+        return response.data['data'] as List<dynamic>;
+      }
+      return [];
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

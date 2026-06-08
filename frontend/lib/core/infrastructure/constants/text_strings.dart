@@ -1345,6 +1345,8 @@ class TTexts {
   static const String settingsVietnamese = "settings_vietnamese";
   static const String settingsEnglish = "settings_english";
   static const String currencyRestrictedMessage = "currency_restricted_message";
+  static const String currencyUpdateSuccess = "currency_update_success";
+  static const String currencyUpdateFailed = "currency_update_failed";
 
   //Exceptions
   static const String userNotFound = "user_not_found";
