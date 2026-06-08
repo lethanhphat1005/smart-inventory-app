@@ -22,6 +22,9 @@ final Map<String, String> enInventory = {
   TTexts.hide: 'Hide',
   TTexts.hideCategorySuccessMessage: 'Category hidden successfully.',
   TTexts.addNewProductDesc: 'Add a new product item to this category.',
+  TTexts.categoryInUseErrorTitle: 'Category in Use',
+  TTexts.categoryInUseErrorDesc: 'This category contains @count products. Do you want to move them all to "Uncategorized" and proceed with deletion?',
+  TTexts.moveAndProceedBtn: 'Move & Delete',
 
   // -- Inventory Header & Health
   TTexts.stockValue: 'Stock Value',

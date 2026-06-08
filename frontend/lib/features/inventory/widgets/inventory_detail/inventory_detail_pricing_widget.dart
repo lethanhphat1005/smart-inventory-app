@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/infrastructure/utils/currency_formatter_utils.dart';
 import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:frontend/features/inventory/controllers/inventory_detail_controller.dart';
@@ -35,12 +36,14 @@ class InventoryDetailPricingWidget extends GetView<InventoryDetailController> {
         Text(title,
             style: const TextStyle(fontSize: 10, color: AppColors.subText)),
         const SizedBox(height: 4),
-        Text("\$${price.toStringAsFixed(2)}",
-            style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: color,
-                fontFamily: AppFonts.mainFont)),
+        Obx(() => Text(
+              CurrencyFormatterUtils.formatFull(price),
+              style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                  fontFamily: AppFonts.mainFont),
+            )),
       ],
     );
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/infrastructure/models/transaction_detail_model.dart';
 import 'package:frontend/core/infrastructure/models/transaction_model.dart';
+import 'package:frontend/core/infrastructure/utils/currency_formatter_utils.dart';
 import 'package:frontend/core/infrastructure/utils/error_handler_utils.dart';
 import 'package:frontend/core/ui/layouts/t_barcode_scanner_layout.dart';
 import 'package:frontend/features/home/controllers/home_controller.dart';
@@ -355,8 +356,12 @@ class InboundTransactionController extends GetxController with TErrorHandler {
         }
         final item = priceChangedItems[i];
         final oldPrice = item.packageInfo?.importPrice ?? 0.0;
+
+        final oldPriceStr = CurrencyFormatterUtils.formatFull(oldPrice);
+        final newPriceStr = CurrencyFormatterUtils.formatFull(item.unitPrice);
+
         priceDetails +=
-            "\n• ${item.packageInfo?.displayName ?? TTexts.unknownProduct.tr}: \$${oldPrice.toStringAsFixed(2)} ➔ \$${item.unitPrice.toStringAsFixed(2)}";
+            "\n• ${item.packageInfo?.displayName ?? TTexts.unknownProduct.tr}: $oldPriceStr ➔ $newPriceStr";
       }
 
       priceDetails += "\n\n${TTexts.priceChangeDetectedDesc.tr}";

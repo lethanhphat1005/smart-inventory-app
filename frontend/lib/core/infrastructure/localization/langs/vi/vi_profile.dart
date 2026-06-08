@@ -133,6 +133,10 @@ final Map<String, String> viProfile = {
   TTexts.settingsSelectLanguage: 'Chọn ngôn ngữ',
   TTexts.settingsCurrency: 'Tiền tệ',
   TTexts.settingsSelectCurrency: 'Chọn tiền tệ',
+  TTexts.currencyRestrictedMessage:
+      'Chỉ Quản lý (Manager) hoặc Chủ cửa hàng (Owner) mới có quyền thay đổi loại tiền tệ.',
+  TTexts.currencyUpdateSuccess: "Cập nhật loại tiền tệ thành công.",
+  TTexts.currencyUpdateFailed: "Không thể thay đổi tiền tệ. Vui lòng thử lại.",
 
   //Exceptions
   TTexts.userNotFound: 'Không tìm thấy thông tin người dùng',

@@ -297,6 +297,8 @@ class TTexts {
   static const String locationErrorMessage = "location_error_message";
   static const String warningEmptyName = "warning_empty_name";
   static const String warningStoreExists = "warning_store_exists";
+  static const String storeCurrencyLabel = "store_currency_label";
+  static const String loadingCurrency = "loading_currency";
 
   // -- Invite Code & Join Store
   static const String inviteCodeTitle = "invite_code_title";
@@ -473,6 +475,9 @@ class TTexts {
   static const String hideCategorySuccessMessage =
       'hide_category_success_message';
   static const String addNewProductDesc = "add_new_product_desc";
+  static const String categoryInUseErrorTitle = 'category_in_use_error_title';
+  static const String categoryInUseErrorDesc = 'category_in_use_error_desc';
+  static const String moveAndProceedBtn = 'move_and_proceed_btn';
 
   // -- Chatbot AI
   static const String chatbotName = "chatbot_name";
@@ -1339,16 +1344,19 @@ class TTexts {
   static const String settingsSelectCurrency = "settings_select_currency";
   static const String settingsVietnamese = "settings_vietnamese";
   static const String settingsEnglish = "settings_english";
+  static const String currencyRestrictedMessage = "currency_restricted_message";
+  static const String currencyUpdateSuccess = "currency_update_success";
+  static const String currencyUpdateFailed = "currency_update_failed";
 
   //Exceptions
   static const String userNotFound = "user_not_found";
   static const String userIdNotFound = "user_id_not_found";
 
-  //Member
+  // -- Member
   static const String profileNoMembers = 'profile_no_members';
   static const String profileNoMembersSubtitle = 'profile_no_members_subtitle';
 
-  //-- System
+  // -- System
   static const String systemSnackbarTitle = "system_snackbar_title";
   static const String systemSnackbar403Error = "system_snackbar_403_error";
 

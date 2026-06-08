@@ -42,10 +42,14 @@ class InventoryProvider {
         data: {'canReassignToUncategorized': canReassignToUncategorized});
   }
 
-  Future<void> hideDefaultCategory(String categoryId) async {
-    await _apiClient.post('/api/categories/$categoryId/hide');
+  Future<void> hideDefaultCategory(String categoryId,
+      {bool canReassignToUncategorized = false}) async {
+    await _apiClient.post(
+      '/api/categories/$categoryId/hide',
+      data: {'canReassignToUncategorized': canReassignToUncategorized},
+    );
   }
-
+  
   // ==============================================================
   // HIDDEN CATEGORIES
   // ==============================================================

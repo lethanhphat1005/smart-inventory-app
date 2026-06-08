@@ -4,12 +4,13 @@ import 'package:get_storage/get_storage.dart';
 class StoreService extends GetxService {
   final storage = GetStorage();
 
-  // Chỉ quản lý thông tin Không gian làm việc
+  // Quản lý thông tin Không gian làm việc
   final RxString currentStoreId = ''.obs;
   final RxString currentStoreName = ''.obs;
   final RxString currentRole = 'staff'.obs;
   final RxString currentStoreAddress = ''.obs;
-  final RxString currentInviteCode = ''.obs; 
+  final RxString currentInviteCode = ''.obs;
+  final RxString currentCurrencyCode = ''.obs;
 
   Future<StoreService> init() async {
     // Đọc từ ổ cứng xem lần trước đang xem dở cửa hàng nào
@@ -17,26 +18,28 @@ class StoreService extends GetxService {
     currentStoreName.value = storage.read('STORE_NAME') ?? '';
     currentRole.value = storage.read('STORE_ROLE') ?? 'staff';
     currentStoreAddress.value = storage.read('STORE_ADDRESS') ?? '';
-    currentInviteCode.value =
-        storage.read('STORE_INVITE_CODE') ?? ''; 
+    currentInviteCode.value = storage.read('STORE_INVITE_CODE') ?? '';
+    currentCurrencyCode.value = storage.read('STORE_CURRENCY_CODE') ?? 'VND';
     return this;
   }
 
   // Lưu dữ liệu khi chọn một Không gian làm việc
   Future<void> saveSelectedStore(
-      String storeId, String storeName, String role, String inviteCode) async {
-    // Thêm tham số inviteCode
-    // 1. Lưu vào ổ cứng (Storage)
+      String storeId, String storeName, String role, String inviteCode,
+      [String currencyCode = 'VND']) async {
     await storage.write('STORE_ID', storeId);
     await storage.write('STORE_NAME', storeName);
     await storage.write('STORE_ROLE', role);
-    await storage.write('STORE_INVITE_CODE', inviteCode); 
+    await storage.write('STORE_INVITE_CODE', inviteCode);
+    await storage.write('STORE_CURRENCY_CODE', currencyCode);
 
     // 2. Lưu vào RAM để UI tự động đổi
     currentStoreId.value = storeId;
     currentStoreName.value = storeName;
     currentRole.value = role;
-    currentInviteCode.value = inviteCode; // Bổ sung
+    currentInviteCode.value = inviteCode;
+    currentCurrencyCode.value = currencyCode;
+    currentCurrencyCode.refresh();
   }
 
   // Hàm chỉ cập nhật riêng lẻ Invite Code (Dùng khi bấm "Tạo mã mới")
@@ -55,6 +58,7 @@ class StoreService extends GetxService {
   Future<void> updateStoreInfo({
     String? name,
     String? address,
+    String? currencyCode,
   }) async {
     if (name != null) {
       await storage.write('STORE_NAME', name);
@@ -65,6 +69,10 @@ class StoreService extends GetxService {
       await storage.write('STORE_ADDRESS', address);
       currentStoreAddress.value = address;
     }
+    if (currencyCode != null) {
+      await storage.write('STORE_CURRENCY_CODE', currencyCode);
+      currentCurrencyCode.value = currencyCode;
+    }
   }
 
   // Xóa dữ liệu Không gian làm việc (Dùng khi đăng xuất)
@@ -74,11 +82,13 @@ class StoreService extends GetxService {
     await storage.remove('STORE_ROLE');
     await storage.remove('STORE_ADDRESS');
     await storage.remove('STORE_INVITE_CODE');
-
+    await storage.remove('STORE_CURRENCY_CODE');
+    
     currentStoreId.value = '';
     currentStoreName.value = '';
     currentRole.value = 'staff';
     currentStoreAddress.value = '';
     currentInviteCode.value = '';
+    currentCurrencyCode.value = '';
   }
 }

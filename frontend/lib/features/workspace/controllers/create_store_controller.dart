@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
+import 'package:frontend/core/infrastructure/models/currency_model.dart';
 import 'package:frontend/core/infrastructure/utils/full_screen_loader_utils.dart';
 import 'package:frontend/features/workspace/provider/workspace_provider.dart';
 import 'package:get/get.dart';
@@ -29,15 +30,39 @@ class CreateStoreController extends GetxController {
   final currentAddress = "".obs;
   bool isMapReady = false;
 
-  // KHÔI PHỤC: Logic gợi ý địa chỉ
+  // Logic gợi ý địa chỉ
   final RxList<dynamic> addressPredictions = <dynamic>[].obs;
   Timer? _debounce;
 
   final WorkspaceProvider _workspaceProvider = WorkspaceProvider();
   final StoreService _storeService = Get.find<StoreService>();
 
-  // --- LOGIC MAP & GPS ---
+  // Logic chọn tiền tệ địa chỉ
+  final currencies = <CurrencyModel>[].obs;
+  final selectedCurrency = Rxn<CurrencyModel>();
 
+  @override
+  void onInit() {
+    super.onInit();
+    _fetchCurrencies();
+  }
+
+  Future<void> _fetchCurrencies() async {
+    try {
+      final list = await _workspaceProvider.getCurrencies();
+      currencies.assignAll(list);
+      if (currencies.isNotEmpty) {
+        selectedCurrency.value = currencies.firstWhere(
+          (element) => element.code == 'VND',
+          orElse: () => currencies.first,
+        );
+      }
+    } catch (e) {
+      debugPrint("Fetch currencies error: $e");
+    }
+  }
+
+  // --- LOGIC MAP & GPS ---
   void onMapCreated() {
     isMapReady = true;
     mapController.move(selectedLocation.value, 15.0);
@@ -155,12 +180,17 @@ class CreateStoreController extends GetxController {
       return;
     }
 
+    if (selectedCurrency.value == null) {
+      TSnackbarsWidget.warning(
+          title: "Thiếu thông tin", message: "Vui lòng chọn loại tiền tệ");
+      return;
+    }
+
     try {
       FullScreenLoaderUtils.openLoadingDialog(TTexts.creatingWorkspace.tr);
 
       String currentTimezone = 'Asia/Ho_Chi_Minh';
       try {
-        // Fix lỗi TimezoneInfo bằng .toString()
         final dynamic tz = await FlutterTimezone.getLocalTimezone();
         currentTimezone = tz.toString();
       } catch (_) {}
@@ -171,6 +201,7 @@ class CreateStoreController extends GetxController {
         "latitude": selectedLocation.value.latitude,
         "longitude": selectedLocation.value.longitude,
         "timezone": currentTimezone,
+        "currencyCode": selectedCurrency.value!.code,
       };
 
       final createdStore = await _workspaceProvider.createStore(payload);
@@ -182,8 +213,9 @@ class CreateStoreController extends GetxController {
       await _storeService.saveSelectedStore(
         createdStore.storeId,
         createdStore.name,
-        'owner', // Gán cứng owner vì người tạo chắc chắn là owner
+        'owner',
         createdStore.inviteCode ?? '',
+        createdStore.currencyCode ?? 'VND',
       );
 
       // 3. RESET NAVIGATION VỀ TAB HOME

@@ -59,6 +59,7 @@ class StoreSelectionController extends GetxController with TErrorHandler {
       final String currentName = store.name;
       final String currentRole = store.role;
       final String currentInviteCode = store.inviteCode ?? '';
+      final currentCurrencyCode = store.currencyCode ?? 'VND';
 
       if (currentId.isEmpty) {
         debugPrint("LỖI CRITICAL: ID Cửa hàng bị rỗng!");
@@ -82,8 +83,8 @@ class StoreSelectionController extends GetxController with TErrorHandler {
       debugPrint("LƯU VÀO MÁY STORE_ID: $currentId");
 
       // 1. Lưu vào máy và RAM
-      await _storeService.saveSelectedStore(
-          currentId, currentName, currentRole, currentInviteCode);
+      await _storeService.saveSelectedStore(currentId, currentName, currentRole,
+          currentInviteCode, currentCurrencyCode);
 
       // 2. Hiện thông báo Snackbar tham gia thành công
       TSnackbarsWidget.success(

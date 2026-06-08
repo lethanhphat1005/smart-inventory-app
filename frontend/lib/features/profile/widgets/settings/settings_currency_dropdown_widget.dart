@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/features/profile/controllers/settings_controller.dart';
+import 'package:frontend/features/profile/widgets/settings/settings_currency_skeleton_widget.dart';
 import 'package:get/get.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
+import 'package:frontend/core/ui/widgets/t_snackbars_widget.dart';
 
 class SettingsCurrencyDropdownWidget extends StatefulWidget {
   const SettingsCurrencyDropdownWidget({super.key});
@@ -30,73 +32,58 @@ class _SettingsCurrencyDropdownWidgetState
   void initState() {
     super.initState();
     _animationController = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 250));
+        vsync: this, duration: const Duration(milliseconds: 200));
     _animation = CurvedAnimation(
         parent: _animationController, curve: Curves.easeOutCubic);
   }
 
   @override
   void dispose() {
-    if (_overlayEntry != null) {
-      _overlayEntry!.remove();
-      _overlayEntry = null;
-    }
+    _removeOverlay();
     _animationController.dispose();
     super.dispose();
   }
 
-  void _toggleDropdown() {
-    _isOpen ? _closeDropdown() : _openDropdown();
-  }
-
-  void _openDropdown() {
-    _overlayEntry = _createOverlayEntry();
-    Overlay.of(context).insert(_overlayEntry!);
-    setState(() => _isOpen = true);
-    _animationController.forward();
-  }
-
-  void _closeDropdown() {
-    _animationController.reverse().then((_) {
-      if (mounted) _removeOverlay();
-    });
-  }
-
   void _removeOverlay() {
-    _overlayEntry?.remove();
-    _overlayEntry = null;
-    if (mounted) setState(() => _isOpen = false);
+    if (_overlayEntry != null) {
+      _overlayEntry!.remove();
+      _overlayEntry = null;
+    }
   }
 
-  // Widget tạo Icon Tiền Tệ "Premium" (Có Gradient và Viền)
+  void _toggleDropdown() {
+    if (_isOpen) {
+      _animationController.reverse().then((_) {
+        _removeOverlay();
+        if (mounted) setState(() => _isOpen = false);
+      });
+    } else {
+      _overlayEntry = _createOverlayEntry();
+      Overlay.of(context).insert(_overlayEntry!);
+      setState(() => _isOpen = true);
+      _animationController.forward();
+    }
+  }
+
   Widget _buildCurrencyIcon(String symbol) {
     return Container(
-      width: 32, // Tăng size lên xíu cho đẹp
+      width: 32,
       height: 32,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        gradient: LinearGradient(
-          colors: [
-            AppColors.primary.withOpacity(0.2),
-            AppColors.primary.withOpacity(0.05),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        border: Border.all(
-          color: AppColors.primary.withOpacity(0.25),
-          width: 1,
-        ),
+        gradient: LinearGradient(colors: [
+          AppColors.primary.withOpacity(0.2),
+          AppColors.primary.withOpacity(0.05)
+        ]),
+        border: Border.all(color: AppColors.primary.withOpacity(0.25)),
       ),
       alignment: Alignment.center,
-      child: Text(
-        symbol,
-        style: const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-          color: AppColors.primary,
-        ),
-      ),
+      child: Text(symbol,
+          style: TextStyle(
+              fontSize: 12,
+              fontFamily: AppFonts.mainFont,
+              fontWeight: FontWeight.bold,
+              color: AppColors.primary)),
     );
   }
 
@@ -109,90 +96,102 @@ class _SettingsCurrencyDropdownWidgetState
       builder: (context) => Stack(
         children: [
           GestureDetector(
-            onTap: _closeDropdown,
-            behavior: HitTestBehavior.translucent,
-            child: Container(color: Colors.transparent),
-          ),
+              onTap: _toggleDropdown,
+              behavior: HitTestBehavior.translucent,
+              child: Container(color: Colors.transparent)),
           CompositedTransformFollower(
             link: _layerLink,
-            showWhenUnlinked: false,
             offset: Offset(0, size.height + 8),
             child: Material(
               color: Colors.transparent,
               child: SizeTransition(
                 sizeFactor: _animation,
-                axisAlignment: -1,
                 child: Container(
                   width: size.width,
-                  constraints: const BoxConstraints(
-                      maxHeight:
-                          280), // Nới chiều cao thêm chút cho nhiều tiền tệ
+                  constraints: const BoxConstraints(maxHeight: 250),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(AppSizes.radius8),
+                    boxShadow: [
+                      BoxShadow(
+                          color: Colors.black.withOpacity(0.1), blurRadius: 20)
+                    ],
+                  ),
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(AppSizes.radius16),
+                    borderRadius: BorderRadius.circular(AppSizes.radius8),
                     child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                      filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
                       child: Container(
                         decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              Colors.white.withOpacity(0.6),
-                              Colors.white.withOpacity(0.15),
-                            ],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          borderRadius:
-                              BorderRadius.circular(AppSizes.radius16),
-                          border: Border.all(
-                              color: Colors.white.withOpacity(0.7), width: 1.5),
-                          boxShadow: [
-                            BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
-                                blurRadius: 20,
-                                offset: const Offset(0, 10))
-                          ],
-                        ),
-                        child: ListView.separated(
-                          padding: EdgeInsets.zero,
-                          shrinkWrap: true,
-                          itemCount: controller.supportedCurrencies.length,
-                          separatorBuilder: (_, __) => Divider(
-                              height: 1, color: Colors.white.withOpacity(0.3)),
-                          itemBuilder: (context, index) {
-                            final currency =
-                                controller.supportedCurrencies[index];
-                            return InkWell(
-                              onTap: () {
-                                if (_overlayEntry != null) {
-                                  _overlayEntry!.remove();
-                                  _overlayEntry = null;
-                                }
-                                if (mounted) {
-                                  setState(() => _isOpen = false);
-                                }
-                                controller.changeCurrency(currency);
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 12), // Giảm padding dọc 1 chút
-                                child: Row(
-                                  children: [
-                                    _buildCurrencyIcon(
-                                        currency['symbol'] ?? ''),
-                                    const SizedBox(width: 12),
-                                    Text(currency['name'] ?? '',
-                                        style: TextStyle(
-                                            fontFamily: AppFonts.mainFont,
-                                            fontSize: 14,
-                                            color: AppColors.primaryText,
-                                            fontWeight: FontWeight.w600)),
-                                  ],
+                            color: Colors.white.withOpacity(0.95),
+                            border: Border.all(color: Colors.grey.shade200),
+                            borderRadius:
+                                BorderRadius.circular(AppSizes.radius8)),
+                        child: Obx(() {
+                          // Thuật toán tách lọc và đưa currency được chọn lên đầu danh sách
+                          final selectedCode =
+                              controller.selectedCurrency.value?['code'];
+                          final sortedList =
+                              List.from(controller.supportedCurrencies);
+
+                          if (selectedCode != null) {
+                            final selectedIndex = sortedList
+                                .indexWhere((c) => c['code'] == selectedCode);
+                            if (selectedIndex != -1) {
+                              final selectedItem =
+                                  sortedList.removeAt(selectedIndex);
+                              sortedList.insert(0, selectedItem);
+                            }
+                          }
+
+                          return ListView.separated(
+                            padding: EdgeInsets.zero,
+                            shrinkWrap: true,
+                            itemCount: sortedList.length,
+                            separatorBuilder: (_, __) =>
+                                Divider(height: 1, color: Colors.grey.shade200),
+                            itemBuilder: (context, index) {
+                              final currency = sortedList[index];
+                              final isSelected =
+                                  currency['code'] == selectedCode;
+
+                              return InkWell(
+                                onTap: () {
+                                  _toggleDropdown();
+                                  controller.changeCurrency(currency);
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: AppSizes.p16, vertical: 12),
+                                  color: isSelected
+                                      ? AppColors.primary.withOpacity(0.05)
+                                      : Colors.transparent,
+                                  child: Row(
+                                    children: [
+                                      _buildCurrencyIcon(
+                                          currency['symbol'] ?? ''),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Text(currency['name'] ?? '',
+                                            style: TextStyle(
+                                                fontFamily: AppFonts.mainFont,
+                                                fontSize: 12,
+                                                fontWeight: isSelected
+                                                    ? FontWeight.bold
+                                                    : FontWeight.w500,
+                                                color: isSelected
+                                                    ? AppColors.primary
+                                                    : AppColors.primaryText)),
+                                      ),
+                                      if (isSelected)
+                                        const Icon(Icons.check_circle,
+                                            color: AppColors.primary, size: 18),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            );
-                          },
-                        ),
+                              );
+                            },
+                          );
+                        }),
                       ),
                     ),
                   ),
@@ -211,76 +210,91 @@ class _SettingsCurrencyDropdownWidgetState
 
     return CompositedTransformTarget(
       link: _layerLink,
-      child: GestureDetector(
-        onTap: _toggleDropdown,
-        child: Obx(() {
-          final selectedCurrency = controller.supportedCurrencies.firstWhere(
-            (c) => c['code'] == controller.currentCurrencyCode.value,
-            orElse: () => controller.supportedCurrencies.first,
-          );
+      child: Obx(() {
+        if (controller.isLoadingCurrencies.value) {
+          return const SettingsCurrencySkeletonWidget();
+        }
 
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Label Tiền tệ (Đã dùng Locale)
-              Text(
-                TTexts.currencyLabel.tr,
-                style: TextStyle(
-                  fontFamily: AppFonts.mainFont,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.subText,
-                ),
+        final selected = controller.selectedCurrency.value;
+        final role = controller.currentUserRole.value.toLowerCase();
+        final isRestricted = role == 'staff' || role == 'employee';
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              TTexts.currencyLabel.tr,
+              style: TextStyle(
+                fontFamily: AppFonts.mainFont,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: AppColors.subText,
               ),
-              const SizedBox(height: AppSizes.p8),
-
-              // Ô Input giả lập
-              Container(
+            ),
+            const SizedBox(height: AppSizes.p8),
+            InkWell(
+              onTap: () {
+                if (isRestricted) {
+                  TSnackbarsWidget.warning(
+                    title: TTexts.errorAccessRestrictedTitle.tr,
+                    message: TTexts.currencyRestrictedMessage.tr,
+                  );
+                  return;
+                }
+                _toggleDropdown();
+              },
+              borderRadius: BorderRadius.circular(AppSizes.radius8),
+              child: Container(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: AppSizes.p16,
-                  vertical: 11,
-                ),
+                    horizontal: AppSizes.p16, vertical: 14),
                 decoration: BoxDecoration(
-                  color: Colors.grey.withOpacity(0.05),
+                  color: isRestricted
+                      ? Colors.grey.withOpacity(0.05)
+                      : Colors.transparent,
                   borderRadius: BorderRadius.circular(AppSizes.radius8),
+                  border: Border.all(
+                      color: _isOpen ? AppColors.primary : Colors.grey.shade300,
+                      width: _isOpen ? 1.5 : 1.0),
                 ),
                 child: Row(
                   children: [
-                    // --- Ký hiệu tiền tệ hình tròn ---
-                    _buildCurrencyIcon(selectedCurrency['symbol'] ?? ''),
-                    const SizedBox(width: 12),
-
-                    // --- Text tên tiền tệ ---
-                    Expanded(
-                      child: Text(
-                        selectedCurrency['name'] ?? '',
-                        style: TextStyle(
-                          fontFamily: AppFonts.mainFont,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors
-                              .subText, // Chỉnh lại subText hoặc primaryText tuỳ ý bạn
-                        ),
+                    if (selected != null) ...[
+                      _buildCurrencyIcon(selected['symbol'] ?? ''),
+                      const SizedBox(width: 12),
+                      Expanded(
+                          child: Text(selected['name'] ?? '',
+                              style: TextStyle(
+                                  fontFamily: AppFonts.mainFont,
+                                  fontSize: 12,
+                                  color: isRestricted
+                                      ? AppColors.subText
+                                      : AppColors.primaryText,
+                                  fontWeight: FontWeight.w500))),
+                    ] else ...[
+                      Expanded(
+                          child: Text(TTexts.loading.tr,
+                              style: TextStyle(
+                                  color: AppColors.softGrey,
+                                  fontSize: 12,
+                                  fontFamily: AppFonts.mainFont))),
+                    ],
+                    if (isRestricted)
+                      const Icon(Iconsax.lock_1_copy,
+                          size: 20, color: AppColors.softGrey)
+                    else
+                      AnimatedRotation(
+                        turns: _isOpen ? 0.5 : 0.0,
+                        duration: const Duration(milliseconds: 200),
+                        child: const Icon(Iconsax.arrow_down_1_copy,
+                            size: 20, color: AppColors.softGrey),
                       ),
-                    ),
-
-                    // --- Suffix Icon (Mũi tên xoay) ---
-                    AnimatedRotation(
-                      turns: _isOpen ? 0.5 : 0.0,
-                      duration: const Duration(milliseconds: 200),
-                      child: const Icon(
-                        Iconsax.arrow_down_1_copy,
-                        size: 20,
-                        color: AppColors.primaryText,
-                      ),
-                    ),
                   ],
                 ),
               ),
-            ],
-          );
-        }),
-      ),
+            ),
+          ],
+        );
+      }),
     );
   }
 }

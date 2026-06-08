@@ -23,6 +23,9 @@ final Map<String, String> viInventory = {
   TTexts.hide: 'Ẩn',
   TTexts.hideCategorySuccessMessage: 'Ẩn danh mục thành công.',
   TTexts.addNewProductDesc: 'Thêm sản phẩm mới vào danh mục này.',
+  TTexts.categoryInUseErrorTitle: 'Danh mục đang có sản phẩm',
+  TTexts.categoryInUseErrorDesc: 'Danh mục này đang chứa @count sản phẩm. Bạn có muốn chuyển tất cả sang "Chưa phân loại" (Uncategorized) và tiến hành xóa không?',
+  TTexts.moveAndProceedBtn: 'Chuyển & Xóa',
 
   // -- Inventory Header & Health
   TTexts.stockValue: 'Giá trị tồn kho',

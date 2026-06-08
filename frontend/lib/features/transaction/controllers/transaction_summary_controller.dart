@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/models/transaction_model.dart';
+import 'package:frontend/core/infrastructure/utils/currency_formatter_utils.dart';
 import 'package:frontend/core/infrastructure/utils/day_formatter_utils.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/features/home/controllers/home_controller.dart';
@@ -42,7 +43,8 @@ class TransactionSummaryController extends GetxController {
 
   // Tiền
   double get rawTotal => transaction.totalPrice;
-  String get moneyDisplay => '\$${rawTotal.abs().toStringAsFixed(2)}';
+  String get moneyDisplay =>
+      CurrencyFormatterUtils  .formatFull(transaction.totalPrice);
   Color get moneyColor => themeColor;
 
   // Loại giao dịch

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/features/workspace/widgets/create_store/create_store_currency_dropdown_widget.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
@@ -23,6 +24,8 @@ class CreateStoreInputFormWidget extends GetView<CreateStoreController> {
           controller: controller.nameController,
           prefixIcon: Iconsax.shop_copy,
         ),
+        const SizedBox(height: AppSizes.p24),
+        const CreateStoreCurrencyDropdownWidget(),
         const SizedBox(height: AppSizes.p24),
 
         // 2. INPUT ĐỊA CHỈ & TÌM KIẾM

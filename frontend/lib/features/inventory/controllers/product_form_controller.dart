@@ -269,6 +269,10 @@ class ProductFormController extends GetxController with TErrorHandler {
   Future<void> _loadCategories() async {
     try {
       allCategories = await _provider.getCategories();
+
+      allCategories
+          .sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+
       if (isEditMode && productToEdit != null) {
         selectedCategory.value = allCategories
             .firstWhereOrNull((c) => c.categoryId == productToEdit!.categoryId);
@@ -665,7 +669,8 @@ class ProductFormController extends GetxController with TErrorHandler {
   }
 
   void addBarcode(String code) {
-    String cleanCode = code.trim();
+    String cleanCode = code.replaceAll(RegExp(r'\x00'), '').trim();
+
     if (cleanCode.length < 5) {
       TSnackbarsWidget.warning(
           title: TTexts.warningTitle.tr, message: TTexts.barcodeTooShort.tr);
@@ -817,18 +822,18 @@ class ProductFormController extends GetxController with TErrorHandler {
       final newPackageData = await _provider.createProductPackage(
           newProduct.productId, packagePayload, inventoryPayload);
 
-      final createdPkgId =
-          newPackageData['productPackageId'] ?? newPackageData['id'];
+      final createdPkg = ProductPackageModel.fromJson(newPackageData);
 
-      if (packageBarcodes.isNotEmpty && createdPkgId != null) {
+      if (packageBarcodes.isNotEmpty &&
+          createdPkg.productPackageId.isNotEmpty) {
         for (String code in packageBarcodes) {
           try {
             await _provider.confirmBarcodeMapping(
               barcode: code,
-              productPackageId: createdPkgId,
+              productPackageId: createdPkg.productPackageId,
             );
           } catch (e) {
-            handleError(e);
+            debugPrint("Lỗi map barcode khi tạo package mới: $e");
           }
         }
       }
@@ -1005,8 +1010,9 @@ class ProductFormController extends GetxController with TErrorHandler {
         }
 
         FullScreenLoaderUtils.stopLoading();
-        _triggerRefreshAndClose(TTexts.packageCreatedSuccess.tr,
-            updatedPackage: createdPkg);
+        _triggerRefreshAndClose(
+          TTexts.packageCreatedSuccess.tr,
+        );
       }
     } catch (e) {
       FullScreenLoaderUtils.stopLoading();

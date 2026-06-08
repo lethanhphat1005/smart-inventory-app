@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
+import 'package:frontend/core/infrastructure/utils/currency_formatter_utils.dart';
 import 'package:frontend/core/infrastructure/utils/url_helper_utils.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
@@ -17,7 +18,6 @@ class InboundProductSelectionCartBottomSheetWidget
 
   @override
   Widget build(BuildContext context) {
-    // ĐÃ SỬA: Bỏ "padding: EdgeInsets.zero" để Bottom Sheet dùng khoảng cách viền mặc định đẹp mắt.
     return TBottomSheetWidget(
       child: Obx(() {
         if (controller.draftCart.isEmpty) {
@@ -53,9 +53,6 @@ class InboundProductSelectionCartBottomSheetWidget
               textAlign: TextAlign.center,
             ),
 
-            // ==========================================
-            // THANH "XÓA TẤT CẢ" (Canh lề phải)
-            // ==========================================
             Align(
               alignment: Alignment.centerRight,
               child: TextButton.icon(
@@ -70,10 +67,7 @@ class InboundProductSelectionCartBottomSheetWidget
               ),
             ),
 
-            // ==========================================
-            // DANH SÁCH SẢN PHẨM ĐÃ CHỌN
-            // ==========================================
-            // ĐÃ SỬA: Giới hạn chiều cao cụ thể (45% màn hình) để List có thể tự vuốt trượt nếu số lượng nhiều.
+            // Giới hạn chiều cao cụ thể (45% màn hình) để List có thể tự vuốt trượt nếu số lượng nhiều.
             ConstrainedBox(
               constraints: BoxConstraints(maxHeight: Get.height * 0.45),
               child: ListView.separated(
@@ -94,12 +88,10 @@ class InboundProductSelectionCartBottomSheetWidget
                   final bool isMaxed = qty >= 999999;
 
                   return Container(
-                    // ĐÃ SỬA: Padding rộng rãi, thông thoáng
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(16),
-                      // ĐÃ SỬA: Chỉ giữ viền đỏ cảnh báo, bỏ phần text báo lỗi dài dòng.
                       border: Border.all(
                         color: isMaxed
                             ? Colors.red.shade400
@@ -149,7 +141,7 @@ class InboundProductSelectionCartBottomSheetWidget
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis),
                               const SizedBox(height: 2),
-                              Text('\$${price.toStringAsFixed(2)}',
+                              Text(CurrencyFormatterUtils.formatFull(price),
                                   style: const TextStyle(
                                       fontWeight: FontWeight.bold,
                                       color: AppColors.primary,
@@ -225,7 +217,9 @@ class InboundProductSelectionCartBottomSheetWidget
                             fontWeight: FontWeight.w500, fontSize: 14)),
                   ],
                 ),
-                Text('\$${controller.totalDraftPrice.toStringAsFixed(2)}',
+                Text(
+                    CurrencyFormatterUtils.formatFull(
+                        controller.totalDraftPrice),
                     style: const TextStyle(
                         fontWeight: FontWeight.w900,
                         color: AppColors.primaryText,

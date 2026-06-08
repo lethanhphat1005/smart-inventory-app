@@ -1,13 +1,13 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/models/transaction_detail_model.dart';
+import 'package:frontend/core/infrastructure/utils/currency_formatter_utils.dart';
 import 'package:frontend/core/infrastructure/utils/url_helper_utils.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/widgets/t_no_image_widget.dart';
 import 'package:frontend/routes/app_routes.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 import 'package:frontend/core/ui/widgets/t_snackbars_widget.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 
@@ -18,9 +18,6 @@ class ReportTransactionDetailItemCardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final priceStr = NumberFormat.currency(locale: 'en_US', symbol: '\$')
-        .format(item.unitPrice);
-
     final String? imageUrl =
         UrlHelperUtils.normalizeImageUrl(item.packageInfo?.product?.imageUrl);
 
@@ -137,12 +134,15 @@ class ReportTransactionDetailItemCardWidget extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(priceStr,
-                              style: TextStyle(
-                                  fontFamily: AppFonts.mainFont,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.primary)),
+                          Obx(() => Text(
+                                CurrencyFormatterUtils.formatFull(
+                                    item.unitPrice),
+                                style: TextStyle(
+                                    fontFamily: AppFonts.mainFont,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.primary),
+                              )),
                           Container(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 8, vertical: 2),

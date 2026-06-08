@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:frontend/features/inventory/controllers/inventory_detail_controller.dart';
 import 'package:get/get.dart';
-import 'package:frontend/core/infrastructure/constants/text_strings.dart'; // THÊM IMPORT NÀY
+import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 
 class InventoryDetailProductInfoWidget

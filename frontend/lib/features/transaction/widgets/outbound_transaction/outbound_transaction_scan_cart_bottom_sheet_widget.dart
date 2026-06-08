@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/infrastructure/utils/currency_formatter_utils.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:frontend/core/ui/widgets/t_bottom_sheet_widget.dart';
@@ -90,7 +91,7 @@ class OutboundScanCartBottomSheetWidget
                             fontWeight: FontWeight.w500, fontSize: 14)),
                   ],
                 ),
-                Text('\$${controller.totalFunds.toStringAsFixed(2)}',
+                Text(CurrencyFormatterUtils.formatFull(controller.totalFunds),
                     style: const TextStyle(
                         fontWeight: FontWeight.w900,
                         color: AppColors.primaryText,
