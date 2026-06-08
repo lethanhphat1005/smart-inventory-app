@@ -111,45 +111,57 @@ class _TBarcodeScannerLayoutState extends State<TBarcodeScannerLayout>
                         height: 1.3),
                   ),
                   const SizedBox(height: AppSizes.p24),
-                  TextField(
-                    controller: manualController,
-                    keyboardType: TextInputType.number,
-                    autofocus: true,
-                    style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 2),
-                    textAlign: TextAlign.center,
-                    decoration: InputDecoration(
-                      isDense: true,
-                      hintText: TTexts.enterBarcodeHint.tr,
-                      hintStyle: const TextStyle(
-                          letterSpacing: 0,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w400,
-                          color: AppColors.softGrey),
-                      filled: true,
-                      fillColor: AppColors.surface,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(AppSizes.radius12),
-                        borderSide: BorderSide.none,
+                  Theme(
+                    data: Theme.of(context).copyWith(
+                      textSelectionTheme: TextSelectionThemeData(
+                        cursorColor: AppColors.primary,
+                        selectionHandleColor: AppColors.primary,
+                        selectionColor: AppColors.primary.withOpacity(0.3),
                       ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(AppSizes.radius12),
-                        borderSide: const BorderSide(
-                            color: AppColors.primary, width: 1.2),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                          vertical: 14, horizontal: 16),
                     ),
-                    onSubmitted: (val) {
-                      if (val.trim().isNotEmpty) {
-                        Get.back();
-                        if (widget.onScanned != null) {
-                          widget.onScanned!(val.trim());
+                    child: TextField(
+                      controller: manualController,
+                      cursorColor: AppColors.primary,
+                      keyboardType: TextInputType.number,
+                      autofocus: true,
+                      style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 2),
+                      textAlign: TextAlign.center,
+                      decoration: InputDecoration(
+                        isDense: true,
+                        hintText: TTexts.enterBarcodeHint.tr,
+                        hintStyle: const TextStyle(
+                            letterSpacing: 0,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w400,
+                            color: AppColors.softGrey),
+                        filled: true,
+                        fillColor: AppColors.surface,
+                        border: OutlineInputBorder(
+                          borderRadius:
+                              BorderRadius.circular(AppSizes.radius12),
+                          borderSide: BorderSide.none,
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius:
+                              BorderRadius.circular(AppSizes.radius12),
+                          borderSide: const BorderSide(
+                              color: AppColors.primary, width: 1.2),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                            vertical: 14, horizontal: 16),
+                      ),
+                      onSubmitted: (val) {
+                        if (val.trim().isNotEmpty) {
+                          Get.back();
+                          if (widget.onScanned != null) {
+                            widget.onScanned!(val.trim());
+                          }
                         }
-                      }
-                    },
+                      },
+                    ),
                   ),
                   const SizedBox(height: AppSizes.p24),
                   SizedBox(
