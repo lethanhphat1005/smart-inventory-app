@@ -3,7 +3,7 @@ import { Router } from 'express';
 import { asyncWrapper } from '../../../common/middlewares/index.js';
 import { PERMISSION, requirePermission } from '../../access-control/index.js';
 import { authenticate } from '../../auth/index.js';
-import { requireStoreContext } from '../../stores/index.js';
+import { requireStoreContext } from '../../store-member/index.js';
 import { productPackageController } from '../modules/product-package.module.js';
 import {
   validateCreateProductPackage,

@@ -13,7 +13,7 @@ import {
   validateUpdateInventory,
   validateBatchAdjustInventory,
 } from '../inventories/validator/inventory.validator.js';
-import { requireStoreContext } from '../stores/index.js';
+import { requireStoreContext } from '../store-member/index.js';
 
 const inventoryRouter = Router();
 
