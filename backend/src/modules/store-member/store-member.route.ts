@@ -1,5 +1,6 @@
 import { Router } from 'express';
 
+import { requireStoreContext } from './middlewares/require-store-context.middleware.js'; // tránh circular dependencies
 import { storeMemberController } from './store-member.module.js';
 import { asyncWrapper } from '../../common/middlewares/index.js';
 import { validator } from '../../common/middlewares/index.js';
@@ -11,9 +12,10 @@ import {
   removeStoreMemberSchema,
   updateStoreMemberRoleSchema,
 } from './validator/store-member.validator.js';
-import { requireStoreContext } from '../stores/index.js';
 
 const storeMemberRouter = Router();
+
+storeMemberRouter.use(authenticate, requireStoreContext);
 
 /**
  * @api {DELETE} /api/store-members/:userId Xóa thành viên khỏi cửa hàng
@@ -28,8 +30,6 @@ const storeMemberRouter = Router();
 
 storeMemberRouter.delete(
   '/:userId',
-  authenticate,
-  requireStoreContext,
   requirePermission(PERMISSION.STORE_MEMBER_DELETE),
   validator(removeStoreMemberSchema),
   asyncWrapper(storeMemberController.removeUser),
@@ -49,8 +49,6 @@ storeMemberRouter.delete(
  */
 storeMemberRouter.patch(
   '/:userId/role',
-  authenticate,
-  requireStoreContext,
   requirePermission(PERMISSION.STORE_MEMBER_WRITE),
   validator(updateStoreMemberRoleSchema),
   asyncWrapper(storeMemberController.updateRole),
@@ -73,8 +71,6 @@ storeMemberRouter.patch(
  */
 storeMemberRouter.get(
   '/:storeId/members',
-  authenticate,
-  requireStoreContext,
   validator(getStoreMembersSchema),
   asyncWrapper(storeMemberController.getStoreMembers),
 );

@@ -8,11 +8,55 @@ import type { StoreRole } from '../../../generated/prisma/enums.js';
 import type {
   StoreMemberResponseDto,
   StoreMemberUserResponseDto,
+  RbacStoreMembershipResponseDto
 } from '../dto/store-member.dto.js';
 import type { StoreMemberRepository } from '../repository/store-member.repository.js';
 
 export class StoreMemberService {
   constructor(private readonly storeMemberRepository: StoreMemberRepository) {}
+
+    public async getMembersByStoreId(
+    storeId: string,
+  ): Promise<StoreMemberUserResponseDto[]> {
+    const members = await this.storeMemberRepository.findManyByStoreId(storeId);
+
+    return members.map((item) => ({
+      userId: item.user.userId,
+      email: item.user.email,
+      fullName: item.user.fullName,
+      phone: item.user.phone,
+      address: item.user.address,
+      activeStatus: item.user.activeStatus,
+      role: item.role,
+      joinedAt: item.joinedAt,
+    }));
+  }
+
+  // dùng cho middleware RBAC
+  async getMembershipByUserIdAndStoreId(
+    userId: string,
+    storeId: string,
+  ): Promise<RbacStoreMembershipResponseDto | null> {
+    if (!userId || !storeId) {
+      throw new CustomError({
+        message:
+          'User ID and Store ID are required to fetch membership information',
+        status: StatusCodes.BAD_REQUEST,
+      });
+    }
+
+    const membership =
+      await this.storeMemberRepository.findOneByUserIdAndStoreId(
+        userId,
+        storeId,
+      );
+
+    if (!membership) {
+      return null;
+    }
+
+    return membership;
+  }
 
   public async removeUserFromStore(
     requesterUserId: string,
@@ -131,22 +175,5 @@ export class StoreMemberService {
       storeId,
       newRole,
     );
-  }
-
-  public async getMembersByStoreId(
-    storeId: string,
-  ): Promise<StoreMemberUserResponseDto[]> {
-    const members = await this.storeMemberRepository.findManyByStoreId(storeId);
-
-    return members.map((item) => ({
-      userId: item.user.userId,
-      email: item.user.email,
-      fullName: item.user.fullName,
-      phone: item.user.phone,
-      address: item.user.address,
-      activeStatus: item.user.activeStatus,
-      role: item.role,
-      joinedAt: item.joinedAt,
-    }));
   }
 }

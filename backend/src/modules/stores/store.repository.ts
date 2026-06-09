@@ -1,10 +1,10 @@
-import type { DbClient } from '../../../common/types/index.js';
 import type {
   StoreResponseDto,
   CreateStoreDto,
   UpdateStoreDto,
   ListRawStoreDto,
-} from '../dtos/store.dto.js';
+} from './store.dto.js';
+import type { DbClient } from '../../common/types/index.js';
 
 export class StoreRepository {
   /* tạo constructor cho các repository có dùng cơ chế $transaction,

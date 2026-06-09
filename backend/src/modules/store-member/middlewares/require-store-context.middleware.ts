@@ -2,7 +2,7 @@ import { StatusCodes } from 'http-status-codes';
 
 import { CustomError } from '../../../common/errors/index.js';
 import { requireReqUser } from '../../../common/utils/index.js';
-import { storeMemberService } from '../store.module.js';
+import { storeMemberService } from '../store-member.module.js';
 
 import type { Request, Response, NextFunction } from 'express';
 
