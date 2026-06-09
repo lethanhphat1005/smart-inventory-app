@@ -20,3 +20,12 @@ export type RawStoreMemberDto = {
   joinedAt: Date;
   user: UserProfile;
 };
+
+export type StoreMembershipList = Pick<StoreMember, 'userId' | 'storeId'>;
+
+export type RbacStoreMembershipResponseDto = Omit<StoreMember, 'joinedAt' | 'activeStatus'>;
+
+export type CreateStoreMembershipDto = Omit<
+  StoreMember,
+  'joinedAt' | 'activeStatus'
+>;

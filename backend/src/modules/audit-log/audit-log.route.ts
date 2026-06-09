@@ -5,7 +5,7 @@ import { PERMISSION, requirePermission } from '../access-control/index.js';
 import { auditLogController } from '../audit-log/audit-log.module.js';
 import { validateGetAuditLogs } from '../audit-log/validator/audit-log.validator.js';
 import { authenticate } from '../auth/index.js';
-import { requireStoreContext } from '../stores/index.js';
+import { requireStoreContext } from '../store-member/index.js';
 
 const auditLogRouter = Router();
 

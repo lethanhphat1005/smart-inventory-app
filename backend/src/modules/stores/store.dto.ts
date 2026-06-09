@@ -1,4 +1,4 @@
-import type { Store, StoreMember } from '../../../generated/prisma/client.js';
+import type { Store, StoreMember } from '../../generated/prisma/client.js';
 
 export type StoreResponseDto = Store;
 

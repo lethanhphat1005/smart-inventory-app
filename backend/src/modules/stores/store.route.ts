@@ -1,6 +1,5 @@
 import { Router } from 'express';
 
-import { requireStoreContext } from './index.js';
 import { storeController } from './store.module.js';
 import {
   validateCreateStore,
@@ -12,6 +11,7 @@ import {
 import { asyncWrapper } from '../../common/middlewares/index.js';
 import { requirePermission, PERMISSION } from '../access-control/index.js';
 import { authenticate } from '../auth/index.js';
+import { requireStoreContext } from '../store-member/index.js';
 
 const storeRouter = Router();
 

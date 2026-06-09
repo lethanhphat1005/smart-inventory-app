@@ -1,15 +1,15 @@
 import { StatusCodes } from 'http-status-codes';
 
+import { StoreService } from './store.service.js';
 import {
   requireReqStoreContext,
   requireReqUser,
   sendResponse,
-} from '../../../common/utils/index.js';
-import { StoreService } from '../services/store.service.js';
+} from '../../common/utils/index.js';
 
-import type { ApiResponse } from '../../../common/types/index.js';
-import type { StoreResponseDto } from '../dtos/store.dto.js';
-import type { CreateStoreDto, UpdateStoreDto } from '../dtos/store.dto.js';
+import type { StoreResponseDto } from './store.dto.js';
+import type { CreateStoreDto, UpdateStoreDto } from './store.dto.js';
+import type { ApiResponse } from '../../common/types/index.js';
 import type { Request, Response } from 'express';
 
 export class StoreController {

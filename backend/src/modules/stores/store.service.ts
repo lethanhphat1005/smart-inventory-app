@@ -1,17 +1,17 @@
 import { StatusCodes } from 'http-status-codes';
 
-import { CustomError } from '../../../common/errors/index.js';
-import { prisma } from '../../../db/prismaClient.js'; // gọi prisma để dùng cơ chế $transaction
-import { StoreMemberRepository } from '../repositories/store-member.repository.js';
-import { StoreRepository } from '../repositories/store.repository.js';
-import { generateFormattedInviteCode } from '../store.util.js';
+import { StoreRepository } from './store.repository.js';
+import { generateFormattedInviteCode } from './store.util.js';
+import { CustomError } from '../../common/errors/index.js';
+import { prisma } from '../../db/prismaClient.js'; // gọi prisma để dùng cơ chế $transaction
+import { StoreMemberRepository } from '../store-member/index.js';
 
 import type {
   StoreResponseDto,
   ListStoreResponseDto,
   CreateStoreDto,
   UpdateStoreDto,
-} from '../dtos/store.dto.js';
+} from './store.dto.js';
 
 export class StoreService {
   constructor(private readonly storeRepository: StoreRepository) {}
@@ -203,7 +203,7 @@ export class StoreService {
       }
 
       // 2. Kiểm tra xem user đã là thành viên chưa
-      const existingMembership = await storeMemberRepositoryTx.findMembership(
+      const existingMembership = await storeMemberRepositoryTx.findOne(
         userId,
         store.storeId,
       );

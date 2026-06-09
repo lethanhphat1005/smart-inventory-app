@@ -1,6 +1,7 @@
 export { storeMemberRouter } from './store-member.route.js';
-export { storeMemberService } from './store-member.module.js';
-export type {
-  StoreMemberResponseDto,
-  UpdateStoreMemberRoleDto,
-} from './dto/store-member.dto.js';
+export {
+  storeMemberRepository,
+  storeMemberService,
+} from './store-member.module.js';
+export { StoreMemberRepository } from './repository/store-member.repository.js';
+export { requireStoreContext } from './middlewares/require-store-context.middleware.js';

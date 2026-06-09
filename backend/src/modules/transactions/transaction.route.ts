@@ -10,7 +10,7 @@ import {
 import { asyncWrapper } from '../../common/middlewares/index.js';
 import { PERMISSION, requirePermission } from '../access-control/index.js';
 import { authenticate } from '../auth/index.js';
-import { requireStoreContext } from '../stores/index.js';
+import { requireStoreContext } from '../store-member/index.js';
 
 const transactionRouter = Router();
 
