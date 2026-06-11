@@ -12,13 +12,14 @@ const createProductBodySchema = z.object({
   name: z
     .string()
     .trim()
-    .min(1, 'Tên sản phẩm không được để trống')
-    .max(255, 'Tên sản phẩm không được vượt quá 255 ký tự'),
+    .min(1, 'Product name cannot be empty')
+    .max(255, 'Product name cannot be exeeded 255 characters'),
   imageUrl: z.string().trim().nullable().optional(),
   brand: z
     .string()
     .trim()
-    .max(255, 'Brand không được vượt quá 255 ký tự')
+    .min(1, 'Invalid brand value')
+    .max(255, 'Brand cannot be exeeded 255 characters')
     .nullable()
     .optional(),
   categoryId: z.uuid('Invalid categoryId'),
@@ -36,7 +37,8 @@ const updateProductBodySchema = z
     brand: z
       .string()
       .trim()
-      .max(255, 'Brand name cannot be exeeded 255 characters')
+      .min(1, 'Invalid brand value')
+      .max(255, 'Brand cannot be exeeded 255 characters')
       .nullable()
       .optional(),
     categoryId: z.uuid('Invalid categoryId').optional(),
