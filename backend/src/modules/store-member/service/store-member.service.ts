@@ -8,14 +8,14 @@ import type { StoreRole } from '../../../generated/prisma/enums.js';
 import type {
   StoreMemberResponseDto,
   StoreMemberUserResponseDto,
-  RbacStoreMembershipResponseDto
+  RbacStoreMembershipResponseDto,
 } from '../dto/store-member.dto.js';
 import type { StoreMemberRepository } from '../repository/store-member.repository.js';
 
 export class StoreMemberService {
   constructor(private readonly storeMemberRepository: StoreMemberRepository) {}
 
-    public async getMembersByStoreId(
+  public async getMembersByStoreId(
     storeId: string,
   ): Promise<StoreMemberUserResponseDto[]> {
     const members = await this.storeMemberRepository.findManyByStoreId(storeId);

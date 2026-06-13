@@ -1,4 +1,3 @@
-
 import { supabaseAuthProvider } from '../../auth/providers/supabase-auth.provider.js';
 import { authSessionService } from '../../auth/services/auth-session.service.js';
 

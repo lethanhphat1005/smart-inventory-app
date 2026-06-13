@@ -1,4 +1,7 @@
-import type { StoreMember, UserProfile } from '../../../generated/prisma/client.js';
+import type {
+  StoreMember,
+  UserProfile,
+} from '../../../generated/prisma/client.js';
 import type { StoreRole } from '../../../generated/prisma/enums.js';
 
 export type StoreMemberResponseDto = StoreMember;
@@ -23,7 +26,10 @@ export type RawStoreMemberDto = {
 
 export type StoreMembershipList = Pick<StoreMember, 'userId' | 'storeId'>;
 
-export type RbacStoreMembershipResponseDto = Omit<StoreMember, 'joinedAt' | 'activeStatus'>;
+export type RbacStoreMembershipResponseDto = Omit<
+  StoreMember,
+  'joinedAt' | 'activeStatus'
+>;
 
 export type CreateStoreMembershipDto = Omit<
   StoreMember,

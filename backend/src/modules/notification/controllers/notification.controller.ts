@@ -49,7 +49,7 @@ export class NotificationController {
       storeId,
       page,
       size,
-      type
+      type,
     );
 
     sendResponse.success(res, notifications, { status: StatusCodes.OK });

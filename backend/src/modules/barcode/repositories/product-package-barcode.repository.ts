@@ -97,7 +97,7 @@ export class PackageBarcodeRepository {
     storeId: string,
     barcode: string,
   ): Promise<
-    (Omit<
+    | (Omit<
         ProductPackageBarcode,
         'createdAt' | 'updatedAt' | 'productPackageBarcodeId' | 'confidence'
       > & { confidence: number | null })
