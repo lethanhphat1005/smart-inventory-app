@@ -1,14 +1,10 @@
 import { z } from 'zod';
 
-import { validateSchema } from '../../common/utils/index.js';
-
-import type { NextFunction, Request, Response } from 'express';
-
-const paramsSchema = z.object({
+export const paramsSchema = z.object({
   productId: z.uuid('Invalid productId'),
 });
 
-const createProductBodySchema = z.object({
+export const createProductBodySchema = z.object({
   name: z
     .string()
     .trim()
@@ -25,7 +21,7 @@ const createProductBodySchema = z.object({
   categoryId: z.uuid('Invalid categoryId'),
 });
 
-const updateProductBodySchema = z
+export const updateProductBodySchema = z
   .object({
     name: z
       .string()
@@ -56,52 +52,3 @@ export const listProductsQuerySchema = z.object({
   categoryId: z.string().uuid('Invalid categoryId').optional(),
   brand: z.string().trim().min(1).max(255).optional(),
 });
-
-export const validateGetProducts = (
-  req: Request,
-  _res: Response,
-  next: NextFunction,
-): void => {
-  _res.locals.validatedQuery = validateSchema(
-    listProductsQuerySchema,
-    req.query,
-  );
-  next();
-};
-
-export const validateCreateProduct = (
-  req: Request,
-  _res: Response,
-  next: NextFunction,
-): void => {
-  req.body = validateSchema(createProductBodySchema, req.body);
-  next();
-};
-
-export const validateUpdateProduct = (
-  req: Request,
-  _res: Response,
-  next: NextFunction,
-): void => {
-  req.params = validateSchema(paramsSchema, req.params);
-  req.body = validateSchema(updateProductBodySchema, req.body);
-  next();
-};
-
-export const validateGetProductById = (
-  req: Request,
-  _res: Response,
-  next: NextFunction,
-): void => {
-  req.params = validateSchema(paramsSchema, req.params);
-  next();
-};
-
-export const validateDeleteProduct = (
-  req: Request,
-  _res: Response,
-  next: NextFunction,
-): void => {
-  req.params = validateSchema(paramsSchema, req.params);
-  next();
-};

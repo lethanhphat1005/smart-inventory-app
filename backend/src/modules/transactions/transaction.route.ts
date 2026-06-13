@@ -2,12 +2,15 @@ import { Router } from 'express';
 
 import { transactionController } from './transaction.module.js';
 import {
-  validateCreateImportTransaction,
-  validateCreateExportTransaction,
-  validateGetTransactionById,
-  validateGetTransactions,
+  paramsSchema,
+  listTransactionsQuerySchema,
+  createTransactionBodySchema,
 } from './transaction.validator.js';
-import { asyncWrapper } from '../../common/middlewares/index.js';
+import {
+  asyncWrapper,
+  validator,
+  validatorToLocals,
+} from '../../common/middlewares/index.js';
 import { PERMISSION, requirePermission } from '../access-control/index.js';
 import { authenticate } from '../auth/index.js';
 import { requireStoreContext } from '../store-member/index.js';
@@ -31,7 +34,7 @@ transactionRouter.use(authenticate, requireStoreContext);
 transactionRouter.get(
   '/',
   requirePermission(PERMISSION.TRANSACTION_READ),
-  validateGetTransactions,
+  validatorToLocals(listTransactionsQuerySchema, 'query'),
   asyncWrapper(transactionController.getTransactions),
 );
 
@@ -45,7 +48,7 @@ transactionRouter.get(
 transactionRouter.get(
   '/:transactionId',
   requirePermission(PERMISSION.TRANSACTION_READ),
-  validateGetTransactionById,
+  validator(paramsSchema, 'params'),
   asyncWrapper(transactionController.getTransactionById),
 );
 
@@ -64,7 +67,7 @@ transactionRouter.get(
 transactionRouter.post(
   '/import',
   requirePermission(PERMISSION.TRANSACTION_WRITE),
-  validateCreateImportTransaction,
+  validator(createTransactionBodySchema, 'body'),
   asyncWrapper(transactionController.createImportTransaction),
 );
 
@@ -83,7 +86,7 @@ transactionRouter.post(
 transactionRouter.post(
   '/export',
   requirePermission(PERMISSION.TRANSACTION_WRITE),
-  validateCreateExportTransaction,
+  validator(createTransactionBodySchema, 'body'),
   asyncWrapper(transactionController.createExportTransaction),
 );
 

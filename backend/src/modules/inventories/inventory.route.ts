@@ -1,17 +1,19 @@
 import { Router } from 'express';
 
-import { asyncWrapper } from '../../common/middlewares/index.js';
+import {
+  asyncWrapper,
+  validator,
+  validatorToLocals,
+} from '../../common/middlewares/index.js';
 import { PERMISSION, requirePermission } from '../access-control/index.js';
 import { authenticate } from '../auth/index.js';
 import { inventoryController } from '../inventories/inventory.module.js';
 import {
-  validateCreateInventory,
-  validateDeleteInventory,
-  validateGetInventories,
-  validateGetInventoryByProductPackageId,
-  validateGetLowStockInventories,
-  validateUpdateInventory,
-  validateBatchAdjustInventory,
+  paramsSchema,
+  updateInventoryBodySchema,
+  createInventoryBodySchema,
+  batchAdjustInventoryBodySchema,
+  listInventoriesQuerySchema,
 } from '../inventories/validator/inventory.validator.js';
 import { requireStoreContext } from '../store-member/index.js';
 
@@ -49,13 +51,13 @@ inventoryRouter.use(authenticate, requireStoreContext);
 inventoryRouter.get(
   '/',
   requirePermission(PERMISSION.INVENTORY_READ),
-  validateGetInventories,
+  validatorToLocals(listInventoriesQuerySchema, 'query', 'validatedQuery'),
   asyncWrapper(inventoryController.getInventories),
 );
 inventoryRouter.post(
   '/',
   requirePermission(PERMISSION.INVENTORY_WRITE),
-  validateCreateInventory,
+  validator(createInventoryBodySchema, 'body'),
   asyncWrapper(inventoryController.createInventory),
 );
 
@@ -80,7 +82,7 @@ inventoryRouter.post(
 inventoryRouter.get(
   '/low-stock',
   requirePermission(PERMISSION.INVENTORY_READ),
-  validateGetLowStockInventories,
+  validatorToLocals(listInventoriesQuerySchema, 'query', 'validatedQuery'),
   asyncWrapper(inventoryController.getLowStockInventories),
 );
 
@@ -110,17 +112,18 @@ inventoryRouter
   .route('/product-packages/:productPackageId')
   .get(
     requirePermission(PERMISSION.INVENTORY_READ),
-    validateGetInventoryByProductPackageId,
+    validator(paramsSchema, 'params'),
     asyncWrapper(inventoryController.getInventoryByProductPackageId),
   )
   .patch(
     requirePermission(PERMISSION.INVENTORY_WRITE),
-    validateUpdateInventory,
+    validator(paramsSchema, 'params'),
+    validator(updateInventoryBodySchema, 'body'),
     asyncWrapper(inventoryController.updateInventory),
   )
   .delete(
     requirePermission(PERMISSION.INVENTORY_WRITE),
-    validateDeleteInventory,
+    validator(paramsSchema, 'params'),
     asyncWrapper(inventoryController.deleteInventory),
   );
 
@@ -140,7 +143,7 @@ inventoryRouter
 inventoryRouter.post(
   '/adjustments',
   requirePermission(PERMISSION.INVENTORY_WRITE),
-  validateBatchAdjustInventory,
+  validator(batchAdjustInventoryBodySchema, 'body'),
   asyncWrapper(inventoryController.adjustInventories),
 );
 

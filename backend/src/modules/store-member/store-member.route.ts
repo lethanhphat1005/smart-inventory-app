@@ -2,20 +2,40 @@ import { Router } from 'express';
 
 import { requireStoreContext } from './middlewares/require-store-context.middleware.js'; // tránh circular dependencies
 import { storeMemberController } from './store-member.module.js';
-import { asyncWrapper } from '../../common/middlewares/index.js';
-import { validator } from '../../common/middlewares/index.js';
+import { asyncWrapper, validator } from '../../common/middlewares/index.js';
 import { requirePermission } from '../access-control/require-permission.middleware.js';
 import { PERMISSION } from '../access-control/role-permission.constant.js';
 import { authenticate } from '../auth/index.js';
 import {
-  getStoreMembersSchema,
-  removeStoreMemberSchema,
-  updateStoreMemberRoleSchema,
+  paramsSchema,
+  updateStoreMemberRoleBodySchema,
+  getStoreMembersQuerySchema,
 } from './validator/store-member.validator.js';
 
 const storeMemberRouter = Router();
 
 storeMemberRouter.use(authenticate, requireStoreContext);
+
+/**
+ * @api {GET} /api/store-members
+ * Lấy danh sách thành viên cửa hàng
+ * @description Trả về danh sách thông tin cá nhân (profile) và vai trò (role)
+ * của các thành viên đang hoạt động (active) trong một cửa hàng cụ thể.
+ * Yêu cầu người gọi request phải có quyền truy cập vào cửa hàng này.
+ * * @headers
+ * - Authorization: Bearer <access_token> (Bắt buộc: Token đăng nhập)
+ * - x-store-id: <store_uuid> (Bắt buộc:
+ * ID của cửa hàng đang thao tác để verify storeContext)
+ * * @path_params
+ * - storeId: string (Bắt buộc: UUID của cửa hàng cần lấy danh sách thành viên)
+ * * @body
+ * (Không yêu cầu Body)
+ */
+storeMemberRouter.get(
+  '/',
+  validator(getStoreMembersQuerySchema, 'query'),
+  asyncWrapper(storeMemberController.getStoreMembers),
+);
 
 /**
  * @api {DELETE} /api/store-members/:userId Xóa thành viên khỏi cửa hàng
@@ -31,7 +51,7 @@ storeMemberRouter.use(authenticate, requireStoreContext);
 storeMemberRouter.delete(
   '/:userId',
   requirePermission(PERMISSION.STORE_MEMBER_DELETE),
-  validator(removeStoreMemberSchema),
+  validator(paramsSchema, 'params'),
   asyncWrapper(storeMemberController.removeUser),
 );
 
@@ -50,29 +70,9 @@ storeMemberRouter.delete(
 storeMemberRouter.patch(
   '/:userId/role',
   requirePermission(PERMISSION.STORE_MEMBER_WRITE),
-  validator(updateStoreMemberRoleSchema),
+  validator(paramsSchema, 'params'),
+  validator(updateStoreMemberRoleBodySchema, 'body'),
   asyncWrapper(storeMemberController.updateRole),
-);
-
-/**
- * @api {GET} /api/store-members/:storeId/members
- * Lấy danh sách thành viên cửa hàng
- * @description Trả về danh sách thông tin cá nhân (profile) và vai trò (role)
- * của các thành viên đang hoạt động (active) trong một cửa hàng cụ thể.
- * Yêu cầu người gọi request phải có quyền truy cập vào cửa hàng này.
- * * @headers
- * - Authorization: Bearer <access_token> (Bắt buộc: Token đăng nhập)
- * - x-store-id: <store_uuid> (Bắt buộc:
- * ID của cửa hàng đang thao tác để verify storeContext)
- * * @path_params
- * - storeId: string (Bắt buộc: UUID của cửa hàng cần lấy danh sách thành viên)
- * * @body
- * (Không yêu cầu Body)
- */
-storeMemberRouter.get(
-  '/:storeId/members',
-  validator(getStoreMembersSchema),
-  asyncWrapper(storeMemberController.getStoreMembers),
 );
 
 export { storeMemberRouter };

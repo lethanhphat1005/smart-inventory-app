@@ -14,7 +14,7 @@ export const searchByKeywordQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(100).optional().default(50),
 });
 
-const searchByPrefixQuerySchema = z.object({
+export const searchByPrefixQuerySchema = z.object({
   prefix: z
     .string()
     .trim()

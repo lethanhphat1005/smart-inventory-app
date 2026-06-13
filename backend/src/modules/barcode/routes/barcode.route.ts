@@ -1,13 +1,13 @@
 import { Router } from 'express';
 
-import { asyncWrapper } from '../../../common/middlewares/index.js';
+import { asyncWrapper, validator } from '../../../common/middlewares/index.js';
 import { PERMISSION, requirePermission } from '../../access-control/index.js';
 import { authenticate } from '../../auth/index.js';
 import { requireStoreContext } from '../../store-member/index.js';
 import { barcodesController } from '../barcodes.module.js';
 import {
-  validateConfirmBarcodeMapping,
-  validateScanBarcode,
+  scanBarcodeBodySchema,
+  confirmBarcodeMappingBodySchema,
 } from '../barcodes.validator.js';
 
 const barcodeRouter = Router();
@@ -84,14 +84,14 @@ barcodeRouter.use(authenticate, requireStoreContext);
 barcodeRouter.post(
   '/scan',
   requirePermission(PERMISSION.PRODUCT_READ),
-  validateScanBarcode,
+  validator(scanBarcodeBodySchema, 'body'),
   asyncWrapper(barcodesController.scanBarcode),
 );
 
 barcodeRouter.post(
   '/confirm',
   requirePermission(PERMISSION.PRODUCT_WRITE),
-  validateConfirmBarcodeMapping,
+  validator(confirmBarcodeMappingBodySchema, 'body'),
   asyncWrapper(barcodesController.confirmBarcodeMapping),
 );
 

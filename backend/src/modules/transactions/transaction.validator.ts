@@ -1,10 +1,6 @@
 import { z } from 'zod';
 
-import { validateSchema } from '../../common/utils/index.js';
-
-import type { NextFunction, Request, Response } from 'express';
-
-const paramsSchema = z.object({
+export const paramsSchema = z.object({
   transactionId: z.uuid('Invalid transactionId'),
 });
 
@@ -39,7 +35,7 @@ export const listTransactionsQuerySchema = z
     },
   );
 
-const createTransactionBodySchema = z
+export const createTransactionBodySchema = z
   .object({
     note: z.string().trim().max(1000).nullable().optional(),
     items: z
@@ -72,42 +68,3 @@ const createTransactionBodySchema = z
       productPackageIds.add(item.productPackageId);
     });
   });
-
-export const validateGetTransactions = (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): void => {
-  res.locals.validatedQuery = validateSchema(
-    listTransactionsQuerySchema,
-    req.query,
-  );
-  next();
-};
-
-export const validateGetTransactionById = (
-  req: Request,
-  _res: Response,
-  next: NextFunction,
-): void => {
-  req.params = validateSchema(paramsSchema, req.params);
-  next();
-};
-
-export const validateCreateImportTransaction = (
-  req: Request,
-  _res: Response,
-  next: NextFunction,
-): void => {
-  req.body = validateSchema(createTransactionBodySchema, req.body);
-  next();
-};
-
-export const validateCreateExportTransaction = (
-  req: Request,
-  _res: Response,
-  next: NextFunction,
-): void => {
-  req.body = validateSchema(createTransactionBodySchema, req.body);
-  next();
-};
