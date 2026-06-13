@@ -2,7 +2,7 @@ import type { DbClient } from '../../../common/types/index.js';
 import type { HiddenDefaultResponseDto } from '../category.dto.js';
 
 export class HiddenDefaultRepository {
-    constructor(private readonly db: DbClient) {}
+  constructor(private readonly db: DbClient) {}
 
   async findManyByStore(storeId: string): Promise<HiddenDefaultResponseDto[]> {
     const result = await this.db.hidedDefault.findMany({
@@ -11,8 +11,8 @@ export class HiddenDefaultRepository {
       },
       orderBy: {
         category: {
-          name: 'asc'
-        }
+          name: 'asc',
+        },
       },
       select: {
         category: {

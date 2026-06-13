@@ -2,13 +2,12 @@ import { Router } from 'express';
 
 import { storeController } from './store.module.js';
 import {
-  validateCreateStore,
-  validateGetStoreById,
-  validateDeleteStore,
-  validateUpdateStore,
-  validateJoinStore,
+  paramsSchema,
+  createStoreBodySchema,
+  updateStoreBodySchema,
+  joinStoreBodySchema,
 } from './store.validator.js';
-import { asyncWrapper } from '../../common/middlewares/index.js';
+import { asyncWrapper, validator } from '../../common/middlewares/index.js';
 import { requirePermission, PERMISSION } from '../access-control/index.js';
 import { authenticate } from '../auth/index.js';
 import { requireStoreContext } from '../store-member/index.js';
@@ -42,11 +41,14 @@ storeRouter.use(authenticate);
 storeRouter
   .route('/')
   .get(asyncWrapper(storeController.getStores))
-  .post(validateCreateStore, asyncWrapper(storeController.createStore))
+  .post(
+    validator(createStoreBodySchema, 'body'),
+    asyncWrapper(storeController.createStore),
+  )
   .patch(
     requireStoreContext,
     requirePermission(PERMISSION.STORE_WRITE),
-    validateUpdateStore,
+    validator(updateStoreBodySchema, 'body'),
     asyncWrapper(storeController.updateStore),
   );
 
@@ -68,14 +70,14 @@ storeRouter
   .get(
     requireStoreContext,
     requirePermission(PERMISSION.STORE_READ),
-    validateGetStoreById,
+    validator(paramsSchema, 'params'),
     asyncWrapper(storeController.getStoreById),
   )
 
   .delete(
     requireStoreContext,
     requirePermission(PERMISSION.STORE_WRITE),
-    validateDeleteStore,
+    validator(paramsSchema, 'params'),
     asyncWrapper(storeController.softDeleteStore),
   );
 
@@ -101,7 +103,7 @@ storeRouter.post(
  */
 storeRouter.post(
   '/join',
-  validateJoinStore,
+  validator(joinStoreBodySchema, 'body'),
   asyncWrapper(storeController.joinStore),
 );
 export { storeRouter };

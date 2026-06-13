@@ -1,14 +1,10 @@
 import { z } from 'zod';
 
-import { validateSchema } from '../../common/utils/index.js';
-
-import type { NextFunction, Request, Response } from 'express';
-
-const paramsSchema = z.object({
+export const paramsSchema = z.object({
   categoryId: z.uuid('Invalid categoryId'),
 });
 
-const createCategorySchema = z.object({
+export const createCategoryBodySchema = z.object({
   name: z
     .string()
     .trim()
@@ -22,7 +18,7 @@ const createCategorySchema = z.object({
     .optional(),
 });
 
-const updateCategorySchema = z
+export const updateCategoryBodySchema = z
   .object({
     name: z
       .string()
@@ -38,27 +34,6 @@ const updateCategorySchema = z
       .optional(),
   })
   .refine(
-    (value) => value.name !== undefined || value.description !== undefined,
-    {
-      message: 'At least one field must be provided for update.',
-    },
+    (data) => Object.keys(data).length > 0,
+    'Update request body cannot be empty',
   );
-
-export const validateCreateCategory = (
-  req: Request,
-  _res: Response,
-  next: NextFunction,
-): void => {
-  req.body = validateSchema(createCategorySchema, req.body);
-  next();
-};
-
-export const validateUpdateCategory = (
-  req: Request,
-  _res: Response,
-  next: NextFunction,
-): void => {
-  req.params = validateSchema(paramsSchema, req.params);
-  req.body = validateSchema(updateCategorySchema, req.body);
-  next();
-};

@@ -1,13 +1,14 @@
 import { Router } from 'express';
 
-import { asyncWrapper } from '../../../common/middlewares/index.js';
+import { asyncWrapper, validator } from '../../../common/middlewares/index.js';
 import { PERMISSION, requirePermission } from '../../access-control/index.js';
 import { authenticate } from '../../auth/index.js';
 import { requireStoreContext } from '../../store-member/index.js';
 import { productPackageBarcodeController } from '../barcodes.module.js';
 import {
-  validateCreateProductPackageBarcodeMapping,
-  validateRemoveProductPackageBarcodeMapping,
+  createBarcodeMappingParamsSchema,
+  createBarcodeMappingBodySchema,
+  removeBarcodeMappingParamsSchema,
 } from '../barcodes.validator.js';
 
 const productPackageBarcodeRouter = Router();
@@ -28,7 +29,8 @@ productPackageBarcodeRouter.use(authenticate, requireStoreContext);
 productPackageBarcodeRouter.post(
   '/:productPackageId/barcodes',
   requirePermission(PERMISSION.PRODUCT_WRITE),
-  validateCreateProductPackageBarcodeMapping,
+  validator(createBarcodeMappingParamsSchema, 'params'),
+  validator(createBarcodeMappingBodySchema, 'body'),
   asyncWrapper(productPackageBarcodeController.createPackageBarcode),
 );
 
@@ -44,7 +46,7 @@ productPackageBarcodeRouter.post(
 productPackageBarcodeRouter.delete(
   '/:productPackageId/barcodes/:barcode',
   requirePermission(PERMISSION.PRODUCT_WRITE),
-  validateRemoveProductPackageBarcodeMapping,
+  validator(removeBarcodeMappingParamsSchema, 'params'),
   asyncWrapper(productPackageBarcodeController.deletePackageBarcode),
 );
 

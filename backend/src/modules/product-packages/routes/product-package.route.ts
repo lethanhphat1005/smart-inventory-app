@@ -1,17 +1,20 @@
 import { Router } from 'express';
 
-import { asyncWrapper } from '../../../common/middlewares/index.js';
+import {
+  asyncWrapper,
+  validator,
+  validatorToLocals,
+} from '../../../common/middlewares/index.js';
 import { PERMISSION, requirePermission } from '../../access-control/index.js';
 import { authenticate } from '../../auth/index.js';
 import { requireStoreContext } from '../../store-member/index.js';
 import { productPackageController } from '../modules/product-package.module.js';
 import {
-  validateCreateProductPackage,
-  validateDeleteProductPackage,
-  validateGetProductPackageById,
-  validateGetProductPackagesByProductId,
-  validateUpdateProductPackage,
-  validateGetPackagesByStore,
+  productParamsSchema,
+  productPackageParamsSchema,
+  createProductPackageBodySchema,
+  updateProductPackageBodySchema,
+  listPackageQuerySchema,
 } from '../product-package.validator.js';
 
 const productPackageRouter = Router();
@@ -35,7 +38,7 @@ productPackageProductRouter.use(authenticate, requireStoreContext);
 productPackageRouter.get(
   '/',
   requirePermission(PERMISSION.PRODUCT_READ),
-  validateGetPackagesByStore,
+  validatorToLocals(listPackageQuerySchema, 'query'),
   asyncWrapper(productPackageController.getProductPackagesByStore),
 );
 
@@ -73,12 +76,13 @@ productPackageProductRouter
   .route('/:productId/packages')
   .get(
     requirePermission(PERMISSION.PRODUCT_READ),
-    validateGetProductPackagesByProductId,
+    validator(productParamsSchema, 'params'),
     asyncWrapper(productPackageController.getProductPackagesByProductId),
   )
   .post(
     requirePermission(PERMISSION.PRODUCT_WRITE),
-    validateCreateProductPackage,
+    validator(productParamsSchema, 'params'),
+    validator(createProductPackageBodySchema, 'body'),
     asyncWrapper(productPackageController.createProductPackage),
   );
 
@@ -111,17 +115,18 @@ productPackageRouter
   .route('/:productPackageId')
   .get(
     requirePermission(PERMISSION.PRODUCT_READ),
-    validateGetProductPackageById,
+    validator(productPackageParamsSchema, 'params'),
     asyncWrapper(productPackageController.getProductPackageById),
   )
   .patch(
     requirePermission(PERMISSION.PRODUCT_WRITE),
-    validateUpdateProductPackage,
+    validator(productPackageParamsSchema, 'params'),
+    validator(updateProductPackageBodySchema, 'body'),
     asyncWrapper(productPackageController.updateProductPackage),
   )
   .delete(
     requirePermission(PERMISSION.PRODUCT_WRITE),
-    validateDeleteProductPackage,
+    validator(productPackageParamsSchema, 'params'),
     asyncWrapper(productPackageController.softDeleteProductPackage),
   );
 

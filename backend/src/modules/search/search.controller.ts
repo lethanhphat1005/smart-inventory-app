@@ -40,11 +40,10 @@ export class SearchController {
   ): Promise<void> => {
     const storeId = requireReqStoreContext(req).storeId;
 
-    const searchedProducts =
-      await this.searchService.searchProductsByKeyword(
-        storeId,
-        res.locals.validatedQuery as unknown as SearchByKeywordQueryDto,
-      );
+    const searchedProducts = await this.searchService.searchProductsByKeyword(
+      storeId,
+      res.locals.validatedQuery as unknown as SearchByKeywordQueryDto,
+    );
 
     sendResponse.success(res, searchedProducts, { status: StatusCodes.OK });
   };

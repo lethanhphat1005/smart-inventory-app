@@ -1,18 +1,14 @@
 import { z } from 'zod';
 
-import { validateSchema } from '../../common/utils/index.js';
-
-import type { NextFunction, Request, Response } from 'express';
-
-const productParamsSchema = z.object({
+export const productParamsSchema = z.object({
   productId: z.uuid('Invalid productId'),
 });
 
-const productPackageParamsSchema = z.object({
+export const productPackageParamsSchema = z.object({
   productPackageId: z.uuid('Invalid productPackageId'),
 });
 
-const createProductPackageBodySchema = z
+export const createProductPackageBodySchema = z
   .object({
     package: z.object({
       unitId: z.uuid('Invalid unitId'),
@@ -53,7 +49,7 @@ const createProductPackageBodySchema = z
     'Request body cannot be empty',
   );
 
-const updateProductPackageBodySchema = z
+export const updateProductPackageBodySchema = z
   .object({
     unitId: z.uuid('Invalid unitId'),
     variant: z
@@ -88,62 +84,3 @@ export const listPackageQuerySchema = z.object({
   sortOrder: z.enum(['asc', 'desc']).optional().default('asc'),
   categoryId: z.string().uuid('Invalid categoryId').optional(),
 });
-
-export const validateGetPackagesByStore = (
-  req: Request,
-  _res: Response,
-  next: NextFunction,
-): void => {
-  _res.locals.validatedQuery = validateSchema(
-    listPackageQuerySchema,
-    req.query,
-  );
-  next();
-};
-
-export const validateCreateProductPackage = (
-  req: Request,
-  _res: Response,
-  next: NextFunction,
-): void => {
-  req.params = validateSchema(productParamsSchema, req.params);
-  req.body = validateSchema(createProductPackageBodySchema, req.body);
-  next();
-};
-
-export const validateGetProductPackagesByProductId = (
-  req: Request,
-  _res: Response,
-  next: NextFunction,
-): void => {
-  req.params = validateSchema(productParamsSchema, req.params);
-  next();
-};
-
-export const validateGetProductPackageById = (
-  req: Request,
-  _res: Response,
-  next: NextFunction,
-): void => {
-  req.params = validateSchema(productPackageParamsSchema, req.params);
-  next();
-};
-
-export const validateUpdateProductPackage = (
-  req: Request,
-  _res: Response,
-  next: NextFunction,
-): void => {
-  req.params = validateSchema(productPackageParamsSchema, req.params);
-  req.body = validateSchema(updateProductPackageBodySchema, req.body);
-  next();
-};
-
-export const validateDeleteProductPackage = (
-  req: Request,
-  _res: Response,
-  next: NextFunction,
-): void => {
-  req.params = validateSchema(productPackageParamsSchema, req.params);
-  next();
-};

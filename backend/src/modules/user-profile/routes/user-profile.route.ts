@@ -6,7 +6,10 @@ import { authenticate } from '../../auth/index.js';
 import { verifyAuthOnly } from '../../user-profile/middleware/optional-profile.middleware.js';
 import { userProfileRouter } from '../index.js';
 import { userProfileController } from '../user-profile.module.js';
-import { updateUserProfileSchema } from '../validator/user-profile.validator.js';
+import {
+  paramsSchema,
+  updateUserProfileBodySchema,
+} from '../validator/user-profile.validator.js';
 
 const router = Router();
 
@@ -39,7 +42,8 @@ router.get(
 userProfileRouter.patch(
   '/:userId',
   authenticate,
-  validator(updateUserProfileSchema),
+  validator(paramsSchema, 'params'),
+  validator(updateUserProfileBodySchema, 'body'),
   asyncWrapper(userProfileController.updateUserProfile),
 );
 

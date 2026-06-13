@@ -1,30 +1,27 @@
 import { z } from 'zod';
 
-import { validateSchema } from '../../common/utils/index.js';
-
-import type { NextFunction, Request, Response } from 'express';
-
-const paramsSchema = z.object({
+export const paramsSchema = z.object({
   productId: z.uuid('Invalid productId'),
 });
 
-const createProductBodySchema = z.object({
+export const createProductBodySchema = z.object({
   name: z
     .string()
     .trim()
-    .min(1, 'Tên sản phẩm không được để trống')
-    .max(255, 'Tên sản phẩm không được vượt quá 255 ký tự'),
+    .min(1, 'Product name cannot be empty')
+    .max(255, 'Product name cannot be exeeded 255 characters'),
   imageUrl: z.string().trim().nullable().optional(),
   brand: z
     .string()
     .trim()
-    .max(255, 'Brand không được vượt quá 255 ký tự')
+    .min(1, 'Invalid brand value')
+    .max(255, 'Brand cannot be exeeded 255 characters')
     .nullable()
     .optional(),
   categoryId: z.uuid('Invalid categoryId'),
 });
 
-const updateProductBodySchema = z
+export const updateProductBodySchema = z
   .object({
     name: z
       .string()
@@ -36,7 +33,8 @@ const updateProductBodySchema = z
     brand: z
       .string()
       .trim()
-      .max(255, 'Brand name cannot be exeeded 255 characters')
+      .min(1, 'Invalid brand value')
+      .max(255, 'Brand cannot be exeeded 255 characters')
       .nullable()
       .optional(),
     categoryId: z.uuid('Invalid categoryId').optional(),
@@ -54,52 +52,3 @@ export const listProductsQuerySchema = z.object({
   categoryId: z.string().uuid('Invalid categoryId').optional(),
   brand: z.string().trim().min(1).max(255).optional(),
 });
-
-export const validateGetProducts = (
-  req: Request,
-  _res: Response,
-  next: NextFunction,
-): void => {
-  _res.locals.validatedQuery = validateSchema(
-    listProductsQuerySchema,
-    req.query,
-  );
-  next();
-};
-
-export const validateCreateProduct = (
-  req: Request,
-  _res: Response,
-  next: NextFunction,
-): void => {
-  req.body = validateSchema(createProductBodySchema, req.body);
-  next();
-};
-
-export const validateUpdateProduct = (
-  req: Request,
-  _res: Response,
-  next: NextFunction,
-): void => {
-  req.params = validateSchema(paramsSchema, req.params);
-  req.body = validateSchema(updateProductBodySchema, req.body);
-  next();
-};
-
-export const validateGetProductById = (
-  req: Request,
-  _res: Response,
-  next: NextFunction,
-): void => {
-  req.params = validateSchema(paramsSchema, req.params);
-  next();
-};
-
-export const validateDeleteProduct = (
-  req: Request,
-  _res: Response,
-  next: NextFunction,
-): void => {
-  req.params = validateSchema(paramsSchema, req.params);
-  next();
-};

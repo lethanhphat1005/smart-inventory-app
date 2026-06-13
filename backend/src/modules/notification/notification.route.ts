@@ -3,13 +3,12 @@ import { Router } from 'express';
 import { NotificationController } from './controllers/notification.controller.js';
 import { NotificationRepository } from './repositories/notification.repository.js';
 import { NotificationService } from './services/notification.service.js';
-import { asyncWrapper } from '../../common/middlewares/async-wrapper.middleware.js';
 import { authenticate } from '../auth/index.js';
 import {
-  registerTokenSchema,
-  removeTokenSchema,
+  registerTokenBodySchema,
+  removeTokenBodySchema,
 } from './validators/notification.validator.js';
-import { validator } from '../../common/middlewares/index.js';
+import { asyncWrapper, validator } from '../../common/middlewares/index.js';
 
 const notificationRouter = Router();
 const repository = new NotificationRepository();
@@ -20,14 +19,14 @@ const controller = new NotificationController(service);
 notificationRouter.post(
   '/register-token',
   authenticate,
-  validator(registerTokenSchema),
+  validator(registerTokenBodySchema, 'body'),
   asyncWrapper(controller.registerToken),
 );
 
 notificationRouter.post(
   '/remove-token',
   authenticate,
-  validator(removeTokenSchema),
+  validator(removeTokenBodySchema, 'body'),
   asyncWrapper(controller.removeToken),
 );
 

@@ -2,10 +2,13 @@ import { Router } from 'express';
 
 import { searchController } from './search.module.js';
 import {
-  validateGetProductsByKeyword,
-  validateGetProductsByPrefix,
+  searchByKeywordQuerySchema,
+  searchByPrefixQuerySchema,
 } from './search.validator.js';
-import { asyncWrapper } from '../../common/middlewares/index.js';
+import {
+  asyncWrapper,
+  validatorToLocals,
+} from '../../common/middlewares/index.js';
 import { PERMISSION, requirePermission } from '../access-control/index.js';
 import { authenticate } from '../auth/index.js';
 import { requireStoreContext } from '../store-member/index.js';
@@ -25,7 +28,7 @@ searchRouter.use(authenticate, requireStoreContext);
 searchRouter.get(
   '/products',
   requirePermission(PERMISSION.PRODUCT_READ),
-  validateGetProductsByKeyword,
+  validatorToLocals(searchByKeywordQuerySchema, 'query'),
   asyncWrapper(searchController.getProductsbyKeyword),
 );
 
@@ -40,7 +43,7 @@ searchRouter.get(
 searchRouter.get(
   '/product-packages',
   requirePermission(PERMISSION.PRODUCT_READ),
-  validateGetProductsByKeyword,
+  validatorToLocals(searchByPrefixQuerySchema, 'query'),
   asyncWrapper(searchController.getProductPackagesbyKeyword),
 );
 
@@ -55,7 +58,7 @@ searchRouter.get(
 searchRouter.get(
   '/products/prefix',
   requirePermission(PERMISSION.PRODUCT_READ),
-  validateGetProductsByPrefix,
+  validatorToLocals(searchByPrefixQuerySchema, 'query'),
   asyncWrapper(searchController.getProductsByPrefix),
 );
 

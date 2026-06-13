@@ -2,13 +2,16 @@ import { Router } from 'express';
 
 import { productController } from './product.module.js';
 import {
-  validateGetProducts,
-  validateCreateProduct,
-  validateDeleteProduct,
-  validateGetProductById,
-  validateUpdateProduct,
+  paramsSchema,
+  createProductBodySchema,
+  updateProductBodySchema,
+  listProductsQuerySchema,
 } from './product.validator.js';
-import { asyncWrapper } from '../../common/middlewares/index.js';
+import {
+  asyncWrapper,
+  validator,
+  validatorToLocals,
+} from '../../common/middlewares/index.js';
 import { PERMISSION, requirePermission } from '../access-control/index.js';
 import { authenticate } from '../auth/index.js';
 import { requireStoreContext } from '../store-member/index.js';
@@ -42,12 +45,12 @@ productRouter
   .route('/')
   .get(
     requirePermission(PERMISSION.PRODUCT_READ),
-    validateGetProducts,
+    validatorToLocals(listProductsQuerySchema, 'query'),
     asyncWrapper(productController.getProducts),
   )
   .post(
     requirePermission(PERMISSION.PRODUCT_WRITE),
-    validateCreateProduct,
+    validator(createProductBodySchema, 'body'),
     asyncWrapper(productController.createProduct),
   );
 
@@ -80,17 +83,18 @@ productRouter
   .route('/:productId')
   .get(
     requirePermission(PERMISSION.PRODUCT_READ),
-    validateGetProductById,
+    validator(paramsSchema, 'params'),
     asyncWrapper(productController.getProductById),
   )
   .patch(
     requirePermission(PERMISSION.PRODUCT_WRITE),
-    validateUpdateProduct,
+    validator(paramsSchema, 'params'),
+    validator(updateProductBodySchema, 'body'),
     asyncWrapper(productController.updateProduct),
   )
   .delete(
     requirePermission(PERMISSION.PRODUCT_WRITE),
-    validateDeleteProduct,
+    validator(paramsSchema, 'params'),
     asyncWrapper(productController.softDeleteProduct),
   );
 

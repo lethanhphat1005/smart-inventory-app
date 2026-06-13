@@ -4,9 +4,9 @@ import type { BarcodePrefill } from './barcodes.type.js';
 import type {
   confirmBarcodeMappingBodySchema,
   scanBarcodeBodySchema,
-  createProductPackageBarcodeMappingBodySchema,
-  createProductPackageBarcodeMappingParamsSchema,
-  removeProductPackageBarcodeMappingParamsSchema,
+  createBarcodeMappingBodySchema,
+  createBarcodeMappingParamsSchema,
+  removeBarcodeMappingParamsSchema,
 } from './barcodes.validator.js';
 import type { ProductPackageBarcode } from '../../generated/prisma/client.js';
 import type { ProductPackageResponseDto } from '../product-packages/index.js';
@@ -43,15 +43,15 @@ export type ConfirmBarcodeMappingResponseDto = Pick<
 };
 
 export type CreatePackageBarcodeMappingRequestDto = z.infer<
-  typeof createProductPackageBarcodeMappingBodySchema
+  typeof createBarcodeMappingBodySchema
 >;
 
 export type CreatePackageBarcodeMappingParamsDto = z.infer<
-  typeof createProductPackageBarcodeMappingParamsSchema
+  typeof createBarcodeMappingParamsSchema
 >;
 
 export type RemovePackageBarcodeMappingParamsDto = z.infer<
-  typeof removeProductPackageBarcodeMappingParamsSchema
+  typeof removeBarcodeMappingParamsSchema
 >;
 
 export type CreatePackageBarcodeMappingResponseDto =

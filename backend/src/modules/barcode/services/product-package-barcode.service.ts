@@ -119,9 +119,7 @@ export class ProductPackageBarcodeService {
       });
     }
 
-    if (
-      existingMapping.productPackageId !== input.productPackageId
-    ) {
+    if (existingMapping.productPackageId !== input.productPackageId) {
       throw new CustomError({
         message: 'Barcode does not belong to this product package',
         status: StatusCodes.CONFLICT,

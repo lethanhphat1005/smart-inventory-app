@@ -21,7 +21,7 @@ export class CustomError extends Error {
       this.code = options.code;
     }
 
-    if(options?.details !== undefined) {
+    if (options?.details !== undefined) {
       this.details = options.details;
     }
 

@@ -2,10 +2,11 @@ import { Router } from 'express';
 
 import { categoryController } from './category.module.js';
 import {
-  validateCreateCategory,
-  validateUpdateCategory,
+  paramsSchema,
+  createCategoryBodySchema,
+  updateCategoryBodySchema,
 } from './category.validator.js';
-import { asyncWrapper } from '../../common/middlewares/index.js';
+import { asyncWrapper, validator } from '../../common/middlewares/index.js';
 import { PERMISSION, requirePermission } from '../access-control/index.js';
 import { authenticate } from '../auth/index.js';
 import { requireStoreContext } from '../store-member/index.js';
@@ -33,7 +34,7 @@ categoryRouter
   )
   .post(
     requirePermission(PERMISSION.CATEGORY_WRITE),
-    validateCreateCategory,
+    validator(createCategoryBodySchema, 'body'),
     asyncWrapper(categoryController.createOne),
   );
 
@@ -79,11 +80,13 @@ categoryRouter
   .route('/:categoryId')
   .patch(
     requirePermission(PERMISSION.CATEGORY_WRITE),
-    validateUpdateCategory,
+    validator(paramsSchema, 'params'),
+    validator(updateCategoryBodySchema, 'body'),
     asyncWrapper(categoryController.updateOne),
   )
   .delete(
     requirePermission(PERMISSION.CATEGORY_WRITE),
+    validator(paramsSchema, 'params'),
     asyncWrapper(categoryController.deleteCustomCategory),
   );
 
@@ -112,6 +115,7 @@ categoryRouter.get(
 categoryRouter.post(
   '/:categoryId/hide',
   requirePermission(PERMISSION.CATEGORY_WRITE),
+  validator(paramsSchema, 'params'),
   asyncWrapper(categoryController.hideDefaultCategory),
 );
 
@@ -125,6 +129,7 @@ categoryRouter.post(
 categoryRouter.delete(
   '/:categoryId/unhide',
   requirePermission(PERMISSION.CATEGORY_WRITE),
+  validator(paramsSchema, 'params'),
   asyncWrapper(categoryController.restoreDefaultOne),
 );
 

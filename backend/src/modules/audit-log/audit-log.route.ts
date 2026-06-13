@@ -1,9 +1,10 @@
 import { Router } from 'express';
 
 import { asyncWrapper } from '../../common/middlewares/index.js';
+import { validatorToLocals } from '../../common/middlewares/index.js';
 import { PERMISSION, requirePermission } from '../access-control/index.js';
 import { auditLogController } from '../audit-log/audit-log.module.js';
-import { validateGetAuditLogs } from '../audit-log/validator/audit-log.validator.js';
+import { listAuditLogsQuerySchema } from '../audit-log/validator/audit-log.validator.js';
 import { authenticate } from '../auth/index.js';
 import { requireStoreContext } from '../store-member/index.js';
 
@@ -16,7 +17,7 @@ auditLogRouter.use(authenticate, requireStoreContext);
 auditLogRouter.get(
   '/',
   requirePermission(PERMISSION.AUDIT_LOG_READ),
-  validateGetAuditLogs,
+  validatorToLocals(listAuditLogsQuerySchema, 'query', 'validatedQuery'),
   asyncWrapper(auditLogController.getAuditLogs),
 );
 

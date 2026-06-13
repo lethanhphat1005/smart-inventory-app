@@ -34,7 +34,7 @@ export const sendResponse = {
     options?: {
       code?: string;
       errors?: Record<string, unknown>;
-      data?: T
+      data?: T;
     },
   ) => {
     const response: ApiErrorResponse = {
