@@ -19,8 +19,8 @@ import type { DbClient } from '../../../common/types/db.type.js';
 import type { Prisma } from '../../../generated/prisma/client.js';
 import type { ProductSimpleResponseDto } from '../../products/index.js';
 import type {
-  CreateProductPackageInput,
   CreateProductPackageAndInventoryDto,
+  CreateProductPackageAndInventoryInput,
   ListProductPackagesResponseDto,
   PackageQueryDto,
   ProductPackageDetailResponseDto,
@@ -189,84 +189,131 @@ export class ProductPackageService {
     return ids;
   }
 
-  private async getDefaultDisplayName(
-    storeId: string,
-    productId: string,
-    unitId: string,
-  ): Promise<string> {
-    const product = await this.findExistedProduct(storeId, productId);
-    const unit = await this.unitRepository.findUnitById(unitId);
-
-    if (!unit) {
-      throw new CustomError({
-        message: 'Unit not found',
-        status: StatusCodes.NOT_FOUND,
-      });
-    }
-
-    return [product.name, unit.name].join(' ');
+  private buildDisplayName(productName: string, unitName: string): string {
+    return [productName, unitName].join(' ');
   }
 
   async createProductPackageAndInventory(
     storeId: string,
     userId: string,
     productId: string,
-    data: CreateProductPackageAndInventoryDto,
-  ): Promise<CreatePackageAndInventoryResponseDto> {
-    // NOTE: Ở đây từng có check barcode đã tồn tại
+    data: CreateProductPackageAndInventoryDto[],
+  ): Promise<CreatePackageAndInventoryResponseDto[]> {
+    const product = await this.findExistedProduct(storeId, productId);
 
-    const displayName = await this.getDefaultDisplayName(
-      storeId,
-      productId,
-      data.package.unitId,
+    const unitIds = data.map((item) => item.package.unitId);
+    const unitIdSet = [...new Set(unitIds)]; // tạo Set và convert thành string[]
+    const units = await this.unitRepository.findManyByIds(unitIdSet);
+
+    if (!units) {
+      throw new CustomError({
+        message: 'Unit not found',
+        status: StatusCodes.NOT_FOUND,
+      });
+    }
+
+    // check không được tạo 2 package có unit & variant trùng nhau
+    const seenPackage = new Set<string>();
+
+    for (const item of data) {
+      const key = `${item.package.unitId}|${item.package.variant ?? ''}`;
+
+      if (seenPackage.has(key)) {
+        throw new CustomError({
+          message: `Duplicate package: unitId=${item.package.unitId}, variant=${item.package.variant ?? 'null'}`,
+          status: StatusCodes.BAD_REQUEST,
+        });
+      }
+
+      seenPackage.add(key);
+    }
+
+    // check undefined value để dùng non-null assertion ở nơi call
+    if (units.length !== new Set(unitIds).size) {
+      throw new CustomError({
+        message: 'One or more units not found',
+        status: StatusCodes.NOT_FOUND,
+      });
+    }
+
+    // check product đã có package với (unit, variant) này chưa
+    const packageKeys = data.map((item) => ({
+      unitId: item.package.unitId,
+      variant: item.package.variant ?? null,
+    }));
+
+    const existingPackage =
+      await this.productPackageRepository.findOneExistedVariant(
+        productId,
+        packageKeys,
+      );
+
+    if (existingPackage) {
+      throw new CustomError({
+        message: 'Product package variant already exists',
+        status: StatusCodes.CONFLICT,
+      });
+    }
+
+    const displayNameMap = new Map(
+      units.map((unit) => [
+        unit.unitId,
+        this.buildDisplayName(product.name, unit.name),
+      ]),
     );
 
-    const createPackageData: CreateProductPackageInput = {
-      ...data.package,
-      productId,
-      displayName,
-    };
+    const createData: CreateProductPackageAndInventoryInput[] = data.map(
+      (item) => ({
+        package: {
+          ...item.package,
+          productId,
+          displayName: displayNameMap.get(item.package.unitId)!, // non-null assertion
+        },
+        inventory: item.inventory,
+      }),
+    );
 
     return await prisma.$transaction(async (tx) => {
       const { productPackageRepositoryTx, auditLogRepositoryTx } =
         this.createTxRepositories(tx);
 
       const createdPackageInventory =
-        await productPackageRepositoryTx.createOneAndInventory(
-          createPackageData,
-          data.inventory,
-        );
+        await productPackageRepositoryTx.createManyAndInventory(createData);
 
-      await auditLogRepositoryTx.createLog({
-        actionType: 'create',
-        entityType: 'ProductPackage',
-        entityId: createdPackageInventory.productPackageId,
-        userId,
-        storeId,
-        oldValue: null,
-        newValue: {
-          productId: createdPackageInventory.productId,
-          displayName: createdPackageInventory.displayName,
-          variant: createdPackageInventory.variant,
-          unitId: createdPackageInventory.unitId,
-          importPrice: createdPackageInventory.importPrice,
-          sellingPrice: createdPackageInventory.sellingPrice,
-        } as Prisma.InputJsonObject,
-      });
+      await Promise.all(
+        createdPackageInventory.map(async (item) => {
+          await auditLogRepositoryTx.createLog({
+            actionType: 'create',
+            entityType: 'ProductPackage',
+            entityId: item.productPackageId,
+            userId,
+            storeId,
+            oldValue: null,
+            newValue: {
+              productId: item.productId,
+              displayName: item.displayName,
+              variant: item.variant,
+              unitId: item.unitId,
+              importPrice: item.importPrice,
+              sellingPrice: item.sellingPrice,
+            } as Prisma.InputJsonObject,
+          });
 
-      await auditLogRepositoryTx.createLog({
-        actionType: 'create',
-        entityType: 'Inventory',
-        entityId: createdPackageInventory.inventory?.inventoryId ?? null,
-        userId,
-        storeId,
-        oldValue: null,
-        newValue: {
-          quantity: createdPackageInventory.inventory?.quantity,
-          reorderThreshold: createdPackageInventory.inventory?.reorderThreshold,
-          productPackageId: createdPackageInventory.productPackageId,
-        } as Prisma.InputJsonObject,
-      });
+          await auditLogRepositoryTx.createLog({
+            actionType: 'create',
+            entityType: 'Inventory',
+            entityId: item.inventory?.inventoryId ?? null,
+            userId,
+            storeId,
+            oldValue: null,
+            newValue: {
+              quantity: item.inventory?.quantity,
+              reorderThreshold: item.inventory?.reorderThreshold,
+              productPackageId: item.productPackageId,
+            } as Prisma.InputJsonObject,
+          });
+        }),
+      );
 
       return createdPackageInventory;
     });
@@ -286,13 +333,22 @@ export class ProductPackageService {
     const updateData: UpdateProductPackageInput = {};
 
     if (data.unitId !== undefined) {
-      updateData.unitId = data.unitId;
-
-      const newDisplayName = await this.getDefaultDisplayName(
+      const product = await this.findExistedProduct(
         storeId,
         existingProductPackage.productId,
-        data.unitId,
       );
+      const unit = await this.unitRepository.findOneById(data.unitId);
+
+      if (!unit) {
+        throw new CustomError({
+          message: 'Unit not found',
+          status: StatusCodes.NOT_FOUND,
+        });
+      }
+
+      updateData.unitId = data.unitId;
+
+      const newDisplayName = this.buildDisplayName(product.name, unit.name);
 
       updateData.displayName = newDisplayName;
     }

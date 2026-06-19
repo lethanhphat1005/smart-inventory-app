@@ -9,45 +9,44 @@ export const productPackageParamsSchema = z.object({
 });
 
 export const createProductPackageBodySchema = z
-  .object({
-    package: z.object({
-      unitId: z.uuid('Invalid unitId'),
-      importPrice: z.coerce
-        .number()
-        .min(0, 'Import price must be greater than or equal to 0')
-        .nullable()
-        .optional(),
-      sellingPrice: z.coerce
-        .number()
-        .min(0, 'Selling price must be greater than or equal to 0')
-        .nullable()
-        .optional(),
-      variant: z
-        .string()
-        .trim()
-        .max(255, 'Variant cannot exceed 255 characters')
-        .optional()
-        .default(''),
+  .array(
+    z.object({
+      package: z.object({
+        unitId: z.uuid('Invalid unitId'),
+        importPrice: z.coerce
+          .number()
+          .min(0, 'Import price must be greater than or equal to 0')
+          .nullable()
+          .optional(),
+        sellingPrice: z.coerce
+          .number()
+          .min(0, 'Selling price must be greater than or equal to 0')
+          .nullable()
+          .optional(),
+        variant: z
+          .string()
+          .trim()
+          .max(255, 'Variant cannot exceed 255 characters')
+          .optional()
+          .default(''),
+      }),
+      inventory: z.object({
+        quantity: z
+          .number()
+          .int()
+          .min(0, 'Import price must be greater than or equal to 0')
+          .default(0),
+        reorderThreshold: z
+          .number()
+          .int()
+          .min(0, 'Reorder threshold must be greater than or equal to 0')
+          .nullable()
+          .optional(),
+        lastCount: z.number().int().min(0).nullable().optional(),
+      }),
     }),
-    inventory: z.object({
-      quantity: z
-        .number()
-        .int()
-        .min(0, 'Import price must be greater than or equal to 0')
-        .default(0),
-      reorderThreshold: z
-        .number()
-        .int()
-        .min(0, 'Reorder threshold must be greater than or equal to 0')
-        .nullable()
-        .optional(),
-      lastCount: z.number().int().min(0).nullable().optional(),
-    }),
-  })
-  .refine(
-    (data) => Object.keys(data).length > 0,
-    'Request body cannot be empty',
-  );
+  )
+  .min(1, 'At least one package is required');
 
 export const updateProductPackageBodySchema = z
   .object({

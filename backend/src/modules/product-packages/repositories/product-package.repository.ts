@@ -6,14 +6,13 @@ import type {
 } from '../../../common/types/index.js';
 import type { Prisma } from '../../../generated/prisma/client.js';
 import type {
-  CreateProductPackageInput,
   PackageQueryDto,
   ProductPackageDetailResponseDto,
   UpdateProductPackageInput,
   ProductPackageSimpleResponseDto,
   ProductPackageResponseForTransaction,
-  CreateInventoryInput,
   ProductPackageResponseDto,
+  CreateProductPackageAndInventoryInput,
   CreatePackageAndInventoryResponseDto,
   BarcodeCandidateRecord,
   ProductPackageListResponseDto,
@@ -325,15 +324,21 @@ export class ProductPackageRepository {
     return productPackages.map((productPackage) => productPackage.productId);
   }
 
-  async findActiveByProductIdAndUnitId(
+  async findOneExistedVariant(
     productId: string,
-    unitId: string,
+    packages: {
+      unitId: string;
+      variant: string | null;
+    }[],
   ): Promise<{ productPackageId: string } | null> {
     return await this.db.productPackage.findFirst({
       where: {
         productId,
-        unitId,
         activeStatus: 'active',
+        OR: packages.map((item) => ({
+          unitId: item.unitId,
+          variant: item.variant,
+        })),
       },
       select: {
         productPackageId: true,
@@ -445,48 +450,51 @@ export class ProductPackageRepository {
     }));
   }
 
-  async createOneAndInventory(
-    packageData: CreateProductPackageInput,
-    inventoryData: CreateInventoryInput,
-  ): Promise<CreatePackageAndInventoryResponseDto> {
-    const productPackage = await this.db.productPackage.create({
-      data: {
-        ...packageData,
-        inventory: {
-          create: inventoryData,
-        },
-      },
-      select: {
-        productPackageId: true,
-        displayName: true,
-        variant: true,
-        importPrice: true,
-        sellingPrice: true,
-        createdAt: true,
-        productId: true,
-        unitId: true,
-        inventory: {
-          select: {
-            inventoryId: true,
-            quantity: true,
-            reorderThreshold: true,
+  async createManyAndInventory(
+    data: CreateProductPackageAndInventoryInput[],
+  ): Promise<CreatePackageAndInventoryResponseDto[]> {
+    const productPackage = await Promise.all(
+      data.map((item) =>
+        this.db.productPackage.create({
+          data: {
+            ...item.package,
+            inventory: {
+              create: item.inventory,
+            },
           },
-        },
-        productPackageBarcodes: {
           select: {
-            barcode: true,
-            source: true,
-            isVerified: true,
+            productPackageId: true,
+            displayName: true,
+            variant: true,
+            importPrice: true,
+            sellingPrice: true,
+            createdAt: true,
+            productId: true,
+            unitId: true,
+            inventory: {
+              select: {
+                inventoryId: true,
+                quantity: true,
+                reorderThreshold: true,
+              },
+            },
+            productPackageBarcodes: {
+              select: {
+                barcode: true,
+                source: true,
+                isVerified: true,
+              },
+            },
           },
-        },
-      },
-    });
+        }),
+      ),
+    );
 
-    return {
-      ...productPackage,
-      importPrice: productPackage.importPrice?.toNumber() ?? null,
-      sellingPrice: productPackage.sellingPrice?.toNumber() ?? null,
-    };
+    return productPackage.map((p) => ({
+      ...p,
+      importPrice: p.importPrice?.toNumber() ?? null,
+      sellingPrice: p.sellingPrice?.toNumber() ?? null,
+    }));
   }
 
   async updateOne(

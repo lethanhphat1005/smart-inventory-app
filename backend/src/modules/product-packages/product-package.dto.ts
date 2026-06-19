@@ -49,13 +49,18 @@ export type ProductPackageResponseForTransaction = Pick<
 type CreateProductPackageDto = Pick<ProductPackage, 'unitId'> &
   Partial<Pick<ProductPackage, 'variant' | 'importPrice' | 'sellingPrice'>>;
 
-export type CreateProductPackageInput = CreateProductPackageDto &
+type CreateProductPackageInput = CreateProductPackageDto &
   Pick<ProductPackage, 'displayName' | 'productId'>;
 
-export type CreateInventoryInput = Pick<
+type CreateInventoryInput = Pick<
   CreateInventoryDto,
   'quantity' | 'reorderThreshold'
 >;
+
+export type CreateProductPackageAndInventoryInput = {
+  package: CreateProductPackageInput;
+  inventory: CreateInventoryInput;
+};
 
 export type CreateProductPackageAndInventoryDto = {
   package: CreateProductPackageDto;

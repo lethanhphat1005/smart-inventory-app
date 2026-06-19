@@ -77,7 +77,7 @@ export class ProductPackageController {
 
   createProductPackage = async (
     req: Request,
-    res: Response<ApiResponse<CreatePackageAndInventoryResponseDto>>,
+    res: Response<ApiResponse<CreatePackageAndInventoryResponseDto[]>>,
   ): Promise<void> => {
     const storeId = requireReqStoreContext(req).storeId;
     const userId = requireReqUser(req).userId;
@@ -88,7 +88,7 @@ export class ProductPackageController {
         storeId,
         userId,
         productId as string,
-        req.body as CreateProductPackageAndInventoryDto,
+        req.body as CreateProductPackageAndInventoryDto[],
       );
 
     sendResponse.success(res, productPackage, {
