@@ -3,6 +3,7 @@ import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/features/inventory/widgets/shared/inventory_product_form_action_buttons_widget.dart';
 import 'package:frontend/features/inventory/widgets/shared/inventory_product_form_base_info_widget.dart';
 import 'package:frontend/features/inventory/widgets/shared/inventory_product_form_image_widget.dart';
+import 'package:frontend/features/inventory/widgets/shared/inventory_product_form_multiple_packages_widget.dart';
 import 'package:frontend/features/inventory/widgets/shared/inventory_product_form_shimmer_widget.dart';
 import 'package:frontend/features/inventory/widgets/shared/inventory_product_package_form_fields_widget.dart';
 import 'package:get/get.dart';
@@ -12,7 +13,7 @@ import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:frontend/core/ui/widgets/t_app_bar_widget.dart';
 import 'package:frontend/features/inventory/controllers/product_form_controller.dart';
 import 'package:frontend/features/inventory/widgets/product_form/product_form_progress_bar_widget.dart';
-import 'package:iconsax_flutter/iconsax_flutter.dart'; // IMPORT ICON
+import 'package:iconsax_flutter/iconsax_flutter.dart'; 
 
 class ProductFormMobileView extends GetView<ProductFormController> {
   const ProductFormMobileView({super.key});
@@ -153,7 +154,6 @@ class ProductFormMobileView extends GetView<ProductFormController> {
   }
 
   Widget _renderCurrentForm(String mode, int step) {
-    // ÉP CỨNG GIAO DIỆN NẾU ĐANG Ở CHẾ ĐỘ SỬA LẺ TẺ
     if (mode == 'info') {
       return const InventoryProductFormBaseInfoWidget(key: ValueKey('info'));
     }
@@ -167,15 +167,12 @@ class ProductFormMobileView extends GetView<ProductFormController> {
           key: ValueKey('package_form'));
     }
 
-    // NẾU LÀ TẠO MỚI (WIZARD) THÌ CHẠY THEO STEP
     if (step == 1) {
       return const InventoryProductFormBaseInfoWidget(key: ValueKey('step1'));
     }
     if (step == 2) {
       return const InventoryProductFormImageWidget(key: ValueKey('step2'));
     }
-    return const Form(
-        key: ValueKey('step3'),
-        child: InventoryProductPackageFormFieldsWidget());
+    return const InventoryProductFormMultiplePackagesWidget();
   }
 }

@@ -2,6 +2,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:frontend/core/state/services/supabase_storage_service.dart';
 import 'package:frontend/core/ui/theme/app_fonts.dart';
+import 'package:frontend/core/ui/widgets/t_primary_button_widget.dart';
+import 'package:frontend/features/inventory/models/package_draft_model.dart';
+import 'package:frontend/features/inventory/widgets/shared/inventory_product_package_form_fields_widget.dart';
 import 'package:frontend/routes/app_routes.dart';
 import 'package:get/get.dart';
 import 'package:image_cropper/image_cropper.dart';
@@ -34,6 +37,8 @@ class ProductFormController extends GetxController with TErrorHandler {
   final RxInt currentStep = 1.obs;
   final RxBool isSaving = false.obs;
   final RxBool isPickingImage = false.obs;
+  String? initialBarcode;
+  bool _isInitialBarcodeUsed = false;
 
   final RxString formMode = 'create'.obs;
   bool isEditMode = false;
@@ -77,6 +82,7 @@ class ProductFormController extends GetxController with TErrorHandler {
   final RxList<String> packageBarcodes = <String>[].obs;
   final RxList<String> originalBarcodes = <String>[].obs;
   final RxList<String> pendingDeleteBarcodes = <String>[].obs;
+  final RxList<PackageDraft> packageDrafts = <PackageDraft>[].obs;
   final TextEditingController barcodeInputController = TextEditingController();
 
   @override
@@ -115,8 +121,11 @@ class ProductFormController extends GetxController with TErrorHandler {
       formMode.value = args['mode'] ?? 'create';
 
       if (formMode.value == 'create') {
-        if (args['barcode'] != null) {
-          packageBarcodes.add(args['barcode']);
+        if (formMode.value == 'create') {
+          if (args['barcode'] != null) {
+            initialBarcode = args['barcode'];
+            packageBarcodes.add(args['barcode']);
+          }
         }
         if (args['freshName'] != null) {
           nameController.text = args['freshName'];
@@ -363,6 +372,110 @@ class ProductFormController extends GetxController with TErrorHandler {
     }
   }
 
+  void clearPackageForm() {
+    selectedUnitId.value = '';
+    unitNameController.clear();
+    packageVariantNameController.clear();
+    importPriceController.clear();
+    salePriceController.clear();
+    thresholdController.clear();
+    quantityController.text = '0';
+    packageBarcodes.clear();
+    pendingDeleteBarcodes.clear();
+    barcodeInputController.clear();
+    packageDisplayNameController.clear();
+    if (initialBarcode != null && !_isInitialBarcodeUsed) {
+      packageBarcodes.add(initialBarcode!);
+    }
+  }
+
+  void editPackageInList(int index) {
+    final draft = packageDrafts[index];
+
+    // Đổ ngược dữ liệu từ mảng tạm vào các ô nhập liệu
+    selectedUnitId.value = draft.unitId;
+    unitNameController.text = draft.unitName;
+    packageVariantNameController.text = draft.variant;
+    importPriceController.text =
+        draft.importPrice == 0 ? '' : draft.importPrice.toString();
+    salePriceController.text =
+        draft.salePrice == 0 ? '' : draft.salePrice.toString();
+    thresholdController.text =
+        draft.threshold == 0 ? '' : draft.threshold.toString();
+    quantityController.text = draft.quantity.toString();
+
+    // Nạp lại danh sách mã vạch riêng của item này
+    packageBarcodes.assignAll(draft.barcodes);
+    _updateDynamicDisplayName();
+
+    TBottomSheetWidget.show(
+      title: TTexts.editPackage.tr,
+      child: Column(
+        children: [
+          const InventoryProductPackageFormFieldsWidget(),
+          const SizedBox(height: 24),
+          TPrimaryButtonWidget(
+            text: TTexts.saveChanges.tr,
+            onPressed: () {
+              if (packageFormKey.currentState?.validate() != true ||
+                  selectedUnitId.value.isEmpty) {
+                TSnackbarsWidget.warning(
+                    title: TTexts.warningTitle.tr,
+                    message: TTexts.fillRequiredFields.tr);
+                return;
+              }
+
+              packageDrafts[index] = PackageDraft(
+                unitId: selectedUnitId.value,
+                unitName: unitNameController.text.trim(),
+                variant: packageVariantNameController.text.trim(),
+                importPrice: parsePrice(importPriceController.text) ?? 0.0,
+                salePrice: parsePrice(salePriceController.text) ?? 0.0,
+                threshold: _getParsedThreshold(),
+                quantity: _getParsedQuantity(),
+                barcodes: List.from(packageBarcodes),
+              );
+
+              Get.back();
+              clearPackageForm();
+            },
+          ),
+          const SizedBox(height: 24),
+        ],
+      ),
+    );
+  }
+
+  void addPackageToList() {
+    if (packageFormKey.currentState?.validate() != true ||
+        selectedUnitId.value.isEmpty) {
+      TSnackbarsWidget.warning(
+          title: TTexts.warningTitle.tr, message: TTexts.fillRequiredFields.tr);
+      return;
+    }
+
+    final draft = PackageDraft(
+      unitId: selectedUnitId.value,
+      unitName: unitNameController.text.trim(),
+      variant: packageVariantNameController.text.trim(),
+      importPrice: parsePrice(importPriceController.text) ?? 0.0,
+      salePrice: parsePrice(salePriceController.text) ?? 0.0,
+      threshold: _getParsedThreshold(),
+      quantity: _getParsedQuantity(),
+      barcodes: List.from(packageBarcodes), // Copy danh sách barcode
+    );
+
+    packageDrafts.add(draft);
+    _isInitialBarcodeUsed = true;
+    Get.back(); // Đóng BottomSheet nhập liệu
+    clearPackageForm(); // Dọn form cho lần nhập sau
+  }
+
+// 4. Hàm xóa package khỏi danh sách
+  void removePackageDraft(int index) {
+    packageDrafts.removeAt(index);
+  }
+
   // ==========================================
   // PUBLIC ACTIONS (CÓ DELAY CHỐNG COLLISION KHI ĐÓNG POPUP)
   // ==========================================
@@ -385,17 +498,9 @@ class ProductFormController extends GetxController with TErrorHandler {
   }
 
   void saveProduct() {
-    if (packageFormKey.currentState?.validate() != true ||
-        selectedUnitId.value.isEmpty) {
+    if (packageDrafts.isEmpty) {
       TSnackbarsWidget.warning(
           title: TTexts.warningTitle.tr, message: TTexts.fillRequiredFields.tr);
-      return;
-    }
-
-    if (parsePrice(importPriceController.text) == null ||
-        parsePrice(salePriceController.text) == null) {
-      TSnackbarsWidget.warning(
-          title: TTexts.warningTitle.tr, message: TTexts.invalidPrice.tr);
       return;
     }
 
@@ -408,7 +513,7 @@ class ProductFormController extends GetxController with TErrorHandler {
       onSecondaryPressed: () => Get.back(),
       onPrimaryPressed: () {
         Get.back();
-        // Delay chống kẹt UI trước khi mở loading dialog
+
         Future.delayed(const Duration(milliseconds: 200), () {
           _executeSaveFullProduct();
         });
@@ -777,22 +882,20 @@ class ProductFormController extends GetxController with TErrorHandler {
 
   Future<void> _executeSaveFullProduct() async {
     if (isSaving.value) return;
+
+    if (packageDrafts.isEmpty) {
+      TSnackbarsWidget.warning(
+          title: TTexts.warningTitle.tr, message: TTexts.fillRequiredFields.tr);
+      return;
+    }
+
     try {
       isSaving.value = true;
       FullScreenLoaderUtils.openLoadingDialog(TTexts.saving.tr);
 
-      // 1. Kiểm tra tính hợp lệ của mã vạch
-      final barcodeError = await _checkBarcodeAvailability();
-      if (barcodeError != null) {
-        FullScreenLoaderUtils.stopLoading(); // ĐÓNG LOADING TRƯỚC
-        Future.delayed(const Duration(milliseconds: 200), () {
-          // SAU ĐÓ MỚI BẮN SNACKBAR ĐỂ KHÔNG BỊ KẸT UI
-          TSnackbarsWidget.error(
-              title: TTexts.errorServerTitle.tr, message: barcodeError);
-        });
-        return; // Dừng tiến trình save
-      }
-
+      // ==========================================
+      // BƯỚC 1: TẠO PRODUCT GỐC
+      // ==========================================
       String? imageUrl;
       if (selectedImage.value != null) {
         imageUrl = await _supabaseStorageService.uploadImage(
@@ -805,35 +908,55 @@ class ProductFormController extends GetxController with TErrorHandler {
         'categoryId': selectedCategory.value!.categoryId,
         if (imageUrl != null) 'imageUrl': imageUrl,
       };
+
       final newProduct = await _provider.createProduct(productPayload);
 
-      final packagePayload = {
-        'variant': packageVariantNameController.text.trim(),
-        'unitId': selectedUnitId.value,
-        'importPrice': parsePrice(importPriceController.text),
-        'sellingPrice': parsePrice(salePriceController.text),
-      };
+      // ==========================================
+      // BƯỚC 2: GOM DATA VÀ GỌI API TẠO NHIỀU PACKAGE (API CŨ CỦA BẠN)
+      // ==========================================
 
-      final inventoryPayload = {
-        'quantity': _getParsedQuantity(),
-        'reorderThreshold': _getParsedThreshold(),
-      };
+      // 2.1 Chuẩn bị mảng payload y hệt như hình bạn chụp
+      List<Map<String, dynamic>> bulkPackagesPayload = [];
 
-      final newPackageData = await _provider.createProductPackage(
-          newProduct.productId, packagePayload, inventoryPayload);
+      for (var draft in packageDrafts) {
+        bulkPackagesPayload.add({
+          'package': {
+            'variant': draft.variant,
+            'unitId': draft.unitId,
+            'importPrice': draft.importPrice,
+            'sellingPrice': draft.salePrice,
+          },
+          'inventory': {
+            'quantity': draft.quantity,
+            'reorderThreshold': draft.threshold,
+          }
+        });
+      }
 
-      final createdPkg = ProductPackageModel.fromJson(newPackageData);
+      // 2.2 Bắn mảng này lên server (Gọi 1 lần duy nhất)
+      final createdPackagesData = await _provider.createMultipleProductPackages(
+          newProduct.productId, bulkPackagesPayload);
 
-      if (packageBarcodes.isNotEmpty &&
-          createdPkg.productPackageId.isNotEmpty) {
-        for (String code in packageBarcodes) {
-          try {
-            await _provider.confirmBarcodeMapping(
-              barcode: code,
-              productPackageId: createdPkg.productPackageId,
-            );
-          } catch (e) {
-            debugPrint("Lỗi map barcode khi tạo package mới: $e");
+      // ==========================================
+      // BƯỚC 3: MAP BARCODE (NẾU CÓ)
+      // ==========================================
+      // Cần map ID trả về từ server với danh sách barcode tương ứng mà user đã nhập
+      for (int i = 0; i < createdPackagesData.length; i++) {
+        final createdPkg = ProductPackageModel.fromJson(createdPackagesData[i]);
+        final originalDraft =
+            packageDrafts[i]; // Lấy lại draft tương ứng để lấy barcode
+
+        if (originalDraft.barcodes.isNotEmpty &&
+            createdPkg.productPackageId.isNotEmpty) {
+          for (String code in originalDraft.barcodes) {
+            try {
+              await _provider.confirmBarcodeMapping(
+                barcode: code,
+                productPackageId: createdPkg.productPackageId,
+              );
+            } catch (e) {
+              debugPrint("Lỗi map barcode $code: $e");
+            }
           }
         }
       }

@@ -49,7 +49,7 @@ class InventoryProvider {
       data: {'canReassignToUncategorized': canReassignToUncategorized},
     );
   }
-  
+
   // ==============================================================
   // HIDDEN CATEGORIES
   // ==============================================================
@@ -161,6 +161,17 @@ class InventoryProvider {
     } catch (e) {
       return [];
     }
+  }
+
+  Future<List<dynamic>> createMultipleProductPackages(
+      String productId, List<Map<String, dynamic>> packagesList) async {
+    final response = await _apiClient.post(
+      '/api/products/$productId/packages',
+      data: packagesList,
+    );
+
+    // Trả về danh sách các package vừa được tạo
+    return response.data['data'] ?? response.data;
   }
 
   // ==========================================
