@@ -23,7 +23,8 @@ final Map<String, String> enInventory = {
   TTexts.hideCategorySuccessMessage: 'Category hidden successfully.',
   TTexts.addNewProductDesc: 'Add a new product item to this category.',
   TTexts.categoryInUseErrorTitle: 'Category in Use',
-  TTexts.categoryInUseErrorDesc: 'This category contains @count products. Do you want to move them all to "Uncategorized" and proceed with deletion?',
+  TTexts.categoryInUseErrorDesc:
+      'This category contains @count products. Do you want to move them all to "Uncategorized" and proceed with deletion?',
   TTexts.moveAndProceedBtn: 'Move & Delete',
 
   // -- Inventory Header & Health
@@ -225,6 +226,7 @@ final Map<String, String> enInventory = {
   TTexts.deleteCategorySuccessMessage: 'Category has been deleted.',
   TTexts.categoryNotEmptyError:
       'Cannot delete. Please remove or clear inventory of all products inside this category first.',
+  TTexts.addedVariantsHeader: "Added Variants List",
 
   // -- Add Product
   TTexts.addNewProductTitle: 'Add New Product',

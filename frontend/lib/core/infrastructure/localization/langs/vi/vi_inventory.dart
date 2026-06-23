@@ -24,7 +24,8 @@ final Map<String, String> viInventory = {
   TTexts.hideCategorySuccessMessage: 'Ẩn danh mục thành công.',
   TTexts.addNewProductDesc: 'Thêm sản phẩm mới vào danh mục này.',
   TTexts.categoryInUseErrorTitle: 'Danh mục đang có sản phẩm',
-  TTexts.categoryInUseErrorDesc: 'Danh mục này đang chứa @count sản phẩm. Bạn có muốn chuyển tất cả sang "Chưa phân loại" (Uncategorized) và tiến hành xóa không?',
+  TTexts.categoryInUseErrorDesc:
+      'Danh mục này đang chứa @count sản phẩm. Bạn có muốn chuyển tất cả sang "Chưa phân loại" (Uncategorized) và tiến hành xóa không?',
   TTexts.moveAndProceedBtn: 'Chuyển & Xóa',
 
   // -- Inventory Header & Health
@@ -224,6 +225,7 @@ final Map<String, String> viInventory = {
   TTexts.deleteCategorySuccessMessage: 'Đã xóa danh mục.',
   TTexts.categoryNotEmptyError:
       'Không thể xóa. Vui lòng xóa hoặc làm trống toàn bộ sản phẩm trong danh mục trước.',
+  TTexts.addedVariantsHeader: "Danh sách các variant đã thêm",
 
   // -- Add Product
   TTexts.addNewProductTitle: 'Thêm sản phẩm mới',
@@ -293,7 +295,8 @@ final Map<String, String> viInventory = {
   TTexts.editProductImageSub: 'Cập nhật ảnh chính của sản phẩm.',
   TTexts.editPackageTitle: 'Chỉnh sửa gói',
   TTexts.editPackageSub: 'Cập nhật giá, barcode và ngưỡng tồn kho.',
-  TTexts.productPackageInfoSub: 'Xem chi tiết thông tin gói sản phẩm, giá bán và mã vạch.',
+  TTexts.productPackageInfoSub:
+      'Xem chi tiết thông tin gói sản phẩm, giá bán và mã vạch.',
   TTexts.addPackageTitle: 'Thêm gói mới',
   TTexts.addPackageSub: 'Tạo biến thể hoặc đơn vị mới cho sản phẩm.',
   TTexts.saveChanges: 'Lưu thay đổi',

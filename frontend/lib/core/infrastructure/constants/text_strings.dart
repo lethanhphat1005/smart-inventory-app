@@ -878,6 +878,7 @@ class TTexts {
   static const String sellingPrice = 'selling_price';
   static const String deleteProductImageTitle = "deleteProductImageTitle";
   static const String deleteProductImageMessage = "deleteProductImageMessage";
+  static const String addedVariantsHeader = 'addedVariantsHeader';
 
   // Empty State
   static const String homeQuickActions = "home_quick_actions";
