@@ -4,7 +4,9 @@
   "description": "",
   "main": "dist/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "dev": "tsx watch src/server.ts",
     "start": "node dist/server.js",
     "build": "tsc -p tsconfig.json",
@@ -25,6 +27,8 @@
     "@types/node": "^25.5.0",
     "@types/node-cron": "^3.0.11",
     "@types/nodemailer": "^7.0.11",
+    "@types/supertest": "^7.2.0",
+    "@vitest/coverage-v8": "^4.1.9",
     "eslint": "^9.39.4",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.32.0",
@@ -37,9 +41,11 @@
     "prettier": "^3.8.1",
     "prisma": "^7.5.0",
     "supabase": "^2.78.1",
+    "supertest": "^7.2.2",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.57.0"
+    "typescript-eslint": "^8.57.0",
+    "vitest": "^4.1.9"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.4.2",
