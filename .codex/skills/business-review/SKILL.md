@@ -167,6 +167,14 @@ For each scenario include:
 
 Do not generate test code.
 
+## Test Location
+
+tests/unit/modules/<module-name>/
+
+Examples:
+tests/unit/modules/products/product.service.test.ts
+tests/unit/modules/products/product.controller.test.ts
+
 ## Domain Knowledge
 
 Apply domain-specific rules defined in AGENTS.md.

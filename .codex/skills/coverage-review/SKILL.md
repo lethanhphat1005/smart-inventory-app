@@ -179,6 +179,14 @@ Current coverage:
 
 ---
 
+## Test Location
+
+tests/unit/modules/<module-name>/
+
+Examples:
+tests/unit/modules/products/product.service.test.ts
+tests/unit/modules/products/product.controller.test.ts
+
 ## Rules
 
 Do not:
