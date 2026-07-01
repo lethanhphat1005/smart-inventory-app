@@ -1,6 +1,10 @@
 import express from 'express';
 
-import { errorHandler, pinoLogger } from './common/middlewares/index.js';
+import {
+  errorHandler,
+  pinoLogger,
+  rateLimiter,
+} from './common/middlewares/index.js';
 import { sendResponse } from './common/utils/index.js';
 import { initFirebaseAdmin } from './config/firebase.config.js';
 import { initCronJobs } from './cron/index.js';
@@ -47,25 +51,91 @@ app.get('/api/health', (_req: Request, res: Response<ApiResponse<null>>) => {
   sendResponse.success(res, null, { message: 'ok' });
 });
 
-app.use('/api/stores', storeRouter);
-app.use('/api/barcodes', barcodeRouter);
-app.use('/api/products', [productRouter, productPackageProductRouter]);
-app.use('/api/categories', categoryRouter);
-app.use('/api/auth', userProfileRouter);
-app.use('/api/product-packages', [
+app.use('/api/stores', rateLimiter({ windowMs: 60 * 1000, max: 60 }), storeRouter);
+
+app.use(
+  '/api/barcodes',
+  rateLimiter({ windowMs: 60 * 1000, max: 30 }),
+  barcodeRouter,
+);
+
+app.use('/api/products', rateLimiter({ windowMs: 60 * 1000, max: 120 }), [
+  productRouter,
+  productPackageProductRouter,
+]);
+
+app.use(
+  '/api/categories',
+  rateLimiter({ windowMs: 60 * 1000, max: 60 }),
+  categoryRouter,
+);
+
+app.use(
+  '/api/auth',
+  rateLimiter({ windowMs: 15 * 60 * 1000, max: 10 }),
+  userProfileRouter,
+);
+
+app.use('/api/product-packages', rateLimiter({ windowMs: 60 * 1000, max: 120 }), [
   productPackageRouter,
   productPackageBarcodeRouter,
 ]);
-app.use('/api/inventories', inventoryRouter);
-app.use('/api/transactions', transactionRouter);
-app.use('/api/audit-logs', auditLogRouter);
-app.use('/api/notification', notificationRouter);
-app.use('/api/search', searchRouter);
-app.use('/api/units', unitRouter);
-app.use('/api/store-members', storeMemberRouter);
-app.use('/api/chat-bot', chatRouter);
-app.use('/api/smart-decisions', smartDecisionRouter);
-app.use('/api/currencies', currencyRouter);
+
+app.use(
+  '/api/inventories',
+  rateLimiter({ windowMs: 60 * 1000, max: 120 }),
+  inventoryRouter,
+);
+
+app.use(
+  '/api/transactions',
+  rateLimiter({ windowMs: 60 * 1000, max: 60 }),
+  transactionRouter,
+);
+
+app.use(
+  '/api/audit-logs',
+  rateLimiter({ windowMs: 60 * 1000, max: 30 }),
+  auditLogRouter,
+);
+
+app.use(
+  '/api/notification',
+  rateLimiter({ windowMs: 60 * 1000, max: 120 }),
+  notificationRouter,
+);
+
+app.use(
+  '/api/search',
+  rateLimiter({ windowMs: 60 * 1000, max: 60 }),
+  searchRouter,
+);
+
+app.use('/api/units', rateLimiter({ windowMs: 60 * 1000, max: 120 }), unitRouter);
+
+app.use(
+  '/api/store-members',
+  rateLimiter({ windowMs: 60 * 1000, max: 30 }),
+  storeMemberRouter,
+);
+
+app.use(
+  '/api/chat-bot',
+  rateLimiter({ windowMs: 60 * 1000, max: 10 }),
+  chatRouter,
+);
+
+app.use(
+  '/api/smart-decisions',
+  rateLimiter({ windowMs: 60 * 1000, max: 30 }),
+  smartDecisionRouter,
+);
+
+app.use(
+  '/api/currencies',
+  rateLimiter({ windowMs: 60 * 1000, max: 120 }),
+  currencyRouter,
+);
 
 app.use(errorHandler);
 
