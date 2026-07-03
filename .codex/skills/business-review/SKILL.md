@@ -1,3 +1,9 @@
+---
+name: business-review
+description: Analyze a backend module before test generation, identifying business rules, execution branches, exceptional flows, edge cases, security risks, concurrency risks, transaction risks, and test requirements without modifying code or generating tests.
+argument-hint: "[module path]"
+---
+
 # Skill: Business Review
 
 ## Goal
@@ -19,8 +25,6 @@ Do not modify code.
 
 This skill is purely analytical.
 
----
-
 ## Inputs
 
 Module:
@@ -35,8 +39,6 @@ Read:
 * validator
 * related shared utilities
 * related Prisma models
-
----
 
 ## Analysis Process
 
@@ -79,8 +81,6 @@ Identify exceptional flows.
 
 Never assume a branch is impossible.
 
----
-
 ## Security Review
 
 Identify:
@@ -90,8 +90,6 @@ Identify:
 * insecure direct object references
 * cross-store access vulnerabilities
 * missing ownership validation
-
----
 
 ## Concurrency Review
 
@@ -103,8 +101,6 @@ Identify:
 * concurrent transaction creation
 
 Determine whether database transactions are required.
-
----
 
 ## Data Consistency Review
 
@@ -120,8 +116,6 @@ Example:
 
 * Delete product with inventory
 * Delete product with transaction history
-
----
 
 ## Output Format
 
@@ -166,14 +160,6 @@ For each scenario include:
   * cosmetic or defensive cases
 
 Do not generate test code.
-
-## Test Location
-
-tests/unit/modules/<module-name>/
-
-Examples:
-tests/unit/modules/products/product.service.test.ts
-tests/unit/modules/products/product.controller.test.ts
 
 ## Domain Knowledge
 

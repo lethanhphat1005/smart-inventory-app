@@ -1,3 +1,9 @@
+---
+name: coverage-review
+description: Analyze existing backend module test coverage and generate additional tests for uncovered branches, missing business behavior, edge cases, security cases, concurrency paths, and transaction behavior.
+argument-hint: "[module path] [coverage report]"
+---
+
 # Skill: Coverage Review
 
 ## Goal
@@ -10,8 +16,6 @@ This skill assumes tests already exist.
 
 Do not modify production code unless explicitly requested.
 
----
-
 ## Inputs
 
 Required:
@@ -19,8 +23,6 @@ Required:
 * module source code
 * existing test files
 * coverage report
-
----
 
 ## Coverage Priority
 
@@ -34,8 +36,6 @@ Coverage importance order:
 Never optimize only for line coverage.
 
 Always prioritize missing branches.
-
----
 
 ## Coverage Review Process
 
@@ -84,8 +84,6 @@ Generate additional tests only for missing behavior.
 
 Avoid duplicate tests.
 
----
-
 ## Branch Analysis
 
 For every uncovered branch identify:
@@ -112,8 +110,6 @@ switch(status)
 
 → Missing enum value test
 
----
-
 ## Security Coverage Checklist
 
 Review only security-related behavior that is currently uncovered by tests.
@@ -126,8 +122,6 @@ Examples:
 * invalid JWT
 * missing JWT
 
----
-
 ## Concurrency Coverage Checklist
 
 Review uncovered code related to:
@@ -138,8 +132,6 @@ Review uncovered code related to:
 
 Generate additional tests if coverage gaps exist.
 
----
-
 ## Database Transaction Coverage
 
 Review whether tests exist for:
@@ -149,8 +141,6 @@ Review whether tests exist for:
 * partial failure
 
 Generate tests only if uncovered.
-
----
 
 ## Output Format
 
@@ -177,15 +167,19 @@ Current coverage:
 
 * Generate only the tests required to increase coverage.
 
----
-
 ## Test Location
+
+Unit tests:
 
 tests/unit/modules/<module-name>/
 
-Examples:
-tests/unit/modules/products/product.service.test.ts
-tests/unit/modules/products/product.controller.test.ts
+Integration tests:
+
+tests/integration/modules/<module-name>/
+
+Shared test helpers:
+
+tests/helpers/
 
 ## Rules
 
