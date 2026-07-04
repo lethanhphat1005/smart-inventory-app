@@ -2,14 +2,9 @@ import { StatusCodes } from 'http-status-codes';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { StoreController } from '../../../../src/modules/stores/store.controller.js';
+import { createRequest, createResponse } from '../../../helpers/index.js';
 
-import type {
-  ApiResponse,
-  CurrentUser,
-  StoreContext,
-} from '../../../../src/common/types/index.js';
 import type { StoreResponseDto } from '../../../../src/modules/stores/store.dto.js';
-import type { Request, Response } from 'express';
 
 type MockStoreService = {
   getStoresByUserId: ReturnType<typeof vi.fn>;
@@ -19,16 +14,6 @@ type MockStoreService = {
   softDeleteStore: ReturnType<typeof vi.fn>;
   refreshInviteCode: ReturnType<typeof vi.fn>;
   joinStoreByInviteCode: ReturnType<typeof vi.fn>;
-};
-
-type MockResponse<T> = Response<ApiResponse<T>> & {
-  status: ReturnType<typeof vi.fn>;
-  json: ReturnType<typeof vi.fn>;
-};
-
-type MockRequest = Partial<Request> & {
-  user?: CurrentUser;
-  storeContext?: StoreContext;
 };
 
 const storeFixture = (
@@ -56,22 +41,6 @@ const createMockService = (): MockStoreService => ({
   refreshInviteCode: vi.fn(),
   joinStoreByInviteCode: vi.fn(),
 });
-
-const createRequest = (overrides: MockRequest): Request => {
-  return overrides as Request;
-};
-
-const createResponse = <T>(): MockResponse<T> => {
-  const response = {
-    status: vi.fn(),
-    json: vi.fn(),
-  } as unknown as MockResponse<T>;
-
-  response.status.mockReturnValue(response);
-  response.json.mockReturnValue(response);
-
-  return response;
-};
 
 describe('StoreController', () => {
   let storeService: MockStoreService;
