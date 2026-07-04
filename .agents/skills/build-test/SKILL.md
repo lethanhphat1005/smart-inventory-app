@@ -284,5 +284,9 @@ Do not:
 * add meaningless assertions
 * call mocked repository tests integration tests
 * place integration tests under tests/unit
+* reuse existing helpers whenever possible.
+* if the same helper is used by multiple test files or modules, extract it into tests/helpers.
+* update imports after extracting shared helpers.
+* duplicate reusable mocks, middleware, factories, or utilities.
 
 Prefer meaningful branch coverage over shallow line coverage.
