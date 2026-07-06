@@ -122,7 +122,9 @@ vi.mock('../../../../src/modules/product-packages/index.js', () => ({
 
 vi.mock('../../../../src/common/utils/index.js', async (importActual) => {
   const actual =
-    await importActual<typeof import('../../../../src/common/utils/index.js')>();
+    await importActual<
+      typeof import('../../../../src/common/utils/index.js')
+    >();
 
   return {
     ...actual,
@@ -188,7 +190,7 @@ describe('ProductService', () => {
     vi.clearAllMocks();
 
     productMocks.getSignedUrl.mockImplementation(
-      async (_bucket: string, path: string | null) =>
+      (_bucket: string, path: string | null) =>
         path ? `signed:${path}` : null,
     );
     productMocks.categoryRepository.findById.mockResolvedValue({
@@ -244,7 +246,10 @@ describe('ProductService', () => {
 
       productRepository.findDetailOne.mockResolvedValue(detailProduct);
 
-      const result = await productService.getProductById('store-1', 'product-1');
+      const result = await productService.getProductById(
+        'store-1',
+        'product-1',
+      );
 
       expect(productRepository.findDetailOne).toHaveBeenCalledWith(
         'store-1',
@@ -348,7 +353,9 @@ describe('ProductService', () => {
         'category-1',
       );
       expect(productMocks.transactionMock).toHaveBeenCalledTimes(1);
-      expect(productMocks.transactionClient.product.create).toHaveBeenCalledWith(
+      expect(
+        productMocks.transactionClient.product.create,
+      ).toHaveBeenCalledWith(
         expect.objectContaining({
           data: {
             storeId: 'store-1',
@@ -506,7 +513,9 @@ describe('ProductService', () => {
         },
       );
 
-      expect(productMocks.transactionClient.product.update).toHaveBeenCalledWith(
+      expect(
+        productMocks.transactionClient.product.update,
+      ).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { productId: 'product-1' },
           data: { name: 'Oat Milk' },
@@ -543,7 +552,9 @@ describe('ProductService', () => {
       expect(
         productMocks.transactionClient.productPackage.findMany,
       ).not.toHaveBeenCalled();
-      expect(productMocks.transactionClient.auditLog.create).not.toHaveBeenCalled();
+      expect(
+        productMocks.transactionClient.auditLog.create,
+      ).not.toHaveBeenCalled();
     });
 
     it('throws not found before update when the product is missing', async () => {
@@ -582,13 +593,17 @@ describe('ProductService', () => {
       productMocks.transactionClient.product.update.mockResolvedValue({
         productId: 'product-1',
       });
-      productMocks.transactionClient.productPackage.updateMany.mockResolvedValue({
-        count: 2,
-      });
+      productMocks.transactionClient.productPackage.updateMany.mockResolvedValue(
+        {
+          count: 2,
+        },
+      );
 
       await productService.softDeleteProduct('store-1', 'user-1', 'product-1');
 
-      expect(productMocks.transactionClient.product.update).toHaveBeenCalledWith({
+      expect(
+        productMocks.transactionClient.product.update,
+      ).toHaveBeenCalledWith({
         where: {
           productId: 'product-1',
         },

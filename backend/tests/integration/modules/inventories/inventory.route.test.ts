@@ -119,7 +119,9 @@ describe('inventoryRouter', () => {
     });
 
     expect(response.status).toBe(400);
-    expect(routeMocks.inventoryController.getInventories).not.toHaveBeenCalled();
+    expect(
+      routeMocks.inventoryController.getInventories,
+    ).not.toHaveBeenCalled();
   });
 
   it('routes POST /inventories through write permission and body validator', async () => {
@@ -134,9 +136,9 @@ describe('inventoryRouter', () => {
     expect(routeMocks.requirePermission).toHaveBeenCalledWith(
       'INVENTORY_WRITE',
     );
-    expect(routeMocks.inventoryController.createInventory).toHaveBeenCalledTimes(
-      1,
-    );
+    expect(
+      routeMocks.inventoryController.createInventory,
+    ).toHaveBeenCalledTimes(1);
   });
 
   it('rejects invalid create body before controller execution', async () => {
@@ -146,7 +148,9 @@ describe('inventoryRouter', () => {
     });
 
     expect(response.status).toBe(400);
-    expect(routeMocks.inventoryController.createInventory).not.toHaveBeenCalled();
+    expect(
+      routeMocks.inventoryController.createInventory,
+    ).not.toHaveBeenCalled();
   });
 
   it('routes GET /inventories/low-stock through read permission and query validator', async () => {
@@ -183,12 +187,12 @@ describe('inventoryRouter', () => {
     expect(
       routeMocks.inventoryController.getInventoryByProductPackageId,
     ).toHaveBeenCalledTimes(1);
-    expect(routeMocks.inventoryController.updateInventory).toHaveBeenCalledTimes(
-      1,
-    );
-    expect(routeMocks.inventoryController.deleteInventory).toHaveBeenCalledTimes(
-      1,
-    );
+    expect(
+      routeMocks.inventoryController.updateInventory,
+    ).toHaveBeenCalledTimes(1);
+    expect(
+      routeMocks.inventoryController.deleteInventory,
+    ).toHaveBeenCalledTimes(1);
   });
 
   it('rejects invalid product package params and empty update bodies before controller execution', async () => {
@@ -204,7 +208,9 @@ describe('inventoryRouter', () => {
     expect(
       routeMocks.inventoryController.getInventoryByProductPackageId,
     ).not.toHaveBeenCalled();
-    expect(routeMocks.inventoryController.updateInventory).not.toHaveBeenCalled();
+    expect(
+      routeMocks.inventoryController.updateInventory,
+    ).not.toHaveBeenCalled();
   });
 
   it('routes POST /inventories/adjustments through write permission and body validator', async () => {
@@ -226,9 +232,9 @@ describe('inventoryRouter', () => {
     expect(routeMocks.requirePermission).toHaveBeenCalledWith(
       'INVENTORY_WRITE',
     );
-    expect(routeMocks.inventoryController.adjustInventories).toHaveBeenCalledTimes(
-      1,
-    );
+    expect(
+      routeMocks.inventoryController.adjustInventories,
+    ).toHaveBeenCalledTimes(1);
   });
 
   it('rejects invalid adjustment body before controller execution', async () => {
@@ -237,6 +243,8 @@ describe('inventoryRouter', () => {
     });
 
     expect(response.status).toBe(400);
-    expect(routeMocks.inventoryController.adjustInventories).not.toHaveBeenCalled();
+    expect(
+      routeMocks.inventoryController.adjustInventories,
+    ).not.toHaveBeenCalled();
   });
 });

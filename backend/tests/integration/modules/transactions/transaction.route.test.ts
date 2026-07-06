@@ -36,16 +36,12 @@ const routeMocks = vi.hoisted(() => {
       getTransactionById: vi.fn((_req: Request, res: Response): void => {
         res.status(200).json({ handler: 'getTransactionById' });
       }),
-      createImportTransaction: vi.fn(
-        (_req: Request, res: Response): void => {
-          res.status(201).json({ handler: 'createImportTransaction' });
-        },
-      ),
-      createExportTransaction: vi.fn(
-        (_req: Request, res: Response): void => {
-          res.status(201).json({ handler: 'createExportTransaction' });
-        },
-      ),
+      createImportTransaction: vi.fn((_req: Request, res: Response): void => {
+        res.status(201).json({ handler: 'createImportTransaction' });
+      }),
+      createExportTransaction: vi.fn((_req: Request, res: Response): void => {
+        res.status(201).json({ handler: 'createExportTransaction' });
+      }),
     },
   };
 });
@@ -103,9 +99,9 @@ describe('transactionRouter', () => {
       'TRANSACTION_READ',
     );
     expect(routeMocks.permissionMiddleware).toHaveBeenCalledTimes(1);
-    expect(routeMocks.transactionController.getTransactions).toHaveBeenCalledTimes(
-      1,
-    );
+    expect(
+      routeMocks.transactionController.getTransactions,
+    ).toHaveBeenCalledTimes(1);
   });
 
   it('rejects invalid list query before controller execution', async () => {
@@ -116,7 +112,9 @@ describe('transactionRouter', () => {
       success: false,
       status: 400,
     });
-    expect(routeMocks.transactionController.getTransactions).not.toHaveBeenCalled();
+    expect(
+      routeMocks.transactionController.getTransactions,
+    ).not.toHaveBeenCalled();
   });
 
   it('routes GET /transactions/:transactionId through read permission and params validator', async () => {

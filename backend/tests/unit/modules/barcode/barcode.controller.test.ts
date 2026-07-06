@@ -169,6 +169,7 @@ describe('BarcodesController', () => {
       isVerified: true,
       productPackage,
     };
+
     service.confirmBarcodeMapping.mockResolvedValue(mapping);
     const req = createRequest({
       storeContext: { storeId: 'store-1', role: 'owner' },
@@ -217,6 +218,7 @@ describe('ProductPackageBarcodeController', () => {
       isVerified: true,
       productPackage,
     };
+
     service.createPackageBarcodeMapping.mockResolvedValue(mapping);
     const req = createRequest({
       storeContext: { storeId: 'store-1', role: 'owner' },

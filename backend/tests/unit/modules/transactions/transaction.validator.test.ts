@@ -60,7 +60,9 @@ describe('transaction validators', () => {
     });
 
     it('rejects limits above 100', () => {
-      expect(() => listTransactionsQuerySchema.parse({ limit: '101' })).toThrow();
+      expect(() =>
+        listTransactionsQuerySchema.parse({ limit: '101' }),
+      ).toThrow();
     });
 
     it('rejects invalid transaction type', () => {

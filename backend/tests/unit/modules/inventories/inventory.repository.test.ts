@@ -59,6 +59,7 @@ const createMockDb = () => ({
 describe('InventoryRepository', () => {
   it('findManyByStoreId scopes to active store inventory and maps inventory status', async () => {
     const db = createMockDb();
+
     db.$transaction.mockResolvedValue([
       [
         rawInventory({ quantity: 0, reorderThreshold: 5 }),
@@ -117,6 +118,7 @@ describe('InventoryRepository', () => {
 
   it('findManyByStoreId filters derived inventoryStatus after mapping', async () => {
     const db = createMockDb();
+
     db.$transaction.mockResolvedValue([
       [
         rawInventory({ quantity: 0, reorderThreshold: 5 }),
@@ -150,6 +152,7 @@ describe('InventoryRepository', () => {
 
   it('findLowStockByStoreId returns early when count is zero', async () => {
     const db = createMockDb();
+
     db.$queryRaw.mockResolvedValueOnce([{ count: 0n }]);
     const repository = new InventoryRepository(db as never);
 
@@ -166,6 +169,7 @@ describe('InventoryRepository', () => {
 
   it('findLowStockByStoreId fetches low stock ids then maps selected inventories', async () => {
     const db = createMockDb();
+
     db.$queryRaw
       .mockResolvedValueOnce([{ count: 1n }])
       .mockResolvedValueOnce([{ inventory_id: 'inventory-1' }]);
@@ -193,6 +197,7 @@ describe('InventoryRepository', () => {
 
   it('findManyActiveByProductPackageIds returns empty input immediately or active store-scoped records', async () => {
     const db = createMockDb();
+
     db.inventory.findMany.mockResolvedValue([
       {
         inventoryId: 'inventory-1',
@@ -245,6 +250,7 @@ describe('InventoryRepository', () => {
 
   it('findOneByProductPackageId returns null or active store-scoped inventory details', async () => {
     const db = createMockDb();
+
     db.inventory.findFirst.mockResolvedValueOnce(null).mockResolvedValueOnce(
       rawInventory({
         reorderThreshold: null,
@@ -283,6 +289,7 @@ describe('InventoryRepository', () => {
 
   it('adjusts quantity using set, increment, and decrement update shapes', async () => {
     const db = createMockDb();
+
     db.inventory.update.mockResolvedValue(rawInventory());
     const repository = new InventoryRepository(db as never);
 
@@ -306,6 +313,7 @@ describe('InventoryRepository', () => {
 
   it('updates reorder threshold and soft deletes by product package id', async () => {
     const db = createMockDb();
+
     db.inventory.update
       .mockResolvedValueOnce(rawInventory({ reorderThreshold: 9 }))
       .mockResolvedValueOnce({ inventoryId: 'inventory-1' });
@@ -314,8 +322,9 @@ describe('InventoryRepository', () => {
     await expect(
       repository.updateOne('inventory-1', { reorderThreshold: 9 }),
     ).resolves.toMatchObject({ reorderThreshold: 9 });
-    await expect(repository.softDeleteOneByPackageId('package-1')).resolves
-      .toEqual({ inventoryId: 'inventory-1' });
+    await expect(
+      repository.softDeleteOneByPackageId('package-1'),
+    ).resolves.toEqual({ inventoryId: 'inventory-1' });
 
     expect(db.inventory.update).toHaveBeenNthCalledWith(
       1,
@@ -333,6 +342,7 @@ describe('InventoryRepository', () => {
 
   it('checks ownership, creates, restores, and soft deletes inventory records', async () => {
     const db = createMockDb();
+
     db.productPackage.count.mockResolvedValue(1);
     db.inventory.findUnique.mockResolvedValue({
       inventoryId: 'inventory-1',
@@ -377,6 +387,7 @@ describe('InventoryRepository', () => {
 
   it('decreaseManyForTransaction records packages that fail the database quantity guard', async () => {
     const db = createMockDb();
+
     db.inventory.updateMany
       .mockResolvedValueOnce({ count: 1 })
       .mockResolvedValueOnce({ count: 0 });
@@ -415,6 +426,7 @@ describe('InventoryRepository', () => {
 
   it('increaseManyForTransaction increments each inventory atomically', async () => {
     const db = createMockDb();
+
     db.inventory.update.mockResolvedValue(rawInventory());
     const repository = new InventoryRepository(db as never);
 

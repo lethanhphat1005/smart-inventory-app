@@ -83,13 +83,9 @@ describe('auditLogRouter', () => {
     expect(response.body).toEqual({ handler: 'getAuditLogs' });
     expect(routeMocks.authenticate).toHaveBeenCalledTimes(1);
     expect(routeMocks.requireStoreContext).toHaveBeenCalledTimes(1);
-    expect(routeMocks.requirePermission).toHaveBeenCalledWith(
-      'AUDIT_LOG_READ',
-    );
+    expect(routeMocks.requirePermission).toHaveBeenCalledWith('AUDIT_LOG_READ');
     expect(routeMocks.permissionMiddleware).toHaveBeenCalledTimes(1);
-    expect(routeMocks.auditLogController.getAuditLogs).toHaveBeenCalledTimes(
-      1,
-    );
+    expect(routeMocks.auditLogController.getAuditLogs).toHaveBeenCalledTimes(1);
   });
 
   it('rejects invalid query before controller execution', async () => {

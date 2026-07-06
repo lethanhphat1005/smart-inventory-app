@@ -139,7 +139,9 @@ describe('categoryRouter', () => {
     expect(response.status).toBe(200);
     expect(response.body).toEqual({ handler: 'findAllHidden' });
     expect(routeMocks.requirePermission).toHaveBeenCalledWith('CATEGORY_READ');
-    expect(routeMocks.categoryController.findAllHidden).toHaveBeenCalledTimes(1);
+    expect(routeMocks.categoryController.findAllHidden).toHaveBeenCalledTimes(
+      1,
+    );
   });
 
   it('rejects invalid categoryId params before delete controller execution', async () => {
@@ -199,8 +201,8 @@ describe('categoryRouter', () => {
     expect(
       routeMocks.categoryController.hideDefaultCategory,
     ).toHaveBeenCalledTimes(1);
-    expect(routeMocks.categoryController.restoreDefaultOne).toHaveBeenCalledTimes(
-      1,
-    );
+    expect(
+      routeMocks.categoryController.restoreDefaultOne,
+    ).toHaveBeenCalledTimes(1);
   });
 });

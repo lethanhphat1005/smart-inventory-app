@@ -148,7 +148,9 @@ describe('productRouter', () => {
     expect(response.status).toBe(200);
     expect(response.body).toEqual({ handler: 'getProductById' });
     expect(routeMocks.requirePermission).toHaveBeenCalledWith('PRODUCT_READ');
-    expect(routeMocks.productController.getProductById).toHaveBeenCalledTimes(1);
+    expect(routeMocks.productController.getProductById).toHaveBeenCalledTimes(
+      1,
+    );
   });
 
   it('rejects invalid productId params before delete controller execution', async () => {
@@ -160,7 +162,9 @@ describe('productRouter', () => {
       status: 400,
       message: 'Invalid productId',
     });
-    expect(routeMocks.productController.softDeleteProduct).not.toHaveBeenCalled();
+    expect(
+      routeMocks.productController.softDeleteProduct,
+    ).not.toHaveBeenCalled();
   });
 
   it('rejects empty update body before controller execution', async () => {
@@ -191,8 +195,8 @@ describe('productRouter', () => {
     expect(deleteResponse.body).toEqual({ handler: 'softDeleteProduct' });
     expect(routeMocks.requirePermission).toHaveBeenCalledWith('PRODUCT_WRITE');
     expect(routeMocks.productController.updateProduct).toHaveBeenCalledTimes(1);
-    expect(routeMocks.productController.softDeleteProduct).toHaveBeenCalledTimes(
-      1,
-    );
+    expect(
+      routeMocks.productController.softDeleteProduct,
+    ).toHaveBeenCalledTimes(1);
   });
 });

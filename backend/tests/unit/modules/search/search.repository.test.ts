@@ -37,27 +37,25 @@ describe('SearchRepository', () => {
   });
 
   it('searchProductPackagesByKeyword queries store-scoped active packages and maps decimal prices', async () => {
-    db.$queryRaw
-      .mockResolvedValueOnce([{ total: 1n }])
-      .mockResolvedValueOnce([
-        {
-          productId: 'product-1',
-          productName: 'Milk',
-          imageUrl: 'products/milk.png',
-          brand: 'Dairy Co',
-          categoryId: 'category-1',
-          categoryName: 'Dairy',
-          productPackageId: 'package-1',
-          displayName: 'Milk Box',
-          importPrice: decimal(1000),
-          sellingPrice: decimal(1500),
-          quantity: 10,
-          reorderThreshold: 2,
-          unitId: 'unit-1',
-          unitCode: 'BOX',
-          unitName: 'Box',
-        },
-      ]);
+    db.$queryRaw.mockResolvedValueOnce([{ total: 1n }]).mockResolvedValueOnce([
+      {
+        productId: 'product-1',
+        productName: 'Milk',
+        imageUrl: 'products/milk.png',
+        brand: 'Dairy Co',
+        categoryId: 'category-1',
+        categoryName: 'Dairy',
+        productPackageId: 'package-1',
+        displayName: 'Milk Box',
+        importPrice: decimal(1000),
+        sellingPrice: decimal(1500),
+        quantity: 10,
+        reorderThreshold: 2,
+        unitId: 'unit-1',
+        unitCode: 'BOX',
+        unitName: 'Box',
+      },
+    ]);
 
     const result = await searchRepository.searchProductPackagesByKeyword(
       'store-1',
@@ -70,11 +68,15 @@ describe('SearchRepository', () => {
 
     expect(db.$queryRaw).toHaveBeenCalledTimes(2);
     expect(db.$queryRaw.mock.calls[0]?.[0].values).toContain('store-1');
-    expect(db.$queryRaw.mock.calls[0]?.[0].values).toContain(
-      'milk:* | box:*',
-    );
+    expect(db.$queryRaw.mock.calls[0]?.[0].values).toContain('milk:* | box:*');
     expect(db.$queryRaw.mock.calls[1]?.[0].values).toEqual(
-      expect.arrayContaining(['store-1', 'milk:* & box:*', 'milk:* | box:*', 5, 5]),
+      expect.arrayContaining([
+        'store-1',
+        'milk:* & box:*',
+        'milk:* | box:*',
+        5,
+        5,
+      ]),
     );
     expect(result).toEqual({
       items: [
@@ -158,18 +160,16 @@ describe('SearchRepository', () => {
   });
 
   it('searchProductsByKeyword escapes tsquery operators and maps product rows', async () => {
-    db.$queryRaw
-      .mockResolvedValueOnce([{ total: 1n }])
-      .mockResolvedValueOnce([
-        {
-          productId: 'product-1',
-          productName: 'Milk',
-          imageUrl: null,
-          brand: null,
-          categoryId: 'category-1',
-          categoryName: 'Dairy',
-        },
-      ]);
+    db.$queryRaw.mockResolvedValueOnce([{ total: 1n }]).mockResolvedValueOnce([
+      {
+        productId: 'product-1',
+        productName: 'Milk',
+        imageUrl: null,
+        brand: null,
+        categoryId: 'category-1',
+        categoryName: 'Dairy',
+      },
+    ]);
 
     const result = await searchRepository.searchProductsByKeyword('store-1', {
       keyword: 'milk & box',
@@ -178,11 +178,15 @@ describe('SearchRepository', () => {
     });
 
     expect(db.$queryRaw).toHaveBeenCalledTimes(2);
-    expect(db.$queryRaw.mock.calls[0]?.[0].values).toContain(
-      'milk:* | box:*',
-    );
+    expect(db.$queryRaw.mock.calls[0]?.[0].values).toContain('milk:* | box:*');
     expect(db.$queryRaw.mock.calls[1]?.[0].values).toEqual(
-      expect.arrayContaining(['store-1', 'milk:* & box:*', 'milk:* | box:*', 10, 0]),
+      expect.arrayContaining([
+        'store-1',
+        'milk:* & box:*',
+        'milk:* | box:*',
+        10,
+        0,
+      ]),
     );
     expect(result).toEqual({
       items: [

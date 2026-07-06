@@ -30,13 +30,14 @@ describe('inventory validators', () => {
 
   describe('listInventoriesQuerySchema', () => {
     it('coerces pagination and applies defaults', () => {
-      expect(listInventoriesQuerySchema.parse({ page: '2', limit: '25' }))
-        .toEqual({
-          page: 2,
-          limit: 25,
-          sortBy: 'updatedAt',
-          sortOrder: 'desc',
-        });
+      expect(
+        listInventoriesQuerySchema.parse({ page: '2', limit: '25' }),
+      ).toEqual({
+        page: 2,
+        limit: 25,
+        sortBy: 'updatedAt',
+        sortOrder: 'desc',
+      });
     });
 
     it('accepts filters and trims keyword', () => {
@@ -59,7 +60,9 @@ describe('inventory validators', () => {
 
     it('rejects invalid pagination, sort, and inventory status values', () => {
       expect(() => listInventoriesQuerySchema.parse({ page: '0' })).toThrow();
-      expect(() => listInventoriesQuerySchema.parse({ limit: '101' })).toThrow();
+      expect(() =>
+        listInventoriesQuerySchema.parse({ limit: '101' }),
+      ).toThrow();
       expect(() =>
         listInventoriesQuerySchema.parse({ sortBy: 'createdAt' }),
       ).toThrow();
@@ -74,8 +77,9 @@ describe('inventory validators', () => {
       expect(updateInventoryBodySchema.parse({ reorderThreshold: 5 })).toEqual({
         reorderThreshold: 5,
       });
-      expect(updateInventoryBodySchema.parse({ reorderThreshold: null }))
-        .toEqual({ reorderThreshold: null });
+      expect(
+        updateInventoryBodySchema.parse({ reorderThreshold: null }),
+      ).toEqual({ reorderThreshold: null });
     });
 
     it('rejects empty payloads and negative thresholds', () => {
@@ -146,8 +150,9 @@ describe('inventory validators', () => {
     });
 
     it('rejects empty batches, invalid UUIDs, invalid types, and negative quantities', () => {
-      expect(() => batchAdjustInventoryBodySchema.parse({ items: [] }))
-        .toThrow('Danh sách điều chỉnh phải có ít nhất 1 sản phẩm');
+      expect(() => batchAdjustInventoryBodySchema.parse({ items: [] })).toThrow(
+        'Danh sách điều chỉnh phải có ít nhất 1 sản phẩm',
+      );
       expect(() =>
         batchAdjustInventoryBodySchema.parse({
           items: [{ productPackageId: 'package-1', type: 'set', quantity: 1 }],

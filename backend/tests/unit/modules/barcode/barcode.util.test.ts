@@ -55,7 +55,9 @@ describe('barcode utils', () => {
         keepNumbers: false,
       }),
     ).toBe('Brand');
-    expect(reduceProviderNoise('330ml', { keepNumbers: false })).toBeUndefined();
+    expect(
+      reduceProviderNoise('330ml', { keepNumbers: false }),
+    ).toBeUndefined();
   });
 
   it('extracts package-related tokens from free text', () => {

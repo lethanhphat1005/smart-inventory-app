@@ -115,16 +115,18 @@ describe('BarcodesService', () => {
       resolutionType: 'exact_match',
       productPackage,
     });
-    expect(repositories.barcodeApiCacheRepository.findOneByBarcode).not.toHaveBeenCalled();
+    expect(
+      repositories.barcodeApiCacheRepository.findOneByBarcode,
+    ).not.toHaveBeenCalled();
   });
 
   it('returns scored candidates and prefill from fresh cache', async () => {
     repositories.barcodeApiCacheRepository.findOneByBarcode.mockResolvedValue(
       cacheRecord(),
     );
-    repositories.productPackageRepository.findBarcodeCandidates.mockResolvedValue([
-      candidateRecord,
-    ]);
+    repositories.productPackageRepository.findBarcodeCandidates.mockResolvedValue(
+      [candidateRecord],
+    );
 
     const result = await service.scanBarcode({
       storeId: 'store-1',
@@ -132,10 +134,12 @@ describe('BarcodesService', () => {
       type: 'ean',
     });
 
-    expect(repositories.barcodeApiCacheRepository.markAsUsed).toHaveBeenCalledWith(
-      'cache-1',
-    );
-    expect(repositories.barcodeProviderService.lookupBarcode).not.toHaveBeenCalled();
+    expect(
+      repositories.barcodeApiCacheRepository.markAsUsed,
+    ).toHaveBeenCalledWith('cache-1');
+    expect(
+      repositories.barcodeProviderService.lookupBarcode,
+    ).not.toHaveBeenCalled();
     expect(result).toMatchObject({
       resolutionType: 'candidate_match',
       prefill: {
@@ -159,7 +163,9 @@ describe('BarcodesService', () => {
       type: 'ean',
     });
 
-    expect(repositories.barcodeApiCacheRepository.createOne).toHaveBeenCalledWith(
+    expect(
+      repositories.barcodeApiCacheRepository.createOne,
+    ).toHaveBeenCalledWith(
       expect.objectContaining({
         barcode: '123456789012',
         status: 'valid',
@@ -197,7 +203,9 @@ describe('BarcodesService', () => {
       barcode: '123456789012',
     });
 
-    expect(repositories.barcodeApiCacheRepository.updateOne).toHaveBeenCalledWith(
+    expect(
+      repositories.barcodeApiCacheRepository.updateOne,
+    ).toHaveBeenCalledWith(
       'cache-old',
       expect.objectContaining({
         barcode: '123456789012',
@@ -311,28 +319,30 @@ describe('BarcodesService', () => {
         extractedPackageText: null,
       }),
     );
-    repositories.productPackageRepository.findBarcodeCandidates.mockResolvedValue([
-      {
-        productName: 'Coca',
-        brand: null,
-        productPackage: {
-          ...productPackage,
-          productPackageId: 'package-low',
-          displayName: 'Coca Cola',
-          variant: null,
+    repositories.productPackageRepository.findBarcodeCandidates.mockResolvedValue(
+      [
+        {
+          productName: 'Coca',
+          brand: null,
+          productPackage: {
+            ...productPackage,
+            productPackageId: 'package-low',
+            displayName: 'Coca Cola',
+            variant: null,
+          },
         },
-      },
-      {
-        productName: 'Coca Cola Classic',
-        brand: null,
-        productPackage: {
-          ...productPackage,
-          productPackageId: 'package-high',
-          displayName: 'Coca Cola Classic',
-          variant: null,
+        {
+          productName: 'Coca Cola Classic',
+          brand: null,
+          productPackage: {
+            ...productPackage,
+            productPackageId: 'package-high',
+            displayName: 'Coca Cola Classic',
+            variant: null,
+          },
         },
-      },
-    ]);
+      ],
+    );
 
     const result = await service.scanBarcode({
       storeId: 'store-1',
@@ -404,7 +414,9 @@ describe('BarcodesService', () => {
       'store-1',
       'package-1',
     );
-    expect(repositories.packageBarcodeRepository.createMapping).toHaveBeenCalledWith({
+    expect(
+      repositories.packageBarcodeRepository.createMapping,
+    ).toHaveBeenCalledWith({
       barcode: '123456789012',
       productPackageId: 'package-1',
       source: 'user_confirmed',
@@ -416,14 +428,16 @@ describe('BarcodesService', () => {
   });
 
   it('keeps confirm idempotent for the same package and rejects conflicts', async () => {
-    repositories.packageBarcodeRepository.checkOneExistedInStore.mockResolvedValueOnce({
-      barcode: '123456789012',
-      productPackageId: 'package-1',
-      type: null,
-      source: 'user_confirmed',
-      confidence: 100,
-      isVerified: true,
-    });
+    repositories.packageBarcodeRepository.checkOneExistedInStore.mockResolvedValueOnce(
+      {
+        barcode: '123456789012',
+        productPackageId: 'package-1',
+        type: null,
+        source: 'user_confirmed',
+        confidence: 100,
+        isVerified: true,
+      },
+    );
 
     await expect(
       service.confirmBarcodeMapping({
@@ -436,10 +450,12 @@ describe('BarcodesService', () => {
       productPackage,
     });
 
-    repositories.packageBarcodeRepository.checkOneExistedInStore.mockResolvedValueOnce({
-      barcode: '123456789012',
-      productPackageId: 'other-package',
-    });
+    repositories.packageBarcodeRepository.checkOneExistedInStore.mockResolvedValueOnce(
+      {
+        barcode: '123456789012',
+        productPackageId: 'other-package',
+      },
+    );
 
     await expect(
       service.confirmBarcodeMapping({

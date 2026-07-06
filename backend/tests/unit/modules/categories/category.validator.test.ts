@@ -54,9 +54,9 @@ describe('category validators', () => {
     });
 
     it('rejects empty name after trimming', () => {
-      expect(() =>
-        createCategoryBodySchema.parse({ name: '   ' }),
-      ).toThrow('Category name is required.');
+      expect(() => createCategoryBodySchema.parse({ name: '   ' })).toThrow(
+        'Category name is required.',
+      );
     });
 
     it('rejects names longer than 100 characters', () => {

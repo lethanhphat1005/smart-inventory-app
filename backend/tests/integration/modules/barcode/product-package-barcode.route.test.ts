@@ -56,8 +56,7 @@ vi.mock('../../../../src/modules/access-control/index.js', () => ({
 }));
 
 vi.mock('../../../../src/modules/barcode/barcodes.module.js', () => ({
-  productPackageBarcodeController:
-    routeMocks.productPackageBarcodeController,
+  productPackageBarcodeController: routeMocks.productPackageBarcodeController,
 }));
 
 describe('productPackageBarcodeRouter', () => {
@@ -70,9 +69,7 @@ describe('productPackageBarcodeRouter', () => {
     const [{ errorHandler }, { productPackageBarcodeRouter }] =
       await Promise.all([
         import('../../../../src/common/middlewares/index.js'),
-        import(
-          '../../../../src/modules/barcode/routes/product-package-barcode.route.js'
-        ),
+        import('../../../../src/modules/barcode/routes/product-package-barcode.route.js'),
       ]);
 
     app = express();
@@ -83,9 +80,7 @@ describe('productPackageBarcodeRouter', () => {
 
   it('routes POST /product-packages/:productPackageId/barcodes through write permission and validators', async () => {
     const response = await request(app)
-      .post(
-        '/product-packages/550e8400-e29b-41d4-a716-446655440000/barcodes',
-      )
+      .post('/product-packages/550e8400-e29b-41d4-a716-446655440000/barcodes')
       .send({
         barcode: '123456789012',
         type: 'ean',
@@ -107,9 +102,7 @@ describe('productPackageBarcodeRouter', () => {
       .post('/product-packages/not-a-uuid/barcodes')
       .send({ barcode: '123456789012' });
     const invalidBodyResponse = await request(app)
-      .post(
-        '/product-packages/550e8400-e29b-41d4-a716-446655440000/barcodes',
-      )
+      .post('/product-packages/550e8400-e29b-41d4-a716-446655440000/barcodes')
       .send({ barcode: '12345' });
 
     expect(invalidParamsResponse.status).toBe(400);

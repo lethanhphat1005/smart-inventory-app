@@ -63,7 +63,9 @@ describe('ProductPackageBarcodeService', () => {
       'store-1',
       'package-1',
     );
-    expect(repositories.packageBarcodeRepository.createMapping).toHaveBeenCalledWith({
+    expect(
+      repositories.packageBarcodeRepository.createMapping,
+    ).toHaveBeenCalledWith({
       barcode: '123456789012',
       productPackageId: 'package-1',
       source: 'barcode_flow_create',
@@ -75,14 +77,16 @@ describe('ProductPackageBarcodeService', () => {
   });
 
   it('returns the existing mapping when creation is idempotent', async () => {
-    repositories.packageBarcodeRepository.checkOneExistedInStore.mockResolvedValue({
-      barcode: '123456789012',
-      productPackageId: 'package-1',
-      type: null,
-      source: 'user_confirmed',
-      confidence: 100,
-      isVerified: true,
-    });
+    repositories.packageBarcodeRepository.checkOneExistedInStore.mockResolvedValue(
+      {
+        barcode: '123456789012',
+        productPackageId: 'package-1',
+        type: null,
+        source: 'user_confirmed',
+        confidence: 100,
+        isVerified: true,
+      },
+    );
 
     const result = await service.createPackageBarcodeMapping({
       storeId: 'store-1',
@@ -90,7 +94,9 @@ describe('ProductPackageBarcodeService', () => {
       barcode: '123456789012',
     });
 
-    expect(repositories.packageBarcodeRepository.createMapping).not.toHaveBeenCalled();
+    expect(
+      repositories.packageBarcodeRepository.createMapping,
+    ).not.toHaveBeenCalled();
     expect(result).toEqual({
       barcode: '123456789012',
       type: null,
@@ -118,10 +124,12 @@ describe('ProductPackageBarcodeService', () => {
     repositories.productPackageRepository.findOne.mockResolvedValueOnce(
       productPackage,
     );
-    repositories.packageBarcodeRepository.checkOneExistedInStore.mockResolvedValueOnce({
-      barcode: '123456789012',
-      productPackageId: 'other-package',
-    });
+    repositories.packageBarcodeRepository.checkOneExistedInStore.mockResolvedValueOnce(
+      {
+        barcode: '123456789012',
+        productPackageId: 'other-package',
+      },
+    );
 
     await expect(
       service.createPackageBarcodeMapping({
@@ -136,10 +144,12 @@ describe('ProductPackageBarcodeService', () => {
   });
 
   it('removes an owned mapping', async () => {
-    repositories.packageBarcodeRepository.checkOneExistedInStore.mockResolvedValue({
-      barcode: '123456789012',
-      productPackageId: 'package-1',
-    });
+    repositories.packageBarcodeRepository.checkOneExistedInStore.mockResolvedValue(
+      {
+        barcode: '123456789012',
+        productPackageId: 'package-1',
+      },
+    );
 
     await service.removePackageBarcodeMapping({
       storeId: 'store-1',
@@ -168,10 +178,12 @@ describe('ProductPackageBarcodeService', () => {
       message: 'Barcode mapping not found',
     });
 
-    repositories.packageBarcodeRepository.checkOneExistedInStore.mockResolvedValueOnce({
-      barcode: '123456789012',
-      productPackageId: 'other-package',
-    });
+    repositories.packageBarcodeRepository.checkOneExistedInStore.mockResolvedValueOnce(
+      {
+        barcode: '123456789012',
+        productPackageId: 'other-package',
+      },
+    );
 
     await expect(
       service.removePackageBarcodeMapping({

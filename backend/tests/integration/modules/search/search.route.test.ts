@@ -93,9 +93,9 @@ describe('searchRouter', () => {
     expect(routeMocks.requireStoreContext).toHaveBeenCalledTimes(1);
     expect(routeMocks.requirePermission).toHaveBeenCalledWith('PRODUCT_READ');
     expect(routeMocks.permissionMiddleware).toHaveBeenCalledTimes(1);
-    expect(routeMocks.searchController.getProductsbyKeyword).toHaveBeenCalledTimes(
-      1,
-    );
+    expect(
+      routeMocks.searchController.getProductsbyKeyword,
+    ).toHaveBeenCalledTimes(1);
   });
 
   it('rejects invalid product keyword query before controller execution', async () => {
@@ -107,7 +107,9 @@ describe('searchRouter', () => {
       status: 400,
       message: 'Keyword is required',
     });
-    expect(routeMocks.searchController.getProductsbyKeyword).not.toHaveBeenCalled();
+    expect(
+      routeMocks.searchController.getProductsbyKeyword,
+    ).not.toHaveBeenCalled();
   });
 
   it('routes GET /search/products/prefix through prefix validator', async () => {
@@ -118,9 +120,9 @@ describe('searchRouter', () => {
     expect(response.status).toBe(200);
     expect(response.body).toEqual({ handler: 'getProductsByPrefix' });
     expect(routeMocks.requirePermission).toHaveBeenCalledWith('PRODUCT_READ');
-    expect(routeMocks.searchController.getProductsByPrefix).toHaveBeenCalledTimes(
-      1,
-    );
+    expect(
+      routeMocks.searchController.getProductsByPrefix,
+    ).toHaveBeenCalledTimes(1);
   });
 
   it('rejects invalid prefix query before controller execution', async () => {
@@ -133,7 +135,9 @@ describe('searchRouter', () => {
       success: false,
       status: 400,
     });
-    expect(routeMocks.searchController.getProductsByPrefix).not.toHaveBeenCalled();
+    expect(
+      routeMocks.searchController.getProductsByPrefix,
+    ).not.toHaveBeenCalled();
   });
 
   it('routes GET /search/product-packages using the current prefix query validator', async () => {

@@ -35,7 +35,9 @@ vi.mock('../../../../src/common/events/event-bus.js', () => ({
 
 vi.mock('../../../../src/common/utils/index.js', async (importActual) => {
   const actual =
-    await importActual<typeof import('../../../../src/common/utils/index.js')>();
+    await importActual<
+      typeof import('../../../../src/common/utils/index.js')
+    >();
 
   return {
     ...actual,
@@ -121,7 +123,7 @@ describe('TransactionService', () => {
     vi.clearAllMocks();
 
     transactionMocks.getSignedUrl.mockImplementation(
-      async (_bucket: string, path: string | null) =>
+      (_bucket: string, path: string | null) =>
         path ? `signed:${path}` : null,
     );
 
@@ -271,10 +273,11 @@ describe('TransactionService', () => {
         data,
       );
 
-      expect(productPackageService.getProductPackagesByIds).toHaveBeenCalledWith(
-        'store-1',
-        ['550e8400-e29b-41d4-a716-446655440000'],
-      );
+      expect(
+        productPackageService.getProductPackagesByIds,
+      ).toHaveBeenCalledWith('store-1', [
+        '550e8400-e29b-41d4-a716-446655440000',
+      ]);
       expect(transactionMocks.transactionMock).toHaveBeenCalledTimes(1);
       expect(txRepository.createOne).toHaveBeenCalledWith({
         type: 'import',
@@ -293,7 +296,9 @@ describe('TransactionService', () => {
           },
         ],
       });
-      expect(inventoryService.adjustInventoriesForTransaction).toHaveBeenCalledWith(
+      expect(
+        inventoryService.adjustInventoriesForTransaction,
+      ).toHaveBeenCalledWith(
         'transaction-1',
         'import',
         'user-1',
@@ -348,15 +353,19 @@ describe('TransactionService', () => {
         totalPrice: 12000,
       });
 
-      const result = await service.createImportTransaction('store-1', 'user-1', {
-        items: [
-          {
-            productPackageId: '550e8400-e29b-41d4-a716-446655440000',
-            quantity: 1,
-            unitPrice: 12000,
-          },
-        ],
-      });
+      const result = await service.createImportTransaction(
+        'store-1',
+        'user-1',
+        {
+          items: [
+            {
+              productPackageId: '550e8400-e29b-41d4-a716-446655440000',
+              quantity: 1,
+              unitPrice: 12000,
+            },
+          ],
+        },
+      );
 
       expect(result.priceUpdateSuggestions).toEqual([]);
     });
@@ -369,7 +378,9 @@ describe('TransactionService', () => {
         code: 'PACKAGE_ITEM_IS_EMPTY',
         status: StatusCodes.BAD_REQUEST,
       });
-      expect(productPackageService.getProductPackagesByIds).not.toHaveBeenCalled();
+      expect(
+        productPackageService.getProductPackagesByIds,
+      ).not.toHaveBeenCalled();
     });
 
     it('throws when package ids are duplicated', async () => {
@@ -469,7 +480,9 @@ describe('TransactionService', () => {
         code: 'PACKAGE_ITEM_IS_EMPTY',
         status: StatusCodes.BAD_REQUEST,
       });
-      expect(productPackageService.getProductPackagesByIds).not.toHaveBeenCalled();
+      expect(
+        productPackageService.getProductPackagesByIds,
+      ).not.toHaveBeenCalled();
     });
 
     it('creates an export transaction and delegates inventory stock validation to inventory service', async () => {
@@ -506,7 +519,9 @@ describe('TransactionService', () => {
         userId: 'user-1',
         storeId: 'store-1',
       });
-      expect(inventoryService.adjustInventoriesForTransaction).toHaveBeenCalledWith(
+      expect(
+        inventoryService.adjustInventoriesForTransaction,
+      ).toHaveBeenCalledWith(
         'transaction-2',
         'export',
         'user-1',
@@ -571,11 +586,16 @@ describe('TransactionService', () => {
       { associatedPackageId: 'package-2', frequency: 3 },
     ]);
 
-    const result = await service.getCrossSellSuggestions('store-1', 'package-1');
+    const result = await service.getCrossSellSuggestions(
+      'store-1',
+      'package-1',
+    );
 
     expect(
       transactionRepository.getFrequentlyBoughtTogether,
     ).toHaveBeenCalledWith('store-1', 'package-1', 3);
-    expect(result).toEqual([{ associatedPackageId: 'package-2', frequency: 3 }]);
+    expect(result).toEqual([
+      { associatedPackageId: 'package-2', frequency: 3 },
+    ]);
   });
 });

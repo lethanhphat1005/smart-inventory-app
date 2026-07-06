@@ -1,11 +1,11 @@
 import { StatusCodes } from 'http-status-codes';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { InventoryController } from '../../../../src/modules/inventories/controller/inventory.controller.js';
 import {
   createRequest,
   createResponse,
 } from '../../../helpers/create-request-response.util.js';
-import { InventoryController } from '../../../../src/modules/inventories/controller/inventory.controller.js';
 
 const date = new Date('2026-01-01T00:00:00.000Z');
 
@@ -149,6 +149,7 @@ describe('InventoryController', () => {
         updatedAt: date,
       },
     ];
+
     service.adjustInventories.mockResolvedValue(adjusted);
     const req = createRequest({
       storeContext: { storeId: 'store-1' },

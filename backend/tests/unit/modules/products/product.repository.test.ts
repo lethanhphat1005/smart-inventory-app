@@ -101,7 +101,10 @@ describe('ProductRepository', () => {
       ],
     });
 
-    const result = await productRepository.findDetailOne('store-1', 'product-1');
+    const result = await productRepository.findDetailOne(
+      'store-1',
+      'product-1',
+    );
 
     expect(db.product.findUnique).toHaveBeenCalledWith(
       expect.objectContaining({

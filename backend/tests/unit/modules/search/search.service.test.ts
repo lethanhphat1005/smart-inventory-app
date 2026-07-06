@@ -48,7 +48,8 @@ describe('SearchService', () => {
     );
 
     commonMocks.getSignedUrl.mockImplementation(
-      (_bucket: string, path: string | null) => path ? `signed:${path}` : null,
+      (_bucket: string, path: string | null) =>
+        path ? `signed:${path}` : null,
     );
   });
 

@@ -27,7 +27,9 @@ vi.mock('../../../../src/db/prismaClient.js', () => ({
 
 vi.mock('../../../../src/common/utils/index.js', async (importActual) => {
   const actual =
-    await importActual<typeof import('../../../../src/common/utils/index.js')>();
+    await importActual<
+      typeof import('../../../../src/common/utils/index.js')
+    >();
 
   return {
     ...actual,
@@ -133,7 +135,7 @@ describe('InventoryService', () => {
     vi.clearAllMocks();
 
     inventoryMocks.getSignedUrl.mockImplementation(
-      async (_bucket: string, path: string | null) =>
+      (_bucket: string, path: string | null) =>
         path ? `signed:${path}` : null,
     );
 
@@ -340,7 +342,9 @@ describe('InventoryService', () => {
 
       await expect(
         service.adjustInventories('store-1', 'user-1', {
-          items: [{ productPackageId: 'package-1', type: 'increase', quantity: 1 }],
+          items: [
+            { productPackageId: 'package-1', type: 'increase', quantity: 1 },
+          ],
         }),
       ).rejects.toMatchObject({ status: StatusCodes.BAD_REQUEST });
       expect(inventoryMocks.transactionMock).not.toHaveBeenCalled();
@@ -358,7 +362,9 @@ describe('InventoryService', () => {
 
       await expect(
         service.adjustInventories('store-1', 'user-1', {
-          items: [{ productPackageId: 'package-1', type: 'decrease', quantity: 2 }],
+          items: [
+            { productPackageId: 'package-1', type: 'decrease', quantity: 2 },
+          ],
         }),
       ).rejects.toMatchObject({
         status: StatusCodes.BAD_REQUEST,
@@ -566,6 +572,7 @@ describe('InventoryService', () => {
           ]),
         },
       };
+
       txRepository.decreaseManyForTransaction.mockResolvedValue(
         new Set(['package-1']),
       );
@@ -607,6 +614,7 @@ describe('InventoryService', () => {
           ]),
         },
       };
+
       txRepository.decreaseManyForTransaction.mockResolvedValue(new Set());
 
       await service.adjustInventoriesForTransaction(
