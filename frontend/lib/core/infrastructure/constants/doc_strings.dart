@@ -1,7 +1,7 @@
-import 'docs/privacy_policy_en.dart';
-import 'docs/privacy_policy_vi.dart';
-import 'docs/terms_of_service_en.dart';
-import 'docs/terms_of_service_vi.dart';
+import 'legal_document/privacy_policy_en.dart';
+import 'legal_document/privacy_policy_vi.dart';
+import 'legal_document/terms_of_service_en.dart';
+import 'legal_document/terms_of_service_vi.dart';
 
 class DocStrings {
   DocStrings._();
