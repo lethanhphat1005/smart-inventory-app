@@ -10,6 +10,7 @@ import 'package:get/get.dart';
 import 'package:frontend/core/ui/widgets/t_snackbars_widget.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/routes/app_routes.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:frontend/core/state/services/store_service.dart';
 
@@ -17,19 +18,51 @@ class LoginController extends GetxController {
   final AuthProvider authProvider;
   LoginController({required this.authProvider});
 
+  final _storage = GetStorage();
+
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
   final RxBool isPasswordHidden = true.obs;
   final RxBool rememberMe = false.obs;
   final RxBool isLoading = false.obs;
+  late RxBool isTermsAccepted;
+  final RxBool showCheckboxError = false.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    bool savedTermsState = _storage.read('IS_TERMS_ACCEPTED') ?? false;
+    isTermsAccepted = savedTermsState.obs;
+
+    ever(isTermsAccepted, (value) {
+      _storage.write('IS_TERMS_ACCEPTED', value);
+    });
+  }
 
   void togglePasswordVisibility() =>
       isPasswordHidden.value = !isPasswordHidden.value;
   void toggleRememberMe(bool? value) => rememberMe.value = value ?? false;
 
+  void _triggerCheckboxError() {
+    showCheckboxError.value = true;
+    // Tự động tắt highlight sau 1.5 giây để tạo hiệu ứng "nháy" chú ý
+    Future.delayed(const Duration(milliseconds: 1500), () {
+      showCheckboxError.value = false;
+    });
+  }
+
   /// Logic Đăng nhập thường
   Future<void> login() async {
+    if (!isTermsAccepted.value) {
+      _triggerCheckboxError();
+      TSnackbarsWidget.warning(
+        title: TTexts.warningTitle.tr,
+        message: TTexts.pleaseAcceptTerms.tr,
+      );
+      return;
+    }
+
     final email = emailController.text.trim();
     final password = passwordController.text;
 
@@ -86,6 +119,14 @@ class LoginController extends GetxController {
 
   /// Logic Đăng nhập Google
   Future<void> loginWithGoogle() async {
+    if (!isTermsAccepted.value) {
+      _triggerCheckboxError();
+      TSnackbarsWidget.warning(
+        title: TTexts.warningTitle.tr,
+        message: TTexts.pleaseAcceptTerms.tr,
+      );
+      return;
+    }
     try {
       FullScreenLoaderUtils.openLoadingDialog(TTexts.loggingIn.tr);
       final response = await authProvider.signInWithGoogle();
@@ -119,6 +160,10 @@ class LoginController extends GetxController {
       TSnackbarsWidget.error(
           title: TTexts.loginFailedTitle.tr, message: e.toString());
     }
+  }
+
+  void goToLegalDocument(bool isTerms) {
+    Get.toNamed(AppRoutes.legalDocument, arguments: {'isTerms': isTerms});
   }
 
   /// Tác vụ chạy song song không block UI

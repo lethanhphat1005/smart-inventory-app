@@ -196,6 +196,17 @@ class TTexts {
   static const String loginWarningUnverifiedMessage =
       "login_warning_unverified_message";
 
+  // -- Policy - Terms & Conditions Screen
+  static const String termsAgreePrefix = "terms_agree_prefix";
+  static const String termsOfService = "terms_of_service";
+  static const String termsAnd = "terms_and";
+  static const String privacyPolicy = "privacy_policy";
+  static const String termsAgreeSuffix = "terms_agree_suffix";
+  static const String termsTitle = "terms_title";
+  static const String privacyTitle = "privacy_title";
+  static const String closeBtn = "close_btn";
+  static const String pleaseAcceptTerms = "please_accept_terms";
+
   // -- Register Screen
   static const String registerTitle = "register_title";
   static const String registerSubtitle = "register_subtitle";

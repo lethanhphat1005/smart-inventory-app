@@ -55,6 +55,18 @@ final Map<String, String> viAuth = {
   TTexts.loginWarningUnverifiedMessage:
       'Vui lòng xác minh email trước khi đăng nhập.',
 
+  // -- Policy - Terms & Conditions
+  TTexts.termsAgreePrefix: 'Tôi đã đọc và đồng ý với ',
+  TTexts.termsOfService: 'Điều khoản dịch vụ',
+  TTexts.termsAnd: ' và ',
+  TTexts.privacyPolicy: 'Chính sách bảo mật',
+  TTexts.termsAgreeSuffix: ' của ứng dụng.',
+  TTexts.termsTitle: 'Điều khoản dịch vụ',
+  TTexts.privacyTitle: 'Chính sách bảo mật',
+  TTexts.closeBtn: 'Đóng',
+  TTexts.pleaseAcceptTerms:
+      'Vui lòng đồng ý với Điều khoản dịch vụ và Chính sách bảo mật để tiếp tục.',
+
   // Register
   TTexts.registerTitle: 'Tạo Tài Khoản',
   TTexts.registerSubtitle: 'Đăng ký ngay hôm nay để bắt đầu quản lý kho hàng.',

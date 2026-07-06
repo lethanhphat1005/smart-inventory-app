@@ -5,7 +5,6 @@ import 'package:get/get.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/features/auth/controllers/login_controller.dart';
 
-/// Màn hình đăng nhập Mobile áp dụng AuthStandardLayout
 class LoginMobileView extends GetView<LoginController> {
   const LoginMobileView({super.key});
 
@@ -14,8 +13,8 @@ class LoginMobileView extends GetView<LoginController> {
     return AuthStandardLayout(
       title: TTexts.loginWelcomeTitle.tr,
       subtitle: TTexts.loginWelcomeSubtitle.tr,
-      showBackButton: false, 
-      child: const LoginFormWidget(), 
+      showBackButton: false,
+      child: const LoginFormWidget(),
     );
   }
 }

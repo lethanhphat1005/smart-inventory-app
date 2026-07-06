@@ -25,7 +25,10 @@ class LoginRememberMeWidget extends GetView<LoginController> {
                   value: controller.rememberMe.value,
                   onChanged: controller.toggleRememberMe,
                   activeColor: AppColors.primary,
-                  side: BorderSide(color: Colors.grey.shade400),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  side: BorderSide(color: Colors.grey.shade400, width: 1.2),
                 ),
               ),
               const SizedBox(width: 8),

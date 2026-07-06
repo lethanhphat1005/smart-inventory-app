@@ -5,6 +5,7 @@ class AppRoutes {
   static const languageSelect = '/language-select';
   static const onboarding = '/onboarding';
   static const login = '/login';
+  static const legalDocument = '/legal_document';
   static const register = '/register';
   static const forgotPassword = '/forgot_password';
   static const verifyEmail = '/verify_email';
