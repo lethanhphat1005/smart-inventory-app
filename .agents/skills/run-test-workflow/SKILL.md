@@ -14,8 +14,9 @@ Execute the standard backend testing workflow.
 
 1. Run skill: business-review.
 2. Use the review output to run skill: build-test.
-3. If a coverage report is available, run skill: coverage-review.
+3. If the test suite output is available, run skill: coverage-review.
 4. Generate only additional tests if required.
+5. Finally, run skill: test-report.
 
 ## Rules
 

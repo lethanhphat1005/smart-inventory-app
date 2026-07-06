@@ -4,10 +4,5 @@
     "rootDir": ".",
     "types": ["node", "vitest"]
   },
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.d.ts",
-    "tests/**/*.ts",
-    "*.config.ts"
-  ]
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "tests/**/*.ts", "*.config.ts"]
 }

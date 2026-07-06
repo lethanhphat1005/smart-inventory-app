@@ -7,20 +7,11 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
 
-      reporter: [
-        'text',
-        'html',
-        'json',
-      ],
+      reporter: ['text', 'html', 'json'],
 
-      include: [
-        'src/modules/**/*.ts',
-      ],
+      include: ['src/modules/**/*.ts'],
 
-      exclude: [
-        '**/*.dto.ts',
-        '**/*.type.ts',
-      ],
+      exclude: ['**/*.dto.ts', '**/*.type.ts'],
     },
   },
 });

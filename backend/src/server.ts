@@ -51,7 +51,11 @@ app.get('/api/health', (_req: Request, res: Response<ApiResponse<null>>) => {
   sendResponse.success(res, null, { message: 'ok' });
 });
 
-app.use('/api/stores', rateLimiter({ windowMs: 60 * 1000, max: 60 }), storeRouter);
+app.use(
+  '/api/stores',
+  rateLimiter({ windowMs: 60 * 1000, max: 60 }),
+  storeRouter,
+);
 
 app.use(
   '/api/barcodes',
@@ -76,10 +80,11 @@ app.use(
   userProfileRouter,
 );
 
-app.use('/api/product-packages', rateLimiter({ windowMs: 60 * 1000, max: 120 }), [
-  productPackageRouter,
-  productPackageBarcodeRouter,
-]);
+app.use(
+  '/api/product-packages',
+  rateLimiter({ windowMs: 60 * 1000, max: 120 }),
+  [productPackageRouter, productPackageBarcodeRouter],
+);
 
 app.use(
   '/api/inventories',
@@ -111,7 +116,11 @@ app.use(
   searchRouter,
 );
 
-app.use('/api/units', rateLimiter({ windowMs: 60 * 1000, max: 120 }), unitRouter);
+app.use(
+  '/api/units',
+  rateLimiter({ windowMs: 60 * 1000, max: 120 }),
+  unitRouter,
+);
 
 app.use(
   '/api/store-members',

@@ -50,7 +50,7 @@ productPackageRouter.get(
  *  - productId: string (UUID, required)
  *
  * API endpoint: POST /api/products/:productId/packages
- * Tạo package và inventory mới cho sản phẩm
+ * Tạo mảng package và inventory mới cho sản phẩm
  *
  * Path params:
  *  - productId: string (UUID, required)
@@ -63,14 +63,16 @@ productPackageRouter.get(
  *     (xem api comment tại product-package-barcode.route.ts)
  *
  * Body:
- *  - package: object (required)
- *    - unitId: string (UUID, required) - đơn vị tính của package
- *    - importPrice?: number | null - giá nhập
- *    - sellingPrice?: number | null - giá bán
- *    - variant?: string | null - biến thể của package
- *  - inventory: object (required)
- *    - quantity: number (integer, default: 0) - số lượng tồn kho ban đầu
- *    - reorderThreshold?: number | null - ngưỡng cảnh báo
+ *  [
+ *   - package: object (required)
+ *     - unitId: string (UUID, required) - đơn vị tính của package
+ *     - importPrice?: number | null - giá nhập
+ *     - sellingPrice?: number | null - giá bán
+ *     - variant?: string | null - biến thể của package
+ *   - inventory: object (required)
+ *     - quantity: number (integer, default: 0) - số lượng tồn kho ban đầu
+ *     - reorderThreshold?: number | null - ngưỡng cảnh báo
+ *  ]
  */
 productPackageProductRouter
   .route('/:productId/packages')

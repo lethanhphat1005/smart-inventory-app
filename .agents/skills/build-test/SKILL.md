@@ -209,6 +209,28 @@ Repository integration tests:
 * use a test database
 * test persistence behavior
 
+## Shared Test Helpers
+
+Before generating new test utilities, check whether equivalent helpers already exist.
+
+If reusable code is identified, move it into:
+
+tests/helpers/
+
+Examples:
+
+- mock middlewares
+- mock users
+- mock stores
+- request builders
+- response builders
+- common test data factories
+- shared test utilities
+
+Update all affected imports.
+
+Avoid duplicating helper implementations across modules.
+
 ## Test Location
 
 Unit tests:
@@ -262,5 +284,9 @@ Do not:
 * add meaningless assertions
 * call mocked repository tests integration tests
 * place integration tests under tests/unit
+* reuse existing helpers whenever possible.
+* if the same helper is used by multiple test files or modules, extract it into tests/helpers.
+* update imports after extracting shared helpers.
+* duplicate reusable mocks, middleware, factories, or utilities.
 
 Prefer meaningful branch coverage over shallow line coverage.
