@@ -61,6 +61,18 @@ final Map<String, String> enAuth = {
   TTexts.loginWarningUnverifiedMessage:
       'Please verify your email address before logging in.',
 
+  // -- Policy - Terms & Conditions
+  TTexts.termsAgreePrefix: 'I have read and agree to the ',
+  TTexts.termsOfService: 'Terms of Service',
+  TTexts.termsAnd: ' and ',
+  TTexts.privacyPolicy: 'Privacy Policy',
+  TTexts.termsAgreeSuffix: '.',
+  TTexts.termsTitle: 'Terms of Service',
+  TTexts.privacyTitle: 'Privacy Policy',
+  TTexts.closeBtn: 'Close',
+  TTexts.pleaseAcceptTerms:
+      'Please accept the Terms of Service and Privacy Policy to continue.',
+
   // Register
   TTexts.registerTitle: 'Create an Account',
   TTexts.registerSubtitle: 'Sign up today to start managing your inventory.',

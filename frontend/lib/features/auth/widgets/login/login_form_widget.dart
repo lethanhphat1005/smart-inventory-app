@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/ui/widgets/t_text_form_field_widget.dart';
-import 'package:get/get.dart'; // Thêm import này
+import 'package:frontend/features/auth/widgets/login/login_terms_checkbox_widget.dart';
+import 'package:get/get.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:frontend/core/ui/widgets/t_primary_button_widget.dart';
-
-// Imports nội bộ
 import '../shared/auth_divider_widget.dart';
 import '../shared/auth_social_button_widget.dart';
 import '../shared/auth_tab_toggle_widget.dart';
 import 'login_remember_me_widget.dart';
-
-// Đổi thành GetView<LoginController> để tự động có biến `controller`
 import '../../controllers/login_controller.dart';
 
 class LoginFormWidget extends GetView<LoginController> {
@@ -57,7 +54,7 @@ class LoginFormWidget extends GetView<LoginController> {
         const LoginRememberMeWidget(),
         const SizedBox(height: AppSizes.p24),
 
-        // 5. Nút Login (Đã gọi được controller.login)
+        // 5. Nút Login (Gọi hàm login của controller, ở trong controller đã có bước check policy rồi)
         TPrimaryButtonWidget(
           text: TTexts.loginBtn.tr,
           onPressed: () => controller.login(),
@@ -69,7 +66,10 @@ class LoginFormWidget extends GetView<LoginController> {
 
         AuthSocialButtonWidget(
             title: TTexts.continueWithGoogle.tr,
-            onPressed: () => controller.loginWithGoogle())
+            onPressed: () => controller.loginWithGoogle()),
+            
+        const SizedBox(height: AppSizes.p16),
+        const LoginTermsCheckboxWidget(),
       ],
     );
   }

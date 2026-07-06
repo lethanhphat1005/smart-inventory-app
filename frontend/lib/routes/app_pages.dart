@@ -1,10 +1,12 @@
 import 'package:frontend/features/auth/bindings/forgot_password_binding.dart';
+import 'package:frontend/features/auth/bindings/legal_document_binding.dart';
 import 'package:frontend/features/auth/bindings/login_binding.dart';
 import 'package:frontend/features/auth/bindings/register_binding.dart';
 import 'package:frontend/features/auth/bindings/reset_password_binding.dart';
 import 'package:frontend/features/auth/bindings/verify_email_binding.dart';
 import 'package:frontend/features/auth/bindings/verify_otp_binding.dart';
 import 'package:frontend/features/auth/views/forgot_password_view.dart';
+import 'package:frontend/features/auth/views/legal_document_view.dart';
 import 'package:frontend/features/auth/views/login_view.dart';
 import 'package:frontend/features/auth/views/register_view.dart';
 import 'package:frontend/features/auth/views/reset_password_view.dart';
@@ -130,6 +132,14 @@ class AppPages {
       page: () => const LoginView(),
       binding: LoginBinding(),
       transition: Transition.fadeIn,
+    ),
+
+    // -- Legal Document
+    GetPage(
+      name: AppRoutes.legalDocument,
+      page: () => const LegalDocumentView(),
+      binding: LegalDocumentBinding(),
+      transition: Transition.cupertino,
     ),
 
     // -- Register
