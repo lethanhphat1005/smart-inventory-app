@@ -43,37 +43,31 @@ vi.mock('../../../../src/modules/auth/index.js', () => ({
 }));
 
 vi.mock(
-  '../../../../src/modules/notification/controllers/notification.controller.js',
-  () => ({
-    NotificationController: vi.fn(() => {
-      return {
-        registerToken: routeMocks.registerToken,
-        removeToken: routeMocks.removeToken,
-        testSend: routeMocks.testSend,
-        getNotifications: routeMocks.getNotifications,
-        markAsRead: routeMocks.markAsRead,
-        deleteNotification: routeMocks.deleteNotification,
-        markAllAsRead: routeMocks.markAllAsRead,
-      };
-    }),
-  }),
-);
-
-vi.mock(
   '../../../../src/modules/notification/repositories/notification.repository.js',
   () => ({
-    NotificationRepository: vi.fn(() => {
-      return {};
-    }),
+    NotificationRepository: class NotificationRepository {},
   }),
 );
 
 vi.mock(
   '../../../../src/modules/notification/services/notification.service.js',
   () => ({
-    NotificationService: vi.fn(() => {
-      return {};
-    }),
+    NotificationService: class NotificationService {},
+  }),
+);
+
+vi.mock(
+  '../../../../src/modules/notification/controllers/notification.controller.js',
+  () => ({
+    NotificationController: class NotificationController {
+      registerToken = routeMocks.registerToken;
+      removeToken = routeMocks.removeToken;
+      testSend = routeMocks.testSend;
+      getNotifications = routeMocks.getNotifications;
+      markAsRead = routeMocks.markAsRead;
+      deleteNotification = routeMocks.deleteNotification;
+      markAllAsRead = routeMocks.markAllAsRead;
+    },
   }),
 );
 
