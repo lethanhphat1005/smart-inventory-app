@@ -5,7 +5,6 @@ import {
   pinoLogger,
   rateLimiter,
 } from './common/middlewares/index.js';
-import { sendResponse } from './common/utils/index.js';
 import { initFirebaseAdmin } from './config/firebase.config.js';
 import { initCronJobs } from './cron/index.js';
 import { smartDecisionRouter } from './modules/alerts/index.js';
@@ -17,6 +16,7 @@ import {
 import { categoryRouter } from './modules/categories/index.js';
 import { chatRouter } from './modules/chat-bot/index.js';
 import { currencyRouter } from './modules/currencies/index.js';
+import { healthRouter } from './modules/health-check/index.js';
 import { inventoryRouter } from './modules/inventories/inventory.route.js';
 import notificationRouter from './modules/notification/notification.route.js';
 import {
@@ -31,9 +31,6 @@ import { storeRouter } from './modules/stores/index.js';
 import { transactionRouter } from './modules/transactions/index.js';
 import { userProfileRouter } from './modules/user-profile/index.js';
 
-import type { ApiResponse } from './common/types/index.js';
-import type { Request, Response } from 'express';
-
 const app = express();
 const port = 3000;
 
@@ -47,9 +44,7 @@ initFirebaseAdmin();
 // Khởi tạo corn jobs quét tự động 8 đến 22h và mỗi 2 tiếng 1 lần
 initCronJobs();
 
-app.get('/api/health', (_req: Request, res: Response<ApiResponse<null>>) => {
-  sendResponse.success(res, null, { message: 'ok' });
-});
+app.use('/api/health', healthRouter);
 
 app.use(
   '/api/stores',
