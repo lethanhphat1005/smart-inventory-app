@@ -28,6 +28,6 @@ export const initCronJobs = () => {
     },
   );
 
-  console.info('[Smart Cron Job] Đề xuất nhập hàng vào mỗi 8h hằng ngày!');
-  console.info('[Smart Cron Job] Nhắc nhở hàng tồn kho vào mỗi 20h hằng ngày!');
+  console.info('[Smart Cron Job] Suggested restock time: 8:00 AM every day');
+  console.info('[Smart Cron Job] Inventory reminder at 8:00 PM every day');
 };
