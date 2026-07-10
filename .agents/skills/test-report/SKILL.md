@@ -159,6 +159,8 @@ Status:
 
 ## 5. Coverage Summary
 
+Note: Column "Value" indicates the module coverage only
+
 | Metric | Value |
 |--------|------:|
 | Statements | |

@@ -6,4 +6,4 @@ const notificationRepository = new NotificationRepository();
 const notificationService = new NotificationService(notificationRepository);
 const notificationController = new NotificationController(notificationService);
 
-export { notificationRepository, notificationService, notificationController };
+export { notificationService, notificationController };
