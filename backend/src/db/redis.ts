@@ -11,6 +11,9 @@ export const redisClient = new Redis(
 
     connectTimeout: 3000, // Timeout khi establish TCP connection
     commandTimeout: 2000, // Timeout cho mỗi command Redis
+
+    maxRetriesPerRequest: 1, // Số lần retry khi connection error (1 cho lambda)
+
     retryStrategy(times) {
       return Math.min(times * 200, 1000); // Backoff retry khi mất kết nối
     },
@@ -18,5 +21,5 @@ export const redisClient = new Redis(
 );
 
 redisClient.on('connect', () => console.info('Connected to Redis'));
-redisClient.on('ready', () => console.info('Redis TLS ready'));
+redisClient.on('ready', () => console.info('Redis is ready'));
 redisClient.on('error', (err) => console.error('Redis error:', err));
