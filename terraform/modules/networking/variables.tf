@@ -12,7 +12,6 @@ variable "region" {
 variable "tags" {
   description = "Tag chung cho toàn bộ resource"
   type        = map(string)
-  default     = {}
 }
 
 variable "vpc_cidr" {
@@ -23,16 +22,4 @@ variable "vpc_cidr" {
 variable "public_subnets" {
   description = "Danh sách CIDR cho public subnets"
   type        = list(string)
-}
-
-variable "allowed_ssh_cidrs" {
-  description = "Danh sách CIDR được phép SSH vào EC2"
-  type        = list(string)
-  default     = []
-}
-
-variable "enable_eip" {
-  description = "Có tạo Elastic IP cho EC2 hay không"
-  type        = bool
-  default     = true
 }

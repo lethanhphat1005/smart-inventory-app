@@ -1,19 +1,14 @@
-output "ec2_role_name" {
-  description = "Tên IAM role gán cho EC2."
-  value       = aws_iam_role.ec2.name
+output "lambda_role_name" {
+  description = "Lambda IAM role name"
+  value       = aws_iam_role.lambda.name
 }
 
-output "ec2_role_arn" {
-  description = "ARN IAM role gán cho EC2."
-  value       = aws_iam_role.ec2.arn
+output "lambda_role_arn" {
+  description = "Lambda IAM role ARN"
+  value       = aws_iam_role.lambda.arn
 }
 
-output "instance_profile_name" {
-  description = "Tên IAM instance profile gán cho EC2."
-  value       = aws_iam_instance_profile.ec2.name
-}
-
-output "instance_profile_arn" {
-  description = "ARN IAM instance profile gán cho EC2."
-  value       = aws_iam_instance_profile.ec2.arn
+output "scheduler_role_arn" {
+  description = "EventBridge IAM role ARN"
+  value       = aws_iam_role.scheduler.arn
 }

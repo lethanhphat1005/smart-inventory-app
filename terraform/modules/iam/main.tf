@@ -1,5 +1,6 @@
-resource "aws_iam_role" "ec2" {
-  name = "${var.project_name}-ec2-role"
+# Lambda role
+resource "aws_iam_role" "lambda" {
+  name = "${var.project_name}-lambda-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -8,33 +9,67 @@ resource "aws_iam_role" "ec2" {
         Action = "sts:AssumeRole"
         Effect = "Allow"
         Principal = {
-          Service = "ec2.amazonaws.com"
+          Service = "lambda.amazonaws.com"
         }
       }
     ]
   })
 
   tags = merge(var.tags, {
-    Name = "${var.project_name}-ec2-role"
+    Name = "${var.project_name}-lambda-role"
   })
 }
 
-resource "aws_iam_instance_profile" "ec2" {
-  name = "${var.project_name}-ec2-instance-profile"
-  role = aws_iam_role.ec2.name
+resource "aws_iam_role_policy_attachment" "lambda" {
+  role       = aws_iam_role.lambda.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+# Event Bridge role
+resource "aws_iam_role" "scheduler" {
+  name = "${var.project_name}-scheduler-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "scheduler.amazonaws.com"
+        }
+      }
+    ]
+  })
 
   tags = merge(var.tags, {
-    Name = "${var.project_name}-ec2-instance-profile"
+    Name = "${var.project_name}-scheduler-role"
   })
 }
 
-# Gắn managed policy chuẩn của AWS cho CloudWatch Agent
-# CloudWatch Agent sẽ đọc và lưu các log file và gửi lên CloudWatch
-resource "aws_iam_role_policy_attachment" "cloudwatch_agent" {
-  count = var.enable_cloudwatch_agent_policy ? 1 : 0
+resource "aws_iam_role_policy" "scheduler" {
+  role = aws_iam_role.scheduler.id
 
-  role       = aws_iam_role.ec2.name
-  policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+  policy = jsonencode({
+    Version = "2012-10-17"
+
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "lambda:InvokeFunction"
+        ]
+        Resource = var.lambda_scheduler_function_arn
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "sqs:SendMessage"
+        ]
+        Resource = var.sqs_dlq_arn
+      }
+    ]
+  })
 }
 
 # Quyền đọc secret từ Secrets Manager
