@@ -1,7 +1,6 @@
 import { StatusCodes } from 'http-status-codes';
 
 import { CustomError } from '../../../common/errors/index.js';
-import { logger } from '../../../common/utils/index.js';
 import { ProductPackageRepository } from '../../product-packages/repositories/product-package.repository.js';
 import {
   VALID_BARCODE_CACHE_TTL,
@@ -288,46 +287,46 @@ export class BarcodesService {
     const isPackageTextMatch =
       hasPackageTextSignal && packageTextMatchResult.isMatch;
 
-    logger.info(
-      {
-        productPackageId: input.candidate.productPackage.productPackageId,
-        productName: input.candidate.productName,
-        displayName: input.candidate.productPackage.displayName,
-        normalizedInput: input.normalizedData,
-        normalizedCandidate: {
-          normalizedProductName,
-          normalizedBrand,
-          normalizedDisplayName,
-          normalizedVariant,
-          packageComparableText,
-        },
-        availableSignalCount,
-        hasBrandSignal,
-        hasPackageTextSignal,
-        brandMatchResult,
-        productNameMatchResult,
-        displayNameMatchResult,
-        packageTextMatchResult,
-        scoreSummary: {
-          brandScore,
-          nameScore,
-          packageTextScore,
-          finalScore,
-          threshold,
-        },
-      },
-      'Barcode candidate scored',
-    );
+    // logger.info(
+    //   {
+    //     productPackageId: input.candidate.productPackage.productPackageId,
+    //     productName: input.candidate.productName,
+    //     displayName: input.candidate.productPackage.displayName,
+    //     normalizedInput: input.normalizedData,
+    //     normalizedCandidate: {
+    //       normalizedProductName,
+    //       normalizedBrand,
+    //       normalizedDisplayName,
+    //       normalizedVariant,
+    //       packageComparableText,
+    //     },
+    //     availableSignalCount,
+    //     hasBrandSignal,
+    //     hasPackageTextSignal,
+    //     brandMatchResult,
+    //     productNameMatchResult,
+    //     displayNameMatchResult,
+    //     packageTextMatchResult,
+    //     scoreSummary: {
+    //       brandScore,
+    //       nameScore,
+    //       packageTextScore,
+    //       finalScore,
+    //       threshold,
+    //     },
+    //   },
+    //   'Barcode candidate scored',
+    // );
 
     if (finalScore <= threshold) {
-      logger.info(
-        {
-          productPackageId: input.candidate.productPackage.productPackageId,
-          finalScore,
-          threshold,
-        },
-        'Barcode candidate rejected because score is below threshold',
-      );
+      // logger.info(
+      //   {
+      //     productPackageId: input.candidate.productPackage.productPackageId,
+      //     finalScore,
+      //     threshold,
+      //   },
+      //   'Barcode candidate rejected because score is below threshold',
+      // );
 
       return null;
     }
@@ -366,14 +365,14 @@ export class BarcodesService {
       input.normalizedData.normalizedPackageText,
     );
 
-    logger.info(
-      {
-        nameTokens,
-        brandTokens,
-        packageTokens,
-      },
-      'Tokenize input for package query',
-    );
+    // logger.info(
+    //   {
+    //     nameTokens,
+    //     brandTokens,
+    //     packageTokens,
+    //   },
+    //   'Tokenize input for package query',
+    // );
 
     const candidates =
       await this.productPackageRepository.findBarcodeCandidates({
@@ -498,14 +497,14 @@ export class BarcodesService {
       };
     } catch (error) {
       if (cache) {
-        logger.warn(
-          {
-            barcode: input.barcode,
-            cacheId: cache.barcodeCacheId,
-            err: error,
-          },
-          'Barcode scan falls back to stale cache',
-        );
+        // logger.warn(
+        //   {
+        //     barcode: input.barcode,
+        //     cacheId: cache.barcodeCacheId,
+        //     err: error,
+        //   },
+        //   'Barcode scan falls back to stale cache',
+        // );
 
         return {
           normalizedData: normalizeApiPayload(cache),
@@ -514,7 +513,7 @@ export class BarcodesService {
       }
 
       throw new CustomError({
-        message: 'Failed to lookup barcode from provider',
+        message: `Failed to lookup barcode from provider. Error: ${error}`,
         status: StatusCodes.BAD_GATEWAY,
       });
     }
@@ -556,14 +555,14 @@ export class BarcodesService {
 
     // nếu có candidate thì trả về các candidate này
     if (candidates.length > 0) {
-      logger.info(
-        {
-          barcode,
-          storeId: input.storeId,
-          candidateCount: candidates.length,
-        },
-        'Barcode scan resolved with candidate packages',
-      );
+      // logger.info(
+      //   {
+      //     barcode,
+      //     storeId: input.storeId,
+      //     candidateCount: candidates.length,
+      //   },
+      //   'Barcode scan resolved with candidate packages',
+      // );
 
       return {
         resolutionType: 'candidate_match',
@@ -574,13 +573,13 @@ export class BarcodesService {
       };
     }
 
-    logger.info(
-      {
-        barcode,
-        storeId: input.storeId,
-      },
-      'Barcode scan resolved as not found',
-    );
+    // logger.info(
+    //   {
+    //     barcode,
+    //     storeId: input.storeId,
+    //   },
+    //   'Barcode scan resolved as not found',
+    // );
 
     // nếu không có candidate thì trả về prefill (normalized data từ cache/API)
     return {
