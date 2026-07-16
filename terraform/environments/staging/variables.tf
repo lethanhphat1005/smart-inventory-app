@@ -13,30 +13,15 @@ variable "tags" {
   description = "Tag cho toàn bộ resource"
   type        = map(string)
   default = {
-    Environment = "prod"
+    Environment = "staging"
     Project     = "storix"
   }
 }
 
-variable "vpc_cidr" {
-  description = "CIDR block cho VPC"
+variable "image_tag" {
+  description = "Image tag cho lamba function"
   type        = string
-  default     = "10.0.0.0/16"
-}
-
-variable "public_subnets" {
-  type    = list(string)
-  default = ["10.0.1.0/24"]
-}
-
-variable "allowed_ssh_cidrs" {
-  description = "Danh sách IP được phép SSH vào EC2"
-  type        = list(string)
-}
-
-variable "public_key_path" {
-  description = "Public key để SSH vào EC2"
-  type        = string
+  default     = "latest"
 }
 
 variable "sns_email" {
@@ -44,7 +29,8 @@ variable "sns_email" {
   type        = string
 }
 
-variable "hosted_zone_id" {
-  type    = string
-  default = null
+variable "lambda_api_env" {
+  description = "Biến môi trường của lambda API function"
+  type = map(any)
+  sensitive = true
 }

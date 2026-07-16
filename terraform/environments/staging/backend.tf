@@ -8,7 +8,7 @@ terraform {
   }
   backend "s3" {
     bucket = "storix-tf-state-430118860011-ap-southeast-1-an"
-    key    = "terraform/terraform.tfstate"
+    key    = "staging/terraform.tfstate"
     region = "ap-southeast-1"
   }
 }
