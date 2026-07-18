@@ -1,6 +1,7 @@
 import { StatusCodes } from 'http-status-codes';
 
 import { CustomError } from '../../../common/errors/index.js';
+import { logger } from '../../../common/utils/index.js';
 import { ProductPackageRepository } from '../../product-packages/repositories/product-package.repository.js';
 import {
   VALID_BARCODE_CACHE_TTL,
@@ -497,14 +498,14 @@ export class BarcodesService {
       };
     } catch (error) {
       if (cache) {
-        // logger.warn(
-        //   {
-        //     barcode: input.barcode,
-        //     cacheId: cache.barcodeCacheId,
-        //     err: error,
-        //   },
-        //   'Barcode scan falls back to stale cache',
-        // );
+        logger.warn(
+          {
+            barcode: input.barcode,
+            cacheId: cache.barcodeCacheId,
+            err: error,
+          },
+          'Barcode scan falls back to stale cache',
+        );
 
         return {
           normalizedData: normalizeApiPayload(cache),
@@ -513,7 +514,7 @@ export class BarcodesService {
       }
 
       throw new CustomError({
-        message: `Failed to lookup barcode from provider. Error: ${error}`,
+        message: 'Failed to lookup barcode from provider',
         status: StatusCodes.BAD_GATEWAY,
       });
     }

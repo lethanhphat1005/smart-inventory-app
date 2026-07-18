@@ -4,7 +4,7 @@ import {
   requireReqStoreContext,
   sendResponse,
 } from '../../../common/utils/index.js';
-import { BarcodesService } from '../services/barcodes.service.js';
+import { BarcodesService } from '../services/barcode.service.js';
 
 import type { ApiResponse } from '../../../common/types/index.js';
 import type {

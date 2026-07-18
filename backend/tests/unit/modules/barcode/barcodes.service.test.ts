@@ -1,7 +1,7 @@
 import { StatusCodes } from 'http-status-codes';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { BarcodesService } from '../../../../src/modules/barcode/services/barcodes.service.js';
+import { BarcodesService } from '../../../../src/modules/barcode/services/barcode.service.js';
 
 const productPackage = {
   productPackageId: 'package-1',

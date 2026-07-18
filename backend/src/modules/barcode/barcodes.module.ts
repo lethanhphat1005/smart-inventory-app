@@ -3,7 +3,7 @@ import { ProductPackageBarcodeController } from './controllers/product-package-b
 import { BarcodeApiCacheRepository } from './repositories/barcode-api-cache.repository.js';
 import { PackageBarcodeRepository } from './repositories/product-package-barcode.repository.js';
 import { BarcodeProviderService } from './services/barcode-provider.service.js';
-import { BarcodesService } from './services/barcodes.service.js';
+import { BarcodesService } from './services/barcode.service.js';
 import { ProductPackageBarcodeService } from './services/product-package-barcode.service.js';
 import { prisma } from '../../db/prismaClient.js';
 import { ProductPackageRepository } from '../product-packages/repositories/product-package.repository.js';
