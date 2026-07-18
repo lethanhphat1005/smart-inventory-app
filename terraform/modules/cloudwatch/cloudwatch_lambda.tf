@@ -15,7 +15,7 @@ resource "aws_cloudwatch_dashboard" "lambda" {
           stat    = "Sum",
           metrics = [
             ["AWS/Lambda", "Errors", "FunctionName", var.lambda_function_names.api_function],
-            ["AWS/Lambda", "Errors", "FunctionName", var.lambda_function_names.noti_function],
+            ["AWS/Lambda", "Errors", "FunctionName", var.lambda_function_names.cron_function],
           ]
         }
       },
@@ -30,7 +30,7 @@ resource "aws_cloudwatch_dashboard" "lambda" {
           stat   = "p95",
           metrics = [
             ["AWS/Lambda", "Duration", "FunctionName", var.lambda_function_names.api_function],
-            ["AWS/Lambda", "Duration", "FunctionName", var.lambda_function_names.noti_function],
+            ["AWS/Lambda", "Duration", "FunctionName", var.lambda_function_names.cron_function],
           ]
         }
       },
@@ -45,7 +45,7 @@ resource "aws_cloudwatch_dashboard" "lambda" {
           stat   = "Sum",
           metrics = [
             ["AWS/Lambda", "Throttles", "FunctionName", var.lambda_function_names.api_function],
-            ["AWS/Lambda", "Throttles", "FunctionName", var.lambda_function_names.noti_function],
+            ["AWS/Lambda", "Throttles", "FunctionName", var.lambda_function_names.cron_function],
           ]
         }
       },
@@ -60,7 +60,7 @@ resource "aws_cloudwatch_dashboard" "lambda" {
           stat   = "Maximum",
           metrics = [
             ["AWS/Lambda", "ConcurrentExecutions", "FunctionName", var.lambda_function_names.api_function],
-            ["AWS/Lambda", "ConcurrentExecutions", "FunctionName", var.lambda_function_names.noti_function],
+            ["AWS/Lambda", "ConcurrentExecutions", "FunctionName", var.lambda_function_names.cron_function],
           ]
         }
       },
@@ -75,7 +75,7 @@ resource "aws_cloudwatch_dashboard" "lambda" {
           stat   = "Sum",
           metrics = [
             ["AWS/Lambda", "Invocations", "FunctionName", var.lambda_function_names.api_function],
-            ["AWS/Lambda", "Invocations", "FunctionName", var.lambda_function_names.noti_function],
+            ["AWS/Lambda", "Invocations", "FunctionName", var.lambda_function_names.cron_function],
           ]
         }
       }
@@ -87,7 +87,7 @@ resource "aws_cloudwatch_dashboard" "lambda" {
 resource "aws_cloudwatch_log_group" "lambda" {
   for_each = var.lambda_function_names
 
-  name              = "/sis/backend/${each.value}" # Chỉ định nơi lưu trữ log
+  name              = "/aws/lambda/${each.value}" # Chỉ định nơi lưu trữ log
   retention_in_days = var.log_retention_in_days    # Lưu trữ log trong X ngày
 
   tags = merge(var.tags, {
@@ -155,7 +155,7 @@ resource "aws_cloudwatch_metric_alarm" "lambda_api_duration" {
 }
 
 # Theo dõi Duration - Duration Maximum >= 80% timeout
-resource "aws_cloudwatch_metric_alarm" "lambda_noti_duration" {
+resource "aws_cloudwatch_metric_alarm" "lambda_cron_duration" {
   alarm_name          = "${var.project_name}-lambda-noti-function-duration"
   namespace           = "AWS/Lambda"
   metric_name         = "Duration"
@@ -173,12 +173,12 @@ resource "aws_cloudwatch_metric_alarm" "lambda_noti_duration" {
 
 
   dimensions = {
-    FunctionName = var.lambda_function_names.noti_function
+    FunctionName = var.lambda_function_names.cron_function
   }
 
   tags = merge(var.tags, {
     Name     = "${var.project_name}-lambda-noti-function-duration"
-    Function = var.lambda_function_names.noti_function
+    Function = var.lambda_function_names.cron_function
   })
 }
 

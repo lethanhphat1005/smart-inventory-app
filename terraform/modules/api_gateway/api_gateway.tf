@@ -41,7 +41,7 @@ resource "aws_apigatewayv2_integration" "lambda_functions" {
 
 resource "aws_apigatewayv2_route" "lambda_routes" {
   api_id    = aws_apigatewayv2_api.lambda_http.id
-  route_key = "ANY ${var.api_routes.prefix_path}/{proxy+}"
+  route_key = "$default"
 
   target = "integrations/${aws_apigatewayv2_integration.lambda_functions.id}"
 }
@@ -53,5 +53,5 @@ resource "aws_lambda_permission" "allow_api" {
   function_name = var.api_routes.lambda_arn
   principal     = "apigateway.amazonaws.com"
 
-  source_arn = "${aws_apigatewayv2_api.lambda_http.execution_arn}/*/*/*"
+  source_arn = "${aws_apigatewayv2_api.lambda_http.execution_arn}/*"
 }
