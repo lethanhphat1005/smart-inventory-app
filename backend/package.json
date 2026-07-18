@@ -48,6 +48,7 @@
     "vitest": "^4.1.9"
   },
   "dependencies": {
+    "@aws-sdk/client-ssm": "^3.1089.0",
     "@codegenie/serverless-express": "^5.0.0",
     "@prisma/adapter-pg": "^7.4.2",
     "@prisma/client": "^7.5.0",
