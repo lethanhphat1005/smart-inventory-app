@@ -31,6 +31,12 @@ variable "sns_email" {
 
 variable "lambda_api_env" {
   description = "Biến môi trường của lambda API function"
-  type = map(any)
-  sensitive = true
+  type        = map(any)
+  sensitive   = true
+}
+
+variable "service_account_key_file" {
+  description = "Đường dẫn file serviceAccountKey.json"
+  type        = string
+  sensitive   = true
 }

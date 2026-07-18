@@ -15,8 +15,28 @@ module "iam" {
   project_name = var.project_name
   tags         = var.tags
 
-  lambda_scheduler_function_arn = module.lambda_noti.function_arn
+  lambda_scheduler_function_arn = module.lambda_cron.function_arn
   sqs_dlq_arn                   = module.sqs_dlq.queue_arn
+
+  ssm_parameter_arns = [
+    module.ssm_parameters.parameter_arns["firebase_service_account"]
+  ]
+}
+
+module "ssm_parameters" {
+  source = "../../modules/ssm_parameter"
+
+  project_name = var.project_name
+  tags         = var.tags
+
+  parameter_name_prefix = "/sis/staging"
+
+  parameters_config = {
+    firebase_service_account = {
+      name  = "/service-account-key"
+      value = file(var.service_account_key_file)
+    }
+  }
 }
 
 module "lambda_api" {
@@ -37,11 +57,13 @@ module "lambda_api" {
     timeout       = 30
     architectures = ["arm64"]
 
-    environment = var.lambda_api_env
+    environment = merge(var.lambda_api_env, {
+      FIREBASE_SERVICE_ACCOUNT_PARAMETER = module.ssm_parameters.parameter_names["firebase_service_account"]
+    })
   }
 }
 
-module "lambda_noti" {
+module "lambda_cron" {
   source = "../../modules/lambda"
 
   project_name = var.project_name
@@ -51,18 +73,17 @@ module "lambda_noti" {
 
   image_command = ["dist/lambda/notification.handler"]
 
-  lambda_role_arn = "${module.ecr.repository_urls}:${var.image_tag}"
+  lambda_role_arn = module.iam.lambda_role_arn
 
   lambda_function_config = {
-    image_uri     = module.ecr.repository_urls
+    image_uri     = "${module.ecr.repository_urls}:${var.image_tag}"
     memory        = 512
     timeout       = 120
     architectures = ["arm64"]
-
-    environment = {}
+    environment = {
+      FIREBASE_SERVICE_ACCOUNT_PARAMETER = module.ssm_parameters.parameter_names["firebase_service_account"]
+    }
   }
-
-  reserved_concurrent_executions = 1
 }
 
 module "apigw" {
@@ -72,7 +93,6 @@ module "apigw" {
   tags         = var.tags
 
   api_routes = {
-    prefix_path       = "/"
     lambda_invoke_arn = module.lambda_api.function_invoke_arn
     lambda_arn        = module.lambda_api.function_arn
   }
@@ -96,7 +116,7 @@ module "cloudwatch" {
 
   lambda_function_names = {
     api_function  = module.lambda_api.function_name
-    noti_function = module.lambda_noti.function_name
+    cron_function = module.lambda_cron.function_name
   }
 
   apigw = {
@@ -113,18 +133,14 @@ module "notification_schedule_08h" {
   name_suffix  = "08h"
   tags         = var.tags
 
-  target_arn = module.lambda_noti.function_arn
+  target_arn = module.lambda_cron.function_arn
   role_arn   = module.iam.scheduler_role_arn
 
   schedule_expression = "cron(0 8 * * ? *)"
 
   input = jsonencode({
     source = "sis.scheduler"
-    type   = "notification-cron"
-    region = "ap-southeast-1"
-    detail = {
-      job = "generate-reorder-suggestions"
-    }
+    job    = "generate-reorder-suggestions"
   })
 
   dead_letter_arn = module.sqs_dlq.queue_arn
@@ -137,18 +153,14 @@ module "notification_schedule_20h" {
   name_suffix  = "20h"
   tags         = var.tags
 
-  target_arn = module.lambda_noti.function_arn
+  target_arn = module.lambda_cron.function_arn
   role_arn   = module.iam.scheduler_role_arn
 
   schedule_expression = "cron(0 20 * * ? *)"
 
   input = jsonencode({
     source = "sis.scheduler"
-    type   = "notification-cron"
-    region = "ap-southeast-1"
-    detail = {
-      job = "scan-low-stock"
-    }
+    job    = "scan-low-stock"
   })
 
   dead_letter_arn = module.sqs_dlq.queue_arn
