@@ -2,8 +2,12 @@ import { StatusCodes } from 'http-status-codes';
 
 import { CustomError } from '../common/errors/custom-error.js';
 import { logger } from '../common/utils/logger.util.js';
+import { initFirebaseAdmin } from '../config/firebase.config.js';
 import { smartAlertService } from '../modules/alerts/services/smart-alert.service.js';
 import { smartDecisionService } from '../modules/alerts/smart-decision.module.js';
+
+// Khởi tạo firebase khi khởi động server
+await initFirebaseAdmin();
 
 type NotificationJobEvent = {
   job: 'generate-reorder-suggestions' | 'scan-low-stock';

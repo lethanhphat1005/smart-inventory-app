@@ -2,23 +2,38 @@ import 'dotenv/config';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
-import { initializeApp, cert, getApps } from 'firebase-admin/app';
+import {
+  initializeApp,
+  cert,
+  getApps,
+  type ServiceAccount,
+} from 'firebase-admin/app';
 
-export const initFirebaseAdmin = () => {
+import { getDirectSsmParameter } from '../common/utils/index.js';
+
+const getFirebaseServiceAccount = async (): Promise<ServiceAccount> => {
+  if (process.env.NODE_ENV !== 'production') {
+    const serviceAccountPath = join(process.cwd(), 'serviceAccountKey.json');
+
+    return JSON.parse(readFileSync(serviceAccountPath, 'utf8'));
+  }
+
+  const parameterName = process.env.FIREBASE_SERVICE_ACCOUNT_PARAMETER;
+
+  if (!parameterName) {
+    throw new Error('FIREBASE_SERVICE_ACCOUNT_PARAMETER is missing');
+  }
+
+  const serviceAccountJson = await getDirectSsmParameter(parameterName);
+
+  return JSON.parse(serviceAccountJson);
+};
+
+export const initFirebaseAdmin = async () => {
   if (!getApps().length) {
     try {
-      const serviceAccountPath =
-        process.env.NODE_ENV === 'production'
-          ? (process.env.FIREBASE_SERVICE_ACCOUNT_PATH ??
-            '/run/secrets/serviceAccountKey.json')
-          : join(process.cwd(), 'serviceAccountKey.json');
-      const serviceAccount = JSON.parse(
-        // eslint-disable-next-line security/detect-non-literal-fs-filename
-        readFileSync(serviceAccountPath, 'utf8'),
-      );
-
       initializeApp({
-        credential: cert(serviceAccount),
+        credential: cert(await getFirebaseServiceAccount()),
       });
 
       console.info('[Firebase] Admin SDK initialized successfully');

@@ -27,13 +27,3 @@ output "backend_security_group_id" {
   description = "ID của security group gắn cho EC2 backend"
   value       = aws_security_group.backend.id
 }
-
-output "ec2_eip_allocation_id" {
-  description = "Allocation ID của Elastic IP cho EC2"
-  value       = var.enable_eip ? aws_eip.ec2[0].id : null
-}
-
-output "ec2_eip_public_ip" {
-  description = "Public IP của Elastic IP cho EC2"
-  value       = var.enable_eip ? aws_eip.ec2[0].public_ip : null
-}
