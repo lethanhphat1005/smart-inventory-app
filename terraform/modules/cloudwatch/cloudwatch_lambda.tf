@@ -88,7 +88,7 @@ resource "aws_cloudwatch_log_group" "lambda" {
   for_each = var.lambda_function_names
 
   name              = "/aws/lambda/${each.value}" # Chỉ định nơi lưu trữ log
-  retention_in_days = var.log_retention_in_days    # Lưu trữ log trong X ngày
+  retention_in_days = var.log_retention_in_days   # Lưu trữ log trong X ngày
 
   tags = merge(var.tags, {
     Name = "${var.project_name}-lambda-${each.key}-log"
@@ -164,7 +164,7 @@ resource "aws_cloudwatch_metric_alarm" "lambda_cron_duration" {
   datapoints_to_alarm = 1
   statistic           = "Maximum"
 
-  treat_missing_data  = "notBreaching"
+  treat_missing_data = "notBreaching"
 
   alarm_actions = [aws_sns_topic.notifications.arn]
   ok_actions    = [aws_sns_topic.notifications.arn]

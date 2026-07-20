@@ -84,6 +84,12 @@ module "lambda_cron" {
       FIREBASE_SERVICE_ACCOUNT_PARAMETER = module.ssm_parameters.parameter_names["firebase_service_account"]
     }
   }
+
+  async_invoke_config = {
+    maximum_event_age_in_seconds = 3000
+    maximum_retry_attempts       = 2
+    on_failure_destination_arn   = module.sqs_dlq.queue_arn
+  }
 }
 
 module "apigw" {
@@ -124,6 +130,8 @@ module "cloudwatch" {
     api_id    = module.apigw.api_id
     api_stage = module.apigw.stage_name
   }
+
+  notification_dlq_name = module.sqs_dlq.queue_name
 }
 
 module "notification_schedule_08h" {

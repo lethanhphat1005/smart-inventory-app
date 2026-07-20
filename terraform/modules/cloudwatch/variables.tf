@@ -32,6 +32,11 @@ variable "apigw" {
   })
 }
 
+variable "notification_dlq_name" {
+  description = "Tên SQS queue"
+  type        = string
+}
+
 variable "log_retention_in_days" {
   description = "Số ngày lưu log trong CloudWatch Logs"
   type        = number

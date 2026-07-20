@@ -27,6 +27,24 @@ resource "aws_iam_role_policy_attachment" "lambda" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
+resource "aws_iam_role_policy" "lambda" {
+  role = aws_iam_role.lambda.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = [
+          "sqs:SendMessage"
+        ]
+        Resource = var.sqs_dlq_arn
+      }
+    ]
+  })
+}
+
 # Gán quyền truy cập SSM parameter cụ thể cho mỗi lambda function
 resource "aws_iam_role_policy" "get_ssm_parameter" {
   role = aws_iam_role.lambda.id

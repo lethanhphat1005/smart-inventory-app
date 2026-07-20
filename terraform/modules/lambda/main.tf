@@ -30,3 +30,21 @@ resource "aws_lambda_function" "main" {
     FunctionName = "${var.project_name}-lambda-function"
   })
 }
+
+# Xử lý lỗi khi lambda invoke bất đồng bộ
+# Hiện chỉ dành cho cron_function
+resource "aws_lambda_function_event_invoke_config" "notification" {
+  count = var.async_invoke_config == null ? 0 : 1
+
+  function_name = aws_lambda_function.main.function_name
+
+  maximum_event_age_in_seconds = var.async_invoke_config.maximum_event_age_in_seconds
+  maximum_retry_attempts       = var.async_invoke_config.maximum_retry_attempts
+
+  # Gửi failue events tới đích được chỉ định
+  destination_config {
+    on_failure {
+      destination = var.async_invoke_config.on_failure_destination_arn
+    }
+  }
+}
