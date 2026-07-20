@@ -85,7 +85,10 @@ resource "aws_cloudwatch_metric_alarm" "apigw_4xx_errors" {
   threshold           = 0.05
   evaluation_periods  = 5
 
+  treat_missing_data = "notBreaching"
+
   alarm_actions = [aws_sns_topic.notifications.arn]
+  ok_actions    = [aws_sns_topic.notifications.arn]
 
   metric_query {
     id = "m4xx"
@@ -136,6 +139,8 @@ resource "aws_cloudwatch_metric_alarm" "apigw_5xx_errors" {
   comparison_operator = "GreaterThanThreshold"
   threshold           = 0.05
   evaluation_periods  = 3
+
+  treat_missing_data = "notBreaching"
 
   alarm_actions = [aws_sns_topic.notifications.arn]
   ok_actions    = [aws_sns_topic.notifications.arn]
@@ -194,6 +199,8 @@ resource "aws_cloudwatch_metric_alarm" "apigw_high_latency" {
   # INFO: extended_statistic hỗ trợ chỉ số p0.0 - p100
   extended_statistic = "p90" # 10% request chậm nhất
 
+  treat_missing_data = "notBreaching"
+
   alarm_actions = [aws_sns_topic.notifications.arn]
   ok_actions    = [aws_sns_topic.notifications.arn]
 
@@ -217,6 +224,8 @@ resource "aws_cloudwatch_metric_alarm" "apigw_request_spike" {
   period              = 60
   evaluation_periods  = 1
   statistic           = "Sum"
+
+  treat_missing_data = "notBreaching"
 
   alarm_actions = [aws_sns_topic.notifications.arn]
   ok_actions    = [aws_sns_topic.notifications.arn]

@@ -104,21 +104,17 @@ resource "aws_cloudwatch_metric_alarm" "lambda_error" {
   namespace           = "AWS/Lambda"
   metric_name         = "Errors"
   comparison_operator = "GreaterThanThreshold"
-  threshold           = 0 # Ngưỡng kích hoạt alarm
-  # INFO: CloudWatch theo dõi metric theo datapoint (ô thời gian), độ dài mỗi datapoint quy định bằng period
-  # INFO: Sau X datapoint (quy định bằng evaluation_periods), CloudWatch gom các metric với nhau và so sánh
-  # INFO: datapoints_to_alarm: Số datapoint trong X datapoint (evaluation_periods) phải vượt threshold để kích hoạt alarm
-  # INFO: Ví dụ: evaluation_periods  = 5 & datapoints_to_alarm = 3 -> Cần 3/5 datapoint bị lỗi để kích hoạt alarm
-  period              = 60 # Độ dài mỗi datapoint (sec)
-  evaluation_periods  = 3  # Số datapoint cloudwatch so sánh để xem xét vượt ngưỡng
+  threshold           = 0
+  period              = 60
+  evaluation_periods  = 3
   datapoints_to_alarm = 3
   statistic           = "Sum"
 
-  # Hành động thực hiện khi alarm kích hoạt
+  treat_missing_data = "notBreaching"
+
   alarm_actions = [aws_sns_topic.notifications.arn]
   ok_actions    = [aws_sns_topic.notifications.arn]
 
-  # Filter theo giá trị
   dimensions = {
     FunctionName = each.value
   }
@@ -140,6 +136,8 @@ resource "aws_cloudwatch_metric_alarm" "lambda_api_duration" {
   evaluation_periods  = 15
   datapoints_to_alarm = 15
   extended_statistic  = "p95" # percentile
+
+  treat_missing_data = "notBreaching"
 
   alarm_actions = [aws_sns_topic.notifications.arn]
   ok_actions    = [aws_sns_topic.notifications.arn]
@@ -165,6 +163,7 @@ resource "aws_cloudwatch_metric_alarm" "lambda_cron_duration" {
   evaluation_periods  = 1
   datapoints_to_alarm = 1
   statistic           = "Maximum"
+
   treat_missing_data  = "notBreaching"
 
   alarm_actions = [aws_sns_topic.notifications.arn]
@@ -194,6 +193,8 @@ resource "aws_cloudwatch_metric_alarm" "lambda_api_throttle" {
   datapoints_to_alarm = 5
   statistic           = "Sum"
 
+  treat_missing_data = "notBreaching"
+
   alarm_actions = [aws_sns_topic.notifications.arn]
   ok_actions    = [aws_sns_topic.notifications.arn]
 
@@ -219,6 +220,8 @@ resource "aws_cloudwatch_metric_alarm" "lambda_api_high_concurrency" {
   datapoints_to_alarm = 1
   statistic           = "Maximum"
 
+  treat_missing_data = "notBreaching"
+
   alarm_actions = [aws_sns_topic.notifications.arn]
   ok_actions    = [aws_sns_topic.notifications.arn]
 
@@ -243,6 +246,8 @@ resource "aws_cloudwatch_metric_alarm" "lambda_api_invocation_spike" {
   evaluation_periods  = 1
   datapoints_to_alarm = 1
   statistic           = "Sum"
+
+  treat_missing_data = "notBreaching"
 
   alarm_actions = [aws_sns_topic.notifications.arn]
   ok_actions    = [aws_sns_topic.notifications.arn]
