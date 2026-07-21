@@ -14,7 +14,7 @@ export const rateLimiter = ({
   return rateLimit({
     windowMs,
     max,
-    standardHeaders: true,
+    standardHeaders: 'draft-7',
     legacyHeaders: false,
     handler: (req, res) => {
       // thêm log vì pinoLogger đã ignore >= 400 status code
