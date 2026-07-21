@@ -35,8 +35,8 @@ resource "aws_iam_role_policy" "lambda" {
 
     Statement = [
       {
-        Effect   = "Allow"
-        Action   = [
+        Effect = "Allow"
+        Action = [
           "sqs:SendMessage"
         ]
         Resource = var.sqs_dlq_arn

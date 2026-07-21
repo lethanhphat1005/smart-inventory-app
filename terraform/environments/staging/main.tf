@@ -80,9 +80,9 @@ module "lambda_cron" {
     memory        = 512
     timeout       = 120
     architectures = ["arm64"]
-    environment = {
+    environment = merge(var.lambda_noti_env, {
       FIREBASE_SERVICE_ACCOUNT_PARAMETER = module.ssm_parameters.parameter_names["firebase_service_account"]
-    }
+    })
   }
 
   async_invoke_config = {

@@ -14,8 +14,8 @@ resource "aws_apigatewayv2_stage" "lambda_stage" {
 
   # Rate limit áp dụng mặc định cho tất cả route trong stage
   default_route_settings {
-    throttling_rate_limit  = var.throttling_rate_limit
-    throttling_burst_limit = var.throttling_burst_limit
+    throttling_rate_limit    = var.throttling_rate_limit
+    throttling_burst_limit   = var.throttling_burst_limit
     detailed_metrics_enabled = true # bật metric chi tiết theo route (optional)
   }
 }
