@@ -12,24 +12,12 @@ resource "aws_apigatewayv2_stage" "lambda_stage" {
   name        = "$default"
   auto_deploy = true
 
-  # # Chỉ định metric hiển thị log trên Cloudwatch (dùng khi có aws_cloudwatch_log_group)
-  # access_log_settings {
-  #   destination_arn = var.cloudwatch_log_group
-
-  #   format = jsonencode({
-  #     requestId               = "$context.requestId"
-  #     sourceIp                = "$context.identity.sourceIp"
-  #     requestTime             = "$context.requestTime"
-  #     protocol                = "$context.protocol"
-  #     httpMethod              = "$context.httpMethod"
-  #     resourcePath            = "$context.resourcePath"
-  #     routeKey                = "$context.routeKey"
-  #     status                  = "$context.status"
-  #     integrationErrorMessage = "$context.integrationErrorMessage"
-  #     integrationStatus       = "$context.integration.status"
-  #     latency                 = "$context.responseLatency"
-  #   })
-  # }
+  # Rate limit áp dụng mặc định cho tất cả route trong stage
+  default_route_settings {
+    throttling_rate_limit  = var.throttling_rate_limit
+    throttling_burst_limit = var.throttling_burst_limit
+    detailed_metrics_enabled = true # bật metric chi tiết theo route (optional)
+  }
 }
 
 resource "aws_apigatewayv2_integration" "lambda_functions" {
