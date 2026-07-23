@@ -60,9 +60,12 @@ output "notification_dlq" {
   }
 }
 
-output "ssm_parameter_arns" {
-  description = "ARN của SSM parameters; không chứa giá trị secret"
-  value       = module.ssm_parameters.parameter_arns
+output "ssm_parameters" {
+  description = "ARN và name của SSM parameters; không chứa giá trị secret"
+  value = {
+    parameter_arns  = module.ssm_parameters.parameter_arns
+    parameter_names = module.ssm_parameters.parameter_names
+  }
 }
 
 output "scheduler_role_arn" {

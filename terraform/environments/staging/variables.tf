@@ -41,8 +41,8 @@ variable "lambda_noti_env" {
   sensitive   = true
 }
 
-variable "service_account_key_file" {
-  description = "Đường dẫn file serviceAccountKey.json"
-  type        = string
+variable "secret_parameters" {
+  description = "Các secret lưu trong SSM Parameter"
+  type        = map(any)
   sensitive   = true
 }
