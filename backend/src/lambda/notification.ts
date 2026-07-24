@@ -1,8 +1,7 @@
 import { StatusCodes } from 'http-status-codes';
 
 import { CustomError } from '../common/errors/custom-error.js';
-import { loadCronSecretsToEnvironment } from '../common/utils/get-aws-ssm-parameter.js';
-import { logger } from '../common/utils/logger.util.js';
+import { logger, loadCronSecretsToEnvironment } from '../common/utils/index.js';
 import { initFirebaseAdmin } from '../config/firebase.config.js';
 
 // load secret từ SSM Parameter vào biến môi trường khi khởi tạo server

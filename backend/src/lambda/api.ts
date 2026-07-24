@@ -1,6 +1,6 @@
 import { configure } from '@codegenie/serverless-express';
 
-import { loadApiSecretsToEnvironment } from '../common/utils/get-aws-ssm-parameter.js';
+import { loadApiSecretsToEnvironment } from '../common/utils/index.js';
 import { initFirebaseAdmin } from '../config/firebase.config.js';
 
 console.info('Start lambda environment: Api Function');
