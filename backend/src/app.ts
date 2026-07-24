@@ -31,11 +31,18 @@ import { userProfileRouter } from './modules/user-profile/index.js';
 
 const app = express();
 
+// Tin cậy proxy đầu tiên (API Gateway) để Express xác định đúng IP client,
+// tránh rate limiter sử dụng nhầm IP của proxy.
+app.set('trust proxy', 1);
+
 app.use(express.json());
 
 app.use(pinoLogger);
 
 app.use('/api/health', healthRouter);
+
+// Global rate limiter
+app.use('/api', rateLimiter({ windowMs: 5 * 60 * 1000, max: 300 }));
 
 app.use(
   '/api/stores',
@@ -62,7 +69,7 @@ app.use(
 
 app.use(
   '/api/auth',
-  rateLimiter({ windowMs: 15 * 60 * 1000, max: 10 }),
+  rateLimiter({ windowMs: 60 * 1000, max: 30 }),
   userProfileRouter,
 );
 

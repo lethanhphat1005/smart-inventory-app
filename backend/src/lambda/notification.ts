@@ -1,13 +1,20 @@
 import { StatusCodes } from 'http-status-codes';
 
 import { CustomError } from '../common/errors/custom-error.js';
-import { logger } from '../common/utils/logger.util.js';
+import { logger, loadCronSecretsToEnvironment } from '../common/utils/index.js';
 import { initFirebaseAdmin } from '../config/firebase.config.js';
-import { smartAlertService } from '../modules/alerts/services/smart-alert.service.js';
-import { smartDecisionService } from '../modules/alerts/smart-decision.module.js';
 
-// Khởi tạo firebase khi khởi động server
+// load secret từ SSM Parameter vào biến môi trường khi khởi tạo server
+await loadCronSecretsToEnvironment();
+
+// Khởi tạo firebase
 await initFirebaseAdmin();
+
+// Chỉ import các service sau khi database và Firebase đã sẵn sàng
+const [{ smartAlertService }, { smartDecisionService }] = await Promise.all([
+  import('../modules/alerts/services/smart-alert.service.js'),
+  import('../modules/alerts/smart-decision.module.js'),
+]);
 
 type NotificationJobEvent = {
   job: 'generate-reorder-suggestions' | 'scan-low-stock';

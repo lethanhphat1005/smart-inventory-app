@@ -6,16 +6,20 @@ import {
 
 const ssmClient = new SSMClient({});
 
-type AppSecrets = {
+// NOTE: Không cần fireBaseServiceAccountKey vì đã load riêng ở firebase.config.ts
+type ApiSecrets = {
   databaseUrl: string;
   supabaseServiceRoleKey: string;
+  redisUrl: string;
   groqApiKey: string;
-  firebaseServiceAccount: string;
 };
 
-type SecretParameterNames = AppSecrets;
+type CronSecrets = {
+  databaseUrl: string;
+};
 
-let cachedSecrets: Promise<AppSecrets> | undefined;
+let cachedApiSecrets: Promise<ApiSecrets> | undefined;
+let cachedCronSecrets: Promise<CronSecrets> | undefined;
 
 // Lấy value của một biến env bắt buộc trong lambda function
 // Vd: DATABASE_URL_PARAMETER=/storix/prod/database-url --> return "/storix/prod/database-url"
@@ -31,19 +35,33 @@ const getRequiredEnvironmentVariable = (name: string): string => {
   return value;
 };
 
-// Đọc toàn bộ các SSM Parameter name được cấu hình thông qua biến env
-// NOTE: Lambda function phải cấu hình sẵn các biến env là SSM Parameter name cần thiết
-const getSsmParameterNames = (): SecretParameterNames => {
-  return {
-    databaseUrl: getRequiredEnvironmentVariable('DATABASE_URL_PARAMETER'),
-    supabaseServiceRoleKey: getRequiredEnvironmentVariable(
-      'SUPABASE_SERVICE_ROLE_PARAMETER',
-    ),
-    groqApiKey: getRequiredEnvironmentVariable('GROQ_API_KEY_PARAMETER'),
-    firebaseServiceAccount: getRequiredEnvironmentVariable(
-      'FIREBASE_SERVICE_ACCOUNT_PARAMETER',
-    ),
-  };
+const getParameterValues = async (
+  parameterNames: string[],
+): Promise<Map<string, string>> => {
+  const result = await ssmClient.send(
+    new GetParametersCommand({
+      Names: parameterNames,
+      WithDecryption: true,
+    }),
+  );
+
+  if (result.InvalidParameters?.length) {
+    throw new Error(
+      `Some required SSM parameters could not be loaded: ${result.InvalidParameters.join(
+        ', ',
+      )}`,
+    );
+  }
+
+  const parameters = new Map<string, string>();
+
+  for (const parameter of result.Parameters ?? []) {
+    if (parameter.Name && parameter.Value) {
+      parameters.set(parameter.Name, parameter.Value);
+    }
+  }
+
+  return parameters;
 };
 
 const getParameterValue = (
@@ -61,50 +79,53 @@ const getParameterValue = (
   return parameterValue;
 };
 
-const loadSecrets = async (): Promise<AppSecrets> => {
-  const names = getSsmParameterNames();
-
-  const parameterNames = [
-    names.databaseUrl,
-    names.supabaseServiceRoleKey,
-    names.groqApiKey,
-    names.firebaseServiceAccount,
-  ];
-
-  const result = await ssmClient.send(
-    new GetParametersCommand({
-      Names: parameterNames,
-      WithDecryption: true,
-    }),
+const loadApiSecrets = async (): Promise<ApiSecrets> => {
+  // Đọc toàn bộ các SSM Parameter name được cấu hình thông qua biến env
+  // NOTE: Lambda function phải cấu hình sẵn các biến env là SSM Parameter name cần thiết
+  const databaseUrlParameter = getRequiredEnvironmentVariable(
+    'DATABASE_URL_PARAMETER',
+  );
+  const supabaseServiceRoleKeyParameter = getRequiredEnvironmentVariable(
+    'SUPABASE_SERVICE_ROLE_KEY_PARAMETER',
+  );
+  const redisUrlParameter = getRequiredEnvironmentVariable(
+    'REDIS_URL_PARAMETER',
+  );
+  const groqApiKeyParameter = getRequiredEnvironmentVariable(
+    'GROQ_API_KEY_PARAMETER',
   );
 
-  if (result.InvalidParameters && result.InvalidParameters.length > 0) {
-    throw new Error(
-      `Some required SSM parameters could not be loaded: ${result.InvalidParameters.join(
-        ', ',
-      )}`,
-    );
-  }
+  const parameterNames = [
+    databaseUrlParameter,
+    supabaseServiceRoleKeyParameter,
+    redisUrlParameter,
+    groqApiKeyParameter,
+  ];
 
-  const parameters = new Map<string, string>();
-
-  for (const parameter of result.Parameters ?? []) {
-    if (parameter.Name !== undefined && parameter.Value !== undefined) {
-      parameters.set(parameter.Name, parameter.Value);
-    }
-  }
+  const parameters = await getParameterValues(parameterNames);
 
   return {
-    databaseUrl: getParameterValue(parameters, names.databaseUrl),
+    databaseUrl: getParameterValue(parameters, databaseUrlParameter),
     supabaseServiceRoleKey: getParameterValue(
       parameters,
-      names.supabaseServiceRoleKey,
+      supabaseServiceRoleKeyParameter,
     ),
-    groqApiKey: getParameterValue(parameters, names.groqApiKey),
-    firebaseServiceAccount: getParameterValue(
-      parameters,
-      names.firebaseServiceAccount,
-    ),
+    redisUrl: getParameterValue(parameters, redisUrlParameter),
+    groqApiKey: getParameterValue(parameters, groqApiKeyParameter),
+  };
+};
+
+const loadCronSecrets = async (): Promise<CronSecrets> => {
+  const databaseUrlParameter = getRequiredEnvironmentVariable(
+    'DATABASE_URL_PARAMETER',
+  );
+
+  const parameterNames = [databaseUrlParameter];
+
+  const parameters = await getParameterValues(parameterNames);
+
+  return {
+    databaseUrl: getParameterValue(parameters, databaseUrlParameter),
   };
 };
 
@@ -121,26 +142,43 @@ const loadSecrets = async (): Promise<AppSecrets> => {
  * cache sẽ được xoá để cho phép retry
  * ở lần gọi kế tiếp.
  */
-export const getSecrets = (): Promise<AppSecrets> => {
-  if (!cachedSecrets) {
-    // nếu cache lỗi, reset cache
-    cachedSecrets = loadSecrets().catch((error: unknown) => {
-      cachedSecrets = undefined;
+const getApiSecrets = (): Promise<ApiSecrets> => {
+  if (!cachedApiSecrets) {
+    cachedApiSecrets = loadApiSecrets().catch((error: unknown) => {
+      cachedApiSecrets = undefined;
 
       throw error;
     });
   }
 
-  return cachedSecrets;
+  return cachedApiSecrets;
 };
 
-export const loadSecretsToEnvironment = async (): Promise<void> => {
-  const secrets = await getSecrets();
+const getCronSecrets = (): Promise<CronSecrets> => {
+  if (!cachedCronSecrets) {
+    cachedCronSecrets = loadCronSecrets().catch((error: unknown) => {
+      cachedCronSecrets = undefined;
+
+      throw error;
+    });
+  }
+
+  return cachedCronSecrets;
+};
+
+export const loadApiSecretsToEnvironment = async (): Promise<void> => {
+  const secrets = await getApiSecrets();
 
   process.env.DATABASE_URL = secrets.databaseUrl;
   process.env.SUPABASE_SERVICE_ROLE_KEY = secrets.supabaseServiceRoleKey;
+  process.env.REDIS_URL = secrets.redisUrl;
   process.env.GROQ_API_KEY = secrets.groqApiKey;
-  process.env.FIREBASE_SERVICE_ACCOUNT = secrets.firebaseServiceAccount;
+};
+
+export const loadCronSecretsToEnvironment = async (): Promise<void> => {
+  const secrets = await getCronSecrets();
+
+  process.env.DATABASE_URL = secrets.databaseUrl;
 };
 
 // Lấy trực tiếp value 1 Ssm Parameter và cache

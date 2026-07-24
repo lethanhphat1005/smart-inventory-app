@@ -50,3 +50,15 @@ variable "reserved_concurrent_executions" {
   type        = number
   default     = -1
 }
+
+variable "async_invoke_config" {
+  description = "Cấu hình retry và failure destination cho asynchronous invocation"
+
+  type = object({
+    maximum_event_age_in_seconds = number
+    maximum_retry_attempts       = number
+    on_failure_destination_arn   = string
+  })
+
+  default = null
+}

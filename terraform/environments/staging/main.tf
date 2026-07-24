@@ -19,7 +19,11 @@ module "iam" {
   sqs_dlq_arn                   = module.sqs_dlq.queue_arn
 
   ssm_parameter_arns = [
-    module.ssm_parameters.parameter_arns["firebase_service_account"]
+    module.ssm_parameters.parameter_arns["firebase_service_account"],
+    module.ssm_parameters.parameter_arns["database_url"],
+    module.ssm_parameters.parameter_arns["supabase_service_role_key"],
+    module.ssm_parameters.parameter_arns["redis_url"],
+    module.ssm_parameters.parameter_arns["groq_api_key"],
   ]
 }
 
@@ -33,8 +37,24 @@ module "ssm_parameters" {
 
   parameters_config = {
     firebase_service_account = {
-      name  = "/service-account-key"
-      value = file(var.service_account_key_file)
+      name  = "service-account-key"
+      value = file(var.secret_parameters.service_account_key_file)
+    }
+    database_url = {
+      name  = "database-url"
+      value = var.secret_parameters.database_url
+    }
+    supabase_service_role_key = {
+      name  = "supabase-service-role-key"
+      value = var.secret_parameters.supabase_service_role_key
+    }
+    redis_url = {
+      name  = "redis-url"
+      value = var.secret_parameters.redis_url
+    }
+    groq_api_key = {
+      name  = "groq-api-key"
+      value = var.secret_parameters.groq_api_key
     }
   }
 }
@@ -58,7 +78,11 @@ module "lambda_api" {
     architectures = ["arm64"]
 
     environment = merge(var.lambda_api_env, {
-      FIREBASE_SERVICE_ACCOUNT_PARAMETER = module.ssm_parameters.parameter_names["firebase_service_account"]
+      FIREBASE_SERVICE_ACCOUNT_PARAMETER  = module.ssm_parameters.parameter_names["firebase_service_account"]
+      DATABASE_URL_PARAMETER              = module.ssm_parameters.parameter_names["database_url"]
+      SUPABASE_SERVICE_ROLE_KEY_PARAMETER = module.ssm_parameters.parameter_names["supabase_service_role_key"]
+      REDIS_URL_PARAMETER                 = module.ssm_parameters.parameter_names["redis_url"]
+      GROQ_API_KEY_PARAMETER              = module.ssm_parameters.parameter_names["groq_api_key"]
     })
   }
 }
@@ -80,9 +104,16 @@ module "lambda_cron" {
     memory        = 512
     timeout       = 120
     architectures = ["arm64"]
-    environment = {
+    environment = merge(var.lambda_noti_env, {
       FIREBASE_SERVICE_ACCOUNT_PARAMETER = module.ssm_parameters.parameter_names["firebase_service_account"]
-    }
+      DATABASE_URL_PARAMETER             = module.ssm_parameters.parameter_names["database_url"]
+    })
+  }
+
+  async_invoke_config = {
+    maximum_event_age_in_seconds = 3000
+    maximum_retry_attempts       = 2
+    on_failure_destination_arn   = module.sqs_dlq.queue_arn
   }
 }
 
@@ -124,6 +155,8 @@ module "cloudwatch" {
     api_id    = module.apigw.api_id
     api_stage = module.apigw.stage_name
   }
+
+  notification_dlq_name = module.sqs_dlq.queue_name
 }
 
 module "notification_schedule_08h" {

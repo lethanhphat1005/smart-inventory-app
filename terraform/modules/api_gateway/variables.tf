@@ -13,3 +13,15 @@ variable "api_routes" {
     lambda_arn        = string
   })
 }
+
+variable "throttling_rate_limit" {
+  description = "Số request trung bình mỗi giây"
+  type        = number
+  default     = 10
+}
+
+variable "throttling_burst_limit" {
+  description = "Số request tối đa cho phép trong một khoảng rất ngắn"
+  type        = number
+  default     = 20
+}
