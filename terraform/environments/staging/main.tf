@@ -25,6 +25,20 @@ module "iam" {
     module.ssm_parameters.parameter_arns["redis_url"],
     module.ssm_parameters.parameter_arns["groq_api_key"],
   ]
+
+  function_ssm_parameter_arns = {
+    api_function = [
+      module.ssm_parameters.parameter_arns["firebase_service_account"],
+      module.ssm_parameters.parameter_arns["database_url"],
+      module.ssm_parameters.parameter_arns["supabase_service_role_key"],
+      module.ssm_parameters.parameter_arns["redis_url"],
+      module.ssm_parameters.parameter_arns["groq_api_key"],
+    ]
+    cron_function = [
+      module.ssm_parameters.parameter_arns["firebase_service_account"],
+      module.ssm_parameters.parameter_arns["database_url"],
+    ]
+  }
 }
 
 module "ssm_parameters" {
@@ -69,7 +83,7 @@ module "lambda_api" {
 
   image_command = ["dist/lambda/api.handler"]
 
-  lambda_role_arn = module.iam.lambda_role_arn
+  lambda_role_arn = module.iam.api_lambda_role_arn
 
   lambda_function_config = {
     image_uri     = "${module.ecr.repository_urls}:${var.image_tag}"
@@ -97,7 +111,7 @@ module "lambda_cron" {
 
   image_command = ["dist/lambda/notification.handler"]
 
-  lambda_role_arn = module.iam.lambda_role_arn
+  lambda_role_arn = module.iam.cron_lambda_role_arn
 
   lambda_function_config = {
     image_uri     = "${module.ecr.repository_urls}:${var.image_tag}"

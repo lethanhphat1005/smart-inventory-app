@@ -27,7 +27,7 @@ resource "aws_lambda_function" "main" {
   }
 
   tags = merge(var.tags, {
-    FunctionName = "${var.project_name}-lambda-function"
+    FunctionName = "${var.project_name}-lambda-function-${var.function_name_suffix}"
   })
 }
 
