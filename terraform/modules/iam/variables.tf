@@ -12,15 +12,13 @@ variable "ssm_parameter_arns" {
   default     = []
 }
 
-# variable "lambda_roles_config" {
-#   description = "IAM role và SSM permissions cho từng Lambda"
-
-#   type = map(object({
-#     ssm_parameter_arns = set(string)
-#   }))
-
-#   default = {}
-# }
+variable "function_ssm_parameter_arns" {
+  description = "SSM parameter ARNs mà mỗi lambda function được phép đọc"
+  type = object({
+    api_function  = list(string)
+    cron_function = list(string)
+  })
+}
 
 variable "lambda_scheduler_function_arn" {
   description = "ARN of the Lambda function invoked by the scheduler"

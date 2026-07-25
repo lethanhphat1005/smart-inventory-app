@@ -1,81 +1,124 @@
-# Quyền thực thi và lấy secret từ SSM parameter của từng Lambda function
-resource "aws_iam_role" "lambda" {
-  name = "${var.project_name}-lambda-role"
+data "aws_iam_policy_document" "lambda_assume_role" {
+  statement {
+    sid     = "LambdaAssumeRole"
+    effect  = "Allow"
+    actions = ["sts:AssumeRole"]
 
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
+    principals {
+      type        = "Service"
+      identifiers = ["lambda.amazonaws.com"]
+    }
+  }
+}
 
-    Statement = [
-      {
-        Effect = "Allow"
-        Action = "sts:AssumeRole"
-
-        Principal = {
-          Service = "lambda.amazonaws.com"
-        }
-      }
-    ]
-  })
+# API Lambda role
+resource "aws_iam_role" "lambda_api" {
+  name               = "${var.project_name}-api-lambda-role"
+  assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
 
   tags = merge(var.tags, {
-    Name = "${var.project_name}-lambda-role"
+    Name = "${var.project_name}-api-lambda-role"
   })
 }
 
-resource "aws_iam_role_policy_attachment" "lambda" {
-  role       = aws_iam_role.lambda.name
+resource "aws_iam_role_policy_attachment" "lambda_api_basic_execution" {
+  role       = aws_iam_role.lambda_api.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
-resource "aws_iam_role_policy" "lambda" {
-  role = aws_iam_role.lambda.id
+resource "aws_iam_role_policy" "lambda_api_get_ssm_parameters" {
+  name = "${var.project_name}-api-read-ssm-parameters"
+  role = aws_iam_role.lambda_api.id
 
   policy = jsonencode({
     Version = "2012-10-17"
 
     Statement = [
       {
-        Effect = "Allow"
-        Action = [
-          "sqs:SendMessage"
-        ]
-        Resource = var.sqs_dlq_arn
-      }
-    ]
-  })
-}
-
-# Gán quyền truy cập SSM parameter cụ thể cho mỗi lambda function
-resource "aws_iam_role_policy" "get_ssm_parameter" {
-  role = aws_iam_role.lambda.id
-
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Sid    = "ReadAssignedSSMParameters"
+        Sid    = "ReadApiSSMParameters"
         Effect = "Allow"
 
         Action = [
           "ssm:GetParameter",
           "ssm:GetParameters"
         ]
-        Resource = var.ssm_parameter_arns
+
+        Resource = var.function_ssm_parameter_arns.api_function
       }
     ]
   })
 }
 
-# Quyền invoke lambda function và gửi message tới SQS queue của EventBridge
+# Notification Lambda role
+resource "aws_iam_role" "lambda_cron" {
+  name               = "${var.project_name}-notification-lambda-role"
+  assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
+
+  tags = merge(var.tags, {
+    Name = "${var.project_name}-notification-lambda-role"
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_cron_basic_execution" {
+  role       = aws_iam_role.lambda_cron.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+resource "aws_iam_role_policy" "lambda_cron_get_ssm_parameters" {
+  name = "${var.project_name}-notification-read-ssm-parameters"
+  role = aws_iam_role.lambda_cron.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+
+    Statement = [
+      {
+        Sid    = "ReadNotificationSSMParameters"
+        Effect = "Allow"
+
+        Action = [
+          "ssm:GetParameter",
+          "ssm:GetParameters"
+        ]
+
+        Resource = var.function_ssm_parameter_arns.cron_function
+      }
+    ]
+  })
+}
+
+# Chỉ Notification Lambda cần quyền gửi failed async invocation vào DLQ.
+resource "aws_iam_role_policy" "lambda_cron_send_to_dlq" {
+  name = "${var.project_name}-notification-send-to-dlq"
+  role = aws_iam_role.lambda_cron.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+
+    Statement = [
+      {
+        Sid      = "SendFailedAsyncInvocationToDLQ"
+        Effect   = "Allow"
+        Action   = "sqs:SendMessage"
+        Resource = var.sqs_dlq_arn
+      }
+    ]
+  })
+}
+
+# EventBridge Scheduler role
 resource "aws_iam_role" "scheduler" {
   name = "${var.project_name}-scheduler-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
+
     Statement = [
       {
-        Action = "sts:AssumeRole"
+        Sid    = "SchedulerAssumeRole"
         Effect = "Allow"
+        Action = "sts:AssumeRole"
+
         Principal = {
           Service = "scheduler.amazonaws.com"
         }
@@ -89,6 +132,7 @@ resource "aws_iam_role" "scheduler" {
 }
 
 resource "aws_iam_role_policy" "scheduler" {
+  name = "${var.project_name}-scheduler-policy"
   role = aws_iam_role.scheduler.id
 
   policy = jsonencode({
@@ -96,17 +140,15 @@ resource "aws_iam_role_policy" "scheduler" {
 
     Statement = [
       {
-        Effect = "Allow"
-        Action = [
-          "lambda:InvokeFunction"
-        ]
+        Sid      = "InvokeNotificationLambda"
+        Effect   = "Allow"
+        Action   = "lambda:InvokeFunction"
         Resource = var.lambda_scheduler_function_arn
       },
       {
-        Effect = "Allow"
-        Action = [
-          "sqs:SendMessage"
-        ]
+        Sid      = "SendSchedulerFailureToDLQ"
+        Effect   = "Allow"
+        Action   = "sqs:SendMessage"
         Resource = var.sqs_dlq_arn
       }
     ]

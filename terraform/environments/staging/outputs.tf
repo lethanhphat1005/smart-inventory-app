@@ -7,7 +7,10 @@ output "iam" {
   description = "Thông tin IAM role"
 
   value = {
-    lambda_role_arn    = module.iam.lambda_role_arn
+    lambda_role_arn    = {
+      api_function = module.iam.api_lambda_role_arn
+      cron_function = module.iam.cron_lambda_role_arn
+    }
     scheduler_role_arn = module.iam.scheduler_role_arn
   }
 }

@@ -1,18 +1,14 @@
-output "lambda_role_arn" {
-  description = "Lambda IAM role ARN"
-  value       = aws_iam_role.lambda.arn
+output "api_lambda_role_arn" {
+  description = "Execution role ARN của API Lambda"
+  value       = aws_iam_role.lambda_api.arn
 }
 
-# output "lambda_role_arns" {
-#   description = "IAM role ARN của từng Lambda"
-
-#   value = {
-#     for key, role in aws_iam_role.lambda :
-#     key => role.arn
-#   }
-# }
+output "cron_lambda_role_arn" {
+  description = "Execution role ARN của Notification Lambda"
+  value       = aws_iam_role.lambda_cron.arn
+}
 
 output "scheduler_role_arn" {
-  description = "EventBridge IAM role ARN"
+  description = "Execution role ARN của EventBridge Scheduler"
   value       = aws_iam_role.scheduler.arn
 }
