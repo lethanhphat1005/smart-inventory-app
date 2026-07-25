@@ -118,4 +118,21 @@ export class StoreController {
 
     sendResponse.success(res, store, { status: StatusCodes.OK });
   };
+
+  hardDeleteStore = async (
+    req: Request,
+    res: Response<ApiResponse<null>>,
+  ): Promise<void> => {
+    const userId = requireReqUser(req).userId;
+    const { storeId } = req.params;
+    const { storeName } = req.body as { storeName: string };
+
+    await this.storeService.hardDeleteStore(
+      storeId as string,
+      userId,
+      storeName,
+    );
+
+    sendResponse.success(res, null, { status: StatusCodes.OK });
+  };
 }

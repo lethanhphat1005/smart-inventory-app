@@ -238,4 +238,45 @@ export class StoreService {
       return store;
     });
   }
+
+  // store.service.ts
+
+  public async hardDeleteStore(
+    storeId: string,
+    userId: string,
+    storeName: string,
+  ): Promise<void> {
+    const store = await this.storeRepository.findByIdAndUserId(storeId, userId);
+
+    if (!store) {
+      throw new CustomError({
+        message: 'Store not found',
+        status: StatusCodes.NOT_FOUND,
+      });
+    }
+
+    if (store.name?.trim() !== storeName.trim()) {
+      throw new CustomError({
+        message: 'Store name confirmation does not match',
+        status: StatusCodes.BAD_REQUEST,
+      });
+    }
+
+    const member = await prisma.storeMember.findFirst({
+      where: {
+        storeId,
+        userId,
+        activeStatus: 'active',
+      },
+    });
+
+    if (!member || member.role !== 'owner') {
+      throw new CustomError({
+        message: 'Only store owner can perform hard delete',
+        status: StatusCodes.FORBIDDEN,
+      });
+    }
+
+    await this.storeRepository.deleteOne(storeId);
+  }
 }

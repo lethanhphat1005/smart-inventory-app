@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -120,7 +114,7 @@ model StoreMember {
   activeStatus ActiveStatus @default(active) @map("active_status")
 
   user  UserProfile @relation(fields: [userId], references: [userId])
-  store Store       @relation(fields: [storeId], references: [storeId])
+  store Store       @relation(fields: [storeId], references: [storeId], onDelete: Cascade)
 
   @@id([userId, storeId])
 }
@@ -132,7 +126,7 @@ model Category {
   isDefault   Boolean @map("is_default")
   storeId     String? @map("store_id")
 
-  store         Store?         @relation(fields: [storeId], references: [storeId])
+  store         Store?         @relation(fields: [storeId], references: [storeId], onDelete: Cascade)
   products      Product[]
   hidedDefaults HidedDefault[]
 }
@@ -141,8 +135,8 @@ model HidedDefault {
   storeId    String @map("store_id")
   categoryId String @map("category_id")
 
-  store    Store    @relation(fields: [storeId], references: [storeId])
-  category Category @relation(fields: [categoryId], references: [categoryId])
+  store    Store    @relation(fields: [storeId], references: [storeId], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [categoryId], onDelete: Cascade)
 
   @@id([storeId, categoryId])
 }
@@ -158,7 +152,7 @@ model Product {
   storeId      String       @map("store_id")
   categoryId   String       @map("category_id")
 
-  store           Store            @relation(fields: [storeId], references: [storeId])
+  store           Store            @relation(fields: [storeId], references: [storeId], onDelete: Cascade)
   category        Category         @relation(fields: [categoryId], references: [categoryId])
   productPackages ProductPackage[]
 }
@@ -184,7 +178,7 @@ model ProductPackage {
   productId        String       @map("product_id")
 
   unit                   Unit                    @relation(fields: [unitId], references: [unitId])
-  product                Product                 @relation(fields: [productId], references: [productId])
+  product                Product                 @relation(fields: [productId], references: [productId], onDelete: Cascade)
   inventory              Inventory?
   transactionDetails     TransactionDetail[]
   productPackageBarcodes ProductPackageBarcode[]
@@ -201,7 +195,7 @@ model ProductPackageBarcode {
   updatedAt               DateTime             @updatedAt @map("updated_at") @db.Timestamptz(3)
   productPackageId        String               @map("product_package_id")
 
-  productPackage ProductPackage @relation(fields: [productPackageId], references: [productPackageId])
+  productPackage ProductPackage @relation(fields: [productPackageId], references: [productPackageId], onDelete: Cascade)
 }
 
 model Inventory {
@@ -212,7 +206,7 @@ model Inventory {
   activeStatus     ActiveStatus @default(active) @map("active_status")
   productPackageId String       @unique @map("product_package_id")
 
-  productPackage ProductPackage @relation(fields: [productPackageId], references: [productPackageId])
+  productPackage ProductPackage @relation(fields: [productPackageId], references: [productPackageId], onDelete: Cascade)
 }
 
 model Transaction {
@@ -226,7 +220,7 @@ model Transaction {
   storeId       String            @map("store_id")
 
   user               UserProfile         @relation(fields: [userId], references: [userId])
-  store              Store               @relation(fields: [storeId], references: [storeId])
+  store              Store               @relation(fields: [storeId], references: [storeId], onDelete: Cascade)
   transactionDetails TransactionDetail[]
 }
 
@@ -236,8 +230,8 @@ model TransactionDetail {
   transactionId    String  @map("transaction_id")
   productPackageId String  @map("product_package_id")
 
-  transaction    Transaction    @relation(fields: [transactionId], references: [transactionId])
-  productPackage ProductPackage @relation(fields: [productPackageId], references: [productPackageId])
+  transaction    Transaction    @relation(fields: [transactionId], references: [transactionId], onDelete: Cascade)
+  productPackage ProductPackage @relation(fields: [productPackageId], references: [productPackageId], onDelete: Cascade)
 
   @@id([transactionId, productPackageId])
 }
@@ -255,7 +249,7 @@ model AuditLog {
   note        String?
 
   user  UserProfile @relation(fields: [userId], references: [userId])
-  store Store       @relation(fields: [storeId], references: [storeId])
+  store Store       @relation(fields: [storeId], references: [storeId], onDelete: Cascade)
 }
 
 model BarcodeApiCache {

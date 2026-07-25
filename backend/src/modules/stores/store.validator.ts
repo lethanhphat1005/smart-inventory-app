@@ -1,9 +1,5 @@
 import { z } from 'zod';
 
-// import { validateSchema } from '../../common/utils/index.js';
-
-// import type { NextFunction, Request, Response } from 'express';
-
 export const paramsSchema = z.object({
   storeId: z.uuid('Invalid storeId'),
 });
@@ -119,3 +115,10 @@ export const joinStoreBodySchema = z.object({
 //   req.body = validateSchema(joinStoreBodySchema, req.body);
 //   next();
 // };
+
+export const hardDeleteStoreBodySchema = z.object({
+  storeName: z
+    .string()
+    .trim()
+    .min(1, 'Store name is required for confirmation'),
+});

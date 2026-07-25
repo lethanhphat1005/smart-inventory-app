@@ -6,6 +6,7 @@ import {
   createStoreBodySchema,
   updateStoreBodySchema,
   joinStoreBodySchema,
+  hardDeleteStoreBodySchema,
 } from './store.validator.js';
 import { asyncWrapper, validator } from '../../common/middlewares/index.js';
 import { requirePermission, PERMISSION } from '../access-control/index.js';
@@ -105,5 +106,23 @@ storeRouter.post(
   '/join',
   validator(joinStoreBodySchema, 'body'),
   asyncWrapper(storeController.joinStore),
+);
+
+/**
+ * API endpoint: DELETE /api/stores/:storeId/hard
+ * Xóa cứng cửa hàng (Yêu cầu nhập chính xác tên Store & Người thực hiện là Owner)
+ *
+ * Path params:
+ *  - storeId: string (UUID, required)
+ * Body:
+ *  - storeName: string (required) - Tên cửa hàng xác nhận từ Dialog UI
+ */
+storeRouter.delete(
+  '/:storeId/hard',
+  requireStoreContext,
+  requirePermission(PERMISSION.STORE_WRITE),
+  validator(paramsSchema, 'params'),
+  validator(hardDeleteStoreBodySchema, 'body'),
+  asyncWrapper(storeController.hardDeleteStore),
 );
 export { storeRouter };
