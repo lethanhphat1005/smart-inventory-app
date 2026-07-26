@@ -106,6 +106,15 @@ final Map<String, String> viProfile = {
   TTexts.editStoreDialogDescription:
       'Bạn có chắc muốn cập nhật hồ sơ cửa hàng không?',
   TTexts.profileUpdateError: 'Không thể cập nhật hồ sơ',
+  TTexts.deleteStoreTitle: 'Khu Vực Nguy Hiểm',
+  TTexts.deleteStoreBtn: 'Xóa Vĩnh Viễn Cửa Hàng',
+  TTexts.deleteStoreDialogTitle: 'Xóa Cửa Hàng',
+  TTexts.deleteStoreDialogDesc: 'Hành động này không thể hoàn tác và sẽ xóa toàn bộ dữ liệu. Vui lòng nhập chính xác tên cửa hàng dưới đây để xác nhận:\n\n',
+  TTexts.deleteStoreInputLabel: 'Nhập tên cửa hàng',
+  TTexts.deleteStoreInputWarning: 'Xác nhận không hợp lệ. Vui lòng nhập y chang tên cửa hàng để xóa.',
+  TTexts.deleteStoreSuccess: 'Đã xóa cửa hàng vĩnh viễn.',
+  TTexts.deleteStoreSystemError: 'Lỗi hệ thống khi xóa cửa hàng.',
+  TTexts.deleteStoreCancelBtn: 'Hủy',
 
   //Assign Role
   TTexts.assignsRoleTitle: 'Phân Quyền',

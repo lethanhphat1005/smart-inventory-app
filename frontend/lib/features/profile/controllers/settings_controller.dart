@@ -30,7 +30,7 @@ class SettingsController extends GetxController {
   void onInit() {
     super.onInit();
     _loadLanguageSettings();
-    _fetchCurrenciesFromServer();
+    fetchCurrenciesFromServer(); // Đổi thành hàm Public
 
     ever(_storeService.currentCurrencyCode, (newCode) {
       if (supportedCurrencies.isNotEmpty) {
@@ -52,7 +52,7 @@ class SettingsController extends GetxController {
     }
   }
 
-  Future<void> _fetchCurrenciesFromServer() async {
+  Future<void> fetchCurrenciesFromServer() async {
     try {
       isLoadingCurrencies.value = true;
       final data = await _storeProvider.getCurrencies();
@@ -69,6 +69,12 @@ class SettingsController extends GetxController {
       debugPrint("Error fetching currency: $e");
     } finally {
       isLoadingCurrencies.value = false;
+    }
+  }
+
+  void loadCurrenciesIfNeeded() {
+    if (supportedCurrencies.isEmpty) {
+      fetchCurrenciesFromServer();
     }
   }
 

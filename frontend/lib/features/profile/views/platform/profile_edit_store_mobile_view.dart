@@ -6,6 +6,7 @@ import 'package:frontend/features/profile/controllers/profile_edit_store_control
 import 'package:frontend/features/profile/widgets/edit_store/edit_store_card_widgets.dart';
 import 'package:frontend/features/profile/widgets/edit_store/edit_store_header_widgets.dart';
 import 'package:frontend/features/profile/widgets/edit_store/edit_store_list_widgets.dart';
+import 'package:frontend/features/profile/widgets/edit_store/edit_store_delete_widget.dart';
 import 'package:get/get.dart';
 
 class EditStoreMobileView extends GetView<ProfileEditStoreController> {
@@ -30,7 +31,7 @@ class EditStoreMobileView extends GetView<ProfileEditStoreController> {
                     AppSizes.p16,
                 left: AppSizes.p24,
                 right: AppSizes.p24,
-                bottom: AppSizes.p48,
+                bottom: AppSizes.p48, // Padding đáy thoải mái
               ),
               child: const Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -39,8 +40,8 @@ class EditStoreMobileView extends GetView<ProfileEditStoreController> {
                   SizedBox(height: AppSizes.p24),
                   EditStoreCardWidgets(),
                   SizedBox(height: AppSizes.p24),
-                  // AssignsRoleMembersView(),
                   EditStoreListWidgets(),
+                  EditStoreDeleteWidget(),
                 ],
               ),
             ),
