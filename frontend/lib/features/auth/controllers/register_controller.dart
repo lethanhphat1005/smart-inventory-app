@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart'; // 🔥 Import GetStorage
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:frontend/core/infrastructure/utils/full_screen_loader_utils.dart';
 import 'package:frontend/core/ui/widgets/t_snackbars_widget.dart';
@@ -27,13 +28,49 @@ class RegisterController extends GetxController {
   final RxBool isLoading = false.obs;
   final RxInt passwordStrength = 0.obs;
 
+  final _storage = GetStorage();
+  late RxBool isTermsAccepted;
+  final RxBool showCheckboxError = false.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    bool savedTermsState = _storage.read('IS_TERMS_ACCEPTED') ?? false;
+    isTermsAccepted = savedTermsState.obs;
+
+    ever(isTermsAccepted, (value) {
+      _storage.write('IS_TERMS_ACCEPTED', value);
+    });
+  }
+
   void togglePasswordVisibility() =>
       isPasswordHidden.value = !isPasswordHidden.value;
   void toggleConfirmPasswordVisibility() =>
       isConfirmPasswordHidden.value = !isConfirmPasswordHidden.value;
 
-  /// Đăng ký Email thường 
+  void _triggerCheckboxError() {
+    showCheckboxError.value = true;
+    Future.delayed(const Duration(milliseconds: 1500), () {
+      showCheckboxError.value = false;
+    });
+  }
+
+  // Hàm chuyển hướng xem tài liệu
+  void goToLegalDocument(bool isTerms) {
+    Get.toNamed(AppRoutes.legalDocument, arguments: {'isTerms': isTerms});
+  }
+
+  // Đăng ký Email thường
   Future<void> register() async {
+    if (!isTermsAccepted.value) {
+      _triggerCheckboxError();
+      TSnackbarsWidget.warning(
+        title: TTexts.warningTitle.tr,
+        message: TTexts.pleaseAcceptTerms.tr,
+      );
+      return;
+    }
+
     final email = emailController.text.trim();
     final password = passwordController.text;
     final confirmPassword = confirmPasswordController.text;
@@ -88,8 +125,18 @@ class RegisterController extends GetxController {
     }
   }
 
-  /// Đăng ký/Đăng nhập Google (Tối ưu hóa: Vào thẳng App)
+  /// Đăng ký/Đăng nhập Google
   Future<void> registerWithGoogle() async {
+    // 🔥 CHẶN ĐĂNG KÝ GOOGLE NẾU CHƯA TICK
+    if (!isTermsAccepted.value) {
+      _triggerCheckboxError();
+      TSnackbarsWidget.warning(
+        title: TTexts.warningTitle.tr,
+        message: TTexts.pleaseAcceptTerms.tr,
+      );
+      return;
+    }
+
     try {
       FullScreenLoaderUtils.openLoadingDialog(TTexts.registering.tr);
       final response = await authProvider.signInWithGoogle();
@@ -104,11 +151,9 @@ class RegisterController extends GetxController {
           user.email?.split('@')[0] ??
           'User';
 
-      // Tối ưu hóa: Thực hiện các bước khởi tạo bắt buộc
       await UserProfileProvider().createUserProfile(fullName: displayName);
       await Get.find<UserService>().fetchAndSaveProfile();
 
-      // Chạy song song các tác vụ nền
       _runBackgroundTasks(user.email ?? "", "google_dummy_password");
 
       FullScreenLoaderUtils.stopLoading();
