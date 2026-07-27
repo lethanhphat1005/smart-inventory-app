@@ -166,6 +166,30 @@ export class ProductRepository {
       : null;
   }
 
+  // Trả về image_url[] để xóa all product images trong supabase
+  // khi hard delete store
+  async findAllImagePathsByStoreId(storeId: string): Promise<string[]> {
+    const products = await this.db.product.findMany({
+      where: {
+        storeId,
+        imageUrl: {
+          not: null,
+        },
+      },
+      select: {
+        imageUrl: true,
+      },
+    });
+
+    return products.flatMap((product) => {
+      if (!product.imageUrl) {
+        return [];
+      }
+
+      return [product.imageUrl];
+    });
+  }
+
   async createOne(data: CreateProductData): Promise<ProductResponseDto> {
     return await this.db.product.create({
       data,
