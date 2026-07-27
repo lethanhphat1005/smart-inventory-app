@@ -231,7 +231,7 @@ model TransactionDetail {
   productPackageId String  @map("product_package_id")
 
   transaction    Transaction    @relation(fields: [transactionId], references: [transactionId], onDelete: Cascade)
-  productPackage ProductPackage @relation(fields: [productPackageId], references: [productPackageId], onDelete: Cascade)
+  productPackage ProductPackage @relation(fields: [productPackageId], references: [productPackageId])
 
   @@id([transactionId, productPackageId])
 }
