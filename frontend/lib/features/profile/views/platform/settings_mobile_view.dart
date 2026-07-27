@@ -14,6 +14,10 @@ class SettingsMobileView extends GetView<SettingsController> {
 
   @override
   Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.loadCurrenciesIfNeeded();
+    });
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: const TBlurAppBarWidget(),

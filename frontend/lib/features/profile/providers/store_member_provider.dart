@@ -1,7 +1,8 @@
 import 'package:frontend/core/infrastructure/network/app_client.dart';
+import 'package:get/get.dart';
 
 class StoreMemberProvider {
-  final _apiClient = ApiClient();
+  final ApiClient _apiClient = Get.find<ApiClient>();
 
   Future<List<dynamic>> getStoreMembers(String storeId) async {
     try {

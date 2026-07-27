@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/features/auth/widgets/register/register_password_strength_indicator_widget.dart';
+import 'package:frontend/features/auth/widgets/register/register_terms_checkbox_widget.dart';
 import 'package:frontend/features/auth/widgets/shared/auth_social_button_widget.dart';
 import 'package:frontend/features/auth/widgets/shared/auth_tab_toggle_widget.dart';
 import 'package:get/get.dart';
@@ -97,13 +98,17 @@ class RegisterFormWidget extends GetView<RegisterController> {
             Expanded(child: Divider(color: Colors.grey.shade300, thickness: 1)),
           ],
         ),
-        const SizedBox(height: AppSizes.p24),
+        const SizedBox(height: AppSizes.p16),
 
-        // 6. Nút Register với Google (Gọi Component vừa tái sử dụng)
+        // 6. Nút Register với Google
         AuthSocialButtonWidget(
           title: TTexts.registerWithGoogle.tr,
           onPressed: () => controller.registerWithGoogle(),
         ),
+        
+        const SizedBox(height: AppSizes.p16),
+        const RegisterTermsCheckboxWidget(),
+        const SizedBox(height: AppSizes.p24),
       ],
     );
   }

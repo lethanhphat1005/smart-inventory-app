@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/models/store_member_model.dart';
+import 'package:frontend/core/ui/theme/app_colors.dart';
+import 'package:frontend/core/ui/theme/app_fonts.dart';
+import 'package:frontend/core/ui/theme/app_sizes.dart';
+import 'package:frontend/core/ui/widgets/t_custom_dialog_widget.dart';
+import 'package:frontend/core/ui/widgets/t_text_form_field_widget.dart';
+import 'package:frontend/routes/app_routes.dart';
 import 'package:get/get.dart';
 import 'package:dio/dio.dart';
 import 'package:geolocator/geolocator.dart';
@@ -27,6 +33,7 @@ class ProfileEditStoreController extends GetxController {
   final nameController = TextEditingController();
   final addressController = TextEditingController();
   final mapController = MapController();
+  final deleteConfirmController = TextEditingController();
 
   // GlobalKey để validate Form
   GlobalKey<FormState> editStoreFormKey = GlobalKey<FormState>();
@@ -461,10 +468,108 @@ class ProfileEditStoreController extends GetxController {
     }
   }
 
+  // ==========================================
+  // Logic xóa cửa
+  // ==========================================
+
+  void showDeleteConfirmDialog() {
+    deleteConfirmController.clear();
+    final storeName = _storeService.currentStoreName.value;
+
+    Get.dialog(
+      TCustomDialogWidget(
+        title: TTexts.deleteStoreDialogTitle.tr,
+        description: "",
+        icon: const Text('🗑️', style: TextStyle(fontSize: 40)),
+        content: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            RichText(
+              textAlign: TextAlign.center,
+              text: TextSpan(
+                style: TextStyle(
+                  fontFamily: AppFonts.mainFont,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                  color: AppColors.subText,
+                  height: 1.5,
+                ),
+                children: [
+                  TextSpan(text: TTexts.deleteStoreDialogDesc.tr),
+                  TextSpan(
+                    text: storeName,
+                    style: TextStyle(
+                      fontFamily: AppFonts.mainFont,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.black,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppSizes.p16),
+            TTextFormFieldWidget(
+              controller: deleteConfirmController,
+              label: TTexts.deleteStoreInputLabel.tr,
+              hintText: storeName,
+            ),
+          ],
+        ),
+        primaryButtonText: TTexts.deleteStoreDialogTitle.tr,
+        onPrimaryPressed: () => _confirmDeleteStore(storeName),
+        secondaryButtonText: TTexts.deleteStoreCancelBtn.tr,
+      ),
+    );
+  }
+
+  Future<void> _confirmDeleteStore(String storeName) async {
+    // 1. Kiểm tra nếu nhập sai tên
+    if (deleteConfirmController.text.trim() != storeName.trim()) {
+      TSnackbarsWidget.warning(
+        title: TTexts.warningTitle.tr,
+        message: TTexts.deleteStoreInputWarning.tr,
+      );
+      return;
+    }
+
+    Get.back(); // Đóng Dialog
+
+    try {
+      isLoading.value = true;
+      FullScreenLoaderUtils.openLoadingDialog(TTexts.deleting.tr);
+
+      // 2. Gọi API Xóa
+      final storeId = _storeService.currentStoreId.value;
+      await _storeProvider.deleteStore(storeId);
+
+      // 3. Clear bộ nhớ Local
+      await _storeService.clearWorkspaceData();
+
+      FullScreenLoaderUtils.stopLoading();
+      TSnackbarsWidget.success(
+        title: TTexts.successTitle.tr,
+        message: TTexts.deleteStoreSuccess.tr,
+      );
+
+      // 4. Điều hướng người dùng về trang chọn cửa hàng
+      Get.offAllNamed(AppRoutes.storeSelection);
+    } catch (e) {
+      FullScreenLoaderUtils.stopLoading();
+      TSnackbarsWidget.error(
+        title: TTexts.deleteStoreSystemError.tr,
+        message: e.toString(),
+      );
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   @override
   void onClose() {
     nameController.dispose();
     addressController.dispose();
+    deleteConfirmController.dispose();
     super.onClose();
   }
 

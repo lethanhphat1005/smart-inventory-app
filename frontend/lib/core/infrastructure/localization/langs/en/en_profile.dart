@@ -98,6 +98,17 @@ final Map<String, String> enProfile = {
   TTexts.editStoreDialogDescription:
       'Are you sure you want to update your store profile?',
   TTexts.profileUpdateError: 'Failed to update profile',
+  TTexts.deleteStoreTitle: 'Danger Zone',
+  TTexts.deleteStoreBtn: 'Delete Store Permanently',
+  TTexts.deleteStoreDialogTitle: 'Delete Store',
+  TTexts.deleteStoreDialogDesc:
+      'This action cannot be undone and all data will be lost. Please enter the store name below to confirm:\n\n',
+  TTexts.deleteStoreInputLabel: 'Enter store name',
+  TTexts.deleteStoreInputWarning:
+      'Invalid confirmation. Please enter the exact store name to delete.',
+  TTexts.deleteStoreSuccess: 'Store deleted permanently.',
+  TTexts.deleteStoreSystemError: 'System error occurred while deleting store.',
+  TTexts.deleteStoreCancelBtn: 'Cancel',
 
   //Assign Role
   TTexts.assignsRoleTitle: 'Assigns Role',

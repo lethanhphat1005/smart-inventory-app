@@ -1334,6 +1334,15 @@ class TTexts {
       'edit_store_dialog_description';
   static const String profileUpdateStoreSuccess =
       'profile_update_store_success';
+  static const String deleteStoreTitle = "delete_store_title";
+  static const String deleteStoreBtn = "delete_store_btn";
+  static const String deleteStoreDialogTitle = "delete_store_dialog_title";
+  static const String deleteStoreDialogDesc = "delete_store_dialog_desc";
+  static const String deleteStoreInputLabel = "delete_store_input_label";
+  static const String deleteStoreInputWarning = "delete_store_input_warning";
+  static const String deleteStoreSuccess = "delete_store_success";
+  static const String deleteStoreSystemError = "delete_store_system_error";
+  static const String deleteStoreCancelBtn = "delete_store_cancel_btn";
 
   // --Assigns role
   static const String assignsRoleTitle = 'assigns_role_title';
