@@ -74,7 +74,6 @@ storeRouter
     validator(paramsSchema, 'params'),
     asyncWrapper(storeController.getStoreById),
   )
-
   .delete(
     requireStoreContext,
     requirePermission(PERMISSION.STORE_WRITE),
@@ -125,4 +124,5 @@ storeRouter.delete(
   validator(hardDeleteStoreBodySchema, 'body'),
   asyncWrapper(storeController.hardDeleteStore),
 );
+
 export { storeRouter };

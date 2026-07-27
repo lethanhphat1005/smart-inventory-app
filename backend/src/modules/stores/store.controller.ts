@@ -124,13 +124,16 @@ export class StoreController {
     res: Response<ApiResponse<null>>,
   ): Promise<void> => {
     const userId = requireReqUser(req).userId;
-    const { storeId } = req.params;
+    const userRole = requireReqStoreContext(req).role;
+    const storeId = requireReqStoreContext(req).storeId;
+
     const { storeName } = req.body as { storeName: string };
 
     await this.storeService.hardDeleteStore(
-      storeId as string,
+      storeId,
       userId,
       storeName,
+      userRole,
     );
 
     sendResponse.success(res, null, { status: StatusCodes.OK });
