@@ -46,6 +46,25 @@ vi.mock('../../../../src/modules/stores/store.util.js', () => ({
   generateFormattedInviteCode: vi.fn(() => 'aaaa-bbbb-cccc-dddd'),
 }));
 
+// NOTE: tạm thời bypass failure test case khi import productRepository
+vi.mock('../../../../src/modules/products/index.js', () => ({
+  ProductRepository: class {
+    findAllImagePathsByStoreId = vi.fn();
+  },
+
+  productRepository: {},
+  productService: {},
+  productRouter: {},
+}));
+
+type MockProductRepository = {
+  findAllImagePathsByStoreId: ReturnType<typeof vi.fn>;
+};
+
+const createMockProductRepository = (): MockProductRepository => ({
+  findAllImagePathsByStoreId: vi.fn(),
+});
+
 type MockStoreRepository = {
   findManybyUserId: ReturnType<typeof vi.fn>;
   findByIdAndUserId: ReturnType<typeof vi.fn>;
@@ -81,12 +100,17 @@ const createMockRepository = (): MockStoreRepository => ({
 describe('StoreService', () => {
   let storeRepository: MockStoreRepository;
   let storeService: StoreService;
+  let productRepository: MockProductRepository;
 
   beforeEach(() => {
     vi.clearAllMocks();
 
     storeRepository = createMockRepository();
-    storeService = new StoreService(storeRepository as never);
+    productRepository = createMockProductRepository();
+    storeService = new StoreService(
+      storeRepository as never,
+      productRepository as never,
+    );
   });
 
   describe('getStoresByUserId', () => {

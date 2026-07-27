@@ -191,4 +191,10 @@ export class StoreRepository {
       },
     });
   }
+
+  async deleteOne(storeId: string): Promise<void> {
+    await this.db.store.delete({
+      where: { storeId },
+    });
+  }
 }

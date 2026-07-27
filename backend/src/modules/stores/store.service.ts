@@ -3,7 +3,9 @@ import { StatusCodes } from 'http-status-codes';
 import { StoreRepository } from './store.repository.js';
 import { generateFormattedInviteCode } from './store.util.js';
 import { CustomError } from '../../common/errors/index.js';
+import { StorageService } from '../../common/utils/get-signed-url.util.js';
 import { prisma } from '../../db/prismaClient.js'; // gọi prisma để dùng cơ chế $transaction
+import { ProductRepository } from '../products/index.js';
 import { StoreMemberRepository } from '../store-member/index.js';
 
 import type {
@@ -14,7 +16,10 @@ import type {
 } from './store.dto.js';
 
 export class StoreService {
-  constructor(private readonly storeRepository: StoreRepository) {}
+  constructor(
+    private readonly storeRepository: StoreRepository,
+    private readonly productRepository: ProductRepository,
+  ) {}
 
   async getStoresByUserId(userId: string): Promise<ListStoreResponseDto[]> {
     const rawStores = await this.storeRepository.findManybyUserId(userId);
@@ -237,5 +242,44 @@ export class StoreService {
 
       return store;
     });
+  }
+
+  public async hardDeleteStore(
+    storeId: string,
+    userId: string,
+    storeName: string,
+    userRole: string,
+  ): Promise<void> {
+    const store = await this.storeRepository.findByIdAndUserId(storeId, userId);
+
+    if (!store) {
+      throw new CustomError({
+        message: 'Store not found',
+        status: StatusCodes.NOT_FOUND,
+      });
+    }
+
+    if (store.name?.trim() !== storeName.trim()) {
+      throw new CustomError({
+        message: 'Store name confirmation does not match',
+        status: StatusCodes.BAD_REQUEST,
+      });
+    }
+
+    if (userRole !== 'owner') {
+      throw new CustomError({
+        message: 'Only store owner can perform hard delete',
+        status: StatusCodes.FORBIDDEN,
+      });
+    }
+
+    // Xóa toàn bộ image lưu trong supabase liên quan
+    const imagePaths =
+      await this.productRepository.findAllImagePathsByStoreId(storeId);
+
+    await StorageService.deleteProductImages(imagePaths);
+
+    // Thực hiện nuke store data
+    await this.storeRepository.deleteOne(storeId);
   }
 }

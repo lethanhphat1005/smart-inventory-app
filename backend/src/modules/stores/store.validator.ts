@@ -1,9 +1,5 @@
 import { z } from 'zod';
 
-// import { validateSchema } from '../../common/utils/index.js';
-
-// import type { NextFunction, Request, Response } from 'express';
-
 export const paramsSchema = z.object({
   storeId: z.uuid('Invalid storeId'),
 });
@@ -75,47 +71,9 @@ export const joinStoreBodySchema = z.object({
   inviteCode: z.string().trim().min(1, 'Invite code is required'),
 });
 
-// export const validateCreateStore = (
-//   req: Request,
-//   _res: Response,
-//   next: NextFunction,
-// ): void => {
-//   req.body = validateSchema(createStoreBodySchema, req.body);
-//   next();
-// };
-
-// export const validateUpdateStore = (
-//   req: Request,
-//   _res: Response,
-//   next: NextFunction,
-// ): void => {
-//   req.body = validateSchema(updateStoreBodySchema, req.body);
-//   next();
-// };
-
-// export const validateGetStoreById = (
-//   req: Request,
-//   _res: Response,
-//   next: NextFunction,
-// ): void => {
-//   req.params = validateSchema(paramsSchema, req.params);
-//   next();
-// };
-
-// export const validateDeleteStore = (
-//   req: Request,
-//   _res: Response,
-//   next: NextFunction,
-// ): void => {
-//   req.params = validateSchema(paramsSchema, req.params);
-//   next();
-// };
-
-// export const validateJoinStore = (
-//   req: Request,
-//   _res: Response,
-//   next: NextFunction,
-// ): void => {
-//   req.body = validateSchema(joinStoreBodySchema, req.body);
-//   next();
-// };
+export const hardDeleteStoreBodySchema = z.object({
+  storeName: z
+    .string()
+    .trim()
+    .min(1, 'Store name is required for confirmation'),
+});
