@@ -32,6 +32,12 @@ const storeFixture = (
   ...overrides,
 });
 
+vi.mock('../../../../src/modules/products/index.js', () => ({
+  ProductRepository: class {
+    findAllImagePathsByStoreId = vi.fn();
+  },
+}));
+
 const createMockService = (): MockStoreService => ({
   getStoresByUserId: vi.fn(),
   getStoreById: vi.fn(),
