@@ -1,19 +1,19 @@
 import { StatusCodes } from 'http-status-codes';
 
-import { CustomError } from '../../../common/errors/custom-error.js';
-import { sendResponse } from '../../../common/utils/api-response.util.js';
+import { CustomError } from '../../common/errors/custom-error.js';
+import { sendResponse } from '../../common/utils/api-response.util.js';
 import {
   requireReqStoreContext,
   requireReqUser,
-} from '../../../common/utils/require-req.js';
+} from '../../common/utils/require-req.js';
 
-import type { ApiResponse } from '../../../common/types/api-response.type.js';
 import type {
   StoreMemberResponseDto,
   StoreMemberUserResponseDto,
   UpdateStoreMemberRoleDto,
-} from '../dto/store-member.dto.js';
-import type { StoreMemberService } from '../service/store-member.service.js';
+} from './store-member.dto.js';
+import type { StoreMemberService } from './store-member.service.js';
+import type { ApiResponse } from '../../common/types/api-response.type.js';
 import type { Request, Response } from 'express';
 
 export class StoreMemberController {
