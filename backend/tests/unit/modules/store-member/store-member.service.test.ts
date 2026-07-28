@@ -5,12 +5,12 @@ import {
   appEvents,
   eventBus,
 } from '../../../../src/common/events/event-bus.js';
-import { StoreMemberService } from '../../../../src/modules/store-member/service/store-member.service.js';
+import { StoreMemberService } from '../../../../src/modules/store-member/store-member.service.js';
 
 import type {
   RawStoreMemberDto,
   StoreMemberResponseDto,
-} from '../../../../src/modules/store-member/dto/store-member.dto.js';
+} from '../../../../src/modules/store-member/store-member.dto.js';
 
 type MockStoreMemberRepository = {
   findManyByStoreId: ReturnType<typeof vi.fn>;

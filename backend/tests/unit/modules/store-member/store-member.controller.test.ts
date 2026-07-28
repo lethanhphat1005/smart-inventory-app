@@ -1,13 +1,13 @@
 import { StatusCodes } from 'http-status-codes';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { StoreMemberController } from '../../../../src/modules/store-member/controller/store-member.controller.js';
+import { StoreMemberController } from '../../../../src/modules/store-member/store-member.controller.js';
 import { createRequest, createResponse } from '../../../helpers/index.js';
 
 import type {
   StoreMemberResponseDto,
   StoreMemberUserResponseDto,
-} from '../../../../src/modules/store-member/dto/store-member.dto.js';
+} from '../../../../src/modules/store-member/store-member.dto.js';
 
 type MockStoreMemberService = {
   removeUserFromStore: ReturnType<typeof vi.fn>;

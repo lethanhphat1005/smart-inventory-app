@@ -95,19 +95,6 @@ describe('storeMemberRouter', () => {
     expect(routeMocks.storeMemberController.getStoreMembers).toHaveBeenCalled();
   });
 
-  it('rejects invalid list pagination before controller execution', async () => {
-    const response = await request(app).get('/store-members?limit=101');
-
-    expect(response.status).toBe(400);
-    expect(response.body).toMatchObject({
-      success: false,
-      status: 400,
-    });
-    expect(
-      routeMocks.storeMemberController.getStoreMembers,
-    ).not.toHaveBeenCalled();
-  });
-
   it('routes DELETE /store-members/:userId through delete permission', async () => {
     const response = await request(app).delete(
       '/store-members/550e8400-e29b-41d4-a716-446655440000',

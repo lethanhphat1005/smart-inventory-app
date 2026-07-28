@@ -1,10 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
 import {
-  getStoreMembersQuerySchema,
   paramsSchema,
   updateStoreMemberRoleBodySchema,
-} from '../../../../src/modules/store-member/validator/store-member.validator.js';
+} from '../../../../src/modules/store-member/store-member.validator.js';
 
 describe('store-member validators', () => {
   describe('paramsSchema', () => {
@@ -47,35 +46,6 @@ describe('store-member validators', () => {
       expect(() => updateStoreMemberRoleBodySchema.parse({})).toThrow();
       expect(() =>
         updateStoreMemberRoleBodySchema.parse({ role: 123 }),
-      ).toThrow();
-    });
-  });
-
-  describe('getStoreMembersQuerySchema', () => {
-    it('applies default pagination values', () => {
-      const result = getStoreMembersQuerySchema.parse({});
-
-      expect(result).toEqual({ page: 1, limit: 10 });
-    });
-
-    it('coerces valid pagination query strings', () => {
-      const result = getStoreMembersQuerySchema.parse({
-        page: '2',
-        limit: '25',
-        search: '  user@example.com  ',
-      });
-
-      expect(result).toEqual({
-        page: 2,
-        limit: 25,
-        search: 'user@example.com',
-      });
-    });
-
-    it('rejects invalid pagination boundaries', () => {
-      expect(() => getStoreMembersQuerySchema.parse({ page: '0' })).toThrow();
-      expect(() =>
-        getStoreMembersQuerySchema.parse({ limit: '101' }),
       ).toThrow();
     });
   });

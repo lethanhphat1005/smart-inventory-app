@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { StoreMemberRepository } from '../../../../src/modules/store-member/repository/store-member.repository.js';
+import { StoreMemberRepository } from '../../../../src/modules/store-member/store-member.repository.js';
 
 const createMockDb = () => ({
   storeMember: {
