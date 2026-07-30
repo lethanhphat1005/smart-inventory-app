@@ -1,3 +1,12 @@
+output "s3_backup_bucket" {
+  description = "Thông tin bucket backup"
+
+  value = {
+    bucket_arn = module.s3_backup.bucket_arn
+    bucket_name = module.s3_backup.bucket_name
+  }
+}
+
 output "ecr_repository_urls" {
   description = "ECR repository URL của backend"
   value       = module.ecr.repository_urls
@@ -7,8 +16,8 @@ output "iam" {
   description = "Thông tin IAM role"
 
   value = {
-    lambda_role_arn    = {
-      api_function = module.iam.api_lambda_role_arn
+    lambda_role_arn = {
+      api_function  = module.iam.api_lambda_role_arn
       cron_function = module.iam.cron_lambda_role_arn
     }
     scheduler_role_arn = module.iam.scheduler_role_arn

@@ -1,3 +1,12 @@
+module "s3_backup" {
+  source = "../../modules/s3"
+
+  project_name = var.project_name
+  tags         = var.tags
+
+  name = "backup"
+}
+
 # NOTE: Tạo ECR và push image trước khi tạo lambda function và các resource liên quan
 module "ecr" {
   source = "../../modules/ecr"
