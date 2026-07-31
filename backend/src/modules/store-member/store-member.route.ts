@@ -2,15 +2,14 @@ import { Router } from 'express';
 
 import { requireStoreContext } from './middlewares/require-store-context.middleware.js'; // tránh circular dependencies
 import { storeMemberController } from './store-member.module.js';
+import {
+  paramsSchema,
+  updateStoreMemberRoleBodySchema,
+} from './store-member.validator.js';
 import { asyncWrapper, validator } from '../../common/middlewares/index.js';
 import { requirePermission } from '../access-control/require-permission.middleware.js';
 import { PERMISSION } from '../access-control/role-permission.constant.js';
 import { authenticate } from '../auth/index.js';
-import {
-  paramsSchema,
-  updateStoreMemberRoleBodySchema,
-  getStoreMembersQuerySchema,
-} from './validator/store-member.validator.js';
 
 const storeMemberRouter = Router();
 
@@ -31,11 +30,7 @@ storeMemberRouter.use(authenticate, requireStoreContext);
  * * @body
  * (Không yêu cầu Body)
  */
-storeMemberRouter.get(
-  '/',
-  validator(getStoreMembersQuerySchema, 'query'),
-  asyncWrapper(storeMemberController.getStoreMembers),
-);
+storeMemberRouter.get('/', asyncWrapper(storeMemberController.getStoreMembers));
 
 /**
  * @api {DELETE} /api/store-members/:userId Xóa thành viên khỏi cửa hàng

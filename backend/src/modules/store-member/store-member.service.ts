@@ -1,16 +1,16 @@
 import { StatusCodes } from 'http-status-codes';
 
-import { CustomError } from '../../../common/errors/custom-error.js';
-import { appEvents, eventBus } from '../../../common/events/event-bus.js';
-import { ROLE } from '../../access-control/role-permission.constant.js'; // IMPORT CONSTANT MỚI Ở ĐÂY
+import { CustomError } from '../../common/errors/custom-error.js';
+import { appEvents, eventBus } from '../../common/events/event-bus.js';
+import { ROLE } from '../access-control/role-permission.constant.js'; // IMPORT CONSTANT MỚI Ở ĐÂY
 
-import type { StoreRole } from '../../../generated/prisma/enums.js';
 import type {
   StoreMemberResponseDto,
   StoreMemberUserResponseDto,
   RbacStoreMembershipResponseDto,
-} from '../dto/store-member.dto.js';
-import type { StoreMemberRepository } from '../repository/store-member.repository.js';
+} from './store-member.dto.js';
+import type { StoreMemberRepository } from './store-member.repository.js';
+import type { StoreRole } from '../../generated/prisma/enums.js';
 
 export class StoreMemberService {
   constructor(private readonly storeMemberRepository: StoreMemberRepository) {}

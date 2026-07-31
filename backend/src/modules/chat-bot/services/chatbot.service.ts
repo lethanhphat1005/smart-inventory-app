@@ -31,7 +31,7 @@ import type { ListAuditLogsQueryDto } from '../../audit-log/dto/audit-log.dto.js
 import type { AuditLogService } from '../../audit-log/service/audit-log.service.js';
 import type { ListInventoriesQueryDto } from '../../inventories/dto/inventory.dto.js';
 import type { InventoryService } from '../../inventories/index.js';
-import type { StoreMemberRepository } from '../../store-member/repository/store-member.repository.js';
+import type { StoreMemberRepository } from '../../store-member/store-member.repository.js';
 import type { TransactionService } from '../../transactions/transaction.service.js';
 import type { ChatbotRequestDto, ChatbotResponseDto } from '../chatbot.dto.js';
 import type {
@@ -372,7 +372,7 @@ export class ChatbotService {
           botReply: await this.generateFriendlyReply(
             this.buildReplyContext(
               payload.message,
-              `SYSTEM MODERATION: 
+              `SYSTEM MODERATION:
          - If the user's message is a greeting or asks for help/guide/features -> Reply friendly as Tori and EXPLICITLY LIST your capabilities: 1) Create Import/Export, 2) Check product info & low stock, 3) View Audit Logs, 4) Smart Analysis & Restock Suggestions.
          - If the message is OUT OF DOMAIN (e.g. coding, math, weather, history, gossip...) -> Politely refuse to answer in the same language as the user. Explain that you are a specialized assistant for Storix and can only assist with store and inventory management tasks.`,
             ),
@@ -527,7 +527,7 @@ export class ChatbotService {
     const firstResult = searchResult[0];
 
     if (exactMatch) {
-      const context = `Product ${exactMatch.productPackage.displayName} has a selling price of ${exactMatch.productPackage.sellingPrice}. 
+      const context = `Product ${exactMatch.productPackage.displayName} has a selling price of ${exactMatch.productPackage.sellingPrice}.
 Inventory: ${exactMatch.quantity} ${exactMatch.productPackage.unit.name}.`;
 
       return {
@@ -541,7 +541,7 @@ Inventory: ${exactMatch.quantity} ${exactMatch.productPackage.unit.name}.`;
     }
 
     if (searchResult.length === 1 && firstResult) {
-      const context = `Product ${firstResult.productPackage.displayName} has a selling price of ${firstResult.productPackage.sellingPrice}. 
+      const context = `Product ${firstResult.productPackage.displayName} has a selling price of ${firstResult.productPackage.sellingPrice}.
 Inventory: ${firstResult.quantity} ${firstResult.productPackage.unit.name}.`;
 
       return {

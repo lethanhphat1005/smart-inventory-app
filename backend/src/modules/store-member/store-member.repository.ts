@@ -1,11 +1,11 @@
-import type { DbClient } from '../../../common/types/index.js';
-import type { StoreRole } from '../../../generated/prisma/enums.js';
 import type {
   RawStoreMemberDto,
   StoreMemberResponseDto,
   CreateStoreMembershipDto,
   RbacStoreMembershipResponseDto,
-} from '../dto/store-member.dto.js';
+} from './store-member.dto.js';
+import type { DbClient } from '../../common/types/index.js';
+import type { StoreRole } from '../../generated/prisma/enums.js';
 
 export class StoreMemberRepository {
   /* tạo constructor cho các repository có dùng cơ chế $transaction,
