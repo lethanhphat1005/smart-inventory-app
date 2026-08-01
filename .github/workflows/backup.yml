@@ -1,0 +1,98 @@
+name: Backup Supabase
+
+on:
+  schedule:
+    - cron: "0 18 * * 1" # UTC
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
+
+      AWS_REGION: ap-southeast-1
+      BACKUP_BUCKET: ${{ secrets.BACKUP_BUCKET }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Install PostgreSQL Client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client-17
+
+      - name: Verify PostgreSQL Client
+        run: |
+          pg_dump --version
+          psql --version
+
+      - name: Install Supabase CLI
+        uses: supabase/setup-cli@v2
+        with:
+          version: 2.111.0
+
+      - name: Link Supabase Project
+        run: |
+          supabase link \
+            --project-ref "$SUPABASE_PROJECT_ID"
+
+      - name: Prepare backup directories
+        run: |
+          mkdir -p backup
+          mkdir -p storage-backup
+
+      - name: Backup PostgreSQL
+        run: |
+          pg_dump \
+            --schema=public \
+            --schema=auth \
+            --format=custom \
+            --no-owner \
+            --no-privileges \
+            --file=backup/backup.dump \
+            "$DATABASE_URL"
+
+      - name: Backup Storage
+        run: |
+          supabase \
+            --experimental \
+            storage cp \
+            -r \
+            ss:///images \
+            ./storage-backup/images
+
+      - name: Configure AWS Credentials
+        if: success()
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.S3_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.S3_AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Upload Database Backup
+        run: |
+          TODAY=$(date +%F)
+
+          aws s3 cp \
+            backup/backup.dump \
+            s3://$BACKUP_BUCKET/database/$TODAY.dump
+
+      - name: Upload Storage Backup
+        run: |
+          TODAY=$(date +%F)
+
+          aws s3 sync \
+            storage-backup/images \
+            s3://$BACKUP_BUCKET/storage/$TODAY/images
+
+      - name: Cleanup
+        if: always()
+        run: |
+          rm -rf backup
+          rm -rf storage-backup
