@@ -22,16 +22,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Install PostgreSQL Client
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y postgresql-client
-
-      - name: Verify PostgreSQL Client
-        run: |
-          pg_dump --version
-          psql --version
-
       - name: Install Supabase CLI
         uses: supabase/setup-cli@v2
         with:
@@ -49,14 +39,20 @@ jobs:
 
       - name: Backup PostgreSQL
         run: |
-          pg_dump \
-            --schema=public \
-            --schema=auth \
-            --format=custom \
-            --no-owner \
-            --no-privileges \
-            --file=backup/backup.dump \
-            "$DATABASE_URL"
+          docker run --rm \
+            -e DATABASE_URL="$DATABASE_URL" \
+            -v "${{ github.workspace }}/backup:/backup" \
+            postgres:17 \
+            sh -c '
+              pg_dump \
+                --schema=public \
+                --schema=auth \
+                --format=custom \
+                --no-owner \
+                --no-privileges \
+                --file=/backup/backup.dump \
+                "$DATABASE_URL"
+            '
 
       - name: Backup Storage
         run: |
