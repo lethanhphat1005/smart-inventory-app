@@ -85,8 +85,7 @@ class ProfileController extends GetxController {
         return;
       }
 
-      final rawMembers =
-          await _storeMemberProvider.getStoreMembers(currentStoreId);
+      final rawMembers = await _storeMemberProvider.getStoreMembers();
 
       final members = rawMembers
           .map(

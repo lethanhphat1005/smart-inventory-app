@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:frontend/features/profile/controllers/profile_controller.dart';
 import 'package:frontend/features/profile/controllers/profile_edit_store_controller.dart';
+import 'package:frontend/core/state/services/store_service.dart';
 
 class EditStoreCardWidgets extends StatelessWidget {
   const EditStoreCardWidgets({super.key});
@@ -18,212 +19,115 @@ class EditStoreCardWidgets extends StatelessWidget {
     final editStoreController = Get.isRegistered<ProfileEditStoreController>()
         ? Get.find<ProfileEditStoreController>()
         : Get.put(ProfileEditStoreController());
+    final storeService = Get.find<StoreService>();
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSizes.p4),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            TTexts.editStoreCurrentStore.tr,
-            style: const TextStyle(
-              color: AppColors.primary,
-              fontWeight: FontWeight.w700,
-              fontSize: AppSizes.p18,
+    return Obx(
+      () {
+        final isOwner =
+            storeService.currentRole.value.trim().toLowerCase() == 'owner';
+
+        return Container(
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(AppSizes.radius16),
+            border: Border.all(
+              color: AppColors.primary.withOpacity(0.3),
             ),
           ),
-          const SizedBox(height: AppSizes.p12),
-          Obx(
-            () {
-              final isOwner =
-                  editStoreController.currentUserStoreRole.value == 'owner';
-
-              return Container(
-                padding: const EdgeInsets.all(AppSizes.p16),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.03),
-                  borderRadius: BorderRadius.circular(AppSizes.radius16),
-                  border: Border.all(
-                    color: AppColors.primary,
-                    width: AppSizes.p1_2,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.04),
-                      blurRadius: AppSizes.p18,
-                      offset: const Offset(0, AppSizes.p8),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // ICON BOX
-                    Container(
-                      width: AppSizes.p56,
-                      height: AppSizes.p56,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(AppSizes.radius18),
-                        gradient: const LinearGradient(
-                          colors: [
-                            AppColors.lightOrange,
-                            AppColors.lightOrangeGradientEnd,
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
+          child: ListTile(
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: AppSizes.p16,
+              vertical: AppSizes.p8,
+            ),
+            leading: Container(
+              width: AppSizes.p40,
+              height: AppSizes.p40,
+              decoration: BoxDecoration(
+                color: AppColors.primary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(AppSizes.radius12),
+              ),
+              child: const Icon(
+                Iconsax.shop_copy,
+                color: AppColors.primary,
+                size: AppSizes.p20,
+              ),
+            ),
+            title: Text(
+              controller.storeName.value.isNotEmpty
+                  ? controller.storeName.value
+                  : TTexts.profileStoreName.tr,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: AppSizes.p15,
+                color: AppColors.primaryText,
+              ),
+            ),
+            subtitle: Padding(
+              padding: const EdgeInsets.only(top: AppSizes.p6),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Iconsax.location_copy,
+                          size: AppSizes.p14, color: AppColors.subText),
+                      const SizedBox(width: AppSizes.p4),
+                      Expanded(
+                        child: Text(
+                          editStoreController.storeAddress.value.isNotEmpty
+                              ? editStoreController.storeAddress.value
+                              : TTexts.profileNoAddress.tr,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: AppSizes.p12,
+                            color: AppColors.subText,
+                          ),
                         ),
                       ),
-                      child: const Icon(
-                        Iconsax.shop_copy,
-                        color: AppColors.primary,
-                        size: AppSizes.p28,
+                    ],
+                  ),
+                  const SizedBox(height: AppSizes.p4),
+                  Row(
+                    children: [
+                      const Icon(Iconsax.profile_2user_copy,
+                          size: AppSizes.p14, color: AppColors.subText),
+                      const SizedBox(width: AppSizes.p4),
+                      Text(
+                        "${editStoreController.memberCount.value} ${TTexts.profileMembers.tr}",
+                        style: const TextStyle(
+                          fontSize: AppSizes.p12,
+                          color: AppColors.subText,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            trailing: isOwner
+                ? IconButton(
+                    onPressed: () {
+                      Get.dialog(
+                        const TEditStoreCustomDialogWidgets(),
+                        barrierDismissible: false,
+                      );
+                    },
+                    icon: const Icon(Iconsax.edit_2_copy,
+                        color: AppColors.primary, size: AppSizes.p20),
+                    style: IconButton.styleFrom(
+                      backgroundColor: AppColors.primary.withOpacity(0.1),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(AppSizes.radius8),
                       ),
                     ),
-
-                    const SizedBox(width: AppSizes.p14),
-
-                    // CONTENT
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // NAME
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  controller.storeName.value.isNotEmpty
-                                      ? controller.storeName.value
-                                      : TTexts.profileStoreName.tr,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: AppSizes.p17,
-                                    color: AppColors.primaryText,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-
-                          const SizedBox(height: AppSizes.p10),
-
-                          // ADDRESS
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Padding(
-                                padding: EdgeInsets.only(top: AppSizes.p2),
-                                child: Icon(
-                                  Iconsax.location_copy,
-                                  size: AppSizes.p15,
-                                  color: AppColors.subText,
-                                ),
-                              ),
-                              const SizedBox(width: AppSizes.p8),
-                              Expanded(
-                                child: Text(
-                                  editStoreController
-                                          .storeAddress.value.isNotEmpty
-                                      ? editStoreController.storeAddress.value
-                                      : TTexts.profileNoAddress.tr,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    fontSize: AppSizes.p13,
-                                    height: 1.45,
-                                    color: AppColors.subText,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-
-                          const SizedBox(height: AppSizes.p8),
-
-                          // MEMBERS
-                          Row(
-                            children: [
-                              const Icon(
-                                Iconsax.profile_2user_copy,
-                                size: AppSizes.p15,
-                                color: AppColors.subText,
-                              ),
-                              const SizedBox(width: AppSizes.p8),
-                              Text(
-                                "${editStoreController.memberCount.value} ${TTexts.profileMembers.tr}",
-                                style: const TextStyle(
-                                  fontSize: AppSizes.p13,
-                                  fontWeight: FontWeight.w500,
-                                  color: AppColors.subText,
-                                ),
-                              ),
-                            ],
-                          ),
-
-                          const SizedBox(height: AppSizes.p14),
-
-                          // EDIT BUTTON
-                          if (isOwner)
-                            Align(
-                              alignment: Alignment.centerLeft,
-                              child: GestureDetector(
-                                onTap: () {
-                                  Get.dialog(
-                                    const TEditStoreCustomDialogWidgets(),
-                                    barrierDismissible: false,
-                                  );
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: AppSizes.p14,
-                                    vertical: AppSizes.p8,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.primary,
-                                    borderRadius: BorderRadius.circular(999),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color:
-                                            AppColors.primary.withOpacity(0.18),
-                                        blurRadius: AppSizes.p12,
-                                        offset: const Offset(0, AppSizes.p4),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      const Icon(
-                                        Iconsax.edit_2_copy,
-                                        size: AppSizes.p14,
-                                        color: AppColors.whiteText,
-                                      ),
-                                      const SizedBox(width: AppSizes.p6),
-                                      Text(
-                                        TTexts.editStoreBtnEdit.tr,
-                                        style: const TextStyle(
-                                          color: AppColors.whiteText,
-                                          fontSize: AppSizes.p13,
-                                          fontWeight: FontWeight.w700,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
+                  )
+                : null,
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

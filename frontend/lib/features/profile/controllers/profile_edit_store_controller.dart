@@ -137,7 +137,7 @@ class ProfileEditStoreController extends GetxController {
         isLoadingMembers.value = true;
       }
 
-      final data = await _storeMemberProvider.getStoreMembers(storeId);
+      final data = await _storeMemberProvider.getStoreMembers();
       final currentUser = _userService.currentUser.value;
 
       final mappedMembers = data.map<StoreMemberModel>((item) {
@@ -151,7 +151,8 @@ class ProfileEditStoreController extends GetxController {
       memberCount.value = mappedMembers.length;
 
       // Xác định role current user
-      currentUserStoreRole.value = '';
+      currentUserStoreRole.value =
+          _storeService.currentRole.value.trim().toLowerCase();
 
       if (currentUser != null) {
         StoreMemberModel? currentMember;

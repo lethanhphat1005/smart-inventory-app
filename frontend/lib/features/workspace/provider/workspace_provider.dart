@@ -18,7 +18,7 @@ class WorkspaceProvider {
     }
   }
 
-  // --- BỔ SUNG HÀM CREATE STORE ---
+  // --- CREATE STORE ---
   Future<StoreModel> createStore(Map<String, dynamic> storeData) async {
     try {
       // Gọi POST endpoint '/' như định nghĩa trong store.route.ts của bạn
@@ -48,8 +48,7 @@ class WorkspaceProvider {
   Future<List<StoreMemberModel>> getStoreMembers(
       String storeId, String currentUserId) async {
     try {
-      final response =
-          await _apiClient.get('/api/store-members/$storeId/members');
+      final response = await _apiClient.get('/api/store-members');
 
       final List<dynamic> data = response.data['data'] ?? response.data;
 
