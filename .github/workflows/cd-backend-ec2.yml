@@ -1,4 +1,4 @@
-name: CD workflow for backend
+name: CD workflow for backend (EC2)
 
 on:
   workflow_dispatch:
