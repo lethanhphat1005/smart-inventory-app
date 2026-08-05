@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/state/controllers/network_controller.dart';
-import 'package:frontend/core/infrastructure/utils/token_utils.dart';
 import 'package:frontend/core/state/services/auth_service.dart';
 import 'package:frontend/core/state/services/notification_service.dart';
 import 'package:frontend/core/state/services/user_service.dart';
@@ -10,6 +9,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:frontend/routes/app_routes.dart';
 import 'package:frontend/core/state/services/store_service.dart';
+import 'package:supabase_flutter/supabase_flutter.dart'; // Đã thêm thư viện Supabase
 
 class SplashController extends GetxController {
   // 1. State variables
@@ -39,7 +39,7 @@ class SplashController extends GetxController {
       {'message': TTexts.splashLoadingServices.tr, 'action': _initCoreServices},
       {
         'message': TTexts.splashLoadingUser.tr,
-        'action': _checkUserAuthentication,
+        'action': _checkUserAuthentication, // Tác vụ được điều chỉnh
       },
     ];
 
@@ -67,6 +67,8 @@ class SplashController extends GetxController {
       }
       // CÁC LỖI NGHIÊM TRỌNG KHÁC (như Token chết) -> XOÁ DATA VÀ RA LOGIN
       else {
+        // Chủ động gọi Supabase signOut để dọn rác
+        await Supabase.instance.client.auth.signOut();
         await Get.find<AuthService>().clearAuthData();
         _navigateToNextScreen();
       }
@@ -102,9 +104,10 @@ class SplashController extends GetxController {
     await Future.delayed(const Duration(milliseconds: 300));
   }
 
-  /// TÁC VỤ 4: Xác thực Token với Server
+  /// TÁC VỤ 4: Xác thực Token với Server (ĐÃ ĐƯỢC CHỈNH SỬA)
   Future<void> _checkUserAuthentication() async {
     final authService = Get.find<AuthService>();
+    final storage = GetStorage();
 
     // Nếu chưa từng đăng nhập -> Bỏ qua
     if (!authService.isLoggedIn.value) {
@@ -112,23 +115,48 @@ class SplashController extends GetxController {
       return;
     }
 
-    // Đã lưu Remember Me
-    final userService = Get.find<UserService>();
-    final isProfileLoaded = await userService.fetchAndSaveProfile();
+    try {
+      final session = Supabase.instance.client.auth.currentSession;
 
-    if (!isProfileLoaded) {
-      // KIỂM TRA BẰNG TOKEN UTILS (Giữ nguyên logic của bạn)
-      if (TokenUtils.isSessionExpired) {
-        // Token chết thật -> Ném lỗi để xoá data
-        throw Exception('Session expired or Invalid');
-      } else {
-        // Token sống nhưng tải Profile lỗi (SERVER SẬP)
-        // -> Ném lỗi ra ngoài để bật Hộp thoại Thử lại, KHÔNG cho vào app!
-        throw Exception('SERVER_CONNECTION_ERROR');
+      // 🌟 THỰC THI LUỒNG THỦ CÔNG: Kiểm tra Token hết hạn hoặc rỗng
+      if (session == null || session.isExpired) {
+        debugPrint(
+            "⏳ Token hết hạn hoặc bị mất. Đang lôi Refresh Token từ Local ra...");
+
+        // 1. Đọc Refresh Token từ Local
+        final savedRefreshToken = storage.read('REFRESH_TOKEN');
+
+        if (savedRefreshToken == null) {
+          throw Exception(
+              'Không tìm thấy Refresh Token trong Local. Yêu cầu Login lại.');
+        }
+
+        // 2. Gọi ép hàm phục hồi phiên (setSession / refreshSession) truyền thẳng Token vào
+        final response =
+            await Supabase.instance.client.auth.setSession(savedRefreshToken);
+
+        if (response.session == null) {
+          throw Exception('Refresh Token đã bị Server từ chối (Revoked).');
+        }
+
+        // 3. Cập nhật lại Refresh Token MỚI NHẤT vào Local để xài cho lần sau
+        await storage.write('REFRESH_TOKEN', response.session!.refreshToken!);
+        debugPrint(
+            "✅ Đã lấy Access Token mới thành công từ Local Refresh Token!");
       }
-    } else {
-      debugPrint('Xác thực và tải profile thành công!');
-      await NotificationService.registerTokenWithBackend();
+
+      // Đã lưu Remember Me & Token đều hợp lệ
+      final userService = Get.find<UserService>();
+      final isProfileLoaded = await userService.fetchAndSaveProfile();
+
+      if (!isProfileLoaded) {
+        throw Exception('SERVER_CONNECTION_ERROR');
+      } else {
+        debugPrint('Xác thực và tải profile thành công!');
+        await NotificationService.registerTokenWithBackend();
+      }
+    } catch (e) {
+      rethrow;
     }
   }
 
