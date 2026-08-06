@@ -6,9 +6,6 @@ import { CustomError } from '../errors/index.js';
 const STORAGE_BUCKET = process.env.STORAGE_BUCKET ?? 'images';
 
 export class StorageService {
-  // 1. Gọi Singleton Client từ Provider
-  private static readonly supabase = SupabaseProvider.getClient();
-
   /**
    * Tạo Signed URL cho ảnh có thời hạn truy cập (vd: 1 giờ)
    */
@@ -21,8 +18,11 @@ export class StorageService {
     }
 
     try {
+      // 1. Gọi Singleton Client từ Provider
+      const supabase = SupabaseProvider.getClient();
+
       // 2. Sử dụng client để tạo Signed URL
-      const { data, error } = await this.supabase.storage
+      const { data, error } = await supabase.storage
         .from(bucket)
         .createSignedUrl(path, 60 * 60); // 3600 giây = 1 giờ
 
@@ -56,7 +56,9 @@ export class StorageService {
       return;
     }
 
-    const { error } = await this.supabase.storage
+    const supabase = SupabaseProvider.getClient();
+
+    const { error } = await supabase.storage
       .from(STORAGE_BUCKET)
       .remove(normalizedPaths);
 

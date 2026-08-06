@@ -18,10 +18,16 @@ export class SupabaseProvider {
     const supabaseUrl = process.env.SUPABASE_URL;
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-    if (!supabaseUrl || !supabaseServiceKey) {
+    if (!supabaseUrl) {
       throw new CustomError({
-        message:
-          'Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY environment variables.',
+        message: 'Missing SUPABASE_URL environment variables.',
+        status: StatusCodes.INTERNAL_SERVER_ERROR,
+      });
+    }
+
+    if (!supabaseServiceKey) {
+      throw new CustomError({
+        message: 'Missing SUPABASE_SERVICE_ROLE_KEY environment variables.',
         status: StatusCodes.INTERNAL_SERVER_ERROR,
       });
     }
