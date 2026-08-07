@@ -9,6 +9,10 @@ jobs:
   backup:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: read # tránh ghi đè permission mặc định
+      id-token: write # enable OIDC for token rotation
+
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
