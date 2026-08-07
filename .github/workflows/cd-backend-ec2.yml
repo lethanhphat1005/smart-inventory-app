@@ -38,7 +38,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ env.AWS_REGION }}
-          role-to-assume: ${{ var.oidc_authorized_role }}
+          role-to-assume: ${{ vars.OIDC_AUTHORIZED_ROLE }}
 
       - name: Allow SSH from GitHub runner
         run: |
