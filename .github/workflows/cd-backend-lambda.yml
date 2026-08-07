@@ -54,6 +54,19 @@ jobs:
 
       - name: Inspect image
         run: |
-          docker inspect ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
-          echo "Image ID: ${{ steps.build.outputs.imageid }}\n\n"
-          echo "Metadata: ${{ steps.build.outputs.metadata }} | jq \n\n"
+          docker inspect \
+            "${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}"
+          echo "Image ID:"
+          echo "${{ steps.build.outputs.imageid }}"
+          echo '${{ steps.build.outputs.metadata }}' | jq .
+
+      - name: Compare image
+        run: |
+          docker history \
+            ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
+
+          docker image ls
+
+          docker image inspect \
+            ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }} \
+            --format='Size={{.Size}} bytes'
