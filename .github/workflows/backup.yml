@@ -65,11 +65,10 @@ jobs:
 
       - name: Configure AWS Credentials
         if: success()
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
-          aws-access-key-id: ${{ secrets.S3_AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.S3_AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ var.oidc_authorized_role }}
 
       - name: Upload Database Backup
         run: |
