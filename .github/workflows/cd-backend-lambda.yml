@@ -46,8 +46,7 @@ jobs:
           platforms: linux/arm64
           provenance: false
           sbom: false
-          push: false
-          load: true
+          push: true
           tags: ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
