@@ -6,10 +6,15 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     defaults:
       run:
         shell: bash
         working-directory: ./backend
+
+    permissions:
+      contents: read # tránh ghi đè permission mặc định
+      id-token: write # enable OIDC for token rotation
 
     steps:
       - name: Checkout source

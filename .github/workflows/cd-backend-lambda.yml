@@ -13,7 +13,8 @@ jobs:
         working-directory: ./backend
 
     permissions:
-      id-token: write
+      contents: read # tránh ghi đè permission mặc định
+      id-token: write # enable OIDC for token rotation
 
     env:
       AWS_REGION: ap-southeast-1
