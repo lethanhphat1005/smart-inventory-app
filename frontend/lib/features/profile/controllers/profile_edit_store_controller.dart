@@ -137,7 +137,7 @@ class ProfileEditStoreController extends GetxController {
         isLoadingMembers.value = true;
       }
 
-      final data = await _storeMemberProvider.getStoreMembers(storeId);
+      final data = await _storeMemberProvider.getStoreMembers();
       final currentUser = _userService.currentUser.value;
 
       final mappedMembers = data.map<StoreMemberModel>((item) {
@@ -151,7 +151,8 @@ class ProfileEditStoreController extends GetxController {
       memberCount.value = mappedMembers.length;
 
       // Xác định role current user
-      currentUserStoreRole.value = '';
+      currentUserStoreRole.value =
+          _storeService.currentRole.value.trim().toLowerCase();
 
       if (currentUser != null) {
         StoreMemberModel? currentMember;
@@ -468,8 +469,8 @@ class ProfileEditStoreController extends GetxController {
     }
   }
 
-  // ==========================================
-  // Logic xóa cửa
+// ==========================================
+  // Logic xóa cửa hàng (Xác nhận 2 lớp)
   // ==========================================
 
   void showDeleteConfirmDialog() {
@@ -517,14 +518,14 @@ class ProfileEditStoreController extends GetxController {
           ],
         ),
         primaryButtonText: TTexts.deleteStoreDialogTitle.tr,
-        onPrimaryPressed: () => _confirmDeleteStore(storeName),
+        onPrimaryPressed: () => _verifyStoreNameInput(storeName),
         secondaryButtonText: TTexts.deleteStoreCancelBtn.tr,
       ),
     );
   }
 
-  Future<void> _confirmDeleteStore(String storeName) async {
-    // 1. Kiểm tra nếu nhập sai tên
+  // Bước 1: Kiểm tra nhập tên
+  Future<void> _verifyStoreNameInput(String storeName) async {
     if (deleteConfirmController.text.trim() != storeName.trim()) {
       TSnackbarsWidget.warning(
         title: TTexts.warningTitle.tr,
@@ -533,17 +534,40 @@ class ProfileEditStoreController extends GetxController {
       return;
     }
 
-    Get.back(); // Đóng Dialog
+    Get.back(); // Đóng Dialog 1
 
+    // Hiện Dialog 2 (Cảnh báo lần cuối)
+    _showFinalDeleteConfirmDialog();
+  }
+
+  // Bước 2: Hiển thị hộp thoại cảnh báo nguy hiểm lần cuối
+  void _showFinalDeleteConfirmDialog() {
+    Get.dialog(
+      TCustomDialogWidget(
+        title: TTexts.deleteStoreFinalConfirmTitle.tr,
+        description: TTexts.deleteStoreFinalConfirmDesc.tr,
+        icon: const Text('⚠️', style: TextStyle(fontSize: 40)),
+        primaryButtonText: TTexts.deleteStoreFinalConfirmBtn.tr,
+        onPrimaryPressed: () {
+          Get.back();
+          _executeDeleteStoreAPI();
+        },
+        secondaryButtonText: TTexts.deleteStoreCancelBtn.tr,
+      ),
+    );
+  }
+
+  // Bước 3: Gọi API Xóa Cửa Hàng
+  Future<void> _executeDeleteStoreAPI() async {
     try {
       isLoading.value = true;
       FullScreenLoaderUtils.openLoadingDialog(TTexts.deleting.tr);
 
-      // 2. Gọi API Xóa
+      // Gọi API Xóa
       final storeId = _storeService.currentStoreId.value;
       await _storeProvider.deleteStore(storeId);
 
-      // 3. Clear bộ nhớ Local
+      // Clear bộ nhớ Local
       await _storeService.clearWorkspaceData();
 
       FullScreenLoaderUtils.stopLoading();
@@ -552,7 +576,7 @@ class ProfileEditStoreController extends GetxController {
         message: TTexts.deleteStoreSuccess.tr,
       );
 
-      // 4. Điều hướng người dùng về trang chọn cửa hàng
+      // Điều hướng người dùng về trang chọn cửa hàng
       Get.offAllNamed(AppRoutes.storeSelection);
     } catch (e) {
       FullScreenLoaderUtils.stopLoading();

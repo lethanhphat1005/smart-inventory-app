@@ -12,7 +12,7 @@ class SupabaseStorageService {
   /// Upload ảnh và trả về path (vd: 'products/17123456_image.jpg')
   Future<String?> uploadImage({
     required File imageFile,
-    required String folderPath, // vd: 'products', 'avatars'
+    required String folderPath,
   }) async {
     try {
       final String fileExtension = p.extension(imageFile.path);

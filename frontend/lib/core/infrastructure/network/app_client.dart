@@ -31,24 +31,23 @@ class ApiClient {
       ),
     );
 
+    // 🔥 SỬ DỤNG QUEUED INTERCEPTOR ĐỂ XỬ LÝ ĐỒNG BỘ KHI CÓ NHIỀU REQUEST CÙNG LÚC
     dio.interceptors.add(
-      InterceptorsWrapper(
+      QueuedInterceptorsWrapper(
         onRequest: (options, handler) async {
-          // Lấy token từ Supabase
-          final session = Supabase.instance.client.auth.currentSession;
+          // Lấy token hiện tại
+          final session = supabase.auth.currentSession;
           final token = session?.accessToken;
 
           if (token != null && token.isNotEmpty) {
             options.headers['Authorization'] = 'Bearer $token';
           }
 
-          // Đọc StoreID từ Storage (Sử dụng StoreService/GetStorage như bạn đã thiết lập)
           final storeId = GetStorage().read('STORE_ID');
           if (storeId != null && storeId.toString().isNotEmpty) {
             options.headers['x-store-id'] = storeId;
           }
 
-          // Đính kèm Locale hiện tại của GetX ứng dụng vào Header
           final currentLocale = Get.locale?.languageCode ??
               Get.deviceLocale?.languageCode ??
               'vi';
@@ -57,48 +56,62 @@ class ApiClient {
           return handler.next(options);
         },
         onResponse: (response, handler) => handler.next(response),
+
+        // LOGIC XỬ LÝ LỖI (REFRESH TOKEN HOẶC LOGOUT)
         onError: (DioException e, handler) async {
           final statusCode = e.response?.statusCode;
 
-          // Xử lý lỗi xác thực (401) hoặc quyền truy cập (403)
-          if (statusCode == 401 || statusCode == 403) {
-            await supabase.auth.signOut();
-            await GoogleSignIn.instance.signOut();
+          if (statusCode == 401) {
+            // 1. CHẶN LỖI LÚC MỚI MỞ APP (Nếu request không có token thì bỏ qua)
+            final hasAuthHeader =
+                e.requestOptions.headers.containsKey('Authorization');
+            if (!hasAuthHeader) {
+              return handler.next(e);
+            }
 
             try {
-              // Xóa dữ liệu Storage thông qua Services thay vì gọi GetStorage trực tiếp
-              if (Get.isRegistered<AuthService>()) {
-                await Get.find<AuthService>().clearAuthData();
+              final tokenSent = e.requestOptions.headers['Authorization']
+                  ?.toString()
+                  .replaceAll('Bearer ', '');
+              final currentSession = supabase.auth.currentSession;
+              final currentToken = currentSession?.accessToken;
+
+              // 2. CHỐNG XUNG ĐỘT (CONCURRENT REFRESH):
+              // Nếu API khác đã xin Token thành công rồi thì xài ké luôn, không gọi refresh nữa!
+              if (currentToken != null && currentToken != tokenSent) {
+                debugPrint(
+                    "🔄 Token đã được làm mới bởi request trước đó. Hưởng sái xài luôn!");
+                e.requestOptions.headers['Authorization'] =
+                    'Bearer $currentToken';
+                final cloneReq = await dio.fetch(e.requestOptions);
+                return handler.resolve(cloneReq);
               }
-              if (Get.isRegistered<StoreService>()) {
-                await Get.find<StoreService>().clearWorkspaceData();
+
+              // 3. NẾU CHƯA AI XIN -> ĐẠI DIỆN ĐI XIN TOKEN MỚI
+              final AuthResponse res = await supabase.auth.refreshSession();
+              final newToken = res.session?.accessToken;
+
+              if (newToken != null) {
+                debugPrint("🔄 Tự động Refresh Token thành công!");
+                e.requestOptions.headers['Authorization'] = 'Bearer $newToken';
+
+                final cloneReq = await dio.fetch(e.requestOptions);
+                return handler.resolve(cloneReq);
+              } else {
+                throw Exception("Refresh trả về Token null");
               }
-              // Xóa dữ liệu trên RAM
-              if (Get.isRegistered<UserService>()) {
-                Get.find<UserService>().clearUser();
-              }
-              // Dọn dẹp Chatbot
-              if (Get.isRegistered<ChatbotUiController>()) {
-                Get.find<ChatbotUiController>().messages.clear();
-                Get.find<ChatbotUiController>().isChatOpen.value = false;
-              }
-            } catch (cleanupError) {
+            } catch (refreshError) {
+              // 4. REFRESH THẤT BẠI (Do token bị revoke, user bị disable, v.v.)
               debugPrint(
-                  'Lỗi dọn dẹp local data khi bị 401/403: $cleanupError');
+                  "❌ Refresh Token thất bại: $refreshError. Tiến hành Logout.");
+              await _forceLogout(isSessionExpired: true);
+              return handler.next(e);
             }
+          }
 
-            final currentRoute = Get.currentRoute;
-            final isPublicRoute = currentRoute == AppRoutes.login ||
-                currentRoute == AppRoutes.onboarding ||
-                currentRoute == AppRoutes.splash;
-
-            if (!isPublicRoute) {
-              Get.offAllNamed(AppRoutes.login);
-
-              TSnackbarsWidget.warning(
-                  title: TTexts.systemSnackbarTitle.tr,
-                  message: TTexts.systemSnackbar403Error.tr);
-            }
+          // NẾU BỊ 403 (Cấm truy cập)
+          if (statusCode == 403) {
+            await _forceLogout(isSessionExpired: false);
           }
 
           return handler.next(e);
@@ -107,11 +120,54 @@ class ApiClient {
     );
   }
 
-  // --- Các hàm gọi API cơ bản ---
-  Future<Response> get(
-    String path, {
-    Map<String, dynamic>? queryParameters,
-  }) async {
+  // --- HÀM ÉP ĐĂNG XUẤT TẬP TRUNG ---
+  Future<void> _forceLogout({required bool isSessionExpired}) async {
+    await supabase.auth.signOut();
+    await GoogleSignIn.instance.signOut();
+
+    try {
+      if (Get.isRegistered<AuthService>()) {
+        await Get.find<AuthService>().clearAuthData();
+      }
+      if (Get.isRegistered<StoreService>()) {
+        await Get.find<StoreService>().clearWorkspaceData();
+      }
+      if (Get.isRegistered<UserService>()) {
+        Get.find<UserService>().clearUser();
+      }
+      if (Get.isRegistered<ChatbotUiController>()) {
+        Get.find<ChatbotUiController>().messages.clear();
+        Get.find<ChatbotUiController>().isChatOpen.value = false;
+      }
+    } catch (cleanupError) {
+      debugPrint('Lỗi dọn dẹp data: $cleanupError');
+    }
+
+    final currentRoute = Get.currentRoute;
+    final isPublicRoute = currentRoute == AppRoutes.login ||
+        currentRoute == AppRoutes.onboarding ||
+        currentRoute == AppRoutes.splash;
+
+    if (!isPublicRoute) {
+      Get.offAllNamed(AppRoutes.login);
+
+      // Báo lỗi cho người dùng biết vì sao bị đá văng
+      if (isSessionExpired) {
+        TSnackbarsWidget.warning(
+            title: TTexts.warningTitle.tr,
+            message:
+                TTexts.sessionExpiredMessage.tr); // "Phiên đăng nhập hết hạn"
+      } else {
+        TSnackbarsWidget.warning(
+            title: TTexts.systemSnackbarTitle.tr,
+            message: TTexts.systemSnackbar403Error.tr);
+      }
+    }
+  }
+
+  // --- Các hàm gọi API cơ bản (Giữ nguyên) ---
+  Future<Response> get(String path,
+      {Map<String, dynamic>? queryParameters}) async {
     return await dio.get(path, queryParameters: queryParameters);
   }
 
@@ -123,21 +179,15 @@ class ApiClient {
     return await dio.put(path, data: data);
   }
 
-  // HÀM SAU KHI MERGE: Giữ phiên bản mới từ main (có thêm queryParameters)
   Future<Response> patch(String path,
       {dynamic data, Map<String, dynamic>? queryParameters}) async {
-    return await dio.patch(
-      path,
-      data: data,
-      queryParameters: queryParameters,
-    );
+    return await dio.patch(path, data: data, queryParameters: queryParameters);
   }
 
   Future<Response> delete(String path, {dynamic data}) async {
     return await dio.delete(path, data: data);
   }
 
-  // HÀM TIỆN ÍCH TỪ NHÁNH HEAD: Giữ lại để hỗ trợ parse List nhanh
   Future<List<dynamic>> getList(String path,
       {Map<String, dynamic>? queryParameters}) async {
     final response = await get(path, queryParameters: queryParameters);

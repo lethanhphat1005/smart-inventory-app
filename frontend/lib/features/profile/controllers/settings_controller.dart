@@ -30,7 +30,7 @@ class SettingsController extends GetxController {
   void onInit() {
     super.onInit();
     _loadLanguageSettings();
-    fetchCurrenciesFromServer(); // Đổi thành hàm Public
+    // fetchCurrenciesFromServer(); // Đổi thành hàm Public
 
     ever(_storeService.currentCurrencyCode, (newCode) {
       if (supportedCurrencies.isNotEmpty) {

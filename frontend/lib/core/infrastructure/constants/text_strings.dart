@@ -1343,6 +1343,9 @@ class TTexts {
   static const String deleteStoreSuccess = "delete_store_success";
   static const String deleteStoreSystemError = "delete_store_system_error";
   static const String deleteStoreCancelBtn = "delete_store_cancel_btn";
+  static const String deleteStoreFinalConfirmTitle = "delete_store_final_confirm_title";
+  static const String deleteStoreFinalConfirmDesc = "delete_store_final_confirm_desc";
+  static const String deleteStoreFinalConfirmBtn = "delete_store_final_confirm_btn";
 
   // --Assigns role
   static const String assignsRoleTitle = 'assigns_role_title';

@@ -109,6 +109,9 @@ final Map<String, String> enProfile = {
   TTexts.deleteStoreSuccess: 'Store deleted permanently.',
   TTexts.deleteStoreSystemError: 'System error occurred while deleting store.',
   TTexts.deleteStoreCancelBtn: 'Cancel',
+  TTexts.deleteStoreFinalConfirmTitle: 'Final Confirmation',
+  TTexts.deleteStoreFinalConfirmDesc: 'Are you absolutely sure you want to delete this store? All inventory, members, and transaction data will be permanently erased. This cannot be undone.',
+  TTexts.deleteStoreFinalConfirmBtn: 'Yes, Delete Permanently',
 
   //Assign Role
   TTexts.assignsRoleTitle: 'Assigns Role',

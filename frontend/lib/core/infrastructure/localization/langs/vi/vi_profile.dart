@@ -115,6 +115,9 @@ final Map<String, String> viProfile = {
   TTexts.deleteStoreSuccess: 'Đã xóa cửa hàng vĩnh viễn.',
   TTexts.deleteStoreSystemError: 'Lỗi hệ thống khi xóa cửa hàng.',
   TTexts.deleteStoreCancelBtn: 'Hủy',
+  TTexts.deleteStoreFinalConfirmTitle: 'Xác Nhận Lần Cuối',
+  TTexts.deleteStoreFinalConfirmDesc: 'Bạn có chắc chắn 100% muốn xóa cửa hàng này không? Toàn bộ dữ liệu tồn kho, thành viên và giao dịch sẽ bị xóa vĩnh viễn. Không thể khôi phục lại.',
+  TTexts.deleteStoreFinalConfirmBtn: 'Có, Xóa Vĩnh Viễn',
 
   //Assign Role
   TTexts.assignsRoleTitle: 'Phân Quyền',
