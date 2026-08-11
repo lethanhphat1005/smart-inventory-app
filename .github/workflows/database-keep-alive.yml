@@ -1,0 +1,17 @@
+name: Keep Alive Supabase
+
+on:
+  schedule:
+    - cron: "0 18 * * 5" # UTC
+  workflow_dispatch:
+
+jobs:
+  keep-alive:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Ping Supabase
+        run: |
+          curl -sS \
+            -H "apikey: ${{ secrets.DATABASE_ANON_KEY }}" \
+            "${{ secrets.DATABASE_URL }}/rest/v1/rpc/keep_alive"
