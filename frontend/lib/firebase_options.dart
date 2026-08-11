@@ -41,48 +41,46 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyAbEzOo9x2p4G9IaRwhYmlep5TXt-I5qvo',
-    appId: '1:38888872312:web:2d760312070c4472ba508d',
-    messagingSenderId: '38888872312',
-    projectId: 'storixapp-2026',
-    authDomain: 'storixapp-2026.firebaseapp.com',
-    storageBucket: 'storixapp-2026.firebasestorage.app',
-    measurementId: 'G-J02B0PP2TJ',
+    apiKey: 'AIzaSyC8HcEHC8duxFFzGm0a0uDiDnUTYSlukj8',
+    appId: '1:1019570928869:web:09f22fc85eef63668fa80c',
+    messagingSenderId: '1019570928869',
+    projectId: 'storix-6ac34',
+    authDomain: 'storix-6ac34.firebaseapp.com',
+    storageBucket: 'storix-6ac34.firebasestorage.app',
+    measurementId: 'G-HM10X2CF1J',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyABWzxYnCQM4DSSZFzhOXBP-zuxdBzN56k',
-    appId: '1:38888872312:android:4801deab2d620c37ba508d',
-    messagingSenderId: '38888872312',
-    projectId: 'storixapp-2026',
-    storageBucket: 'storixapp-2026.firebasestorage.app',
+    apiKey: 'AIzaSyAeSMgQpjmHcRFDNWeVrij79Of54DQvqj4',
+    appId: '1:1019570928869:android:4f5bc91e2f1605648fa80c',
+    messagingSenderId: '1019570928869',
+    projectId: 'storix-6ac34',
+    storageBucket: 'storix-6ac34.firebasestorage.app',
   );
-
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyDHsFneRJila0t6AhpxQrToT0HTTYvA8ow',
-    appId: '1:38888872312:ios:4294644e653e7efcba508d',
-    messagingSenderId: '38888872312',
-    projectId: 'storixapp-2026',
-    storageBucket: 'storixapp-2026.firebasestorage.app',
-    iosBundleId: 'com.group21.storix',
+    apiKey: 'AIzaSyAW1ajrDkzddsnXfzLpPps-TjC6vofm4Mo',
+    appId: '1:1019570928869:ios:679a6cc15b5e2ef08fa80c',
+    messagingSenderId: '1019570928869',
+    projectId: 'storix-6ac34',
+    storageBucket: 'storix-6ac34.firebasestorage.app',
+    iosBundleId: 'com.fourmonkeysstudio.storix',
   );
-
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyDHsFneRJila0t6AhpxQrToT0HTTYvA8ow',
-    appId: '1:38888872312:ios:ac8a42fb4f0bbf3fba508d',
-    messagingSenderId: '38888872312',
-    projectId: 'storixapp-2026',
-    storageBucket: 'storixapp-2026.firebasestorage.app',
+    apiKey: 'AIzaSyAW1ajrDkzddsnXfzLpPps-TjC6vofm4Mo',
+    appId: '1:1019570928869:ios:82179325be2006b68fa80c',
+    messagingSenderId: '1019570928869',
+    projectId: 'storix-6ac34',
+    storageBucket: 'storix-6ac34.firebasestorage.app',
     iosBundleId: 'com.example.frontend',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyAbEzOo9x2p4G9IaRwhYmlep5TXt-I5qvo',
-    appId: '1:38888872312:web:c33d8a7ae3a0bb87ba508d',
-    messagingSenderId: '38888872312',
-    projectId: 'storixapp-2026',
-    authDomain: 'storixapp-2026.firebaseapp.com',
-    storageBucket: 'storixapp-2026.firebasestorage.app',
-    measurementId: 'G-1226R7QKG2',
+    apiKey: 'AIzaSyC8HcEHC8duxFFzGm0a0uDiDnUTYSlukj8',
+    appId: '1:1019570928869:web:83dedfec29a0fac88fa80c',
+    messagingSenderId: '1019570928869',
+    projectId: 'storix-6ac34',
+    authDomain: 'storix-6ac34.firebaseapp.com',
+    storageBucket: 'storix-6ac34.firebasestorage.app',
+    measurementId: 'G-TH7K9NDJG9',
   );
 }
