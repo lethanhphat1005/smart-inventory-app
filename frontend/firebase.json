@@ -3,20 +3,20 @@
     "platforms": {
       "android": {
         "default": {
-          "projectId": "storixapp-2026",
-          "appId": "1:38888872312:android:4801deab2d620c37ba508d",
+          "projectId": "storix-6ac34",
+          "appId": "1:1019570928869:android:4f5bc91e2f1605648fa80c",
           "fileOutput": "android/app/google-services.json"
         }
       },
       "dart": {
         "lib/firebase_options.dart": {
-          "projectId": "storixapp-2026",
+          "projectId": "storix-6ac34",
           "configurations": {
-            "android": "1:38888872312:android:4801deab2d620c37ba508d",
-            "ios": "1:38888872312:ios:4294644e653e7efcba508d",
-            "macos": "1:38888872312:ios:ac8a42fb4f0bbf3fba508d",
-            "web": "1:38888872312:web:2d760312070c4472ba508d",
-            "windows": "1:38888872312:web:c33d8a7ae3a0bb87ba508d"
+            "android": "1:1019570928869:android:4f5bc91e2f1605648fa80c",
+            "ios": "1:1019570928869:ios:679a6cc15b5e2ef08fa80c",
+            "macos": "1:1019570928869:ios:82179325be2006b68fa80c",
+            "web": "1:1019570928869:web:09f22fc85eef63668fa80c",
+            "windows": "1:1019570928869:web:83dedfec29a0fac88fa80c"
           }
         }
       }
