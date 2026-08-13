@@ -2,7 +2,7 @@ output "s3_backup_bucket" {
   description = "Thông tin bucket backup"
 
   value = {
-    bucket_arn = module.s3_backup.bucket_arn
+    bucket_arn  = module.s3_backup.bucket_arn
     bucket_name = module.s3_backup.bucket_name
   }
 }

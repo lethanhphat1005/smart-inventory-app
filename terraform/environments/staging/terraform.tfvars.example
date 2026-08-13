@@ -1,1 +1,16 @@
-sns_email = "youremail@example.com"
+sns_email = "your-email@example.com"
+
+lambda_api_env = {
+  SUPABASE_URL   = "your-supabase-url"
+  STORAGE_BUCKET = "your-supabase-bucket-name"
+}
+
+lambda_noti_env = {}
+
+secret_parameters = {
+  service_account_key_file  = "<file_path>/serviceAccountKey.json"
+  database_url              = "your-database-url"
+  supabase_service_role_key = "your-supabase-service-role-key"
+  redis_url                 = "your-redis-host-url"
+  groq_api_key              = "your-chat-bot-api-key"
+}
