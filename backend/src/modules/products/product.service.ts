@@ -270,6 +270,8 @@ export class ProductService {
       data,
     );
 
+    const oldImageUrl = existingProduct.imageUrl;
+
     const updatedProduct = await prisma.$transaction(async (tx) => {
       const { productRepositoryTx, auditLogRepositoryTx } =
         this.createTxRepositories(tx);
@@ -308,6 +310,15 @@ export class ProductService {
 
       return product;
     });
+
+    // Xóa image trong storage khi update hoặc xóa imageUrl cũ
+    if (
+      oldImageUrl !== null &&
+      data.imageUrl !== undefined &&
+      data.imageUrl !== oldImageUrl
+    ) {
+      await StorageService.deleteProductImages([oldImageUrl]);
+    }
 
     // Trả về kèm Signed URL sau khi update
     updatedProduct.imageUrl = await StorageService.getSignedUrl(
