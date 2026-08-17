@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/infrastructure/models/inventory_model.dart';
+import 'package:frontend/core/infrastructure/utils/get_package_full_display_name.dart';
 import 'package:frontend/core/infrastructure/utils/url_helper_utils.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/core/ui/theme/app_fonts.dart';
@@ -22,8 +23,9 @@ class LowStockItemWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final pkg = model.productPackage;
-    final String productName =
-        pkg?.displayName ?? pkg?.product?.name ?? TTexts.unknownProduct.tr;
+    // final String productName =
+    //     pkg?.displayName ?? pkg?.product?.name ?? TTexts.unknownProduct.tr;
+    final String productName = DisplayNameUtils.getFullPackageDisplayName(pkg);
 
     final String? imageUrl =
         UrlHelperUtils.normalizeImageUrl(pkg?.product?.imageUrl);

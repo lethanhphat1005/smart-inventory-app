@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/infrastructure/utils/error_handler_utils.dart';
+import 'package:frontend/core/infrastructure/utils/get_package_full_display_name.dart';
 import 'package:frontend/features/home/model/adjustment_history_model.dart';
 import 'package:frontend/features/home/providers/home_provider.dart';
 import 'package:frontend/core/ui/widgets/t_bottom_sheet_widget.dart';
@@ -59,9 +60,13 @@ class AdjustmentHistoryController extends GetxController with TErrorHandler {
       final inventories = await _provider.getAllInventoriesForDictionary();
       for (var inv in inventories) {
         if (inv.productPackage != null) {
+          // _nameDictionary[inv.productPackageId] =
+          //     inv.productPackage!.displayName;
+          // _nameDictionary[inv.inventoryId] = inv.productPackage!.displayName;
           _nameDictionary[inv.productPackageId] =
-              inv.productPackage!.displayName;
-          _nameDictionary[inv.inventoryId] = inv.productPackage!.displayName;
+              DisplayNameUtils.getFullPackageDisplayName(inv.productPackage!);
+          _nameDictionary[inv.inventoryId] =
+              DisplayNameUtils.getFullPackageDisplayName(inv.productPackage!);
         }
       }
     } catch (e) {

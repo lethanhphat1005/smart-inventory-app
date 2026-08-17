@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/infrastructure/utils/get_package_full_display_name.dart';
 import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/widgets/t_custom_fade_overlay_widget.dart';
 import 'package:frontend/routes/app_routes.dart'; // ĐÃ IMPORT ROUTES
@@ -68,9 +69,13 @@ class HomeLowStockAlertsWidget extends GetView<HomeController> {
                   ...items.take(3).map((item) {
                     final pkg = item.productPackage;
 
-                    final name = pkg?.displayName ??
-                        pkg?.product?.name ??
-                        TTexts.unknownProduct.tr;
+                    // final name = pkg?.displayName ??
+                    //     pkg?.product?.name ??
+                    //     TTexts.unknownProduct.tr;
+
+                    final String name = pkg != null
+                        ? DisplayNameUtils.getFullPackageDisplayName(pkg)
+                        : TTexts.unknownProduct.tr;
                     final barcode = pkg?.barcodeValue ?? '';
                     final String displaySubtitle = barcode.isNotEmpty
                         ? '${TTexts.barcodeLabel.tr}: $barcode'

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
+import 'package:frontend/core/infrastructure/utils/get_package_full_display_name.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/core/ui/widgets/t_primary_button_widget.dart';
 import 'package:frontend/features/transaction/controllers/transaction_summary_controller.dart';
@@ -82,7 +83,10 @@ class TransactionSummaryDetailsBottomSheetWidget
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(item.packageInfo?.displayName ?? TTexts.product.tr,
+                        Text(
+                            // item.packageInfo?.displayName ?? TTexts.product.tr,
+                            DisplayNameUtils.getFullPackageDisplayName(
+                                item.packageInfo),
                             style: const TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w500,

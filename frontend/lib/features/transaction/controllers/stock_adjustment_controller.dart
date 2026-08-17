@@ -5,6 +5,7 @@ import 'package:frontend/core/infrastructure/models/transaction_detail_model.dar
 import 'package:frontend/core/infrastructure/models/transaction_model.dart';
 import 'package:frontend/core/infrastructure/utils/error_handler_utils.dart';
 import 'package:frontend/core/infrastructure/utils/full_screen_loader_utils.dart';
+import 'package:frontend/core/infrastructure/utils/get_package_full_display_name.dart';
 import 'package:frontend/core/ui/layouts/t_barcode_scanner_layout.dart';
 import 'package:frontend/core/ui/widgets/t_snackbars_widget.dart';
 import 'package:frontend/core/ui/widgets/t_custom_dialog_widget.dart';
@@ -52,7 +53,10 @@ class StockAdjustmentController extends GetxController with TErrorHandler {
         return AdjustmentItemRx(
           id: e['inventoryId'] ?? e['id'] ?? '',
           packageId: realPackageId,
-          name: packageInfo?.displayName ?? TTexts.unknownProduct.tr,
+          // name: packageInfo?.displayName ?? TTexts.unknownProduct.tr,
+          name: packageInfo != null
+              ? DisplayNameUtils.getFullPackageDisplayName(packageInfo)
+              : TTexts.unknownProduct.tr,
           initialSystemQty: e['quantity'] ?? 0,
           packageInfo: packageInfo,
         );
@@ -371,7 +375,7 @@ class StockAdjustmentController extends GetxController with TErrorHandler {
         final newItem = AdjustmentItemRx(
           id: invJsonMap['inventoryId'] ?? '',
           packageId: realPackageId,
-          name: packageInfo.displayName,
+          name: DisplayNameUtils.getFullPackageDisplayName(packageInfo),
           initialSystemQty: invJsonMap['quantity'] ?? 0,
           packageInfo: packageInfo,
         );

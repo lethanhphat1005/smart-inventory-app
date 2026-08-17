@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/models/transaction_detail_model.dart';
 import 'package:frontend/core/infrastructure/utils/currency_formatter_utils.dart';
+import 'package:frontend/core/infrastructure/utils/get_package_full_display_name.dart';
 import 'package:frontend/core/infrastructure/utils/url_helper_utils.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/core/ui/theme/app_fonts.dart';
@@ -117,8 +118,11 @@ class ReportTransactionDetailItemCardWidget extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                          item.packageInfo?.displayName ??
-                              TTexts.unknownProduct.tr,
+                          item.packageInfo != null
+                              ? DisplayNameUtils.getFullPackageDisplayName(
+                                  item.packageInfo,
+                                )
+                              : TTexts.unknownProduct.tr,
                           style: TextStyle(
                               fontFamily: AppFonts.mainFont,
                               fontSize: 14,

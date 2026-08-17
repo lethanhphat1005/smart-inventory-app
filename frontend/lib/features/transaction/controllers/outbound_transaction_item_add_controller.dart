@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/models/product_model.dart';
 import 'package:frontend/core/infrastructure/models/product_package_barcode_model.dart';
+import 'package:frontend/core/infrastructure/utils/get_package_full_display_name.dart';
 import 'package:frontend/core/ui/widgets/t_bottom_sheet_widget.dart';
 import 'package:frontend/features/inventory/widgets/shared/inventory_barcode_list_bottom_sheet_widget.dart';
 import 'package:get/get.dart';
@@ -271,10 +272,19 @@ class OutboundTransactionItemAddController extends GetxController
 
   InventoryModel get _activeInventory =>
       freshInventoryData.value ?? initialItem.inventory;
-  String get displayName =>
-      _activeInventory.productPackage?.displayName ??
-      initialItem.product?.name ??
-      TTexts.productNameUnknown.tr;
+  // String get displayName =>
+  //     _activeInventory.productPackage?.displayName ??
+  //     initialItem.product?.name ??
+  //     TTexts.productNameUnknown.tr;
+  String get displayName {
+    final package = _activeInventory.productPackage;
+
+    if (package != null) {
+      return DisplayNameUtils.getFullPackageDisplayName(package);
+    }
+
+    return initialItem.product?.name ?? TTexts.productNameUnknown.tr;
+  }
 
   String get barcode {
     if (fetchedBarcode.value.isNotEmpty) return fetchedBarcode.value;

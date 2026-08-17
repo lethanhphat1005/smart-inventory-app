@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/models/product_package_barcode_model.dart';
 import 'package:frontend/core/infrastructure/utils/day_formatter_utils.dart';
+import 'package:frontend/core/infrastructure/utils/get_package_full_display_name.dart';
 import 'package:frontend/core/ui/widgets/t_bottom_sheet_widget.dart';
 import 'package:frontend/core/infrastructure/utils/error_handler_utils.dart';
 import 'package:frontend/core/state/services/store_service.dart';
@@ -441,8 +442,11 @@ class InventoryDetailController extends GetxController with TErrorHandler {
   // ==========================================
 
   InventoryInsightDisplayModel? get _item => currentDisplayItem.value;
-  String get name =>
-      _item?.inventory.productPackage?.displayName ?? TTexts.unknownProduct.tr;
+  // String get name =>
+  //     _item?.inventory.productPackage?.displayName ?? TTexts.unknownProduct.tr;
+  String get name => DisplayNameUtils.getFullPackageDisplayName(
+        _item?.inventory.productPackage,
+      );
 
   String get barcode =>
       _item?.inventory.productPackage?.barcodeValue ?? TTexts.na.tr;

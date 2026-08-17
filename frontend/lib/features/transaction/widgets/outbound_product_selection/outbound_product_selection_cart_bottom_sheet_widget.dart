@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/infrastructure/utils/currency_formatter_utils.dart';
+import 'package:frontend/core/infrastructure/utils/get_package_full_display_name.dart';
 import 'package:frontend/core/infrastructure/utils/url_helper_utils.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
@@ -71,8 +72,10 @@ class OutboundProductSelectionCartBottomSheetWidget
                   final qty = controller.draftCart[pkgId]!;
                   final inventory = controller.draftCartModels[pkgId]!;
 
-                  final name =
-                      inventory.productPackage?.displayName ?? 'Hàng hóa';
+                  // final name =
+                  //     inventory.productPackage?.displayName ?? 'Hàng hóa';
+                  final name = DisplayNameUtils.getFullPackageDisplayName(
+                      inventory.productPackage);
                   final price = inventory.productPackage?.sellingPrice ?? 0.0;
                   final imageUrl = inventory.productPackage?.product?.imageUrl;
 

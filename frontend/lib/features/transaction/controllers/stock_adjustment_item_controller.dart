@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/infrastructure/utils/error_handler_utils.dart';
+import 'package:frontend/core/infrastructure/utils/get_package_full_display_name.dart';
 import 'package:frontend/core/ui/widgets/t_snackbars_widget.dart';
 import 'package:frontend/features/transaction/controllers/stock_adjustment_controller.dart';
 import 'package:frontend/features/transaction/models/adjustment_item_model.dart';
@@ -209,13 +210,15 @@ class StockAdjustmentItemController extends GetxController with TErrorHandler {
       final spread = tempActualQty.value - item.systemQty.value;
       final spreadStr = spread.abs().toString();
 
+      final packageName = item.packageInfo != null
+          ? DisplayNameUtils.getFullPackageDisplayName(item.packageInfo!)
+          : item.name;
       final unitStr = item.packageInfo?.unit?.name ?? TTexts.defaultUnit.tr;
       final foundText = TTexts.itemFoundText.tr;
 
       String automatedText = "${tempSelectedReason.value.tr}: ";
       automatedText += spread > 0 ? "$foundText $spreadStr" : "-$spreadStr";
-      automatedText +=
-          " ${item.packageInfo?.displayName ?? item.name} $unitStr";
+      automatedText += " $packageName $unitStr";
 
       tempNoteController.text = automatedText;
     } else {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/infrastructure/models/product_package_model.dart';
+import 'package:frontend/core/infrastructure/utils/get_package_full_display_name.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
@@ -66,7 +67,7 @@ class InventoryBarcodeListBottomSheetWidget extends StatelessWidget {
 
         // 3. Subtitle (Sản phẩm: Tên)
         Text(
-          '${TTexts.productLabel.tr}: ${package.displayName}',
+          '${TTexts.productLabel.tr}: ${DisplayNameUtils.getFullPackageDisplayName(package)}',
           textAlign: TextAlign.center,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,

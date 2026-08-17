@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:frontend/core/infrastructure/utils/get_package_full_display_name.dart';
 import 'package:frontend/core/infrastructure/utils/url_helper_utils.dart';
 import 'package:frontend/core/ui/theme/app_fonts.dart' show AppFonts;
 import 'package:frontend/core/ui/widgets/t_no_image_widget.dart';
@@ -46,7 +47,7 @@ class SearchSimpleItemWidget extends StatelessWidget {
         style: const TextStyle(fontSize: 12, color: AppColors.subText),
       );
     } else if (isPackage) {
-      title = package.displayName;
+      title = DisplayNameUtils.getFullPackageDisplayName(package);
       final price = package.sellingPrice;
       final formattedPrice =
           NumberFormat.currency(locale: 'en_US', symbol: '\$').format(price);

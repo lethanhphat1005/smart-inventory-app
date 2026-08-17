@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/utils/currency_formatter_utils.dart';
+import 'package:frontend/core/infrastructure/utils/get_package_full_display_name.dart';
 import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:frontend/core/ui/widgets/t_no_image_widget.dart';
@@ -20,7 +21,8 @@ class InventoryInsightItemWidget extends GetView<InventoryInsightController> {
     final product = displayItem.product;
     final pkg = inventory.productPackage;
 
-    final name = pkg?.displayName ?? TTexts.unknownProduct.tr;
+    // final name = pkg?.displayName ?? TTexts.unknownProduct.tr;
+    final name = DisplayNameUtils.getFullPackageDisplayName(pkg);
     final brand =
         product?.brand?.isNotEmpty == true ? product!.brand! : TTexts.na.tr;
     final price = pkg?.sellingPrice ?? 0.0;

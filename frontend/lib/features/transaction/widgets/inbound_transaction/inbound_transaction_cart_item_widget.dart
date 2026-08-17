@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/infrastructure/models/transaction_detail_model.dart';
 import 'package:frontend/core/infrastructure/utils/currency_formatter_utils.dart';
+import 'package:frontend/core/infrastructure/utils/get_package_full_display_name.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:get/get.dart';
@@ -21,8 +22,12 @@ class InboundTransactionCartItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final name = item.packageInfo?.displayName ??
-        '${TTexts.product.tr} #${item.productPackageId?.substring(0, 5) ?? TTexts.labelNoBarcode.tr}';
+    // final name = item.packageInfo?.displayName ??
+    //     '${TTexts.product.tr} #${item.productPackageId?.substring(0, 5) ?? TTexts.labelNoBarcode.tr}';
+    final name = item.packageInfo != null
+        ? DisplayNameUtils.getFullPackageDisplayName(item.packageInfo)
+        : '${TTexts.product.tr} #'
+            '${item.productPackageId?.substring(0, 5) ?? TTexts.labelNoBarcode.tr}';
 
     return Container(
       padding: const EdgeInsets.all(12),

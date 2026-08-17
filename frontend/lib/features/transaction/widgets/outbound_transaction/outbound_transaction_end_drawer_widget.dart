@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/infrastructure/models/inventory_model.dart';
+import 'package:frontend/core/infrastructure/utils/get_package_full_display_name.dart';
 import 'package:frontend/core/infrastructure/utils/url_helper_utils.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/core/ui/widgets/t_no_image_widget.dart';
@@ -89,7 +90,9 @@ class OutboundTransactionEndDrawerWidget
     final pkgId = item.productPackageId.isNotEmpty
         ? item.productPackageId
         : item.productPackage?.productPackageId ?? '';
-    final name = item.productPackage?.displayName ?? TTexts.product.tr;
+    // final name = item.productPackage?.displayName ?? TTexts.product.tr;
+    final name =
+        DisplayNameUtils.getFullPackageDisplayName(item.productPackage);
     final imageUrl = item.productPackage?.product?.imageUrl;
     final stock = item.quantity;
 

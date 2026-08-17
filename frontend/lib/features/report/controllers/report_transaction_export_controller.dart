@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:excel/excel.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/infrastructure/models/transaction_model.dart';
+import 'package:frontend/core/infrastructure/utils/get_package_full_display_name.dart';
 import 'package:frontend/core/state/services/store_service.dart';
 import 'package:frontend/core/state/services/user_service.dart';
 import 'package:frontend/core/ui/widgets/t_snackbars_widget.dart';
@@ -182,8 +183,10 @@ class ReportTransactionExportController extends GetxController {
 
       for (int i = 0; i < tx.items.length; i++) {
         final item = tx.items[i];
+        // final productName =
+        //     item.packageInfo?.displayName ?? TTexts.unknownProduct.tr;
         final productName =
-            item.packageInfo?.displayName ?? TTexts.unknownProduct.tr;
+            DisplayNameUtils.getFullPackageDisplayName(item.packageInfo);
         final barcode = item.packageInfo?.barcodeValue ?? TTexts.na.tr;
 
         final displayQty = item.quantity.abs().toInt();
