@@ -3,6 +3,8 @@ sns_email = "your-email@example.com"
 lambda_api_env = {
   SUPABASE_URL   = "your-supabase-url"
   STORAGE_BUCKET = "your-supabase-bucket-name"
+  CHATBOT_COORDINATOR_MODEL="your-chatbot-coordinator-model"
+  CHATBOT_FRIENDLY_REPLY_MODEL="your-chatbot-friendly-reply-model"
 }
 
 lambda_noti_env = {}
