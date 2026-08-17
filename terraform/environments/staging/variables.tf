@@ -6,7 +6,7 @@ variable "region" {
 variable "project_name" {
   description = "Project name, prefix cho các tài nguyên"
   type        = string
-  default     = "storix-backend"
+  default     = "storix-staging"
 }
 
 variable "tags" {

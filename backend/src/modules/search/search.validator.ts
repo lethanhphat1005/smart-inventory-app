@@ -1,9 +1,5 @@
 import { z } from 'zod';
 
-import { validateSchema } from '../../common/utils/index.js';
-
-import type { NextFunction, Request, Response } from 'express';
-
 export const searchByKeywordQuerySchema = z.object({
   keyword: z
     .string()
@@ -22,27 +18,3 @@ export const searchByPrefixQuerySchema = z.object({
     .max(100, 'Prefix must be at most 100 characters'),
   limit: z.coerce.number().int().min(1).max(20).optional(),
 });
-
-export const validateGetProductsByKeyword = (
-  req: Request,
-  _res: Response,
-  next: NextFunction,
-): void => {
-  _res.locals.validatedQuery = validateSchema(
-    searchByKeywordQuerySchema,
-    req.query,
-  );
-  next();
-};
-
-export const validateGetProductsByPrefix = (
-  req: Request,
-  _res: Response,
-  next: NextFunction,
-): void => {
-  _res.locals.validatedQuery = validateSchema(
-    searchByPrefixQuerySchema,
-    req.query,
-  );
-  next();
-};

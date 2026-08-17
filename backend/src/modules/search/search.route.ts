@@ -43,7 +43,7 @@ searchRouter.get(
 searchRouter.get(
   '/product-packages',
   requirePermission(PERMISSION.PRODUCT_READ),
-  validatorToLocals(searchByPrefixQuerySchema, 'query'),
+  validatorToLocals(searchByKeywordQuerySchema, 'query'),
   asyncWrapper(searchController.getProductPackagesbyKeyword),
 );
 

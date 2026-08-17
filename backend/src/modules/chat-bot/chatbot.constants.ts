@@ -1,7 +1,11 @@
+import 'dotenv/config';
+
 export const GROQ_OPENAI_BASE_URL = 'https://api.groq.com/openai/v1';
 
-export const COORDINATOR_MODEL = 'llama-3.1-8b-instant';
-export const FRIENDLY_REPLY_MODEL = 'llama-3.1-8b-instant';
+export const COORDINATOR_MODEL =
+  process.env.CHATBOT_COORDINATOR_MODEL ?? 'openai/gpt-oss-20b';
+export const FRIENDLY_REPLY_MODEL =
+  process.env.CHATBOT_FRIENDLY_REPLY_MODEL ?? 'openai/gpt-oss-20b';
 
 export const COORDINATOR_TEMPERATURE = 0.1;
 export const FRIENDLY_REPLY_TEMPERATURE = 0.3;
