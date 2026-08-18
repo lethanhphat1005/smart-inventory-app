@@ -105,6 +105,7 @@ export class TransactionRepository {
               select: {
                 productPackageId: true,
                 displayName: true,
+                variant: true,
                 product: {
                   select: {
                     imageUrl: true,
@@ -131,6 +132,7 @@ export class TransactionRepository {
       items: transaction.transactionDetails.map((item) => ({
         productPackageId: item.productPackage.productPackageId,
         displayName: item.productPackage.displayName,
+        variant: item.productPackage.variant,
         imageUrl: item.productPackage.product.imageUrl,
         quantity: item.quantity,
         unitPrice: item.unitPrice.toNumber(),
@@ -176,7 +178,7 @@ export class TransactionRepository {
     const result = await this.db.$queryRaw<
       { associatedPackageId: string; frequency: bigint; productName: string }[]
     >`
-      SELECT 
+      SELECT
         td2."product_package_id" AS "associatedPackageId",
         pp."display_name" AS "productName", -- Lấy thêm tên sản phẩm ở đây
         COUNT(td2."transaction_id") AS "frequency"
