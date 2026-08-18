@@ -13,6 +13,8 @@ jobs:
       contents: read # tránh ghi đè permission mặc định
       id-token: write # enable OIDC for token rotation
 
+    environment: ${{ vars.ENVIRONMENT }}
+
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
