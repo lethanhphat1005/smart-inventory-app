@@ -16,6 +16,8 @@ jobs:
       contents: read # tránh ghi đè permission mặc định
       id-token: write # enable OIDC for token rotation
 
+    environment: ${{ vars.ENVIRONMENT }}
+
     env:
       AWS_REGION: ap-southeast-1
       AWS_ACCOUNT_ID: ${{ vars.AWS_ACCOUNT_ID }}
