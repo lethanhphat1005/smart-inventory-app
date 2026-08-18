@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/utils/error_handler_utils.dart';
+import 'package:frontend/core/infrastructure/utils/get_package_full_display_name.dart';
 import 'package:frontend/core/state/services/store_service.dart';
 import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/features/home/model/home_adjustment_model.dart';
@@ -98,8 +99,12 @@ class HomeController extends GetxController with TErrorHandler {
       final Map<String, String> nameLookup = {};
       for (var inv in allInventories) {
         if (inv.productPackage != null) {
-          nameLookup[inv.productPackageId] = inv.productPackage!.displayName;
-          nameLookup[inv.inventoryId] = inv.productPackage!.displayName;
+          // nameLookup[inv.productPackageId] = inv.productPackage!.displayName;
+          // nameLookup[inv.inventoryId] = inv.productPackage!.displayName;
+          nameLookup[inv.productPackageId] =
+              DisplayNameUtils.getFullPackageDisplayName(inv.productPackage!);
+          nameLookup[inv.inventoryId] =
+              DisplayNameUtils.getFullPackageDisplayName(inv.productPackage!);
         }
       }
 

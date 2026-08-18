@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
+import 'package:frontend/core/infrastructure/utils/get_package_full_display_name.dart';
 import 'package:frontend/core/infrastructure/utils/url_helper_utils.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/routes/app_routes.dart';
@@ -18,8 +19,9 @@ class ChatCardLowStockProduct extends StatelessWidget {
     final pkg = itemData['productPackage'] ?? itemData;
     final product = pkg['product'];
 
-    final displayName =
-        pkg['displayName'] ?? product?['name'] ?? TTexts.unknownProduct.tr;
+    // final displayName =
+    //     pkg['displayName'] ?? product?['name'] ?? TTexts.unknownProduct.tr;
+    final displayName = DisplayNameUtils.getFullPackageDisplayNameFromJson(pkg);
     final quantity = (itemData['quantity'] ?? pkg['quantity'] ?? 0) as num;
     final unitName = pkg['unit']?['name'] ?? '';
 

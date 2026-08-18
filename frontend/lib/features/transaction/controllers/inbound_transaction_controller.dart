@@ -4,6 +4,7 @@ import 'package:frontend/core/infrastructure/models/transaction_detail_model.dar
 import 'package:frontend/core/infrastructure/models/transaction_model.dart';
 import 'package:frontend/core/infrastructure/utils/currency_formatter_utils.dart';
 import 'package:frontend/core/infrastructure/utils/error_handler_utils.dart';
+import 'package:frontend/core/infrastructure/utils/get_package_full_display_name.dart';
 import 'package:frontend/core/ui/layouts/t_barcode_scanner_layout.dart';
 import 'package:frontend/features/home/controllers/home_controller.dart';
 import 'package:frontend/features/report/controllers/report_controller.dart';
@@ -222,7 +223,8 @@ class InboundTransactionController extends GetxController with TErrorHandler {
 
         addToCart({
           'productPackageId': pkgId,
-          'displayName': item.productPackage?.displayName ?? TTexts.product.tr,
+          'displayName':
+              DisplayNameUtils.getFullPackageDisplayName(item.productPackage),
           'packageInfo': item.productPackage,
           'importPrice': item.productPackage?.importPrice ?? 0.0,
           'sellingPrice': item.productPackage?.sellingPrice ?? 0.0,
@@ -361,7 +363,7 @@ class InboundTransactionController extends GetxController with TErrorHandler {
         final newPriceStr = CurrencyFormatterUtils.formatFull(item.unitPrice);
 
         priceDetails +=
-            "\n• ${item.packageInfo?.displayName ?? TTexts.unknownProduct.tr}: $oldPriceStr ➔ $newPriceStr";
+            "\n• ${DisplayNameUtils.getFullPackageDisplayName(item.packageInfo)}: $oldPriceStr ➔ $newPriceStr";
       }
 
       priceDetails += "\n\n${TTexts.priceChangeDetectedDesc.tr}";

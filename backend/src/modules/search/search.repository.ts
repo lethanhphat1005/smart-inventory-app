@@ -77,6 +77,7 @@ export class SearchRepository {
       categoryName: row.categoryName,
       productPackageId: row.productPackageId,
       displayName: row.displayName,
+      variant: row.variant,
       importPrice: row.importPrice?.toNumber() ?? null,
       sellingPrice: row.sellingPrice?.toNumber() ?? null,
       quantity: row.quantity,
@@ -144,6 +145,7 @@ export class SearchRepository {
             AND (
               setweight(to_tsvector('simple', coalesce(p.name, '')), 'A') ||
               setweight(to_tsvector('simple', coalesce(pp.display_name, '')), 'A') ||
+              setweight(to_tsvector('simple', coalesce(pp.variant, '')), 'A') ||
               setweight(to_tsvector('simple', coalesce(pb.barcodes, '')), 'A') ||
               setweight(to_tsvector('simple', coalesce(p.brand, '')), 'B') ||
               setweight(to_tsvector('simple', coalesce(c.name, '')), 'C') ||
@@ -166,6 +168,7 @@ export class SearchRepository {
             c.name AS "categoryName",
             pp.product_package_id AS "productPackageId",
             pp.display_name AS "displayName",
+            pp.variant AS "variant",
             pp.import_price AS "importPrice",
             pp.selling_price AS "sellingPrice",
             i.quantity AS "quantity",
@@ -176,6 +179,7 @@ export class SearchRepository {
             (
               setweight(to_tsvector('simple', coalesce(p.name, '')), 'A') ||
               setweight(to_tsvector('simple', coalesce(pp.display_name, '')), 'A') ||
+              setweight(to_tsvector('simple', coalesce(pp.variant, '')), 'A') ||
               setweight(to_tsvector('simple', coalesce(pb.barcodes, '')), 'A') ||
               setweight(to_tsvector('simple', coalesce(p.brand, '')), 'B') ||
               setweight(to_tsvector('simple', coalesce(c.name, '')), 'C') ||
@@ -211,6 +215,7 @@ export class SearchRepository {
           "categoryName",
           "productPackageId",
           "displayName",
+          "variant",
           "importPrice",
           "sellingPrice",
           "quantity",

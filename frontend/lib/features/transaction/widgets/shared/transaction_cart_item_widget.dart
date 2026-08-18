@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:frontend/core/infrastructure/utils/currency_formatter_utils.dart';
+import 'package:frontend/core/infrastructure/utils/get_package_full_display_name.dart';
 import 'package:frontend/core/infrastructure/utils/url_helper_utils.dart';
 import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/widgets/t_no_image_widget.dart';
@@ -131,8 +132,14 @@ class _TransactionCartItemWidgetState extends State<TransactionCartItemWidget> {
     final String rawId = widget.item.productPackageId ?? '';
     final String displayId = rawId.length > 5 ? rawId.substring(0, 5) : rawId;
 
-    final name = widget.item.packageInfo?.displayName ??
-        '${TTexts.product.tr} #${displayId.isEmpty ? TTexts.labelNoBarcode.tr : displayId}';
+    // final name = widget.item.packageInfo?.displayName ??
+    //     '${TTexts.product.tr} #${displayId.isEmpty ? TTexts.labelNoBarcode.tr : displayId}';
+    final name = widget.item.packageInfo != null
+        ? DisplayNameUtils.getFullPackageDisplayName(
+            widget.item.packageInfo,
+          )
+        : '${TTexts.product.tr} #'
+            '${displayId.isEmpty ? TTexts.labelNoBarcode.tr : displayId}';
     final bool canIncrease = widget.item.quantity < _maxAllowed;
     final bool canDecrease = widget.item.quantity > 0;
     final bool hasImage =

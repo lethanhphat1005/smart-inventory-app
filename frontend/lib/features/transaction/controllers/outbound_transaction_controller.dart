@@ -7,6 +7,7 @@ import 'package:frontend/core/infrastructure/models/inventory_model.dart';
 import 'package:frontend/core/infrastructure/utils/currency_formatter_utils.dart';
 import 'package:frontend/core/infrastructure/utils/error_handler_utils.dart';
 import 'package:frontend/core/infrastructure/utils/full_screen_loader_utils.dart';
+import 'package:frontend/core/infrastructure/utils/get_package_full_display_name.dart';
 import 'package:frontend/core/ui/layouts/t_barcode_scanner_layout.dart';
 import 'package:frontend/core/ui/widgets/t_snackbars_widget.dart';
 import 'package:frontend/core/ui/widgets/t_custom_dialog_widget.dart';
@@ -297,7 +298,7 @@ class OutboundTransactionController extends GetxController with TErrorHandler {
         final newPriceStr = CurrencyFormatterUtils.formatFull(item.unitPrice);
 
         priceDetails +=
-            "\n• ${item.packageInfo?.displayName ?? TTexts.unknownProduct.tr}: $oldPriceStr ➔ $newPriceStr";
+            "\n• ${DisplayNameUtils.getFullPackageDisplayName(item.packageInfo)}: $oldPriceStr ➔ $newPriceStr";
       }
       priceDetails += "\n\n${TTexts.sellingPriceChangeDetectedDesc.tr}";
 
@@ -423,8 +424,10 @@ class OutboundTransactionController extends GetxController with TErrorHandler {
 
           if (index != -1) {
             final item = cartItems[index];
+            // final productName =
+            //     item.packageInfo?.displayName ?? TTexts.unknownProduct.tr;
             final productName =
-                item.packageInfo?.displayName ?? TTexts.unknownProduct.tr;
+                DisplayNameUtils.getFullPackageDisplayName(item.packageInfo);
             conflictedNames.add(
                 "$productName (${TTexts.actualStock.tr}: $newStock) ➔ ${TTexts.autoRemovedFromCart.tr}");
             cartItems.removeAt(index);

@@ -28,6 +28,7 @@ import 'package:frontend/features/search/models/search_product_model.dart';
 import 'package:frontend/features/search/providers/search_provider.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 import 'package:frontend/core/state/controllers/barcode_action_controller.dart';
+import 'package:frontend/core/infrastructure/utils/get_package_full_display_name.dart';
 
 enum SearchTarget { global, inventory, transactions, users }
 
@@ -454,7 +455,7 @@ class TSearchController extends GetxController with TErrorHandler {
           final newItem = AdjustmentItemRx(
             id: item.inventory.inventoryId,
             packageId: pkg.productPackageId,
-            name: pkg.displayName,
+            name: DisplayNameUtils.getFullPackageDisplayName(pkg),
             initialSystemQty: item.inventory.quantity,
             packageInfo: pkg,
           );
@@ -567,7 +568,7 @@ class TSearchController extends GetxController with TErrorHandler {
           final newItem = AdjustmentItemRx(
             id: invJsonMap['inventoryId'] ?? '',
             packageId: packageModel.productPackageId,
-            name: packageModel.displayName,
+            name: DisplayNameUtils.getFullPackageDisplayName(packageModel),
             initialSystemQty: invJsonMap['quantity'] ?? 0,
             packageInfo: packageModel,
           );
@@ -629,6 +630,7 @@ class TSearchController extends GetxController with TErrorHandler {
                   unitId: s.unitId ?? 'u-default',
                   productId: s.productId,
                   activeStatus: 'active',
+                  variant: s.variant,
                   barcodeValue: s.barcodeValue,
                   unit: UnitModel(
                       unitId: s.unitId ?? 'u-default',

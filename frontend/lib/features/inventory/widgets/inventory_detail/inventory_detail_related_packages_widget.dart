@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/infrastructure/utils/get_package_full_display_name.dart';
 import 'package:frontend/core/ui/theme/app_fonts.dart';
 import 'package:frontend/core/ui/theme/app_sizes.dart';
 import 'package:frontend/features/inventory/controllers/inventory_detail_controller.dart';
@@ -57,7 +58,8 @@ class InventoryDetailRelatedPackagesWidget
           final item = related[index];
           final pkg = item.inventory.productPackage;
 
-          final name = pkg?.displayName ?? TTexts.unknownProduct.tr;
+          // final name = pkg?.displayName ?? TTexts.unknownProduct.tr;
+          final name = DisplayNameUtils.getFullPackageDisplayName(pkg);
           final barcode = pkg?.barcodeValue ?? TTexts.na.tr;
           final stock = item.inventory.quantity;
 

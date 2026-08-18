@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/constants/text_strings.dart';
+import 'package:frontend/core/infrastructure/utils/get_package_full_display_name.dart';
 import 'package:frontend/core/infrastructure/utils/url_helper_utils.dart';
 import 'package:frontend/core/ui/theme/app_colors.dart';
 import 'package:frontend/features/navigation/models/chat_message_model.dart';
@@ -30,8 +31,9 @@ class ChatCardProductInfo extends StatelessWidget {
     final pkg = item['productPackage'];
     final product = pkg['product'];
 
-    final displayName =
-        pkg['displayName'] ?? product?['name'] ?? TTexts.unknownProduct.tr;
+    // final displayName =
+    //     pkg['displayName'] ?? product?['name'] ?? TTexts.unknownProduct.tr;
+    final displayName = DisplayNameUtils.getFullPackageDisplayNameFromJson(pkg);
     final quantity = item['quantity'] ?? pkg['quantity'] ?? 0;
     final unitName = pkg['unit']?['name'] ?? '';
 

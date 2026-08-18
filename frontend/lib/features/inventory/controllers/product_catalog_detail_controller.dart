@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/core/infrastructure/utils/full_screen_loader_utils.dart';
+import 'package:frontend/core/infrastructure/utils/get_package_full_display_name.dart';
 import 'package:frontend/features/inventory/controllers/category_detail_controller.dart';
 import 'package:frontend/features/inventory/controllers/product_catalog_controller.dart';
 import 'package:get/get.dart';
@@ -381,7 +382,7 @@ class ProductCatalogDetailController extends GetxController with TErrorHandler {
         TCustomDialogWidget(
           title: TTexts.deletePackage.tr,
           description:
-              '${TTexts.confirmDeletePackageMessage.tr}\n(${package.displayName})',
+              '${TTexts.confirmDeletePackageMessage.tr}\n(${DisplayNameUtils.getFullPackageDisplayName(package)})',
           icon: const Text('🗑️', style: TextStyle(fontSize: 40)),
           primaryButtonText: TTexts.delete.tr,
           secondaryButtonText: TTexts.cancel.tr,
