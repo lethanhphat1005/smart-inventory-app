@@ -29,6 +29,7 @@ export type SearchProductPackageItemDto = {
 
   productPackageId: string;
   displayName: string | null;
+  variant: string | null;
   importPrice: number | null;
   sellingPrice: number | null;
 
