@@ -17,6 +17,7 @@ class SearchProductModel {
   final String? unitId;
   final String? unitCode;
   final String? unitName;
+  final String? variant;
 
   SearchProductModel({
     required this.productId,
@@ -35,6 +36,7 @@ class SearchProductModel {
     this.unitId,
     this.unitCode,
     this.unitName,
+    this.variant,
   });
 
   factory SearchProductModel.fromJson(Map<String, dynamic> json) {
@@ -55,6 +57,7 @@ class SearchProductModel {
       unitId: json['unitId'],
       unitCode: json['unitCode'],
       unitName: json['unitName'],
+      variant: json['variant'],
     );
   }
 }
