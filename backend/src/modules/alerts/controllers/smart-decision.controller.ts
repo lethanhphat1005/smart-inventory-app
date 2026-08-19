@@ -11,7 +11,6 @@ import type { ListReorderSuggestionResponseDto } from '../dto/smart-decision.dto
 import type { Request, Response } from 'express';
 
 export class SmartDecisionController {
-  // Inject Service qua constructor (Chuẩn DI của dự án)
   constructor(private readonly smartDecisionService: SmartDecisionService) {}
 
   getReorderSuggestions = async (

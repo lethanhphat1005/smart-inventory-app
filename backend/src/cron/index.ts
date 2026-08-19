@@ -1,7 +1,9 @@
 import cron from 'node-cron';
 
-import { smartAlertService } from '../modules/alerts/services/smart-alert.service.js';
-import { smartDecisionService } from '../modules/alerts/smart-decision.module.js';
+import {
+  smartDecisionService,
+  smartAlertService,
+} from '../modules/alerts/index.js';
 
 export const initCronJobs = () => {
   // 1. Vào 08:00 sáng: Phân tích và gợi ý nhập hàng (Planning)

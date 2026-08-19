@@ -1,10 +1,14 @@
 import { appEvents, eventBus } from '../../../common/events/event-bus.js';
-import { prisma } from '../../../db/prismaClient.js';
 
 import type { BatchReorderSuggestionPayload } from '../../../common/events/event-payloads.js';
 import type { ReorderSuggestionItemDto } from '../dto/smart-decision.dto.js';
+import type { SmartDecisionRepository } from '../repositories/smart-decision.repository.js';
 
 export class SmartDecisionService {
+  constructor(
+    private readonly smartDecisionRepository: SmartDecisionRepository,
+  ) {}
+
   public async getStoreReorderSuggestions(
     storeId: string,
   ): Promise<ReorderSuggestionItemDto[]> {
@@ -13,21 +17,8 @@ export class SmartDecisionService {
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
     // Lấy tồn kho của riêng store đang request
-    const inventories = await prisma.inventory.findMany({
-      where: {
-        activeStatus: 'active',
-        productPackage: {
-          product: { storeId: storeId },
-        },
-      },
-      include: {
-        productPackage: {
-          include: {
-            product: { include: { category: true } },
-          },
-        },
-      },
-    });
+    const inventories =
+      await this.smartDecisionRepository.findActiveInventoriesByStore(storeId);
 
     const suggestions: ReorderSuggestionItemDto[] = [];
 
@@ -35,17 +26,11 @@ export class SmartDecisionService {
       const pkgId = inv.productPackageId;
 
       // Tính tổng bán ra trong 30 ngày qua
-      const salesData = await prisma.transactionDetail.aggregate({
-        _sum: { quantity: true },
-        where: {
-          productPackageId: pkgId,
-          transaction: {
-            type: 'export',
-            status: 'completed',
-            createdAt: { gte: thirtyDaysAgo },
-          },
-        },
-      });
+      const salesData =
+        await this.smartDecisionRepository.getProductPackageSales(
+          pkgId,
+          thirtyDaysAgo,
+        );
 
       const totalSold = salesData._sum.quantity ?? 0;
       const ads = totalSold / 30;
@@ -107,9 +92,14 @@ export class SmartDecisionService {
         const suggestedQty = targetStock - inv.quantity;
 
         if (suggestedQty > 0) {
+          const fullDisplayName = [
+            inv.productPackage.displayName,
+            inv.productPackage.variant,
+          ].join(' ');
+
           suggestions.push({
             productId: inv.productPackage.productId,
-            productName: inv.productPackage.displayName ?? 'Product',
+            productName: fullDisplayName ?? 'Product',
             currentStock: inv.quantity,
             suggestedQuantity: suggestedQty,
             suggestedThreshold: reorderPoint,
@@ -126,10 +116,7 @@ export class SmartDecisionService {
     console.info('[Smart Decision] Starting reorder analysis...');
 
     // Lấy danh sách các cửa hàng đang hoạt động
-    const stores = await prisma.store.findMany({
-      where: { activeStatus: 'active' },
-      select: { storeId: true },
-    });
+    const stores = await this.smartDecisionRepository.findActiveStores();
 
     for (const store of stores) {
       // Tái sử dụng hàm logic lõi ở trên
