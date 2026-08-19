@@ -12,8 +12,8 @@ await initFirebaseAdmin();
 
 // Chỉ import các service sau khi database và Firebase đã sẵn sàng
 const [{ smartAlertService }, { smartDecisionService }] = await Promise.all([
-  import('../modules/alerts/services/smart-alert.service.js'),
-  import('../modules/alerts/smart-decision.module.js'),
+  import('../modules/alerts/index.js'),
+  import('../modules/alerts/index.js'),
 ]);
 
 type NotificationJobEvent = {

@@ -1,6 +1,4 @@
 import { appEvents, eventBus } from '../../../common/events/event-bus.js';
-import { prisma } from '../../../db/prismaClient.js';
-import { NotificationRepository } from '../../notification/repositories/notification.repository.js';
 import { NotificationService } from '../../notification/services/notification.service.js';
 import { getRandomMessage } from '../utils/message.util.js';
 
@@ -9,9 +7,13 @@ import type {
   DiscrepancyPayload,
   LowStockInventoryItem,
 } from '../../../common/events/event-payloads.js';
+import type { SmartAlertRepository } from '../repositories/smart-alert.repository.js';
 
 export class SmartAlertService {
-  constructor(private readonly notificationService: NotificationService) {
+  constructor(
+    private readonly notificationService: NotificationService,
+    private readonly smartAlertRepository: SmartAlertRepository,
+  ) {
     this.initEventListeners();
   }
 
@@ -94,16 +96,8 @@ export class SmartAlertService {
     newQuantity?: number,
     oldQuantity?: number,
   ) {
-    const inventory = await prisma.inventory.findUnique({
-      where: { inventoryId: inventoryId },
-      include: {
-        productPackage: {
-          include: {
-            product: true,
-          },
-        },
-      },
-    });
+    const inventory =
+      await this.smartAlertRepository.findInventoryById(inventoryId);
 
     if (!inventory) {
       return;
@@ -139,7 +133,8 @@ export class SmartAlertService {
     }
 
     // Lấy danh sách Chủ và Quản lý của cửa hàng này
-    const targetMembers = await this.getTargetMembers(storeId);
+    const targetMembers =
+      await this.smartAlertRepository.findTargetMembers(storeId);
 
     if (targetMembers.length === 0) {
       return;
@@ -176,16 +171,8 @@ export class SmartAlertService {
   public async scanAllStoresForLowStock() {
     console.info('[Cron] Đang quét toàn hệ thống tìm hàng tồn kho thấp...');
 
-    const lowInventories = await prisma.inventory.findMany({
-      where: {
-        reorderThreshold: { not: null },
-        quantity: { lte: prisma.inventory.fields.reorderThreshold },
-        activeStatus: 'active',
-      },
-      include: {
-        productPackage: { include: { product: true } },
-      },
-    });
+    const lowInventories =
+      await this.smartAlertRepository.findLowStockInventories();
 
     if (lowInventories.length === 0) {
       console.info(
@@ -219,7 +206,8 @@ export class SmartAlertService {
     storeId: string,
     inventories: LowStockInventoryItem[],
   ) {
-    const targetMembers = await this.getTargetMembers(storeId);
+    const targetMembers =
+      await this.smartAlertRepository.findTargetMembers(storeId);
 
     if (targetMembers.length === 0) {
       return;
@@ -288,12 +276,8 @@ export class SmartAlertService {
   }) {
     const inventoryIds = payload.items.map((item) => item.inventoryId);
 
-    const inventories = await prisma.inventory.findMany({
-      where: { inventoryId: { in: inventoryIds } },
-      include: {
-        productPackage: { include: { product: true } },
-      },
-    });
+    const inventories =
+      await this.smartAlertRepository.findInventoriesByIds(inventoryIds);
 
     const lowStockItems: LowStockInventoryItem[] = [];
 
@@ -328,7 +312,9 @@ export class SmartAlertService {
 
       const bodyText = `${productName} is running low (${inv.quantity} units left). Please restock soon!`;
 
-      const targetMembers = await this.getTargetMembers(payload.storeId);
+      const targetMembers = await this.smartAlertRepository.findTargetMembers(
+        payload.storeId,
+      );
 
       await Promise.all(
         targetMembers.map((member) =>
@@ -345,17 +331,6 @@ export class SmartAlertService {
     } else {
       await this.processBatchNotification(payload.storeId, lowStockItems);
     }
-  }
-
-  private async getTargetMembers(storeId: string) {
-    return await prisma.storeMember.findMany({
-      where: {
-        storeId: storeId,
-        role: { in: ['owner', 'manager'] },
-        activeStatus: 'active',
-      },
-      select: { userId: true },
-    });
   }
 
   public async checkDiscrepancyRule(payload: DiscrepancyPayload) {
@@ -381,7 +356,8 @@ export class SmartAlertService {
       return;
     }
 
-    const targetMembers = await this.getTargetMembers(storeId);
+    const targetMembers =
+      await this.smartAlertRepository.findTargetMembers(storeId);
 
     if (targetMembers.length === 0) {
       return;
@@ -440,22 +416,11 @@ export class SmartAlertService {
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
     // Dùng Prisma Aggregate để lấy giá trị trung bình trong 30 ngày gần nhất
-    const stats = await prisma.transaction.aggregate({
-      where: {
-        storeId: payload.storeId,
-        type: payload.type as 'import' | 'export',
-        status: 'completed',
-        createdAt: {
-          gte: thirtyDaysAgo,
-        },
-      },
-      _avg: {
-        totalPrice: true,
-      },
-      _count: {
-        transactionId: true,
-      },
-    });
+    const stats = await this.smartAlertRepository.getTransactionStats(
+      payload.storeId,
+      payload.type as 'import' | 'export',
+      thirtyDaysAgo,
+    );
 
     const averagePrice = stats._avg.totalPrice
       ? Number(stats._avg.totalPrice)
@@ -482,7 +447,9 @@ export class SmartAlertService {
       return;
     }
 
-    const targetMembers = await this.getTargetMembers(payload.storeId);
+    const targetMembers = await this.smartAlertRepository.findTargetMembers(
+      payload.storeId,
+    );
 
     if (targetMembers.length === 0) {
       return;
@@ -544,7 +511,9 @@ export class SmartAlertService {
   private async handleBatchReorderSuggestion(
     payload: BatchReorderSuggestionPayload,
   ) {
-    const targetMembers = await this.getTargetMembers(payload.storeId);
+    const targetMembers = await this.smartAlertRepository.findTargetMembers(
+      payload.storeId,
+    );
 
     if (targetMembers.length === 0) {
       return;
@@ -587,7 +556,3 @@ export class SmartAlertService {
     );
   }
 }
-
-export const smartAlertService = new SmartAlertService(
-  new NotificationService(new NotificationRepository()),
-);

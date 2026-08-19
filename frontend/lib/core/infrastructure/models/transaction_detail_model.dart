@@ -30,6 +30,7 @@ class TransactionDetailModel {
       parsedPackageInfo = ProductPackageModel(
         productPackageId: json['productPackageId'] ?? '',
         displayName: json['displayName'],
+        variant: json['variant'],
         barcodeValue: json['barcodeValue'],
         importPrice: 0.0,
         sellingPrice: 0.0,
