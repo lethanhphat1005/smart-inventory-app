@@ -4,7 +4,10 @@ import { SmartDecisionRepository } from './repositories/smart-decision.repositor
 import { SmartAlertService } from './services/smart-alert.service.js';
 import { SmartDecisionService } from './services/smart-decision.service.js';
 import { prisma } from '../../db/prismaClient.js';
-import { notificationService } from '../notification/index.js';
+import {
+  NotificationRepository,
+  NotificationService,
+} from '../notification/index.js';
 
 const smartDecisionRepository = new SmartDecisionRepository(prisma);
 const smartDecisionService = new SmartDecisionService(smartDecisionRepository);
@@ -12,6 +15,10 @@ const smartDecisionService = new SmartDecisionService(smartDecisionRepository);
 const smartDecisionController = new SmartDecisionController(
   smartDecisionService,
 );
+
+// tạo instance mới tránh circular dependency
+const notificationRepository = new NotificationRepository();
+const notificationService = new NotificationService(notificationRepository);
 
 const smartAlertRepository = new SmartAlertRepository(prisma);
 const smartAlertService = new SmartAlertService(
