@@ -3,7 +3,7 @@ import cron from 'node-cron';
 import {
   smartDecisionService,
   smartAlertService,
-} from '../modules/alerts/index.js';
+} from '../modules/alerts/index-cron.js';
 
 export const initCronJobs = () => {
   // 1. Vào 08:00 sáng: Phân tích và gợi ý nhập hàng (Planning)

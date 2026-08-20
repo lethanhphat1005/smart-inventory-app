@@ -16,7 +16,7 @@ await initFirebaseAdmin();
 
 // Chỉ import các service sau khi database và Firebase đã sẵn sàng
 const { smartAlertService, smartDecisionService } =
-  await import('../modules/alerts/index.js');
+  await import('../modules/alerts/index-cron.js');
 
 type NotificationJobEvent = {
   job: 'generate-reorder-suggestions' | 'scan-low-stock';
