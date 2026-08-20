@@ -4,17 +4,19 @@ import { CustomError } from '../common/errors/custom-error.js';
 import { logger, loadCronSecretsToEnvironment } from '../common/utils/index.js';
 import { initFirebaseAdmin } from '../config/firebase.config.js';
 
+console.info('Start lambda environment: Cron Function');
+
 // load secret từ SSM Parameter vào biến môi trường khi khởi tạo server
 await loadCronSecretsToEnvironment();
+
+console.info('Loaded SSM Parameter secrets to env variables');
 
 // Khởi tạo firebase
 await initFirebaseAdmin();
 
 // Chỉ import các service sau khi database và Firebase đã sẵn sàng
-const [{ smartAlertService }, { smartDecisionService }] = await Promise.all([
-  import('../modules/alerts/index.js'),
-  import('../modules/alerts/index.js'),
-]);
+const { smartAlertService, smartDecisionService } =
+  await import('../modules/alerts/index.js');
 
 type NotificationJobEvent = {
   job: 'generate-reorder-suggestions' | 'scan-low-stock';
