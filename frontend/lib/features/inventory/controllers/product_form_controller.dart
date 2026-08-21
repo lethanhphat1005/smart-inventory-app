@@ -1297,6 +1297,11 @@ class ProductFormController extends GetxController with TErrorHandler {
   }
 
   void confirmExit() {
+    if (formMode.value == 'view_package') {
+      Get.back();
+      return;
+    }
+
     Get.dialog(
         TCustomDialogWidget(
           title: TTexts.discardChangesTitle.tr,
