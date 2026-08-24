@@ -51,19 +51,19 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyAeSMgQpjmHcRFDNWeVrij79Of54DQvqj4',
-    appId: '1:1019570928869:android:4f5bc91e2f1605648fa80c',
-    messagingSenderId: '1019570928869',
-    projectId: 'storix-6ac34',
-    storageBucket: 'storix-6ac34.firebasestorage.app',
+    apiKey: 'AIzaSyDNUABGADg9gJ-8Y39WL5tFW7cLtSmheyk',
+    appId: '1:365917199256:android:0956059f0623b5cfdc29ed',
+    messagingSenderId: '365917199256',
+    projectId: 'storix-512ff',
+    storageBucket: 'storix-512ff.firebasestorage.app',
   );
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyAW1ajrDkzddsnXfzLpPps-TjC6vofm4Mo',
-    appId: '1:1019570928869:ios:679a6cc15b5e2ef08fa80c',
-    messagingSenderId: '1019570928869',
-    projectId: 'storix-6ac34',
-    storageBucket: 'storix-6ac34.firebasestorage.app',
-    iosBundleId: 'com.fourmonkeysstudio.storix',
+    apiKey: 'AIzaSyCtFDlS_idospFWJTKGJppmvSpIgrfMcl0',
+    appId: '1:365917199256:ios:4cc3dbed30879608dc29ed',
+    messagingSenderId: '365917199256',
+    projectId: 'storix-512ff',
+    storageBucket: 'storix-512ff.firebasestorage.app',
+    iosBundleId: 'com.storixstudio.storix',
   );
   static const FirebaseOptions macos = FirebaseOptions(
     apiKey: 'AIzaSyAW1ajrDkzddsnXfzLpPps-TjC6vofm4Mo',
