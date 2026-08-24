@@ -2,7 +2,7 @@ import 'package:frontend/core/infrastructure/constants/text_strings.dart';
 
 final Map<String, String> enCore = {
   TTexts.appName: 'Smart Inventory',
-  TTexts.fourMonkeysStudio: "Four Monkeys Studio",
+  TTexts.storixStudio: "Storix Studio",
 
   // -- Global Errors
   TTexts.errorTitle: 'Error',
