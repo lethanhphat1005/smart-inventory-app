@@ -7,7 +7,7 @@ final Map<String, String> viCore = {
   TTexts.languageSelectBtnContinue: "Tiếp tục",
 
   TTexts.appName: 'Quản Lý Kho Thông Minh',
-  TTexts.fourMonkeysStudio: "Four Monkeys Studio",
+  TTexts.storixStudio: "Storix Studio",
 
   // -- Global Errors
   TTexts.errorTitle: 'Lỗi',

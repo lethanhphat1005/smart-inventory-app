@@ -4,7 +4,7 @@ class TTexts {
 
   // -- Global Texts
   static const String appName = "app_name";
-  static const String fourMonkeysStudio = "group_21";
+  static const String storixStudio = "group_21";
   static const String tryAgain = "try_again";
   static const String successTitle = "success_title";
   static const String weak = "weak";
@@ -1343,9 +1343,12 @@ class TTexts {
   static const String deleteStoreSuccess = "delete_store_success";
   static const String deleteStoreSystemError = "delete_store_system_error";
   static const String deleteStoreCancelBtn = "delete_store_cancel_btn";
-  static const String deleteStoreFinalConfirmTitle = "delete_store_final_confirm_title";
-  static const String deleteStoreFinalConfirmDesc = "delete_store_final_confirm_desc";
-  static const String deleteStoreFinalConfirmBtn = "delete_store_final_confirm_btn";
+  static const String deleteStoreFinalConfirmTitle =
+      "delete_store_final_confirm_title";
+  static const String deleteStoreFinalConfirmDesc =
+      "delete_store_final_confirm_desc";
+  static const String deleteStoreFinalConfirmBtn =
+      "delete_store_final_confirm_btn";
 
   // --Assigns role
   static const String assignsRoleTitle = 'assigns_role_title';
