@@ -28,7 +28,7 @@ class EditStoreMapPreviewWidget extends GetView<ProfileEditStoreController> {
               children: [
                 TileLayer(
                   urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                  userAgentPackageName: 'com.group21.storix',
+                  userAgentPackageName: 'com.fourmonkeysstudio.storix',
                 ),
                 MarkerLayer(
                   markers: [

@@ -1,4 +1,4 @@
-package com.storixstudio.storix
+package com.fourmonkeysstudio.storix
 
 import io.flutter.embedding.android.FlutterActivity
 
