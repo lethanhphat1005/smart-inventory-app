@@ -52,18 +52,18 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyDNUABGADg9gJ-8Y39WL5tFW7cLtSmheyk',
-    appId: '1:365917199256:android:0956059f0623b5cfdc29ed',
+    appId: '1:365917199256:android:0b2207bf054e53d2dc29ed',
     messagingSenderId: '365917199256',
     projectId: 'storix-512ff',
     storageBucket: 'storix-512ff.firebasestorage.app',
   );
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyCtFDlS_idospFWJTKGJppmvSpIgrfMcl0',
-    appId: '1:365917199256:ios:4cc3dbed30879608dc29ed',
+    appId: '1:365917199256:ios:4c5bbddfd6a9b89fdc29ed',
     messagingSenderId: '365917199256',
     projectId: 'storix-512ff',
     storageBucket: 'storix-512ff.firebasestorage.app',
-    iosBundleId: 'com.storixstudio.storix',
+    iosBundleId: 'com.fourmonkeysstudio.storix',
   );
   static const FirebaseOptions macos = FirebaseOptions(
     apiKey: 'AIzaSyAW1ajrDkzddsnXfzLpPps-TjC6vofm4Mo',

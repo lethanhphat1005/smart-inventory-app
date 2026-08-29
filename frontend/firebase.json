@@ -4,7 +4,7 @@
       "android": {
         "default": {
           "projectId": "storix-512ff",
-          "appId": "1:365917199256:android:0956059f0623b5cfdc29ed",
+          "appId": "1:365917199256:android:0b2207bf054e53d2dc29ed",
           "fileOutput": "android/app/google-services.json"
         }
       },
@@ -12,8 +12,8 @@
         "lib/firebase_options.dart": {
           "projectId": "storix-512ff",
           "configurations": {
-            "android": "1:365917199256:android:0956059f0623b5cfdc29ed",
-            "ios": "1:365917199256:ios:4cc3dbed30879608dc29ed"
+            "android": "1:365917199256:android:0b2207bf054e53d2dc29ed",
+            "ios": "1:365917199256:ios:4c5bbddfd6a9b89fdc29ed"
           }
         }
       }

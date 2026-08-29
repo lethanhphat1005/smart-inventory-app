@@ -29,7 +29,7 @@ class CreateStoreMapPreviewWidget extends GetView<CreateStoreController> {
           children: [
             TileLayer(
               urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-              userAgentPackageName: 'com.group21.storix',
+              userAgentPackageName: 'com.fourmonkeysstudio.storix',
             ),
             Obx(() => MarkerLayer(
                   markers: [
