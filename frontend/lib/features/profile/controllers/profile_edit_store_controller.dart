@@ -563,9 +563,11 @@ class ProfileEditStoreController extends GetxController {
       isLoading.value = true;
       FullScreenLoaderUtils.openLoadingDialog(TTexts.deleting.tr);
 
-      // Gọi API Xóa
+      // Gọi API Xóa cứng với storeName
       final storeId = _storeService.currentStoreId.value;
-      await _storeProvider.deleteStore(storeId);
+      final storeNameInput = deleteConfirmController.text.trim();
+
+      await _storeProvider.hardDeleteStore(storeId, storeNameInput);
 
       // Clear bộ nhớ Local
       await _storeService.clearWorkspaceData();

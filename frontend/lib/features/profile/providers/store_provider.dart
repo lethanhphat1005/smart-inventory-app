@@ -95,4 +95,16 @@ class StoreProvider {
       rethrow;
     }
   }
+
+  // Xóa cứng cửa hàng theo storeId 
+  Future<void> hardDeleteStore(String storeId, String storeName) async {
+    try {
+      await _apiClient.delete(
+        '/api/stores/$storeId/hard', 
+        data: {'storeName': storeName}
+      );
+    } catch (e) {
+      rethrow;
+    }
+  }
 }
