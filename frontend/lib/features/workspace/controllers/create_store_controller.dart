@@ -141,9 +141,13 @@ class CreateStoreController extends GetxController {
     _debounce = Timer(const Duration(milliseconds: 500), () async {
       try {
         final response = await Dio().get(
-          'https://nominatim.openstreetmap.org/search',
-          queryParameters: {'q': query, 'format': 'json', 'limit': 5},
-          options: Options(headers: {'User-Agent': 'StorixApp/1.0'}),
+          'https://us1.locationiq.com/v1/search.php',
+          queryParameters: {
+            'key': 'pk.c33a56b5f38f3334264dd90f7eabba87',
+            'q': query,
+            'format': 'json',
+            'limit': 5
+          },
         );
         addressPredictions.assignAll(response.data);
       } catch (e) {
